@@ -1,17 +1,16 @@
 
-# For Comprehensions (Pemahaman `for`)
+# For Comprehensions
 
 Scala's `for` comprehension is the ideal FP abstraction for sequential
 programs that interact with the world. Since we will be using it a lot,
 we're going to relearn the principles of `for` and how Scalaz can help
 us to write cleaner code.
 
-Pada Scala, abstraksi program yang berjalan secara berurutan dan
-berinteraksi dengan dunia luar dilakukan dengan menggunakan `for`.
-Selain itu, dikarenakan kita akan menggunakan kata kunci ini secara
-intensif, kita akan mempelajari ulang prinsip `for` dan hubungan
-tentang bagaimana Scalaz membantu kita untuk menulis kode yang lebih
-bersih.
+`for` pada Scala merupakan abstraksi ideal FP untuk program-program yang
+berjalan secara berurutan serta berinteraksi dengan dunia luar.
+Lebih lanjut, dikarenakan kita akan menggunakan kata kunci ini secara
+intensif, kita akan mempelajari ulang prinsip `for` dan bagaimana
+ Scalaz membantu kita untuk menulis kode yang lebih bersih.
 
 This chapter doesn't try to write pure programs and the techniques are
 applicable to non-FP codebases.
@@ -33,8 +32,8 @@ To see what a `for` comprehension is doing, we use the `show` and
 type inference.
 
 Untuk melihat apa yang terjadi pada `for`, kita akan menggunakan fitur
-`show` dan `reify` pada REPL untuk mencetak bagaimana bentuk kode
-setelah inferensi tipe.
+`show` dan `reify` pada REPL untuk mencetak bentuk kode setelah inferensi
+tipe.
 (btw, inferensi tipe itu semacam "ini apa ya? prok prok prok tolong dibantu.")
 
 {lang="text"}
@@ -58,7 +57,7 @@ when the REPL line is `reify>`, and manually clean up the generated
 code so that it doesn't become a distraction.
 
 Sebagaimana yang terlihat pada potongan kode diatas, terdapat banyak
-derau (noise btw) yang disebabkan oleh tambahan sintaksis seperti `+`
+derau (btw, derau = noise) yang disebabkan oleh pemanis sintaksis seperti `+`
 menjadi `$plus`.
 Selain itu, supaya ringkas dan terfokus, kita akan menghiraukan
 `show` dan `reify` saat baris REPL berupa `reify>` dan juga akan
@@ -79,8 +78,8 @@ nested `flatMap` call, with the final generator a `map` containing the
 `yield` body.
 
 Secara umum, setiap `<-`, biasa disebut *generator*, merupakan
-eksekusi `flatMap` pada konstruk lain, dengan generator akhir berupa
-`map` yang berisi konstruk `yield`.
+eksekusi `flatMap` yang bisa jadi berisi `flatMap` lain, dengan
+generator akhir berupa `map` yang berisi konstruk `yield`.
 
 ### Assignment
 
@@ -89,7 +88,8 @@ needed).
 
 Pada `for`, kita bisa membuat atau menetapkan sebuah nilai tanpa harus
 secara spesifik menggunakan `val`.
-Dengan kata lain, kita bisa langsung menuliskan `ij = i + j` tanpa `val`.
+Dengan kata lain, kita bisa langsung menuliskan `ij = i + j` sebagaimana
+pada potongan kode berikut.
 
 {lang="text"}
 ~~~~~~~~
@@ -202,6 +202,9 @@ A> ~~~~~~~~
 It is possible to put `if` statements after a generator to filter
 values by a predicate
 
+Bisa juga bila kita menggunakan pernyataan `if` setelah generator
+untuk menyaring nilai nilai berdasarkan predikat tertentu.
+
 {lang="text"}
 ~~~~~~~~
   reify> for {
@@ -223,6 +226,13 @@ collections for every predicate, so `withFilter` was introduced as the more
 performant alternative. We can accidentally trigger a `withFilter` by providing
 type information, interpreted as a pattern match.
 
+Dahulu kala, Scala menggunakan `filter`. Namun, dikarenakan `Traversable.filter`
+selalu membuat koleksi objek baru untuk setiap predikat, dibuatlah `withFilter`
+sebagai alternatif.
+Patut diperhatikan, kita juga bisa secara tanpa sengaja menggunakan `withFilter`
+dengan menambahkan informasi mengenai tipe.
+Alasannya, informasi tersebut digunakan untuk case pattern match.
+
 {lang="text"}
 ~~~~~~~~
   reify> for { i: Int <- a } yield i
@@ -238,9 +248,18 @@ unlike assignment (which throws `MatchError` on failure), generators are
 *filtered* and will not fail at runtime. However, there is an inefficient double
 application of the pattern.
 
+Sebagaimana assignment, generator bisa menggunakan pattern match pada persamaan di
+sebelah kiri. Namun berbeda dengan assignment, yang melempar `MatchError` saat terjadi
+galat, generator akan *menyaring* operasi tersebut sehingga akan terhindar dari galat.
+
+
 A> The compiler plugin [`better-monadic-for`](https://github.com/oleg-py/better-monadic-for) produces alternative, **better**,
 A> desugarings than the Scala compiler. This example is interpreted as:
 A> 
+A> Tambahan kompiler [`better-monadic-for`](https://github.com/oleg-py/better-monadic-for)
+A> melakukan pembersihan pemanis sintaksis yang lebih rapi dibandingkan kompiler Scala.
+A> Sebagai contoh:
+A>
 A> {lang="text"}
 A> ~~~~~~~~
 A>   reify> for { i: Int <- a } yield i
@@ -250,12 +269,18 @@ A> ~~~~~~~~
 A> 
 A> instead of inefficient double matching (in the best case) and silent filtering
 A> at runtime (in the worst case). Highly recommended.
+A> 
+A> yang lebih efisien dibandingkan pattern match ganda atau diam diam saring (lol)
+A> saat waktu jalan.
 
 
 ### For Each
 
 Finally, if there is no `yield`, the compiler will use `foreach`
 instead of `flatMap`, which is only useful for side-effects.
+
+Bila tidak ditemukan `yield`, kompiler akan menggunakan `foreach`
+daripada `flatMap`.
 
 {lang="text"}
 ~~~~~~~~
@@ -270,6 +295,10 @@ instead of `flatMap`, which is only useful for side-effects.
 The full set of methods supported by `for` comprehensions do not share
 a common super type; each generated snippet is independently compiled.
 If there were a trait, it would roughly look like:
+
+Tidak ada tipe super umum yang mempunyai metoda umum yang digunakan pada
+`for`; setiap potongan dikompil sendiri sendiri.
+Misalkan, ada `trait` umum, kurang lebih seperti ini.
 
 {lang="text"}
 ~~~~~~~~
@@ -286,8 +315,15 @@ own `map` and `flatMap`, all is not lost. If an implicit
 `scalaz.Bind[T]` is available for `T`, it will provide `map` and
 `flatMap`.
 
+Adalah mu'bah bila konteks (`C[_]`) dari `for` tidak menyediakan `map`
+dan `flatMap` atau metoda lainnya. Jika `scalaz.Bind[T]` tersedia untuk `T`
+`bind` tersebut akan menyediakan apa yang konteks tadi tidak miliki.
+
 A> It often surprises developers when inline `Future` calculations in a
 A> `for` comprehension do not run in parallel:
+A> 
+A> Acap kali pemrogram terkejut ketika komputasi `Future` di dalam baris
+A> `for` comprehension tidak berjalan secara paralel:
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -305,6 +341,11 @@ A> strictly **after** `expensiveCalc`. To ensure that two `Future`
 A> calculations begin in parallel, start them outside the `for`
 A> comprehension.
 A> 
+A> Musabab dari hal diatas adalah `flatMap` menelurkan `anotherExpensiveCalc`
+A> pasti **setelah** `expensiveCalc`. Untuk memastikan bahwa dua komputasi
+A> `Future` tersebut berjalan secara paralel, jalankan keduanya
+A> di luar `for`.
+A> 
 A> {lang="text"}
 A> ~~~~~~~~
 A>   val a = Future { expensiveCalc() }
@@ -315,6 +356,11 @@ A>
 A> `for` comprehensions are fundamentally for defining sequential
 A> programs. We will show a far superior way of defining parallel
 A> computations in a later chapter. Spoiler: don't use `Future`.
+A> 
+A> Pada dasarnya, `for` digunakan untuk menjabarkan program program
+A> secara berurutan. Kita akan menunjukkan cara yang jauh lebih unggul
+A> dan tepat guna untuk menjabarkan komputasi paralel di bab selanjutnya.
+A> Bisik-bisik: bukan `Future`.
 
 
 ## Unhappy path
