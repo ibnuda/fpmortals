@@ -1,23 +1,41 @@
 
-# For Comprehensions
+# For Comprehensions (Pemahaman `for`)
 
 Scala's `for` comprehension is the ideal FP abstraction for sequential
 programs that interact with the world. Since we will be using it a lot,
 we're going to relearn the principles of `for` and how Scalaz can help
 us to write cleaner code.
 
+Pada Scala, abstraksi program yang berjalan secara berurutan dan
+berinteraksi dengan dunia luar dilakukan dengan menggunakan `for`.
+Selain itu, dikarenakan kita akan menggunakan kata kunci ini secara
+intensif, kita akan mempelajari ulang prinsip `for` dan hubungan
+tentang bagaimana Scalaz membantu kita untuk menulis kode yang lebih
+bersih.
+
 This chapter doesn't try to write pure programs and the techniques are
 applicable to non-FP codebases.
 
+Bab ini tidak akan membahas bagaimana cara menulis program murni (lol)
+dan teknik teknik yang bisa diterapkan di basis kode non-FP.
 
-## Syntax Sugar
+## Syntax Sugar (Pemanis Sintaksis)
 
 Scala's `for` is just a simple rewrite rule, also called *syntax
 sugar*, that doesn't have any contextual information.
 
+Pada dasarnya, `for` pada Scala hanya merupakan aturan penulisan
+ulang sederhana, atau *pemanis sintaksis* (lol), yang tidak memiliki
+informasi kontekstual.
+
 To see what a `for` comprehension is doing, we use the `show` and
 `reify` feature in the REPL to print out what code looks like after
 type inference.
+
+Untuk melihat apa yang terjadi pada `for`, kita akan menggunakan fitur
+`show` dan `reify` pada REPL untuk mencetak bagaimana bentuk kode
+setelah inferensi tipe.
+(btw, inferensi tipe itu semacam "ini apa ya? prok prok prok tolong dibantu.")
 
 {lang="text"}
 ~~~~~~~~
@@ -39,6 +57,13 @@ rewritten `$plus`, etc). We will skip the `show` and `reify` for brevity
 when the REPL line is `reify>`, and manually clean up the generated
 code so that it doesn't become a distraction.
 
+Sebagaimana yang terlihat pada potongan kode diatas, terdapat banyak
+derau (noise btw) yang disebabkan oleh tambahan sintaksis seperti `+`
+menjadi `$plus`.
+Selain itu, supaya ringkas dan terfokus, kita akan menghiraukan
+`show` dan `reify` saat baris REPL berupa `reify>` dan juga akan
+merapikan hasil kode secara manual.
+
 {lang="text"}
 ~~~~~~~~
   reify> for { i <- a ; j <- b ; k <- c } yield (i + j + k)
@@ -53,11 +78,18 @@ The rule of thumb is that every `<-` (called a *generator*) is a
 nested `flatMap` call, with the final generator a `map` containing the
 `yield` body.
 
+Secara umum, setiap `<-`, biasa disebut *generator*, merupakan
+eksekusi `flatMap` pada konstruk lain, dengan generator akhir berupa
+`map` yang berisi konstruk `yield`.
 
 ### Assignment
 
 We can assign values inline like `ij = i + j` (a `val` keyword is not
 needed).
+
+Pada `for`, kita bisa membuat atau menetapkan sebuah nilai tanpa harus
+secara spesifik menggunakan `val`.
+Dengan kata lain, kita bisa langsung menuliskan `ij = i + j` tanpa `val`.
 
 {lang="text"}
 ~~~~~~~~
@@ -77,8 +109,17 @@ needed).
 A `map` over the `b` introduces the `ij` which is flat-mapped along
 with the `j`, then the final `map` for the code in the `yield`.
 
+Pada hasil REPL di potongan diatas, selain munculnya `j`, hasil dari
+pemetaan `b`, juga muncul `ij` yang merupakan hasil dari operasi
+`i + j`. Kedua nilai diatas, `j` dan `ij`, akan dipetakan menggunakan
+kode pada `yield`.
+
 Unfortunately we cannot assign before any generators. It has been
 requested as a language feature but has not been implemented:
+<https://github.com/scala/bug/issues/907>
+
+Oh ya, kita tidak dapat melakukan penetapan nilai sebelum generator.
+Walau belum diterapkan, hal ini sudah dibicarakan pada:
 <https://github.com/scala/bug/issues/907>
 
 {lang="text"}
@@ -92,6 +133,8 @@ requested as a language feature but has not been implemented:
 
 We can workaround the limitation by defining a `val` outside the `for`
 
+Untuk menyiasatinya kita bisa membuat `val` di luar `for`
+
 {lang="text"}
 ~~~~~~~~
   scala> val initial = getDefault
@@ -99,6 +142,7 @@ We can workaround the limitation by defining a `val` outside the `for`
 ~~~~~~~~
 
 or create an `Option` out of the initial assignment
+atau membuat `Option` sebagai assignment pertama.
 
 {lang="text"}
 ~~~~~~~~
@@ -110,6 +154,9 @@ or create an `Option` out of the initial assignment
 
 A> `val` doesn't have to assign to a single value, it can be anything
 A> that works as a `case` in a pattern match.
+A>
+A> `val` tidak harus berupa penetapan sebuah nilai. `val` bisa berupa
+A> apapun yang bisa digunakan pada `case` di pattern match.
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -125,6 +172,8 @@ A> ~~~~~~~~
 A> 
 A> The same is true for assignment in `for` comprehensions
 A> 
+A> Hal yang sama juga berlaku untuk assignment pada `for`
+A> 
 A> {lang="text"}
 A> ~~~~~~~~
 A>   scala> val maybe = Option(("hello", "world"))
@@ -137,6 +186,9 @@ A> ~~~~~~~~
 A> 
 A> But be careful not to miss any cases or there will be a runtime exception (a
 A> *totality* failure).
+A> 
+A> Harap dipikir betul supaya tidak ada luput agar tidak terjadi eksepsi
+A> pada saat eksekusi (galat *kesemestaan*). (lol, semesta.)
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -3054,7 +3106,7 @@ successors and predecessors:
     def min: Option[F]
     def max: Option[F]
   
-    @op("-+-") def succn(n: Int, a: F): F = ...
+    @op("-|-") def succn(n: Int, a: F): F = ...
     @op("---") def predn(n: Int, a: F): F = ...
   
     @op("|->" ) def fromToL(from: F, to: F): List[F] = ...
