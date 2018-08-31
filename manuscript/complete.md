@@ -363,91 +363,6 @@ A> dan tepat guna untuk menjabarkan komputasi paralel di bab selanjutnya.
 A> Bisik-bisik: bukan `Future`.
 
 
-## Unhappy path
-
-So far we've only looked at the rewrite rules, not what is happening in `map`
-and `flatMap`. Consider what happens when the `for` context decides that it
-cannot proceed any further.
-
-In the `Option` example, the `yield` is only called when `i,j,k` are
-all defined.
-
-{lang="text"}
-~~~~~~~~
-  for {
-    i <- a
-    j <- b
-    k <- c
-  } yield (i + j + k)
-~~~~~~~~
-
-If any of `a,b,c` are `None`, the comprehension short-circuits with
-`None` but it doesn't tell us what went wrong.
-
-A> There are many functions in the wild that take `Option` parameters but actually
-A> require all parameters to exist. An alternative to throwing a runtime exception
-A> is to use a `for` comprehension, giving us totality (a return value for every
-A> input):
-A> 
-A> {lang="text"}
-A> ~~~~~~~~
-A>   def namedThings(
-A>     someName  : Option[String],
-A>     someNumber: Option[Int]
-A>   ): Option[String] = for {
-A>     name   <- someName
-A>     number <- someNumber
-A>   } yield s"$number ${name}s"
-A> ~~~~~~~~
-A> 
-A> but this is verbose, clunky and bad style. If a function requires
-A> every input then it should make its requirement explicit, pushing the
-A> responsibility of dealing with optional parameters to its caller.
-A> 
-A> {lang="text"}
-A> ~~~~~~~~
-A>   def namedThings(name: String, num: Int) = s"$num ${name}s"
-A> ~~~~~~~~
-
-If we use `Either`, then a `Left` will cause the `for` comprehension
-to short circuit with extra information, much better than `Option` for
-error reporting:
-
-{lang="text"}
-~~~~~~~~
-  scala> val a = Right(1)
-  scala> val b = Right(2)
-  scala> val c: Either[String, Int] = Left("sorry, no c")
-  scala> for { i <- a ; j <- b ; k <- c } yield (i + j + k)
-  
-  Left(sorry, no c)
-~~~~~~~~
-
-And lastly, let's see what happens with a `Future` that fails:
-
-{lang="text"}
-~~~~~~~~
-  scala> import scala.concurrent._
-  scala> import ExecutionContext.Implicits.global
-  scala> for {
-           i <- Future.failed[Int](new Throwable)
-           j <- Future { println("hello") ; 1 }
-         } yield (i + j)
-  scala> Await.result(f, duration.Duration.Inf)
-  caught java.lang.Throwable
-~~~~~~~~
-
-The `Future` that prints to the terminal is never called because, like
-`Option` and `Either`, the `for` comprehension short circuits.
-
-Short circuiting for the unhappy path is a common and important theme.
-`for` comprehensions cannot express resource cleanup: there is no way
-to `try` / `finally`. This is good, in FP it puts a clear ownership of
-responsibility for unexpected error recovery and resource cleanup onto
-the context (which is usually a `Monad` as we will see later), not the
-business logic.
-
-
 ## Gymnastics
 
 Although it is easy to rewrite simple sequential code as a `for`
@@ -455,12 +370,20 @@ comprehension, sometimes we will want to do something that appears to
 require mental summersaults. This section collects some practical
 examples and how to deal with them.
 
+Walaupun penulisan kode berurutan untuk `for` comprehension mudah,
+kadang terjadi hal hal yang menyebabkan kita berpikir keras. Bagian
+ini berisi contoh contoh mengenai hal tadi dan bagaimana cara kita
+menyiasatinya.
 
 ### Fallback Logic
 
 Say we are calling out to a method that returns an `Option`. If it is not
 successful we want to fallback to another method (and so on and so on), like
 when we're using a cache:
+
+Anggap kata kita memanggil sebuah metoda yang mengembalikan `Option`.
+Bila pemanggilan ini gagal, tentu kita ingin ada metoda lain yang menangani
+galat tersebut. (lol)
 
 {lang="text"}
 ~~~~~~~~
@@ -472,6 +395,9 @@ when we're using a cache:
 
 If we have to do this for an asynchronous version of the same API
 
+Bilamana kita harus munggunakan versi asinkronus dari antarmuka
+pemrograman aplikasi,
+
 {lang="text"}
 ~~~~~~~~
   def getFromRedis(s: String): Future[Option[String]]
@@ -479,6 +405,9 @@ If we have to do this for an asynchronous version of the same API
 ~~~~~~~~
 
 then we have to be careful not to do extra work because
+
+maka kita harus hati hati betul agar jangan sampai menambah pekerjaan
+dikarenakan
 
 {lang="text"}
 ~~~~~~~~
@@ -490,6 +419,9 @@ then we have to be careful not to do extra work because
 
 will run both queries. We can pattern match on the first result but
 the type is wrong
+
+akan menjalankan kedua kueri secara bersamaan. Kita dapat pattern match
+hasil pertama tapi tapi tapi tipe salah (lol)
 
 {lang="text"}
 ~~~~~~~~
@@ -503,6 +435,8 @@ the type is wrong
 ~~~~~~~~
 
 We need to create a `Future` from the `cache`
+
+Kita dapat membuat `Future` dari `cache`
 
 {lang="text"}
 ~~~~~~~~
@@ -518,13 +452,22 @@ We need to create a `Future` from the `cache`
 `Future.successful` creates a new `Future`, much like an `Option` or
 `List` constructor.
 
+`Future.successful` membuat objek `Future` baru, sebagaimana konstruktor
+`Option` maupun `List`.
+
 
 ### Early Exit
 
 Say we have some condition that should exit early with a successful value.
 
+Misalkan kita punya sebuah kondisi dimana harus selesai di tengah tengah
+dan mengembalikan nilai yang diinginkan (lol).
+
 If we want to exit early with an error, it is standard practice in OOP to throw
 an exception
+
+Standar praktik pada OOP ketika kita harus keluar dari komputasi lebih awal
+adalah dengan melempar eksepsi
 
 {lang="text"}
 ~~~~~~~~
@@ -536,6 +479,8 @@ an exception
 ~~~~~~~~
 
 which can be rewritten async
+
+Yang dapat ditulas ulang secara asinkronus.
 
 {lang="text"}
 ~~~~~~~~
@@ -553,6 +498,9 @@ which can be rewritten async
 But if we want to exit early with a successful return value, the simple
 synchronous code:
 
+Namun, bila kita ingin keluar lebih awal dari komputasi dengan nilai yang
+ok (lol), kode sinkronus yang sederhana semacam ini:
+
 {lang="text"}
 ~~~~~~~~
   def getB: Int = ...
@@ -564,6 +512,9 @@ synchronous code:
 
 translates into a nested `for` comprehension when our dependencies are
 asynchronous:
+
+ketika diterjemahkan menjadi `for` comprehension bersarang saat kode
+tersebut mempunyai ketergantungan asinkronus:
 
 {lang="text"}
 ~~~~~~~~
@@ -579,9 +530,18 @@ asynchronous:
 A> If there is an implicit `Monad[T]` for `T[_]` (i.e. `T` is monadic) then Scalaz
 A> lets us create a `T[A]` from a value `a: A` by calling `a.pure[T]`.
 A> 
+A> Jika ada `Monad[T]` dalam konteks implisit untuk `T[_]` maka Scalaz akan
+A> menyediakan jalan saat kita membuat `T[A]` dari nilai `a: A` dengan memanggil
+A> `a.Pure[T]`.
+A>
 A> Scalaz provides `Monad[Future]`, and `.pure[Future]` calls `Future.successful`.
 A> Besides `pure` being slightly shorter to type, it is a general concept that
 A> works beyond `Future`, and is therefore recommended.
+A>
+A> Scalaz juga menyediakan `Monad[Future]` dengan tambahan `.pure[Future]` yang
+A> memanggil `Future.successful`. Selain `pure` sedikit lebih pendek untuk ditulis
+A> `pure` juga mencakup konsep umum yang lebih luas dibandingkan `Future`.
+A> Maka dari itu, `pure` sangat direkomendasikan untuk digunakan.
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -593,10 +553,143 @@ A>   } yield c
 A> ~~~~~~~~
 
 
+## Unhappy path
+
+So far we've only looked at the rewrite rules, not what is happening in `map`
+and `flatMap`. Consider what happens when the `for` context decides that it
+cannot proceed any further.
+
+Sampai saat ini, kita baru membahas ingat mengenai aturaan penulisan ulang
+dan belum membahas mengenai `map` dan `flatMap`.
+Kadang-kadang, ada kondisi dimana `for` harus berhenti di tengah-tengah. Apa
+yang terjadi?
+
+In the `Option` example, the `yield` is only called when `i,j,k` are
+all defined.
+
+Pada contoh `Option`, `yield` hanya dipanggil jika dan hanya jika `i, j, k`
+berhasil terdefinisi.
+
+{lang="text"}
+~~~~~~~~
+  for {
+    i <- a
+    j <- b
+    k <- c
+  } yield (i + j + k)
+~~~~~~~~
+
+If any of `a,b,c` are `None`, the comprehension short-circuits with
+`None` but it doesn't tell us what went wrong.
+
+Misalkan salah satu dari `a, b, c` adalah `None`, akan terjadi hubungan
+pendek pada comprehension dan nilai `None` akan dikembalikan tanpa memberikan
+konteks tentang nilai mana yang berupa `None`.
+
+A> There are many functions in the wild that take `Option` parameters but actually
+A> require all parameters to exist. An alternative to throwing a runtime exception
+A> is to use a `for` comprehension, giving us totality (a return value for every
+A> input):
+A> 
+A> Sering ditemui fungsi yang menerima parameter berupa `Option` walaupun pada
+A> kenyataannya, mereka berharap semua parameter mempunya nilai. Layaknya
+A> yang kita tahu saat sesuatu tidak berjalan sesuai ekspektasi, kebanyakan
+A> orang akan marah marah dan melempar barang; dalam konteks ini eksepsi.
+A> Solusi alternatif pada contoh diatas adalah menggunakan `for` comprehension 
+A> yang tidak saja menyediakan cara tanpa marah marah, juga memberikan kita
+A> *kesemestaan* (lol) yang berarti kita pasti mendapatkan nilai untuk semua
+A> parameter yang kita berikan kepada sebuah fungsi.
+A>
+A> {lang="text"}
+A> ~~~~~~~~
+A>   def namedThings(
+A>     someName  : Option[String],
+A>     someNumber: Option[Int]
+A>   ): Option[String] = for {
+A>     name   <- someName
+A>     number <- someNumber
+A>   } yield s"$number ${name}s"
+A> ~~~~~~~~
+A> 
+A> but this is verbose, clunky and bad style. If a function requires
+A> every input then it should make its requirement explicit, pushing the
+A> responsibility of dealing with optional parameters to its caller.
+A>
+A> Sebagaimana yang terlihat pada potongan di atas, ada beberapa kekurangan.
+A> Seperti bertele-tele, kaku, dan secara teknis, kurang bagus bila diteruskan.
+A> Jika sebuah fungsi berharap setiap masukan mempunyai nilai, maka fungsi
+A> tersebut harus secara langsung menyatakan apa yang ia minta dan menyerahkan
+A> parameter opsional kepada yang membutuhkan.
+A>
+A> {lang="text"}
+A> ~~~~~~~~
+A>   def namedThings(name: String, num: Int) = s"$num ${name}s"
+A> ~~~~~~~~
+
+If we use `Either`, then a `Left` will cause the `for` comprehension
+to short circuit with extra information, much better than `Option` for
+error reporting:
+
+Di sisi lain, bila kita menggunakan `Either`, seperti `None`, `Left` akan
+menyebabkan arus-pendek namun memberikan informasi tambahan. Dengan demikian,
+`Either` merupakan pilihan yang jauh lebih baik daripada `Option`. (missed the pun in bahasa)
+
+{lang="text"}
+~~~~~~~~
+  scala> val a = Right(1)
+  scala> val b = Right(2)
+  scala> val c: Either[String, Int] = Left("sorry, no c")
+  scala> for { i <- a ; j <- b ; k <- c } yield (i + j + k)
+  
+  Left(sorry, no c)
+~~~~~~~~
+
+And lastly, let's see what happens with a `Future` that fails:
+
+Mari kita lihat apa yang terjadi bila `Future` gagal:
+
+{lang="text"}
+~~~~~~~~
+  scala> import scala.concurrent._
+  scala> import ExecutionContext.Implicits.global
+  scala> for {
+           i <- Future.failed[Int](new Throwable)
+           j <- Future { println("hello") ; 1 }
+         } yield (i + j)
+  scala> Await.result(f, duration.Duration.Inf)
+  caught java.lang.Throwable
+~~~~~~~~
+
+The `Future` that prints to the terminal is never called because, like
+`Option` and `Either`, the `for` comprehension short circuits.
+
+`Future` yang bertugas untuk mencetak ke terminal tidak akan pernah dipanggil
+sebagaimana `Option` dan `Either` dikarenakan `for` konsluit.
+
+Short circuiting for the unhappy path is a common and important theme.
+`for` comprehensions cannot express resource cleanup: there is no way
+to `try` / `finally`. This is good, in FP it puts a clear ownership of
+responsibility for unexpected error recovery and resource cleanup onto
+the context (which is usually a `Monad` as we will see later), not the
+business logic.
+
+Penggunaan fungsi-arus-pendek (lol) adalah hal yang jamak dilakukan, penting
+malah, pada alur kejadian yang tidak menyenangkan.
+Hal yang juga patut diperhatikan adalah `for` comprehension tidak dapat
+melakukan cleanup (lol) sumber daya yang disebabkan tidak ada `try` maupun
+`finally`.
+Secara prinsip, pemrograman fungsional memancang dengan jelas siapa yang
+bertanggung jawab ketika terjadi galat yang tak terduga.
+Kewajiban tersebut jatuh kepada konteks eksekusi program, yang biasanya berupa
+`Monad`, bukan logika bisnis.
+
 ## Incomprehensible
 
 The context we're comprehending over must stay the same: we cannot mix
 contexts.
+
+Adalah haram untuk mencampur-adukkan konteks saat menggunakan `for`
+comprehension.
 
 {lang="text"}
 ~~~~~~~~
@@ -616,8 +709,16 @@ contexts.
 Nothing can help us mix arbitrary contexts in a `for` comprehension
 because the meaning is not well defined.
 
+Tak ada yang jalan keluar ketika kita ingin mencampur-adukkan konteks pada
+sebuah `for` comprehension. Laksana berucap dalam bahasa Inggris kepada
+orang pedalaman Amazon. Tak ada titik temu, hampa. (lol)
+
 But when we have nested contexts the intention is usually obvious yet
 the compiler still doesn't accept our code.
+
+Bahkan, ketika kita kode yang ada di depan kita memiliki konteks berlapis,
+kompiler acap kali tidak paham intensi kode tersebut.
+Walau maksud dari kode tersebut sejelas rembulan di malam tanpa bintang. (lol)
 
 {lang="text"}
 ~~~~~~~~
@@ -636,11 +737,24 @@ our code on the inner `Option`. Hiding the outer context is exactly
 what a *monad transformer* does, and Scalaz provides implementations
 for `Option` and `Either` named `OptionT` and `EitherT` respectively.
 
+Di atas, kita bermaksud agar `for` mengurus mengenai konteks yang
+melapisi `Option` di dalam namun apa yang terjadi? Sesuai yang diduga
+kompiler gagal menerka maksud kita.
+Yang kita lakukan diatas, menghiraukan konteks bagian luar, biasa
+dicapai dengan menggunakan *monad transformer* yang oleh Scalaz
+disediakan implementasi untuk `Option` dan `Either` dengan nama
+`OptionT` dan `EitherT`.
+
 The outer context can be anything that normally works in a `for`
 comprehension, but it needs to stay the same throughout.
 
+Pada dasarnya, apapun yang bisa digunakan pada `for` comprehension
+bisa digunakan sebagain konteks bagian luar, selama konsisten
+sepanjang comprehension.
+
 We create an `OptionT` from each method call. This changes the context
 of the `for` from `Future[Option[_]]` to `OptionT[Future, _]`.
+
 
 {lang="text"}
 ~~~~~~~~
