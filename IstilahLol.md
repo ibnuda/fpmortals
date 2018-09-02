@@ -7,9 +7,12 @@ Istilah istilah yang belum saya pikirkan padan katanya.
 - *Pure* dalam konteks fungsi.
 - *Syntax sugar*.
 - *Totality*. Mungkin *kesemestaan* cocok?
-- *Filter* dalam konteks `filter :: (a -> a -> Bool) -> f a -> f a`.
+- *Filter* dalam konteks `filter :: (a -> Bool) -> [a] -> [a]`.
 - *Pattern match*
-
+- *Monad transformer*
+- *Refactor*. Mungkinkah *penyederhanaan* cocok?
+- *build-farm*.
+- *worker agent*
 
 ### Catatan
 

@@ -513,7 +513,7 @@ ok (lol), kode sinkronus yang sederhana semacam ini:
 translates into a nested `for` comprehension when our dependencies are
 asynchronous:
 
-ketika diterjemahkan menjadi `for` comprehension bersarang saat kode
+ketika diterjemahkan menjadi `for` comprehension berlapis saat kode
 tersebut mempunyai ketergantungan asinkronus:
 
 {lang="text"}
@@ -664,7 +664,7 @@ The `Future` that prints to the terminal is never called because, like
 `Option` and `Either`, the `for` comprehension short circuits.
 
 `Future` yang bertugas untuk mencetak ke terminal tidak akan pernah dipanggil
-sebagaimana `Option` dan `Either` dikarenakan `for` konsluit.
+sebagaimana `Option` dan `Either` dikarenakan `for` selesai lebih awal.
 
 Short circuiting for the unhappy path is a common and important theme.
 `for` comprehensions cannot express resource cleanup: there is no way
@@ -689,7 +689,7 @@ The context we're comprehending over must stay the same: we cannot mix
 contexts.
 
 Adalah haram untuk mencampur-adukkan konteks saat menggunakan `for`
-comprehension.
+comprehension seperti pada cuplikan di bawah.
 
 {lang="text"}
 ~~~~~~~~
@@ -755,6 +755,9 @@ sepanjang comprehension.
 We create an `OptionT` from each method call. This changes the context
 of the `for` from `Future[Option[_]]` to `OptionT[Future, _]`.
 
+Kita juga bisa menggunakan `OptionT` untuk mengubah konteks `for` dari
+`Future[Option[_]]` menjadi `OptionT[Future, _]` yang ditunjukkan
+pada REPL di bawah.
 
 {lang="text"}
 ~~~~~~~~
@@ -767,6 +770,9 @@ of the `for` from `Future[Option[_]]` to `OptionT[Future, _]`.
 
 `.run` returns us to the original context
 
+Dan dengan memanggil `.run`, konteks yang semula berubah akan kembali
+muncul.
+
 {lang="text"}
 ~~~~~~~~
   scala> result.run
@@ -776,6 +782,11 @@ of the `for` from `Future[Option[_]]` to `OptionT[Future, _]`.
 The monad transformer also allows us to mix `Future[Option[_]]` calls with
 methods that just return plain `Future` via `.liftM[OptionT]` (provided by
 scalaz):
+
+Selain itu, monad transformer juga membuat kita mampu mencampur penggunaan
+`Future[Option[_]]` dengan metoda-metoda yang hanya mengembalikan nilai
+`Future` saja dengan `.liftM[OptionT]` yang disediakan oleh Scalaz.
+Untuk lebih jelasnya, silakan simak contoh di bawah:
 
 {lang="text"}
 ~~~~~~~~
@@ -790,6 +801,10 @@ scalaz):
 
 and we can mix with methods that return plain `Option` by wrapping
 them in `Future.successful` (`.pure[Future]`) followed by `OptionT`
+
+terlebih lagi, kita dapat mencampur penggunaan metoda yang mengembalikan
+`Option` dengan melapisinya dengan `Future.successful` (`.pure[Future]`,
+bila menggunakan Scalaz) dan disambung dengan `OptionT`.
 
 {lang="text"}
 ~~~~~~~~
@@ -807,6 +822,12 @@ It is messy again, but it is better than writing nested `flatMap` and
 `map` by hand. We can clean it up with a DSL that handles all the
 required conversions into `OptionT[Future, _]`
 
+Sudah barang tentu dengan mencampur banyak konteks akan menghasilkan
+kode yang "berisik". Akan tetapi, hal ini jauh lebih baik bila dibandingkan
+dengan menulis `flatMap` dan `map` berlapis secara manual.
+Selain itu, kita juga bisa membersihkannya dengan DSL yang menangani
+pengubahan-pengubahan yang dibutuhkan agar menjadi `OptionT[Future, _]`.
+
 {lang="text"}
 ~~~~~~~~
   def liftFutureOption[A](f: Future[Option[A]]) = OptionT(f)
@@ -818,6 +839,10 @@ required conversions into `OptionT[Future, _]`
 combined with the `|>` operator, which applies the function on the
 right to the value on the left, to visually separate the logic from
 the transformers
+
+Ditambah lagi, dengan menggunakan operator `|>` yang melewatkan nilai
+di sebelah kiri ke fungsi di sebelah kanan operator tersebut, pembatasan
+antara logika bisnis dengan monad transformer akan terlihat lebih jelas.
 
 {lang="text"}
 ~~~~~~~~
@@ -834,12 +859,19 @@ the transformers
 A> `|>` is often called the *thrush operator* because of its uncanny resemblance to
 A> the cute bird. Those who do not like symbolic operators can use the alias
 A> `.into`.
+A>
+A> penjelasan ini mungkin relevan bila diterjemahkan ke bahasa Indonesia.
 
 This approach also works for `EitherT` (and others) as the inner
 context, but their lifting methods are more complex and require
 parameters. Scalaz provides monad transformers for a lot of its own
 types, so it is worth checking if one is available.
 
+Pendekatan ini juga bisa digunakan untuk `EitherT` dan transformer lainnya
+sebagai konteks yang dilapisi. Namun, metoda pengubahan (lifting, lol dyel)
+lebih kompleks dan membutuhkan parameter tambahan.
+Scalaz menyediakan monad transformer bagi kebanyakan tipe yang dimiliki-nya.
+Silakan periksa bila ada.
 
 # Application Design
 
@@ -849,6 +881,12 @@ under the `example` directory along with the book's source, however it is
 recommended not to read the source code until the final chapter as there will be
 significant refactors as we learn more about FP.
 
+Pada bab ini, kita akan menulis logika bisnis dan tes tes untuk aplikasi
+server yang purely functional (lol). Kode sumber untuk aplikasi ini
+bisa dilihat pada direktori `example` yang ada pada kode sumber buku ini.
+Namun, sangat disarankan untuk tidak membacanya sampai bab akhir dikarenakan
+akan ada refactor selama kita mempelajari tentang FP.
+
 
 ## Specification
 
@@ -857,6 +895,12 @@ budget. It will listen to a [Drone](https://github.com/drone/drone) Continuous I
 spawn worker agents using [Google Container Engine](https://cloud.google.com/container-engine/) (GKE) to meet the
 demand of the work queue.
 
+Aplikasi kita akan mengurus kompilasi-tepat-waktu "build farm" dengan
+pendanaan yang sangat mepet. Aplikasi ini akan memperhatikan ke sebuah
+server integrasi berkelanjutan [Drone](https://github.com/drone/drone)
+dan akan menelurkan "worker agent" menggunakan [Google Container Engine](https://cloud.google.com/container-engine)
+(GKE) untuk memenuhi permintaan dari antrian kerja.
+
 {width=60%}
 ![](images/architecture.png)
 
@@ -864,33 +908,68 @@ Drone receives work when a contributor submits a github pull request
 to a managed project. Drone assigns the work to its agents, each
 processing one job at a time.
 
+Drone menerima kerja ketika kontributor membuat sebuah permintaan tarik
+pada github ke proyek yang dimanage. Drone menetapkan beban kerja ke agen-agennya,
+dan pada akhirnya, tiap agen akan memproses satu tugas pada satu waktu.
+
 The goal of our app is to ensure that there are enough agents to
 complete the work, with a cap on the number of agents, whilst
 minimising the total cost. Our app needs to know the number of items
 in the *backlog* and the number of available *agents*.
+
+Tujuan dari aplikasi kita adalah memastikan bahwa agen-agen akan selalu
+cukup untuk menyelesaikan tugas, dengan batasan-batasan pada jumlah agen
+dan pada saat yang bersamaan, menekan biaya keseluruhan. Aplikasi ini
+harus tahu jumlah barang yang ada pada *backlog* dan jumlah agen yang tersedia. (lol)
 
 Google can spawn *nodes*, each can host multiple drone agents. When an
 agent starts up, it registers itself with drone and drone takes care
 of the lifecycle (including keep-alive calls to detect removed
 agents).
 
+Google dapat menelurkan banyak *node* yang masing masing mampu hosting (lol)
+beberapa agen drone. Ketika sebuah agen mulai nyala, agen tersebut akan
+memberitahu kepada drone yang pada akhirnya mengambil alih siklus hidup (lol, siklus hidup)
+(termasuk panggilan "keep-alive" untuk menentukan agen yang ditewaskan)
+
 GKE charges a fee per minute of uptime, rounded up to the nearest hour
 for each node. One does not simply spawn a new node for each job in
 the work queue, we must re-use nodes and retain them until their 58th
 minute to get the most value for money.
 
+GKE menarik biaya berdasarkan uptime dalam hitungan menit, dibulatkan keatas
+ke jam terdekat untuk tiap node.
+Maka dari itu, kita tidak bisa secara sembarangan untuk menyalakan node baru
+untuk tiap tugas di antrian kerja.
+Kita harus menggunakan ulang node dan memaksa mereka untuk bekerja sampai
+sampai ke menit 58 agar tetap ekonomis.
+
 Our app needs to be able to start and stop nodes, as well as check
 their status (e.g. uptimes, list of inactive nodes) and to know what
 time GKE believes it to be.
+
+Aplikasi kita harus bisa memulai dan mematikan node dan juga memeriksa
+status mereka, seperti uptime dan daftar node yang tidak aktif, dan
+memastikan waktu saat ini (lol, susah nulis endonesanya)
 
 In addition, there is no API to talk directly to an *agent* so we do
 not know if any individual agent is performing any work for the drone
 server. If we accidentally stop an agent whilst it is performing work,
 it is inconvenient and requires a human to restart the job.
 
+Sebagai tambahan, tidak ada API yang secara langsung berkomunikasi ke
+sebuah *agen* yang mengakibatkan kita tidak dapat secara tahu secara
+langsung apakah sebuah agen sedang melakukan sesuatu untuk drone server
+atau tidak. Bila kita mematikan sebuah agen tanpa memastikan bahwa
+agen tersebut sedang menganggur, bisa jadi si agen tadi mati di tengah
+medan. Tentu sungguh menyesakkan bila harus memulai ulang agen tersebut
+secara manual.
+
 Contributors can manually add agents to the farm, so counting agents
 and nodes is not equivalent. We don't need to supply any nodes if
 there are agents available.
+
+Kontributor bisa menambahkan agen ke farm () secara manual,
 
 The failure mode should always be to take the least costly option.
 
