@@ -969,12 +969,19 @@ Contributors can manually add agents to the farm, so counting agents
 and nodes is not equivalent. We don't need to supply any nodes if
 there are agents available.
 
-Kontributor bisa menambahkan agen ke farm () secara manual,
+Kontributor juga bisa menambahkan agen ke farm secara manual, sehingga
+menghitung agen tidak selalu sama dengan node. Kita tidak perlu menambah
+node bila ada agen yang tersedia.
 
 The failure mode should always be to take the least costly option.
 
+Mode gagal harus selalu diambil sebagai opsi paling murah.
+
 Both Drone and GKE have a JSON over REST API with OAuth 2.0
 authentication.
+
+Drone dan GKE keduanya mempunya antarmuka JSON yang menggunakan antarmuka
+REST dengan otentikasi OAuth 2.0.
 
 
 ## Interfaces / Algebras
@@ -983,6 +990,10 @@ We will now codify the architecture diagram from the previous section. Firstly,
 we need to define a simple data type to capture a millisecond timestamp because
 such a simple thing does not exist in either the Java or Scala standard
 libraries:
+
+Pada bab ini, kita akan menerjemahkan diagram arsitektur pada bagian sebelumnya.
+Pertama, karena pada pustaka standar Java maupun Scala tidak memiliki tipe data
+timestamp (lol) kita akan membuat sebuah tipe data sederhana untuk keperluan ini.
 
 {lang="text"}
 ~~~~~~~~
@@ -998,8 +1009,16 @@ In FP, an *algebra* takes the place of an `interface` in Java, or the
 set of valid messages for an `Actor` in Akka. This is the layer where
 we define all side-effecting interactions of our system.
 
+Pada FP, sebuah *aljabar* mempunyai kedudukan yang sama dengan `interface`
+di Java yang kurang lebih juga sama dengan pesan-pesan yang dianggap valid
+oleh `Actor` Akka. Aljabar ini pula-lah dimana kita mendefinisikan semua
+interaksi yang mempunyai efek samping pada sistem kita.
+
 There is tight iteration between writing the business logic and the
 algebra: it is a good level of abstraction to design a system.
+
+Pada proses desain sistem, kita akan sering melakukan iterasi saat
+menulis logika bisnis dan aljabarnya. (lol, susah)
 
 {lang="text"}
 ~~~~~~~~
@@ -1022,32 +1041,65 @@ We've used `NonEmptyList`, easily created by calling `.toNel` on the
 stdlib's `List` (returning an `Option[NonEmptyList]`), otherwise
 everything should be familiar.
 
+Di sini, kita menggunakan `NonEmptyList` yang dibuat dengan memanggil `.toNel`
+pada tipe data `List` yang ada pada pustaka standar.
+Walaupun nilai yang dikembalikan adalah `Option[NonEmptyList]` (karena `List`
+bisa saja kosong), hal hal lain tidak berubah.
+
 A> It is good practice in FP to encode constraints in parameters **and** return types
 A> --- it means we never need to handle situations that are impossible. However,
 A> this often conflicts with *Postel's law* "be liberal in what you accept from
 A> others".
+A>
+A> Sesungguhnya, adalah praktik yang ideal untuk menyandikan batasan batasan pada
+A> tipe data paramater **dan** nilai kembalian, yang berarti kita tidak akan
+A> mengurus kejadian luar biasa. Walaupun sering kali hal ini tidak sesuai dengan
+A> *Humuk Postel* yang menyatakan bahwa, "bila dikasi terima aja." (lol, susah)
 A> 
 A> Although we agree that parameters should be as general as possible, we do not
 A> agree that a function should take `Seq` unless it can handle empty `Seq`,
 A> otherwise the only course of action would be to exception, breaking totality and
 A> causing a side effect.
+A>
+A> Walaupun sudah disepakati bahwa parameter harus se-umum mungkin, adalah sebuah
+A> kenyataan bahwa kita menolak sebuah fungsi harus bisa menerima `Seq` tanpa bisa
+A> menerima `Seq` kosong. Bilamana hal tersebut terjadi, tentu yang terjadi adalah
+A> sebuah pengecualian yang menghancurkan kesemestaan dan menyebabkan efek samping
+A> yang berlanjut.
 A> 
 A> We prefer `NonEmptyList`, not because it is a `List`, but because of its
 A> non-empty property. When we learn about Scalaz's typeclass hierarchy, we will
 A> see a better way to request non-emptyness.
-
+A>
+A> Adalah lebih disukai untuk menggunakan `NonEmptyList`, bukan karena ini adalah
+A> `List`, tetapi karena propertinya yang tidak boleh kosong.
+A> Saat kita mempelajari hierarki kelas tipe (lol) dari Scalaz, kita akan
+A> tahu cara yang lebih disukai untuk meminta "yang isi".
 
 ## Business Logic
 
 Now we write the business logic that defines the application's
 behaviour, considering only the happy path.
 
+Sekarang, kita akan menulis logika bisnis yang menentukan perilaku
+dari aplikasi ini, yang saat ini tidak mengindahkan sumber sumber
+penderitaan.
+
 We need a `WorldView` class to hold a snapshot of our knowledge of the
 world. If we were designing this application in Akka, `WorldView`
 would probably be a `var` in a stateful `Actor`.
 
+Untuk membungkus apa yang kita tahu mengenai situasi saat ini, kita akan
+membuat sebuah kelas dengan nama `WorldView` yang apabila kita mendesain
+aplikasi ini di Akka, `WorldView` bisa jadi merupakan sebuah `var` pada
+sebuah `Actor` yang *penuh adanya*. (lol)
+
 `WorldView` aggregates the return values of all the methods in the
 algebras, and adds a *pending* field to track unfulfilled requests.
+
+`WorldView` menyatukan semua nilai kembalian dari semua metoda pada
+aljabar-aljabar dan menambah sebuah bidang *field* yang ditujukan
+untuk menelusuri request mana saja yang belum terpenuhi.
 
 {lang="text"}
 ~~~~~~~~
@@ -1064,7 +1116,12 @@ algebras, and adds a *pending* field to track unfulfilled requests.
 Now we are ready to write our business logic, but we need to indicate
 that we depend on `Drone` and `Machines`.
 
+Walaupun kita sudah siap menulis logika bisnis kita, kita harus menunjukkan
+secara eksplisit bahwa kita bergantung pada `Drone` dan `Machines`.
+
 We can write the interface for the business logic
+
+Kita bisa menulis antarmuka untuk logika bisnis
 
 {lang="text"}
 ~~~~~~~~
@@ -1080,6 +1137,13 @@ algebras and pure functions, and can be abstracted over `F`. If an
 implementation of an algebraic interface is tied to a specific type, e.g. `IO`,
 it is called an *interpreter*.
 
+dan mengimplementaiskannya dengan sebuah *modul*.
+Sebuah modul yang hanya bergantung ke modul-modul lain, aljabar dan fungsi
+murni (lol), dan dapat diabstraksikan melalui `F`.
+Jika sebuah implementasi dari sebuah antarmuka aljabaris terikat spesifik
+pada sebuah tipe, misalkan `IO`, implementasi tersebut disebut sebagai
+sebuah *interpreter* (lol, penerjemah bisa?).
+
 {lang="text"}
 ~~~~~~~~
   final class DynAgentsModule[F[_]: Monad](D: Drone[F], M: Machines[F])
@@ -1089,11 +1153,20 @@ it is called an *interpreter*.
 The `Monad` context bound means that `F` is *monadic*, allowing us to use `map`,
 `pure` and, of course, `flatMap` via `for` comprehensions.
 
+Pembatasan konteks `Monad` menunjukkan bahwa `F` bersifat monad, yang objeknya
+bisa digunakan oleh `map`, `pure`, dan `flatMap` melalui `for` comprehension. (lol)
+
 We have access to the algebra of `Drone` and `Machines` as `D` and `M`,
 respectively. Using a single capital letter name is a common naming convention
 for monad and algebra implementations.
 
+Kita punya akses ke aljabar yang dimiliki oleh `Drone` dan `Machines` dengan
+simbol `D` dan `M`. Penggunaan simbol satu huruf kapital merupakan ijma
+untuk implementasi monad dan aljabar.
+
 Our business logic will run in an infinite loop (pseudocode)
+
+Logika bisnis kita akan berjalan pada sebuah "infinite loop".
 
 {lang="text"}
 ~~~~~~~~
@@ -1108,6 +1181,10 @@ Our business logic will run in an infinite loop (pseudocode)
 
 In `initial` we call all external services and aggregate their results
 into a `WorldView`. We default the `pending` field to an empty `Map`.
+
+Pada `initial`, kita memanggil semua layanan eksternal dan mengagregasi
+semua hasilnya menjadi sebuah `WorldView`.
+Untuk nilai bawaan `pending`, kita akan mengisinya dengan sebuah `Map` kosong.
 
 {lang="text"}
 ~~~~~~~~
@@ -1128,15 +1205,31 @@ safely chain together sequential side-effecting code, whilst being
 able to provide a pure implementation for tests. FP could be described
 as Extreme Mocking.
 
+Sebagaimana yang sudah dibahas pada bab 1, `flatMap` memberikan kita
+jalan untuk melakukan operasi pada nilai yang dihasilkan pada waktu jalan.
+Saat kita mengembalikan sebuah `F[_]`, kita mengembalikan sebuah program
+lain yang akan diterjemahkan saat waktu secara berurutan dan pada akhirnya,
+kita bisa melakukan `flatMap` padanya.
+Beginilah cara kita menyambung beberapa kode yang berefek samping yang berurutan
+secara aman. Saat itu pula, kita juga bisa menyediakan implementasi murni (lol)
+untuk tes.
 
 ### update
 
 `update` should call `initial` to refresh our world view, preserving
 known `pending` actions.
 
+`update` harus memanggil `initial` untuk memperbarui `worldview` kita
+sembari mempertahankan tindakan tindakan yang masih `pending`.
+
 If a node has changed state, we remove it from `pending` and if a
 pending action is taking longer than 10 minutes to do anything, we
 assume that it failed and forget that we asked to do it.
+
+Ketika sebuah node mengalami perubahan kondisi (lol, state), kita akan
+menghapusnya dari `pending`. Dan bila sebuah tindakan yang masih tertunda (pending)
+masih belum mengerjakan apapun setelah menunggu 10 menit, maka kita
+akan menganggapnya sebagai sebuah kegagalan dan kita ngambek (lol.)
 
 {lang="text"}
 ~~~~~~~~
@@ -1158,6 +1251,10 @@ explicit inputs and outputs, so we could move all pure code into standalone
 methods on a stateless `object`, testable in isolation. We're happy testing only
 the public methods, preferring that our business logic is easy to read.
 
+Fungsi konkret semacam `.symdiff` tidak memerlukan test dikarenakan mereka
+mempunyai masukan dan keluaran yang eksplisit. Sehingga, kita dapat memindahkan
+semua kode murni (lol) ke metoda metoda mandiri pada `object` "stateless" (lol).
+Testing metoda publik akan dengan senang hati kita lakukan.
 
 ### act
 

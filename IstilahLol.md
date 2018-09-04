@@ -2,17 +2,21 @@
 
 Istilah istilah yang belum saya pikirkan padan katanya.
 
-- *`for` comprehension*.
-- *Purely* functional programming.
+- *Filter* dalam konteks `filter :: (a -> Bool) -> [a] -> [a]`.
+- *Monad transformer*
+- *Pattern match*
 - *Pure* dalam konteks fungsi.
+- *Purely* functional programming.
+- *Refactor*. Mungkinkah *penyederhanaan* cocok?
 - *Syntax sugar*.
 - *Totality*. Mungkin *kesemestaan* cocok?
-- *Filter* dalam konteks `filter :: (a -> Bool) -> [a] -> [a]`.
-- *Pattern match*
-- *Monad transformer*
-- *Refactor*. Mungkinkah *penyederhanaan* cocok?
+- *`for` comprehension*.
 - *build-farm*.
-- *worker agent*
+- *infinite loop*.
+- *state*.
+- *timestamp*.
+- *typeclass*
+- *worker agent*.
 
 ### Catatan
 
