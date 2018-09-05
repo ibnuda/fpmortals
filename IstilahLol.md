@@ -12,12 +12,14 @@ Istilah istilah yang belum saya pikirkan padan katanya.
 - *Totality*. Mungkin *kesemestaan* cocok?
 - *`for` comprehension*.
 - *build-farm*.
+- *boilerplate*.
 - *infinite loop*.
 - *invoke*. Mungkin *selawat*?
 - *mailboxes*. Pernah pakai, tapi apa ya?
 - *state*.
 - *test-runner*.
 - *timestamp*.
+- *trait*.
 - *typeclass*
 - *worker agent*.
 

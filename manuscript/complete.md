@@ -1618,14 +1618,25 @@ The application that we have designed runs each of its algebraic
 methods sequentially. But there are some obvious places where work can
 be performed in parallel.
 
+Saat ini, aplikasi yang sudah kita desain menjalankan metoda-metoda
+aljabar secara berurutan. Namun, ada beberapa bagian-bagian yang bisa
+dijalankan secara paralel.
+
 
 ### initial
 
 In our definition of `initial` we could ask for all the information we
 need at the same time instead of one query at a time.
 
+Pada definisi kita atas `initial`, kita dapat meminta semua informasi
+yang kita butuhkan pada saat yang sama. Sehingga, kita tidak perlu
+melakukan satu kueri dalam satu waktu.
+
 As opposed to `flatMap` for sequential operations, Scalaz uses
 `Apply` syntax for parallel operations:
+
+Berbeda halnya dengan `flatMap` untuk operasi berurutan, Scalaz menggunakan
+sintaksis `Apply` untuk operasi paralel:
 
 {lang="text"}
 ~~~~~~~~
@@ -1633,6 +1644,8 @@ As opposed to `flatMap` for sequential operations, Scalaz uses
 ~~~~~~~~
 
 which can also use infix notation:
+
+yang bisa juga dituliskan menggunakan notasi sisipan:
 
 {lang="text"}
 ~~~~~~~~
@@ -1642,6 +1655,11 @@ which can also use infix notation:
 If each of the parallel operations returns a value in the same monadic
 context, we can apply a function to the results when they all return.
 Rewriting `update` to take advantage of this:
+
+Bila setiap operasi paralel mengembalikan sebuah nilai pada konteks
+monadik yang sama, kita dapat menerapkan sebuah fungsi ke hasil-hasilya
+saat mereka kembali (lol, pokoknya return bareng.)
+Metoda `update` bisa ditulis ulang sebagai berikut.
 
 {lang="text"}
 ~~~~~~~~
@@ -1659,16 +1677,36 @@ sequentially, waiting for the result, and then proceeding. But we
 could stop all the nodes in parallel and then update our view of the
 world.
 
+Pada logika yang saat ini digunakan untuk `act`, kita menghentikan
+setiap node secara berurutan sembari menunggu hasil proses penghentian
+tersebut, baru melanjutkan penghentian node lainnya.
+Padahal, kita dapat menghentikan semua node bersamaan dan dilanjutkan
+dengan memutakhirkan `worldview` kita.
+
 A disadvantage of doing it this way is that any failures will cause us
 to short-circuit before updating the `pending` field. But that is a
 reasonable tradeoff since our `update` will gracefully handle the case
 where a `node` is shut down unexpectedly.
+
+Salah satu kekurangan dari cara ini adalah ketika sebuah operasi gagal
+dilakukan, maka proses akan berhenti lebih awal sebelum kita memutakhirkan
+bidang `pending`.
+Sebenarnya kompromi semacam ini masih masuk akal karena metoda `update`
+kita akan dengan anggun (lol, anggun) menangani kondisi dimana sebuah
+`nod` mati mendadak.
 
 We need a method that operates on `NonEmptyList` that allows us to
 `map` each element into an `F[MachineNode]`, returning an
 `F[NonEmptyList[MachineNode]]`. The method is called `traverse`, and
 when we `flatMap` over it we get a `NonEmptyList[MachineNode]` that we
 can deal with in a simple way:
+
+Untuk tipe data `NonEmptyList`, kita butuh sebuah metoda yang mampu
+melakukan pemetaan (`map`ping) atas semua elemennya ke sebuah
+`F[MachineNode]` dan menghasilkan sebuah `F[NonEmptyList[MachineNode]]`.
+Cara ini disebut sebagai `traverse` (pelintang) dan ketika kita melakukan
+`flatMap`, kita akan mendapatkan sebuah `NonEmptyList[MachineNode]`
+yang bisa kita tangani dengan cara yang sederhana.
 
 {lang="text"}
 ~~~~~~~~
@@ -1681,6 +1719,9 @@ can deal with in a simple way:
 
 Arguably, this is easier to understand than the sequential version.
 
+Saya kira, cuplikan diatas lebih mudah dipahami bila dibandingkan
+dengan versi yang berurutan.
+
 
 ## Summary
 
@@ -1689,6 +1730,12 @@ Arguably, this is easier to understand than the sequential version.
 3.  *interpreters* are concrete implementations of an algebra for a fixed `F[_]`.
 4.  Test interpreters can replace the side-effecting parts of the system,
     giving a high amount of test coverage.
+
+1.  *aljabar* mendefinisikan antarmuka antar sistem.
+2.  *modul* merupakan implementasi dari sebuah aljabar dalam bentuk aljabar lain.
+3.  *interpreter* merupakan implementasi konkret dari sebuah aljabar untuk sebuah `F[_]` tetap.
+4.  Interpreter tes dapat mengganti bagian bagian yang mempunyai efek samping pada sistem
+    dan memberikan cakuan tes yang lebih tinggi.
 
 
 # Data and Functionality
@@ -1702,12 +1749,32 @@ become obscured by hundreds of lines of methods, trait mixins suffer
 from initialisation order errors, and testing / mocking of highly
 coupled components becomes a chore.
 
+Pada OOP, kita biasa berpikir mengenai data dan fungsionalitas
+dalam satu bentuk, kelas. Hierarki kelas berisi metoda-metoda dan
+trait (lol, ciri) yang memaksa bidang bidang data ada pada kelas
+yang memakainya.
+Polimorfisme saat waktu-jalan dari sebuah objek dilihat dengan kacamata
+hubungan "merupakan", yang mengkehendaki kelas kelas untuk mewariskan
+dari antarmuka-antarmuka umum.
+Hal semacam ini bisa jadi sangat keruh bila basis kode menjadi besar.
+Tipe data tipe data sederhana bisa jadi kabur batasannya karena ratusan
+baris metoda, trait (lol, ciri) menjadi kacau karena urutan inisiasi yang salah,
+dan testing maupun peniruan (lol, mocking) komponen yang melekat kuat menjadi kelagepan (lol, chore).
+
 FP takes a different approach, defining data and functionality
 separately. In this chapter, we will cover the basics of data types
 and the advantages of constraining ourselves to a subset of the Scala
 language. We will also discover *typeclasses* as a way to achieve
 compiletime polymorphism: thinking about functionality of a data
 structure in terms of "has a" rather than "is a" relationships.
+
+FP mengambil pendekatan yang berbeda dengan mendefinisikan data dan
+fungsionalitas secara terpisah.
+Pada bab ini, kita akan membahas tipe data tipe data dasar dan keuntungan
+dari pembatasan diri kita kepada subset Scala.
+Kita juga akan menemukan *tipe kelas* sebagai sebuah cara untuk mencapai
+polimorfisme waktu-jalan dengan melihat fungsionalitas dari sebuah
+struktur data dengan kacamata hubungan "memiliki" bukan hubungan "merupakan".
 
 
 ## Data
@@ -1718,21 +1785,41 @@ The fundamental building blocks of data types are
 -   `sealed abstract class` also known as *coproducts*
 -   `case object` and `Int`, `Double`, `String` (etc) *values*
 
+Blok bangunan mendasar dari tipe data adalah
+
+-   `final case class` yang juga dikenal sebagai *produk*
+-   `sealed abstract class` yang juga dikenal sebagai *ko-produk*
+-   `case object` dan `Int`, `Double`, `String` (dll) sebagai *nilai*
+
 with no methods or fields other than the constructor parameters. We prefer
 `abstract class` to `trait` in order to get better binary compatibility and to
 discourage trait mixing.
 
+tanpa metoda ataupun bidang selain parameter konstruktor.
+Kita lebih memilih `abstract class` dibandingkan `trait` dengan alasan
+agar mendapatkan kompatibilitas biner dan juga me-makruh-kan pencampuran "mixin" (lol, mixin)
+
 The collective name for *products*, *coproducts* and *values* is
 *Algebraic Data Type* (ADT).
+
+Ketiga tipe data diatas, secara paket, disebut juga dengan *Tipe Data Aljabar*.
 
 We compose data types from the `AND` and `XOR` (exclusive `OR`)
 Boolean algebra: a product contains every type that it is composed of,
 but a coproduct can be only one. For example
 
+Sebagai contoh, kita menyusun tipe data dari aljabar Boolean `AND` dan `XOR`:
+sebuah produk berisi setiap tipe yang merupakan penyusunan (lol, HELP).
+
 -   product: `ABC = a AND b AND c`
 -   coproduct: `XYZ = x XOR y XOR z`
 
+-   produk: `ABC = a AND b AND c`
+-   ko-produk: `XYZ = x XOR y XOR z`
+
 written in Scala
+
+yang bila ditulis menggunakan Scala
 
 {lang="text"}
 ~~~~~~~~
@@ -1757,7 +1844,13 @@ written in Scala
 When we introduce a type parameter into an ADT, we call it a
 *Generalised Algebraic Data Type* (GADT).
 
+Ketika kita mengenalkan sebuah parameter tipe ke sebuah ADT, kita
+menyebutnya dengan *Tipe Data Aljabar Umum* (Generalised Algebraic Data Type).
+
 `scalaz.IList`, a safe alternative to the stdlib `List`, is a GADT:
+
+`scalaz.IList`, yang merupakan alternatif yang lebih aman dari pustaka
+standar `List`, merupakan GADT:
 
 {lang="text"}
 ~~~~~~~~
@@ -1769,10 +1862,16 @@ When we introduce a type parameter into an ADT, we call it a
 If an ADT refers to itself, we call it a *recursive type*. `IList` is
 recursive because `ICons` contains a reference to `IList`.
 
+Bila sebuah GADT mengacu pada dirinya sendiri, kita menyebutnya sebagai
+sebuah *tipe rekursif*. `IList` sendiri merupakan contoh tipe rekursif
+karena `ICons` berisi referensi ke sebuah `IList`.
+
 
 ### Functions on ADTs
 
 ADTs can contain *pure functions*
+
+ADT bisa berisi fungsi murni (lol, murni)
 
 {lang="text"}
 ~~~~~~~~
@@ -1784,6 +1883,11 @@ translate perfectly onto the JVM. For example, legacy `Serializable`,
 `hashCode`, `equals` and `toString` do not behave as one might
 reasonably expect.
 
+Namun ADT yang berisi fungsi mempunyai beberapa kekurangan karena
+ADT tersebut tidak bisa diterjemahkan dengan sempurna ke JVM.
+Sebagai contoh, warisan `Serializable`, `hashCode`, `equals`, dan `toString`
+tidak berperilaku sebagaimana yang diharapkan.
+
 Unfortunately, `Serializable` is used by popular frameworks, despite
 far superior alternatives. A common pitfall is forgetting that
 `Serializable` may attempt to serialise the entire closure of a
@@ -1791,9 +1895,24 @@ function, which can crash production servers. A similar caveat applies
 to legacy Java classes such as `Throwable`, which can carry references
 to arbitrary objects.
 
+Dan yang menjadi sebuah kekecewaan adalah, `Serializable` sangat jamak
+digunakan oleh *framework* populer walaupun alternatif yang lebih
+bagus banyak (HIT, lol).
+Salah satu jebakan yang umum memakan korban adalah seorang penulis
+lupa bahwa `Serializable` bisa jadi berusaha untuk menyerikan fungsi
+*closure* secara keseluruhan dan bisa berakibat server rhemuk! (lol, rhemuk)
+Kekurangan lain yang mirip juga sama terjadi pada kelas Java peninggalan
+jaman dulu seperti `Throwable`, yang bisa saja berisi rujukan pada objek
+arbiter.
+
 We will explore alternatives to the legacy methods when we discuss the
 Scalaz library in the next chapter, at the cost of losing
 interoperability with some legacy Java and Scala code.
+
+Kita akan mengeksplorasi alternatif alternatif untuk metoda peninggalan
+sejarah saat kita berbincang mengenai pustaka Scalaz pada bab berikutnya.
+Tentu dengan mengorbankan interoperabilitas dengan kode kode Scala dan
+Java peninggalan sejarah.
 
 
 ### Exhaustivity
@@ -1803,6 +1922,16 @@ It is important that we use `sealed abstract class`, not just
 that all subtypes must be defined in the same file, allowing the
 compiler to know about them in pattern match exhaustivity checks and
 in macros that eliminate boilerplate. e.g.
+
+Adalah hal yang penting untuk kita menggunakan `sealed abstract class`,
+dan tidak hanya `abstract class`, saat kita mendefinisikan sebuah tipe
+data.
+Dengan menyegel (`seal`) sebuah `class`, kita juga memastikan bahwa
+semua sub-tipe-nya harus didefinisikan di berkas yang sama.
+Hal ini memberikan kesempatan agar kompiler bisa mengetahui hubungan
+mereka, sehingga kompiler bisa memeriksa keluwesan "pattern match"
+dan juga pada makro yang menghilangkan "boilerplate" (lol, boilerplate).
+Sebagai contoh,
 
 {lang="text"}
 ~~~~~~~~
@@ -1823,8 +1952,16 @@ This shows the developer what they have broken when they add a new
 product to the codebase. We're using `-Xfatal-warnings`, otherwise
 this is just a warning.
 
+Cuplikan diatas menunjukkan kepada pengembang apa yang telah mereka
+rhemukkan (lol) ketika menambah sebuah produk baru ke basis kode.
+Hal ini terjadi karena kita menggunakan ekstensi `-Xfatal-warnings`
+sehingga semua peringatan dari kompiler menjadi galat.
+
 However, the compiler will not perform exhaustivity checking if the
 `class` is not sealed or if there are guards, e.g.
+
+Namun, kompiler juga tidak akan memeriksa keluwesan bila kelas tidak
+tersegel ataupun ada pengaman lain. Misal
 
 {lang="text"}
 ~~~~~~~~
@@ -1839,8 +1976,14 @@ However, the compiler will not perform exhaustivity checking if the
 
 To remain safe, don't use guards on `sealed` types.
 
+Agar tetap aman, jangan gunakan pengaman ketika menggunakan tipe tersegel.
+
 The [`-Xstrict-patmat-analysis`](https://github.com/scala/scala/pull/5617) flag has been proposed as a language
 improvement to perform additional pattern matcher checks.
+
+Panji [`-Xstrict-patmat-analysis`](https://github.com/scala/scala/pull/5617)
+sudah diajukan sebagai peningkatan bahasa untuk menampah pemeriksaan
+"pattern match" tambahan (lol, pattern match.)
 
 
 ### Alternative Products and Coproducts
@@ -1848,11 +1991,22 @@ improvement to perform additional pattern matcher checks.
 Another form of product is a tuple, which is like an unlabelled `final
 case class`.
 
+Bentuk lain dari produk adalah tuple yang merupakan sebuah `final case class`
+tanpa label.
+
 `(A.type, B, C)` is equivalent to `ABC` in the above example but it is best to
 use `final case class` when part of an ADT because the lack of names is awkward
 to deal with, and `case class` has much better performance for primitive values.
 
+`(A.type, B, C)` ekuivalen denga `ABC` pada contoh di atas.
+Namun, sangat disarankan untuk menggunakan `final case class` ketika
+digunakan pada sebuah ADT. Selain karena agak canggung bila tanpa nama,
+`case class` juga mempunyai performa yang jauh lebih baik bila dibandingkan
+dengan nilai-nilai primitif.
+
 Another form of coproduct is when we nest `Either` types. e.g.
+
+Contoh lain dari ko-produk adalah saat kita melapisi tipe `Either`.
 
 {lang="text"}
 ~~~~~~~~
@@ -1862,6 +2016,12 @@ Another form of coproduct is when we nest `Either` types. e.g.
 equivalent to the `XYZ` sealed abstract class. A cleaner syntax to define
 nested `Either` types is to create an alias type ending with a colon,
 allowing infix notation with association from the right:
+
+yang ekuivalen dengan kelas abstrak tersegel `XYZ`.
+Untuk sintaks yang lebih rapi yang digunakan untuk mendefinisikan
+tipe `Either` berlapis, bisa digunakan tipe alias yang akhiran
+titik dua (lol, HELP)
+
 
 {lang="text"}
 ~~~~~~~~
@@ -1873,6 +2033,10 @@ allowing infix notation with association from the right:
 This is useful to create anonymous coproducts when we cannot put all
 the implementations into the same source file.
 
+Cara ini berguna untuk membuat ko-produk anonim saat kita tidak
+dapat meletakkan semua implementasi dalam sebuah berkas kode yang
+sama.
+
 {lang="text"}
 ~~~~~~~~
   type Accepted = String |: Long |: Boolean
@@ -1880,6 +2044,10 @@ the implementations into the same source file.
 
 Yet another alternative coproduct is to create a custom `sealed abstract class`
 with `final case class` definitions that simply wrap the desired type:
+
+Alternatif lain dari ko-produk adalah dengan membuat `sealed abstract class`
+khusus dengan definisi `final case class` yang hanya membungkus tipe
+yang diinginkan. (lol, susah)
 
 {lang="text"}
 ~~~~~~~~
@@ -1893,6 +2061,12 @@ Pattern matching on these forms of coproduct can be tedious, which is why [Union
 Types](https://contributors.scala-lang.org/t/733) are being explored in the Dotty next-generation Scala compiler. Macros
 such as [totalitarian](https://github.com/propensive/totalitarian) and [iotaz](https://github.com/frees-io/iota) exist as alternative ways of encoding anonymous
 coproducts.
+
+"Pattern match" pada bentuk bentuk ko-produk ini bisa jadi sangat boyak.
+Hal ini juga yang melatar belakangi eksplorasi [Tipe Gabungan](https://contributors.scala-lang.org/t/733)
+pada kompiler baru Scala, Dotty.
+Makro seperti [totalitarian](https://github.com/propensive/totalitarian) dan [iotaz](https://github.com/frees-io/iota)
+hadir sebagai alternatif untuk menyandikan ko-produk anonim.
 
 
 ### Convey Information
