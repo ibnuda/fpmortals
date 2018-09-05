@@ -13,7 +13,10 @@ Istilah istilah yang belum saya pikirkan padan katanya.
 - *`for` comprehension*.
 - *build-farm*.
 - *infinite loop*.
+- *invoke*. Mungkin *selawat*?
+- *mailboxes*. Pernah pakai, tapi apa ya?
 - *state*.
+- *test-runner*.
 - *timestamp*.
 - *typeclass*
 - *worker agent*.

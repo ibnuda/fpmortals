@@ -1265,13 +1265,31 @@ perform one action per invocation, but that is reasonable because we
 can control the invocations and may choose to re-run `act` until no
 further action is taken.
 
+Metoda `act` sedikit lebih kompleks dibandingkan dengan metoda sebelumnya.
+Untuk memperjelas maksud dan memudahkan pemahaman, kita akan membaginya
+menjadi dua bagian. Pertama, mendeteksi kapankah sebuah aksi harus diambil.
+Dan kedua, melakukan aksi yang sudah ditentukan.
+Penyederhanaan ini juga berarti bahwa kita hanya bisa melakukan satu aksi
+dalam sebuah selawat (lol, invocation). Namun, hal tersebut cukup masuk
+akal dikarenakan kita dapat mengontrol selawat (lol) dan bisa juga menjalankan
+ulang `act` sampai tidak ada lagi yang perlu dilakukan.
+
 We write the scenario detectors as extractors for `WorldView`, which
 is nothing more than an expressive way of writing `if` / `else`
 conditions.
 
+Sebagai pengekstrak untuk `WorldView`, kita akan menulis pendeteksi skenario
+yang tidak lain dan tidak bukan hanyalah penulisan percabangan `if` dan `else`
+yang jauh lebih ekspresif dibandingkan yang biasa!
+
 We need to add agents to the farm if there is a backlog of work, we
 have no agents, we have no nodes alive, and there are no pending
 actions. We return a candidate node that we would like to start:
+
+Adalah sebuah keharusan untuk menambah agen ke "farm" (lol) bila ada
+timbunan pekerjaan, atau saat kita tidak punya agen, atau ketika tak ada
+node yang menyala, juga tidak ada aksi aksi yang sedang dihentikan (pending, lol).
+Caranya? Tentu dengan mengembalikan kandidat node yang ingin kita jalankan:
 
 {lang="text"}
 ~~~~~~~~
@@ -1290,8 +1308,16 @@ are not doing any work). However, since Google charge per hour we only shut down
 machines in their 58th minute to get the most out of our money. We return the
 non-empty list of nodes to stop.
 
+Bila tidak ada timbunan pekerjaan, kita harus menghentikan semua node yang
+sudah basi (pengangguran / tidak punya pekerjaan). Akan tetapi, jangan lupa
+bahwa Google menarik bayaran berdasarkan waktu penggunaan (dalam hitungan jam),
+maka kita akan mematikan mesin tersebut pada menit ke 58 agar kita IRIT!
+Disini, kita akan mengembalikan daftar non-kosong dari node untuk dihentikan.
+
 As a financial safety net, all nodes should have a maximum lifetime of
 5 hours.
+
+Agar IRIT, semua node harus mati sebelum 5 jam.
 
 {lang="text"}
 ~~~~~~~~
@@ -1311,6 +1337,12 @@ As a financial safety net, all nodes should have a maximum lifetime of
 Now that we have detected the scenarios that can occur, we can write
 the `act` method. When we schedule a node to be started or stopped, we
 add it to `pending` noting the time that we scheduled the action.
+
+Setelah kita berhasil mendeteksi skenario-skenario yang mungkin terjadi,
+kita bisa melanjutkan dengan menulis metoda `act`.
+Saat kita menjadwalkan sebuah node untuk dijalankan atau dibunuh, kita
+bisa menambahkan node tersebut ke `pending` sambil mencatat waktu yang
+penjadwalan aksi tadi.
 
 {lang="text"}
 ~~~~~~~~
@@ -1337,10 +1369,24 @@ Because `NeedsAgent` and `Stale` do not cover all possible situations,
 we need a catch-all `case _` to do nothing. Recall from Chapter 2 that
 `.pure` creates the `for`'s (monadic) context from a value.
 
+Karena `NeedsAgent` dan `Stale` tidak menutup semua kemungkinan yang bisa
+terjadi, maka kita butuh jaring pengaman `cace _` yang sebenarnya tidak
+melakukan apapun.
+Saudara bisa mengingat kembali bab 2 dimana `.pure` menciptakan konteks monadik
+dari sebah nilai (`for`).
+
 `foldLeftM` is like `foldLeft`, but each iteration of the fold may return a
 monadic value. In our case, each iteration of the fold returns `F[WorldView]`.
 The `M` is for Monadic. We will find more of these *lifted* methods that behave
 as one would expect, taking monadic values in place of values.
+
+`foldLeftM` sendiri sebenarnya mirip dengan `foldLeft`. Namun, tiap iterasi
+dari penekukan ("fold") bisa saja menghasilkan sebuah nilai monadik.
+Pada kasus ini, tiap iterasi dari tiap tekukan mengembalikan `F[WorldView]`.
+Simbol `M` pada `M.stop(n)`, misal, melambangkan bahwa ekspresi tersebut
+bersifat monadik. Kita akan banyak menemukan banyak metoda "lifted"
+seperti ini yang hanya mau menerima nilai nilai monadik, bukan nilai biasa.
+(lol)
 
 
 ## Unit Tests
@@ -1349,6 +1395,11 @@ The FP approach to writing applications is a designer's dream: delegate writing
 the implementations of algebras to team members while focusing on making
 business logic meet the requirements.
 
+Pendekatan seperti ini, yang digunakan pada pemrograman fungsional,
+adalah hal yang diimpikan oleh seorang arsitek dimana detail implementasi
+atas aljabar-aljabar diserahkan kepada anggota tim dan sang arsitek
+fokus dalam menentukan logika bisnis untuk memenuhi tuntutan bisnis.
+
 Our application is highly dependent on timing and third party webservices. If
 this was a traditional OOP application, we'd create mocks for all the method
 calls, or test actors for the outgoing mailboxes. FP mocking is equivalent to
@@ -1356,7 +1407,18 @@ providing an alternative implementation of dependency algebras. The algebras
 already isolate the parts of the system that need to be *mocked*, i.e.
 interpreted differently in the unit tests.
 
+Aplikasi kita ini sangat bergantung pada tempo dan layanan web pihak ketiga.
+Bila kita sedang menulis aplikasi ini dengan metodologi OOP tradisionil,
+kita akan membuat tiruan untuk semua metoda yang digunakan untuk memanggil
+layanan tersebut ataupun aktor aktor untuk pesan pesan keluar (lol).
+Peniruan yang digunakan pada pemrograman fungsional dilakukan dengan cara
+membuat implementasi alternatif dari aljabar yang digunakan.
+Tiap aljabar tiruan tadi, mengisolasi bagian bagian dari sistem yang harus
+ditiru (lol).
+
 We will start with some test data
+
+Kita bisa memulainya dengan data data yang dikhususkan untuk testing.
 
 {lang="text"}
 ~~~~~~~~
@@ -1378,6 +1440,10 @@ We will start with some test data
 A> The `epoch` string interpolator is written with Jon Pretty's [contextual](https://github.com/propensive/contextual) library,
 A> giving us compiletime safety around string constructors of a type:
 A> 
+A> Penambah string `.epoch`, yang ditulis menggunakan pustaka [contextual](https://github.com/propensive/contextual)
+A> milik Jon Pretty, memastikan keamanan saat kompilasi atas pembuatan
+A> string dari sebuah tipe.
+A>
 A> {lang="text"}
 A> ~~~~~~~~
 A>   import java.time.Instant
@@ -1394,9 +1460,17 @@ A> ~~~~~~~~
 We implement algebras by extending `Drone` and `Machines` with a specific
 monadic context, `Id` being the simplest.
 
+Kita bisa mengimplementasikan aljabar-aljabar yang akan ditiru dengan
+meng-eksten (lol) `Drone` dan `Machines` dengan konteks monadik spesifik,
+seperti `Id` sebagai contoh konteks yang paling sederhana.
+
 Our "mock" implementations simply play back a fixed `WorldView`. We've
 isolated the state of our system, so we can use `var` to store the
 state:
+
+Implementasi tiruan kita hanya memutar ulang sebuah `WorldView` yang tetap.
+Kita mengisolasi kondisi sistem kita sehingga kita dapat menggunakan
+`var` untuk menyimpan kondisi tersebut.
 
 {lang="text"}
 ~~~~~~~~
@@ -1421,16 +1495,30 @@ state:
 ~~~~~~~~
 
 A> We will return to this code later on and replace `var` with something safer.
+A>
+A> Kita nanti akan kembali ke kode ini dan mengganti `var` dengan sesuatu
+A> yang lebih aman.
 
 When we write a unit test (here using `FlatSpec` from Scalatest), we create an
 instance of `Mutable` and then import all of its members.
+
+Ketika kita menulis sebuah unit tes, kita akan membuat sebuan instans `Mutable`
+dan mengimpor semua membernya.
 
 Our implicit `drone` and `machines` both use the `Id` execution
 context and therefore interpreting this program with them returns an
 `Id[WorldView]` that we can assert on.
 
+Baik `drone` maupun `machines` kita, menggunakan konteks eksekusi
+`Id`. Sehingga, program ini akan mengembalikan sebuah `Id[WorldView]` 
+yang bisa kita tegaskan (lol).
+
 In this trivial case we just check that the `initial` method returns
 the same value that we use in the static implementations:
+
+Sebenarnya, pada kasus remeh seperti ini, kita tinggal memeriksa
+apakah metoda `initial` memang betul mengembalikan nilai yang sama
+dengan yang kita gunakan dalam implementasi statik.
 
 {lang="text"}
 ~~~~~~~~
@@ -1444,6 +1532,10 @@ the same value that we use in the static implementations:
 
 We can create more advanced tests of the `update` and `act` methods,
 helping us flush out bugs and refine the requirements:
+
+Kita juga bisa membuat tes yang lebih rumit untuk metoda `update`
+dan `act` untuk membantu kita menghilangkan kutu-kutu dan memperhalus
+persyaratan (lol, refining the requirements).
 
 {lang="text"}
 ~~~~~~~~
@@ -1476,6 +1568,11 @@ helping us flush out bugs and refine the requirements:
 It would be boring to go through the full test suite. The following tests are
 easy to implement using the same approach:
 
+Akan menjadi sebuah kebosanan yang nyata bila kita harus berbincang secara
+panjang dan lebar mengenai semua rangkaian tes.
+Tes-tes berikut sebenarnya bisa dengan mudah diimplementasikan dengan menggunakan
+pendekatan yang sama.
+
 -   not request agents when pending
 -   don't shut down agents if nodes are too young
 -   shut down agents when there is no backlog and nodes will shortly incur new costs
@@ -1484,16 +1581,36 @@ easy to implement using the same approach:
 -   shut down agents, even if they are potentially doing work, if they are too old
 -   ignore unresponsive pending actions during update
 
+-   jangan meminta agen saat pending.
+-   jangan mematikan agen bila node masih muda.
+-   matikan agen bila tidak ada timbunan pekerjaan dan node akan makan biaya lagi.
+-   jangan matikan agen bila masih ada tindakan yang pending.
+-   matikan agen bila tidak ada backlog jika terlalu tua.
+-   matikan agen bila sudah tua, termasuk yang sedang mengerjakan sesuatu.
+-   abaikan tindakan-tindakan yang tidak responsif saat pemutakhiran.
+
 All of these tests are synchronous and isolated to the test runner's
 thread (which could be running tests in parallel). If we'd designed
 our test suite in Akka, our tests would be subject to arbitrary
 timeouts and failures would be hidden in logfiles.
+
+Semua tes di atas dijalankan secara berurutan dan terisolasi terhadap
+ulir test-runner (lol, penjalan test?) (yang bisa jadi dijalankan secara
+paralel). Bilamana kita mendesain rangkaian tes kita di Akka, tes-tes kita
+bisa jadi menjadi korban atas kesewenangan habisnya waktu. Belum lagi
+dengan disembunyikannya galat-galat pada berkas log. 
 
 The productivity boost of simple tests for business logic cannot be
 overstated. Consider that 90% of an application developer's time
 interacting with the customer is in refining, updating and fixing
 these business rules. Everything else is implementation detail.
 
+Bukan melebih-lebihkan, namun kenyataan bahwa testing untuk logika
+bisnis pada aplikasi kita memang meningkat drastis.
+Anggap saja bahwa 90% waktu yang digunakan oleh pengembang aplikasi
+bersama dengan pelanggan dihabiskan untuk memperhalus, memperbarui,
+dan memperbaiki aturan aturan bisnis ini, tentu yang lainnya merupakan
+detail saja.
 
 ## Parallel
 
