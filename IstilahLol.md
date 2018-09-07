@@ -13,9 +13,11 @@ Istilah istilah yang belum saya pikirkan padan katanya.
 - *`for` comprehension*.
 - *build-farm*.
 - *boilerplate*.
+- *callbacks**.
 - *infinite loop*.
 - *invoke*. Mungkin *selawat*?
 - *mailboxes*. Pernah pakai, tapi apa ya?
+- *signature*.
 - *state*.
 - *test-runner*.
 - *timestamp*.

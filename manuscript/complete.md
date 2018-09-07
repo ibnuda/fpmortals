@@ -2074,6 +2074,9 @@ hadir sebagai alternatif untuk menyandikan ko-produk anonim.
 Besides being a container for necessary business information, data
 types can be used to encode constraints. For example,
 
+Selain digunakan sebagai kontainer untuk informasi bisnis, tipe data
+juga bisa digunakan untuk menyandikan batasan. Sebagai contoh,
+
 {lang="text"}
 ~~~~~~~~
   final case class NonEmptyList[A](head: A, tail: IList[A])
@@ -2082,8 +2085,16 @@ types can be used to encode constraints. For example,
 can never be empty. This makes `scalaz.NonEmptyList` a useful data type despite
 containing the same information as `IList`.
 
+tidak bisa kisang. Hal inilah yang menjadikan `scalaz.NonEmptyList`
+sebuah tipe data yang penting walaupun mempunyai informasi yang sama
+dengan `IList`.
+
 Product types often contain types that are far more general than is allowed. In
 traditional OOP this would be handled with input validation through assertions:
+
+Tipe produk sering kali berisi tipe yang jauh lebih umum daripada yang diharapkan.
+Pada OOP tradisional, hal ini diatasi dengan menggunakan validasi input
+dan asersi. (lol, asersi)
 
 {lang="text"}
 ~~~~~~~~
@@ -2095,6 +2106,13 @@ traditional OOP this would be handled with input validation through assertions:
 Instead, we can use the `Either` data type to provide `Right[Person]` for valid
 instances and protect invalid instances from propagating. Note that the
 constructor is `private`:
+
+Sebagai gantinya, kita dapat menggunakan tipe data `Either` untuk menyediakan
+`Right[Person]` untuk instans valid. Tidak hanya itu, penggunaan `Either` juga
+bisa mengurangi kemungkinan instansiasi yang seharusnya tidak mungkin terjadi.
+Pada contoh selanjutnya, harap diperhatikan bahwa konstruktor kelas `Person`
+dibuat sebagai final.
+
 
 {lang="text"}
 ~~~~~~~~
@@ -2121,12 +2139,22 @@ A clean way to restrict the values of a general type is with the `refined`
 library, providing a suite of restrictions to the contents of data. To install
 refined, add the following to `build.sbt`
 
+Selain dengan menggunakan `Either` sebagaimana yang telah dicontohkan pada
+bagian sebelumnya, ada juga cara yang lebih mudah dan rapi yaitu dengan
+menggunakan pustaka `refined`.
+Pustaka tersebut memberikan batasan batasan untuk tipe data yang bisa
+digunakan pada sebuah kelas.
+Untuk memasang pustaka tersebut, silakan tambahkan baris berikut pada
+`build.sbt`.
+
 {lang="text"}
 ~~~~~~~~
   libraryDependencies += "eu.timepit" %% "refined-scalaz" % "0.9.2"
 ~~~~~~~~
 
 and the following imports
+
+dan baris-baris berikut pada kode sumber.
 
 {lang="text"}
 ~~~~~~~~
@@ -2137,10 +2165,19 @@ and the following imports
 `Refined` allows us to define `Person` using adhoc refined types to capture
 requirements exactly, written `A Refined B`.
 
+`Refined` memberikan batasan batasan yang jauh lebih jelas dengan menuliskan
+`A Refined B`.
+
 A> All types with two parameters can be written *infix* in Scala. For example,
 A> `Either[String, Int]` is the same as `String Either Int`. It is conventional for
 A> `Refined` to be written infix since `A Refined B` can be read as "an `A` that
 A> meets the requirements defined in `B`".
+A>
+A> Pada Scala, semua tipe dengan dua parameter dapat ditulis sebagai sisipan.
+A> Sebagai contoh, `Either[String, Int]` sama dan sebangun dengan `String Either Int`.
+A> Menggunakan fakta ini, `Refined` secara konvensi akan digunakan sebagai operator
+A> sisipan. Sehingga, `A Refined B` akan terbaca sebagai "Sebuah `A` yang memenuhi
+A> kriteria yang didefinisikan oleh `B`."
 
 {lang="text"}
 ~~~~~~~~
@@ -2156,6 +2193,10 @@ A> meets the requirements defined in `B`".
 The underlying value can be obtained with `.value`. We can construct a
 value at runtime using `.refineV`, returning an `Either`
 
+Nilai pokok bisa didapatkan dengan memanggil metoda `.value`. Sedangkan
+untuk membuat nilai `refined` pada saat waktu jalan, kita bisa menggunakan
+`.refineV` yang mengembalikan `Either`.
+
 {lang="text"}
 ~~~~~~~~
   scala> import refined.refineV
@@ -2168,6 +2209,8 @@ value at runtime using `.refineV`, returning an `Either`
 
 If we add the following import
 
+Bila kita menambah impor berikut,
+
 {lang="text"}
 ~~~~~~~~
   import refined.auto._
@@ -2175,6 +2218,9 @@ If we add the following import
 
 we can construct valid values at compiletime and get an error if the provided
 value does not meet the requirements
+
+kita dapat menyusun nilai nilai valid saat waktu kompile dan akan mendapatkan
+pesan galat ketika nilai yang disediakan tidak memenuhi kriteria yang diminta.
 
 {lang="text"}
 ~~~~~~~~
@@ -2188,6 +2234,9 @@ value does not meet the requirements
 More complex requirements can be captured, for example we can use the built-in
 rule `MaxSize` with the following imports
 
+Untuk kriteria yang lebih kompleks, kita dapat menggunakan aturan `MaxSize` pada
+contoh berikut.
+
 {lang="text"}
 ~~~~~~~~
   import refined.W
@@ -2197,6 +2246,9 @@ rule `MaxSize` with the following imports
 
 capturing the requirement that the `String` must be both non-empty and have a
 maximum size of 10 characters:
+
+Untuk memenuhi persyaratan bahwa `String` harus tidak kosong dan mempunyai
+panjang maksimal 10 karakter, kita bisa menulis sebagai berikut:
 
 {lang="text"}
 ~~~~~~~~
@@ -2210,16 +2262,25 @@ maximum size of 10 characters:
 
 A> The `W` notation is short for "witness". This syntax will be much simpler in
 A> Scala 2.13, which has support for *literal types*:
-A> 
+A>
+A> Notasi `W` merupakan kependekan dari *witness*. Sintaksis ini akan jauh lebih
+A> sederhana pada Scala 2.13 yang mendukung *tipe literal*.
+A>
 A> {lang="text"}
 A> ~~~~~~~~
 A>   type Name = NonEmpty And MaxSize[10]
 A> ~~~~~~~~
 
 It is easy to define custom requirements that are not covered by the refined
-library. For example in `drone-dynamaic-agents` we will need a way of ensuring
+library. For example in `drone-dynamic-agents` we will need a way of ensuring
 that a `String` contains `application/x-www-form-urlencoded` content. We can
 create a `Refined` rule using the Java regular expression library:
+
+Bila kita menemui persyaratan-persyaratan yang tidak didukung oleh pustaka
+`refined`, kita dapat dengan mudah menyusunnya sendiri.
+Sebagai contoh, pada `drone-dynamic-agents`, kita harus memastikan bahwa
+sebuah `String` harus mengandung `application/x-www-form-urlencoded`.
+Untuk menyusunnya, kita bisa menggunakan pustaka standar *regex* Java.
 
 {lang="text"}
 ~~~~~~~~
@@ -2247,8 +2308,18 @@ possible to interact with cross-discipline teams, such as DBAs, UI
 developers and business analysts, using the actual code instead of a
 hand written document as the source of truth.
 
+Dengan tidak berisi fungsionalitas apapun, sangat mungkin sebuah ADT
+memiliki ketergantungan yang kecil. Hal ini-lah yang memudahkan kita
+untuk berbagi dengan pengembang lain.
+Dengan menggunakan bahasa pemodelan data sederhana, interaksi antar
+tim inter-disipliner akan lebih mudah dan ketergantungan atas dokumen
+tertulis berkurang.
+
 Furthermore, tooling can be more easily written to produce or consume
 schemas from other programming languages and wire protocols.
+
+Terlebih lagi, peralatan yang digunakan bisa dibuat dengan mudah untuk
+(lol, males banget. saya kaku.)
 
 
 ### Counting Complexity
@@ -2257,29 +2328,55 @@ The complexity of a data type is the count of values that can exist. A good data
 type has the least amount of complexity it needs to hold the information it
 conveys, and no more.
 
+Kompleksitas dari sebuah tipe data diambil dari jumlah nilai yang bisa
+ada pada tipe data tersebut. Sebuah tipe data yang bagus mempunyai tingkat
+kompleksitas yang rendah bila dibandingkan dengan informasi yang disampaikan.
+
 Values have a built-in complexity:
+
+Nilai-nilai berikut punya kompleksitas yang tetap.
 
 -   `Unit` has one value (why it is called "unit")
 -   `Boolean` has two values
 -   `Int` has 4,294,967,295 values
 -   `String` has effectively infinite values
 
+-   `Unit` punya satu nilai.
+-   `Boolean` punya dua nilai.
+-   `Int` punya 4,294,967,295 nilai.
+-   `String` bisa dibilang punya nilai tak hingga.
+
 To find the complexity of a product, we multiply the complexity of
 each part.
+
+Untuk mencari kompleksitas dari sebuah produk, kita tinggal mengalikan
+kompleksitas dari tiap bagian.
 
 -   `(Boolean, Boolean)` has 4 values (`2*2`)
 -   `(Boolean, Boolean, Boolean)` has 8 values (`2*2*2`)
 
+-   `(Boolean, Boolean)` punya 4 nilai (`2*2`)
+-   `(Boolean, Boolean, Boolean)` punya 8 nilai (`2*2*2`)
+
 To find the complexity of a coproduct, we add the complexity of each
 part.
+
+Sedangkan untuk mencari kompleksitas dari sebuah ko-produk, kita tinggal
+menambah kompleksitas dari tiap bagian.
 
 -   `(Boolean |: Boolean)` has 4 values (`2+2`)
 -   `(Boolean |: Boolean |: Boolean)` has 6 values (`2+2+2`)
 
+-   `(Boolean |: Boolean)` punya 4 nilai (`2+2`)
+-   `(Boolean |: Boolean |: Boolean)` punya 6 nilai (`2+2+2`)
+
 To find the complexity of a GADT, multiply each part by the complexity
 of the type parameter:
 
--   `Option[Boolean]` has 3 values, `Some[Boolean]` and `None` (`2+1`)
+Sedangkan untuk mencari kompleksitas dari sebuah GADT, kalikan tiap bagian
+dengan kompleksitas dari setiap parameter.
+
+-   `Option[Boolean]` punya 3 nilai, `Some[Boolean]` dan `None` (`2+1`)
 
 In FP, functions are *total* and must return an value for every
 input, no `Exception`. Minimising the complexity of inputs and outputs
@@ -2288,8 +2385,20 @@ of a badly designed function when the complexity of a function's
 return value is larger than the product of its inputs: it is a source
 of entropy.
 
+Pada pemrograman fungsional, selain fungsi harus *total*, juga harus mempunyai
+nilai kembalian untuk semua input, tak terkecuali (lol, pun hilang).
+Praktik utama yang digunakan untuk mencapai *totalitas* adalah dengan
+mengurangi jumlah input dan output. Sebagai patokan, tanda tanda fungsi
+yang tidak didesain dengan seksama adalah ketika kompleksitas dari output
+sebuah fungsi lebih besar daripada jumlah perkalian inputnya.
+
+
 The complexity of a total function is the number of possible functions that can
 satisfy the type signature: the output to the power of the input.
+
+Kompleksitas dari sebuah fungsi total adalah jumlah fungsi yang bisa memenuhi
+*signature* dari fungsi tersebut yang dihitung dengan menggunakan output pangkat
+input.
 
 -   `Unit => Boolean` has complexity 2
 -   `Boolean => Boolean` has complexity 4
@@ -2298,25 +2407,47 @@ satisfy the type signature: the output to the power of the input.
 -   `Int => Boolean` is so big that if all implementations were assigned a unique
     number, each would require 4 gigabytes to represent.
 
+-   `Unit => Boolean` punya kompleksitas 2.
+-   `Boolean => Boolean` punya kompleksitas 4.
+-   `Option[Boolean] => Option[Boolean]` punya kompleksitas 27.
+-   `Boolean => Int` dari quintillion jadi sextillion.
+-   `Int => Boolean` gede banget (lol, that's what she said!)
+
 In reality, `Int => Boolean` will be something simple like `isOdd`, `isEven` or
 a sparse `BitSet`. This function, when used in an ADT, could be better replaced
 with a coproduct labelling the limited set of functions that are relevant.
+
+Kenyataannya, `Int => Boolean` bisa jadi hanya sebuah fungsi sederhana seperti
+`isOdd`, `isEven`, atau `BitSet`. Fungsi ini, ketika digunakan pada sebuah ADT,
+bisa diganti dengan menggunakan ko-produk untuk menandai fungsi yang relevan.
 
 When our complexity is "infinity in, infinity out" we should introduce
 restrictive data types and validation closer to the point of input with
 `Refined` from the previous section.
 
+Ketika kompleksitas fungsi kita adalah "semua boleh masuk dan semua bisa keluar",
+kita harus memberikan tipe data yang terbatas dan proses validasi. etc (lol, help)
+
 The ability to count the complexity of a type signature has one other practical
 application: we can find simpler type signatures with High School algebra! To go
 from a type signature to its algebra of complexity, simply replace
 
--   `Either[A, B]` with `a + b`
--   `(A, B)` with `a * b`
--   `A => B` with `b ^ a`
+Keuntungan lain yang bisa didapat saat kita bisa menghitung kompleksitas *signature* (lol)
+tipe adalah kita bisa mencari *signature* (lol) tipe yang lebih sederhana dengan
+aljabar tingkat SMP (pangkat sudah diajari saat SMP, kan?).
+Untuk menghitung kompleksitasnya, tinggal mengganti
+
+-   `Either[A, B]` dengan `a + b`
+-   `(A, B)` dengan `a * b`
+-   `A => B` dengan `b ^ a`
 
 do some rearranging, and convert back. For example, say we've designed a
 framework based on callbacks and we've managed to work ourselves into the
 situation where we have created this type signature:
+
+dilanjutkan dengan mengurutkan, lalu tinggal konversi balik. Sebagai contoh,
+misalkan kita mendesain sebuah kerangka kerja berdasarkan *callbacks* dan
+pada akhirnya kita membuat *signature* tipe sebagai berikut:
 
 {lang="text"}
 ~~~~~~~~
@@ -2324,6 +2455,8 @@ situation where we have created this type signature:
 ~~~~~~~~
 
 We can convert and rearrange
+
+Yang bisa kita konversi dan atur ulang sebagai
 
 {lang="text"}
 ~~~~~~~~
@@ -2334,6 +2467,8 @@ We can convert and rearrange
 
 then convert back to types and get
 
+dan pada akhirnya, kita bisa konversi ulang ke tipe dan mendapat:
+
 {lang="text"}
 ~~~~~~~~
   (Either[A, B] => C) => C
@@ -2342,7 +2477,12 @@ then convert back to types and get
 which is much simpler: we only need to ask the users of our framework to provide
 a `Either[A, B] => C`.
 
+yang jauh lebih sederhana. Kita cuma perlu untuk menyuruh pengguna untuk
+menyediakan `Either[A, B] => C`.
+
 The same line of reasoning can be used to prove that
+
+Dengan penalaran yang sama, kita bisa membuktikan bahwa
 
 {lang="text"}
 ~~~~~~~~
@@ -2351,12 +2491,16 @@ The same line of reasoning can be used to prove that
 
 is equivalent to
 
+ekuivalen dengan
+
 {lang="text"}
 ~~~~~~~~
   (A, B) => C
 ~~~~~~~~
 
 also known as *Currying*.
+
+yang dikenal dengan *Currying* (lol, bikin kare. tapi tidak sopan, nama orang.)
 
 
 ### Prefer Coproduct over Product
@@ -2365,6 +2509,12 @@ An archetypal modelling problem that comes up a lot is when there are
 mutually exclusive configuration parameters `a`, `b` and `c`. The
 product `(a: Boolean, b: Boolean, c: Boolean)` has complexity 8
 whereas the coproduct
+
+Sebuah masalah pemodelan dasar yang sering kali muncul adalah ketika
+ada beberapa parameter konfigurasi yang saling ekslusif yang sebut saja
+`a`, `b`, dan `c`.
+Produk `(a: Boolean, b: Boolean, c: Boolean)` punya kompleksitas 8
+sedangkan ko-produk
 
 {lang="text"}
 ~~~~~~~~
@@ -2380,11 +2530,24 @@ has a complexity of 3. It is better to model these configuration
 parameters as a coproduct rather than allowing 5 invalid states to
 exist.
 
+punya kompleksitas 3. Sebagaimana yang telah ditunjukkan di atas,
+adalah lebih disukai untuk memodelkan parameter konfigurasi ini
+sebagai ko-produk bila dibandingkan dengan memberikan kemungkinan
+5 kondisi invalid terjadi.
+
 The complexity of a data type also has implications on testing. It is
 practically impossible to test every possible input to a function, but it is
 easy to test a sample of values with the [Scalacheck](https://www.scalacheck.org/) property testing framework.
 If a random sample of a data type has a low probability of being valid, it is a
 sign that the data is modelled incorrectly.
+
+Kompleksitas dari sebuah tipe data juga mempunyai implikasi pada testing.
+Di lapangan, adalah hal yang mustahil untuk memeriksa semua input yang
+mungkin terjadi untuk sebuah fungsi. Sebaliknya, dengan mengecek sedikit
+sampel dari sebuah tipe data dengan [Scalacheck](https://www.scalacheck.org)
+jauh lebih mudah.
+Bila sebuah sampel dari sebuah tipe data punya probabilitas valid rendah,
+hal tersebut merupakan pertanda bahwa data dimodelkan dengan tidak benar.
 
 
 ### Optimisations
