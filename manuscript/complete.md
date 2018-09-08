@@ -2547,7 +2547,8 @@ mungkin terjadi untuk sebuah fungsi. Sebaliknya, dengan mengecek sedikit
 sampel dari sebuah tipe data dengan [Scalacheck](https://www.scalacheck.org)
 jauh lebih mudah.
 Bila sebuah sampel dari sebuah tipe data punya probabilitas valid rendah,
-hal tersebut merupakan pertanda bahwa data dimodelkan dengan tidak benar.
+hal tersebut merupakan pertanda bahwa pemodelan data dilakukan secara
+kurang tepat.
 
 
 ### Optimisations
@@ -2556,18 +2557,33 @@ A big advantage of using a simplified subset of the Scala language to
 represent data types is that tooling can optimise the JVM bytecode
 representation.
 
+Keuntungan yang sangat terasa saat menggunakan subset sederhana
+Scala untuk merepresentasikan tipe data adalah *tooling* dapat
+melakukan optimisasi atas representasi *bytecode* JVM.
+
 For example, we could pack `Boolean` and `Option` fields into an `Array[Byte]`,
 cache values, memoise `hashCode`, optimise `equals`, use `@switch` statements
 when pattern matching, and much more.
+
+Sebagai contoh, kita dapat mengemas bidang `Boolean` dan `Option` ke dalam
+sebuah `Array[Byte]`, menyimpan nilai di tembolok, memoisasi `hashCode`,
+optimisasi `equals`, menggunakan statemen `@switch` pada saat pattern match,
+dan banyak lagi.
 
 These optimisations are not applicable to OOP `class` hierarchies that
 may be managing state, throwing exceptions, or providing adhoc method
 implementations.
 
+Optimisasi semacam ini tidak bisa diterapkan pada hierarki `class` di
+OOP yang juga mengatur "state", melempar eksepsi, ataupun menyediakan
+implementasi metoda adhoc.
 
 ## Functionality
 
 Pure functions are typically defined as methods on an `object`.
+
+Fungsi murni (lol) biasanya didefinisikan sebagai metoda pada
+sebuah objek.
 
 {lang="text"}
 ~~~~~~~~
@@ -2585,14 +2601,33 @@ steals the namespace. If we were to define `sin(t: T)` somewhere else
 we get *ambiguous reference* errors. This is the same problem as
 Java's static methods vs class methods.
 
+Sebagaimana yang kita lihat pada cuplikan di atas, penggunaan metoda
+pada object bisa jadi terlihat kikuk. Selain karena terbaca dari dalam
+ke luar (bukan kiri ke kanan), juga karena objek tersebut menggunakan
+"namespace" (ruang nama? lol).
+Bila kita mendefinisikan `sin(t: T)` di tempat lain, kita akan mendapat
+galat *referensi ambigu*. Bila pembaca pernah mengalami masalah saat
+menggunakan metoda statik dan metoda kelas pada Java, hal yang sama
+juga terjadi bila menggunakan metoda objek pada Scala.
+
 W> The sort of developer who puts methods on a `trait`, requiring users to mix it
 W> with the *cake pattern*, is going straight to hell. It leaks internal
 W> implementation detail to public APIs, bloats bytecode, makes binary
 W> compatibility basically impossible, and confuses IDE autocompleters.
 
+W> Sesungguhnya, pengembang yang meletakkan metoda pada sebuah `trait`
+W> dan menyebabkan pengguna menggunakan *cake pattern* akan menerima
+W> azab pedih! Penggunaan semacam ini selain tidak rapi, juga menyebabkan
+W> kebocoran detail implementasi ke API publik, bytecode gemuk, kompatibilitas
+W> binari menjadi tidak mungkin dilakukan, dan membingungkan pengkomplet
+W> automatis dari IDE.
+
 With the `implicit class` language feature (also known as *extension
 methodology* or *syntax*), and a little boilerplate, we can get the
 familiar style:
+
+Dengan menggunakan fitur `implicit class` dan sedikit tambahan (lol, boilerplate), kita
+dapat menggunakan gaya penulisan yang familiar:
 
 {lang="text"}
 ~~~~~~~~
@@ -2607,6 +2642,10 @@ familiar style:
 Often it is best to just skip the `object` definition and go straight
 for an `implicit class`, keeping boilerplate to a minimum:
 
+Sering kali, lebih disukai bila kita melewatkan pendefinisian `object`
+dan langsung mendefinisikan `implicit class` untuk mengurangi
+tambahan (lol, boilerplate).
+
 {lang="text"}
 ~~~~~~~~
   implicit class DoubleOps(x: Double) {
@@ -2616,6 +2655,8 @@ for an `implicit class`, keeping boilerplate to a minimum:
 
 A> `implicit class` is syntax sugar for an implicit conversion:
 A> 
+A> `implicit class` merupakan pemanis sintaksis untuk konversi implisit:
+A>
 A> {lang="text"}
 A> ~~~~~~~~
 A>   implicit def DoubleOps(x: Double): DoubleOps = new DoubleOps(x)
@@ -2627,10 +2668,17 @@ A>
 A> Which unfortunately has a runtime cost: each time the extension method
 A> is called, an intermediate `DoubleOps` will be constructed and then
 A> thrown away. This can contribute to GC pressure in hotspots.
-A> 
+A>
+A> Walaupun mempunyai kekurangan yaitu konstruksi `DoubleOps` yang langsung
+A> dibuang bila selesai dipanggil untuk tiap kali pemanggulan.
+A> Hal ini bisa memberikan beban tambahan untuk GC.
+A>
 A> There is a slightly more verbose form of `implicit class` that avoids
 A> the allocation and is therefore preferred:
-A> 
+A>
+A> Untuk metode yang lebih disukai, walaupun sedikit lebih lantung, tanpa
+A> alokasi memori adalah sebagai berikut.
+A>
 A> {lang="text"}
 A> ~~~~~~~~
 A>   implicit final class DoubleOps(private val x: Double) extends AnyVal {
@@ -2650,10 +2698,25 @@ lives in a *typeclass*. A typeclass is a trait that:
 -   may contain *generalised* methods (*derived combinators*)
 -   may extend other typeclasses
 
+Jenis fungsi yang lebih umum adalah fungsi polimorfis yang biasa
+ada pada sebuah *kelas tipe* (lol). Sebuah tipe kelas merupakan ciri
+yang:
+
+-   tidak berisi kondisi. (lol, state apa ya?)
+-   mempunyai parameter tipe.
+-   mempunyai, setidaknya, satu metoda abstrak (*kombinator primitif*).
+-   mungkin berisi metoda yang terumumkan (*kombinator turunan*).
+-   mungkin berupa perpanjangan dari *kelas tipe* lain.
+
 There can only be one implementation of a typeclass for any given type
 parameter, a property known as *typeclass coherence*. Typeclasses look
 superficially similar to algebraic interfaces from the previous chapter, but
 algebras do not have to be coherent.
+
+Untuk semua tipe parameter, hanya boleh ada satu implementasi kelas tipe.
+Properti ini dikenal sebagai *koherensi kelas tipe*. Kelas tipe secara
+sekilas, terlihat seperti antarmuka aljabaris di bab sebelumnya. Namun,
+aljabar tidak harus koheren.
 
 A> Typeclass coherence is primarily about consistency, and the consistency gives us
 A> the confidence to use `implicit` parameters. It would be difficult to reason
@@ -2665,8 +2728,24 @@ A> Additionally, typeclass coherence allows us to globally cache implicits at
 A> runtime and save memory allocations, gaining performance improvements from
 A> reduced pressure on the garbage collector.
 
+A> Koherensi kelas tipe pada utamanya adalah mengenai konsistensi. Dan, konsistensi-lah
+A> yang memberikan kita kepercayaan diri untuk menggunakan parameter `implicit`.
+A> Penalaran mengenai kode akan sulit bila kode tersebut berperilaku berbeda
+A> saat impor implisit pada cakupan sumber kode tersebut juga berbeda.
+A> Koherensi kelas tipe juga-lah yang menentukan bahwa impor tidak boleh
+A> mempengaruhi perilaku kode.
+A>
+A> Sebagai tambahan, koherensi kelas tipe memberikan kita jalan untuk menyimpan
+A> implisit ke tembolok secara global pada saat waktu jalan. Selain itu, alokasi
+A> memori yang lebih rendah dan peningkatan performa yang disebabkan oleh GC
+A> yang santai juga merupakan bonus menarik karena penggunaan koherensi kelas tipe.
+
 Typeclasses are used in the Scala stdlib. We will explore a simplified
 version of `scala.math.Numeric` to demonstrate the principle:
+
+Pustaka standar Scala juga berisi kelas tipe. Kita akan mengeksplorasi
+`scala.math.Numeric` yang disederhanakan untuk menunjukkan prinsip prinsip
+dari kelas tipe:
 
 {lang="text"}
 ~~~~~~~~
@@ -2697,8 +2776,22 @@ We can see all the key features of a typeclass in action:
     `Numeric` defines `abs` in terms of `lt`, `negate` and `zero`.
 -   `Numeric` extends `Ordering`
 
+Kita dapat melihat semua fitur utama dari sebuah kelas tipe pada
+cuplikan kode di atas:
+
+-   Tidak ada state (lol, state).
+-   `Ordering` dan `Numeric` mempunyai parameter tipe `T`.
+-   `Ordering` mempunyai metoda abstrak `compare` dan `Numeric` mempunya metoda
+    abstrak `plus`, `times`, `negate`, dan `zero`.
+-   `Ordering` mendefinisikan metoda `lt` dan `gt` yang sudah digeneralisasi
+    yang didasarkan pada `compare`. `Numeric` mendefinisikan `abs` dengan
+    menggunakan `lt`, `negate`, dan `zero`.
+-   `Numeric` merupakan perpanjangan dari `Ordering`.
+
 We can now write functions for types that "have a" `Numeric`
 typeclass:
+
+Sekarang kita dapat membuat fungsi untuk tipe yang memiliki kelas tipe `Numeric`:
 
 {lang="text"}
 ~~~~~~~~
@@ -2713,14 +2806,28 @@ i.e. we don't demand that our input "is a" `Numeric`, which is vitally
 important if we want to support a third party class that we cannot
 redefine.
 
+Kita tidak lagi bergantung kepada hierarki OOP untuk tipe input kita.
+Dengan kata lain, kita tidak meminta input kita "merupakan sebuah"
+`Numeric`. Hal ini sangat penting bila kita ingin mendukung kelas dari
+pihak ketiga yang tidak mungkin kita definisikan ulang.
+
 Another advantage of typeclasses is that the association of
 functionality to data is at compiletime, as opposed to OOP runtime
 dynamic dispatch.
+
+Keuntungan lain dari kelas tipe adalah pengasosiasian fungsionalitas
+ke data dilakukan saat kompilasi. Hal yang berbeda terjadi pada OOP
+dimana dilakukan "dynamic dispatch" pada wakut jalan. (lol, apa ini?)
 
 For example, whereas the `List` class can only have one implementation
 of a method, a typeclass method allows us to have a different
 implementation depending on the `List` contents and therefore offload
 work to compiletime instead of leaving it to runtime.
+
+Sebagai contoh, dimana kelas `List` hanya bisa mempunya satu implementasi
+sebuah metoda, sebuah metoda kelas tipe bisa memberikan kita beberapa
+implementasi yang begantung pada konten `List`.
+Sehingga, terjadi pemindahan beban kerja dari waktu jalan ke waktu kompilasi.
 
 
 ### Syntax
