@@ -3239,16 +3239,28 @@ We will finish this chapter with a practical example of data modelling
 and typeclass derivation, combined with algebra / module design from
 the previous chapter.
 
+Kita akan menutup bab ini dengan contoh praktikal dari pemodelan data dan
+derivasi kelas tipe dan aljabar / desain modul dari bab sebelumnya.
+
 In our `drone-dynamic-agents` application, we must communicate with Drone and
 Google Cloud using JSON over REST. Both services use [OAuth2](https://tools.ietf.org/html/rfc6749) for authentication.
 There are many ways to interpret OAuth2, but we will focus on the version that
 works for Google Cloud (the Drone version is even simpler).
+
+Pada aplikasi `drone-dynamic-agents` kita, untuk berkomunikasi dengan Drone
+dan Google Cloud, kita harus menggunakan JSON dengan REST. Kedua layanan tersebut
+menggunakan [OAuth2](https://tools.ietf.org/html/rfc6749) untuk otentikasi.
+Ada banyak dalam interpretasi OAuth2, namun kita akan fokus pada versi yang
+cocok untuk Google Cloud. Bahkan, versi untuk Drone jauh lebih sederhana.
 
 
 ### Description
 
 Every Google Cloud application needs to have an *OAuth 2.0 Client Key*
 set up at
+
+Setiap aplikasi Google Cloud mengharuskan kita untuk mengatur *OAuth 2.0 Client Key*
+pada
 
 {lang="text"}
 ~~~~~~~~
@@ -3257,9 +3269,15 @@ set up at
 
 Obtaining a *Client ID* and a *Client secret*.
 
+Mendapatkan *Client ID* dan *Client secret*. (lol, ini apaan, ya?)
+
 The application can then obtain a one time *code* by making the user
 perform an *Authorization Request* in their browser (yes, really, **in
 their browser**). We need to make this page open in the browser:
+
+Lalu, aplikasi bisa mendapatkan satu *kode* setelah pengguna melakukan
+*Permintaan Otorisasi* pada peramban mereka. Kita harus membuka laman
+berikut pada peramban:
 
 {lang="text"}
 ~~~~~~~~
@@ -3276,7 +3294,14 @@ The *code* is delivered to the `{CALLBACK_URI}` in a `GET` request. To
 capture it in our application, we need to have a web server listening
 on `localhost`.
 
+*Kode* yang dikirimkan ke `{CALLBACK_URI}` dalam sebuah permintaan `GET`.
+Untuk menangkap informasi ini di aplikasi kita, kita harus mempunya sebuah
+pelayan web yang mendengar ke `localhost`.
+
 Once we have the *code*, we can perform an *Access Token Request*:
+
+Setelah kita punya *kode* tersebut, kita dapat melakukan *Access Token Request*:
+
 
 {lang="text"}
 ~~~~~~~~
@@ -3295,6 +3320,8 @@ Once we have the *code*, we can perform an *Access Token Request*:
 
 which gives a JSON response payload
 
+yang akan memberikan jawaban berupa JSON.
+
 {lang="text"}
 ~~~~~~~~
   {
@@ -3307,6 +3334,9 @@ which gives a JSON response payload
 
 *Bearer tokens* typically expire after an hour, and can be refreshed
 by sending an HTTP request with any valid *refresh token*:
+
+*Bearer token* biasanya kadaluarsa setelah satu jam dan dapat disegarkan (lol)
+dengan mengirimkan sebuah permintaan HTTP dengan *refresh token* yang valid.
 
 {lang="text"}
 ~~~~~~~~
@@ -3323,6 +3353,8 @@ by sending an HTTP request with any valid *refresh token*:
 
 responding with
 
+yang akan direspon dengan
+
 {lang="text"}
 ~~~~~~~~
   {
@@ -3334,12 +3366,16 @@ responding with
 
 All userland requests to the server should include the header
 
+Semua permintaan dari pengguna ke server harus mengikutsertakan tajuk
+
 {lang="text"}
 ~~~~~~~~
   Authorization: Bearer BEARER_TOKEN
 ~~~~~~~~
 
 after substituting the actual `BEARER_TOKEN`.
+
+setelah mengganti dengan `BEARER_TOKEN` yang asli.
 
 Google expires all but the most recent 50 *bearer tokens*, so the
 expiry times are just guidance. The *refresh tokens* persist between
@@ -3348,9 +3384,18 @@ have a one-time setup application to obtain the refresh token and then
 include the refresh token as configuration for the user's install of
 the headless server.
 
+Google hanya akan menerima 50 *bearer token* terakhir. Jadi, waktu kadaluarsa
+hanya merupakan panduan saja. *Refresh token* bertahan antar sesi dan dapat
+dibuat kadaluarsa secara manual oleh pengguna. Sehingga, kita memiliki
+aplikasi yang harus diatur sekali untuk mendapatkan "refresh token" (lol)
+dan mengikutsertakan "refresh token" (lol) sebagai konfigurasi untuk pemasangan
+server "headless". (lol)
+
 Drone doesn't implement the `/auth` endpoint, or the refresh, and simply
 provides a `BEARER_TOKEN` through their user interface.
 
+Drone tidak perlu mengimplementaiskan "endpoint" (lol) `/auth` atau refresh
+karena sebuah `BEARER_TOKEN` sudah cukup untuk antarmuka.
 
 ### Data
 
@@ -3358,6 +3403,12 @@ The first step is to model the data needed for OAuth2. We create an ADT with
 fields having exactly the same name as required by the OAuth2 server. We will
 use `String` and `Long` for brevity, but we could use refined types if they leak
 into our business models.
+
+Langkah pertama adalah memodelkan data yang dibutuhkan untuk OAuth2. Kita membuat
+sebuah ADT dengan bidang yang sama persis dengan yang dibutuhkan oleh server OAuth2.
+Kita akan menggunakan `String` dan `Long` dengan alasan keringkasan. Namun,
+kita juga bisa menggunakan tipe "refined" bila bidang yang menggunakan `String` dan
+`Long` tembus ke model bisnis kita.
 
 {lang="text"}
 ~~~~~~~~
@@ -3401,18 +3452,33 @@ into our business models.
 
 W> Avoid using `java.net.URL` at all costs: it uses DNS to resolve the
 W> hostname part when performing `toString`, `equals` or `hashCode`.
+W>
+W> Hindari penggunaan `java.net.URL` karena kelas ini menggunakan DNS
+W> untuk mengecek bagian hostname saat melakukan `toString`, `equals`, atau `hashCode`.
 W> 
 W> Apart from being insane, and **very very** slow, these methods can throw
 W> I/O exceptions (are not *pure*), and can change depending on the
 W> network configuration (are not *deterministic*).
+W>
+W> Selain tidak umum, dan **sangat pelan**, metoda metoda tersebut dapat melempar
+W> eksepsi I/O, dan dapat berubah bergantung dengan konfigurasi jaringan.
+W> Dengan kata lain, tidak pure (lol) dan tidak deterministik.
 W> 
 W> The refined type `String Refined Url` allows us to perform equality checks based
 W> on the `String` and we can safely construct a `URL` only if it is needed by a
 W> legacy API.
+W>
+W> Tipe refined (lol) `String Refined Url` menyediakan jalan untuk melakukan
+W> pemeriksaan kesamaan berdasarkan `String` dan kita dapat membuat sebuah `URL`
+W> dengan aman jika ada kebutuhan dari API lama.
 W> 
 W> That said, in high performance code we would prefer to skip `java.net.URL`
 W> entirely and use a third party URL parser such as [jurl](https://github.com/anthonynsimon/jurl), because even the safe
 W> parts of `java.net.*` are extremely slow at scale.
+W>
+W> Dengan kata lain, pada kode dengan performa tinggi, kita lebih memilih untuk
+W> meninggalkan `java.net.URL` dan menggunakan parser URL dari pihak ketiga seperti [jurl](https://github.com/anthonynsimon/jurl).
+W> Selain karena banyak yang tidak "aman", juga karena lelet.
 
 
 ### Functionality
@@ -3421,10 +3487,20 @@ We need to marshal the data classes we defined in the previous section into
 JSON, URLs and POST-encoded forms. Since this requires polymorphism, we will
 need typeclasses.
 
+Kita juga harus menyusun kelas data yang telah kita definisikan pada bagian
+sebelumnya ke JSON, URL, dan borang yang dikodekan dalam POST. Kebutuhan seperti
+ini sangat bisa dipenuhi dengan menggunakan kelas tipe.
+
 [`jsonformat`](https://github.com/scalaz/scalaz-deriving/tree/master/examples/jsonformat/src) is a simple JSON library that we will study in more detail in a
 later chapter, as it has been written with principled FP and ease of readability
 as its primary design objectives. It consists of a JSON AST and encoder /
 decoder typeclasses:
+
+[`jsonformat`](https://github.com/scalaz/scalaz-deriving/tree/master/examples/jsonformat/src)
+adalah pustaka JSON sederhana yang akan kita pelajari lebih seksama di bab yang akan datang.
+Selain karena pustaka ini ditulis dengan pemrograman fungsional, juga karena didesain
+dengan sedemikian rupa agar mudah dibaca. Pustaka ini terdiri dari sebuah AST JSON dan
+kelas tipe penyandi dan pembaca sandi:
 
 {lang="text"}
 ~~~~~~~~
@@ -3451,13 +3527,24 @@ decoder typeclasses:
 A> `\/` is Scalaz's `Either` and has a `.flatMap`. We can use it in `for`
 A> comprehensions, whereas stdlib `Either` does not support `.flatMap` prior to
 A> Scala 2.12. It is spoken as *disjunction*, or *angry rabbit*.
+A>
+A> `\/` merupakan implementasi `Either` dari Scalaz. Operator ini punya `.flatMap`
+A> sehingga bisa digunakan pada for comprehension (lol, help). Hal yang berbeda
+A> dengan pustaka standar Scala yang tidak mempunyai `.flatMap` sebelum Scala 2.12.
+A> Untuk namanya, biasa disebut dengan (lol, apa ini?)
 A> 
 A> `scala.Either` was [contributed to
 A> the Scala standard library](https://issues.scala-lang.org/browse/SI-250) by the creator of Scalaz, Tony Morris, in 2007.
 A> `\/` was created when unsafe methods were added to `Either`.
+A>
+A> `scala.Either` [dimasukkan pada pustaka standar Scala](https://issues.scala-lang.org/browse/SI-250) oleh penulis Scalaz, Tony Morris pada 2007.
+A> `\/` dibuat ketika metoda yang tidak aman ditambahkan ke `Either`.
 
 We need instances of `JsDecoder[AccessResponse]` and `JsDecoder[RefreshResponse]`.
 We can do this by making use of a helper function:
+
+Kita butuh instans `JsDecoder[AccessResponse]` dan `JsDecoder[RefreshResponse]`
+dan kita dapat membuatnya dengan menggunakan fungsi bantuan:
 
 {lang="text"}
 ~~~~~~~~
@@ -3468,6 +3555,9 @@ We can do this by making use of a helper function:
 
 We put the instances on the companions of our data types, so that they are
 always in the implicit scope:
+
+Kita meletakkan instans tersebut pada pasangan dari tipe data kita. Sehingga,
+mereka akan selalu ada pada cakupan implisit:
 
 {lang="text"}
 ~~~~~~~~
@@ -3495,6 +3585,8 @@ always in the implicit scope:
 
 We can then parse a string into an `AccessResponse` or a `RefreshResponse`
 
+Lalu, kita dapat menguraikan sebuah string ke `AccessResponse` atau `RefreshResponse`
+
 {lang="text"}
 ~~~~~~~~
   scala> import jsonformat._, JsDecoder.ops._
@@ -3514,6 +3606,9 @@ We can then parse a string into an `AccessResponse` or a `RefreshResponse`
 We need to write our own typeclasses for URL and POST encoding. The
 following is a reasonable design:
 
+Kita dapat menulis tipe kelas kita sendiri untuk URL dan pengkodean POST.
+Berikut adalah desain yang masuk akal:
+
 {lang="text"}
 ~~~~~~~~
   // URL query key=value pairs, in un-encoded form.
@@ -3529,6 +3624,8 @@ following is a reasonable design:
 ~~~~~~~~
 
 We need to provide typeclass instances for basic types:
+
+Kita harus menyediakan instans kelas tipe untuk tipe dasar:
 
 {lang="text"}
 ~~~~~~~~
@@ -3557,12 +3654,23 @@ We need to provide typeclass instances for basic types:
 We use `Refined.unsafeApply` when we can logically deduce that the contents of
 the string are already url encoded, bypassing any further checks.
 
+Disini, kita menggunakan `Refined.unsafeApply` ketika kita dapat menebak isi
+dari string sudah berupa url terkode.
+
 `ilist` is an example of simple typeclass derivation, much as we derived
 `Numeric[Complex]` from the underlying numeric representation. The
 `.intercalate` method is like `.mkString` but more general.
 
+`ilist` merupakan sebuah contoh dari penurunan sederhana dari kelas tipe,
+yang kurang lebih satu tingkat dengan penurunan `Numeric[Complex]` dari
+representasi numerik. Metoda `.intercalate` kurang lebih sama dengan `.mkString`
+namun lebih umum.
+
 A> `UrlEncodedWriter` is making use of the *Single Abstract Method* (SAM types)
 A> Scala language feature. The full form of the above is
+A>
+A> `UrlEncodedWriter` menggunakan *Single Abstract Method* (tipe SAM)
+A> yang merupakan fitur dari Scala. Secara lengkapnya bisa dilihat
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -3575,9 +3683,15 @@ A>
 A> When the Scala compiler expects a class (which has a single abstract
 A> method) but receives a lambda, it fills in the boilerplate
 A> automatically.
+A>
+A> Ketika kompiler Scala berharap sebuah kelas (yang memiliki sebuah metoda abstrak)
+A> namun menerima sebuah lambda, kompiler akan mengisi boilerplate (lol) secara otomatis
 A> 
 A> Prior to SAM types, a common pattern was to define a method named
 A> `instance` on the typeclass companion
+A>
+A> Sebelum tipe SAM, pola yang jamak dijumpai adalah mendefinisikan metoda
+A> dengan nama `instance` pada kelas tipe pasangan
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -3588,6 +3702,8 @@ A>     }
 A> ~~~~~~~~
 A> 
 A> allowing for
+A>
+A> yang memungkinkan
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -3597,15 +3713,28 @@ A>
 A> This pattern is still used in code that must support older versions of
 A> Scala, or for typeclasses instances that need to provide more than one
 A> method.
+A>
+A> Pola ini masih digunakan pada kode yang harus mendukung penggunaan pada
+A> Scala versi lama, atau untuk instans kelas yang harus menyediakan lebih
+A> dari satu metoda.
 A> 
 A> Note that there are a lot of bugs around SAM types, as they do not interact with
 A> all the language features. Revert to the non-SAM variant if there are any
 A> strange compiler crashes.
+A>
+A> Harap dicatat, ada banyak kutu yang berhubungan dengan tipe SAM, karena mereka
+A> tidak berhubungan langsung dengan fitur bahasa. Silakan gunakan varian non-SAM
+A> bila terjadi kerhemukan pada kompiler.
 
 In a dedicated chapter on *Typeclass Derivation* we will calculate instances of
 `UrlQueryWriter` automatically, as well as clean up what
 we have already written, but for now we will write the boilerplate for the types
 we wish to convert:
+
+Pada bab khusus pada *Penurunan Kelas Tipe*, kita akan mengkalkulasi instans dari
+`UrlQueryWriter` secara otomatis. Selain itu, kita akan merapikan apa yang
+telah kita tulis. Untuk saat ini, kita akan menulis boilerplate (lol) untuk
+tipe yang akan kita konversi:
 
 {lang="text"}
 ~~~~~~~~

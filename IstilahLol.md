@@ -15,6 +15,7 @@ Istilah istilah yang belum saya pikirkan padan katanya.
 - *build-farm*.
 - *boilerplate*.
 - *callbacks**.
+- *headless*.
 - *infinite loop*.
 - *invoke*. Mungkin *selawat*?
 - *mailboxes*. Pernah pakai, tapi apa ya?
