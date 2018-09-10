@@ -11,6 +11,7 @@ Istilah istilah yang belum saya pikirkan padan katanya.
 - *Syntax sugar*.
 - *Totality*. Mungkin *kesemestaan* cocok?
 - *`for` comprehension*.
+- *ancestor*.
 - *build-farm*.
 - *boilerplate*.
 - *callbacks**.
@@ -23,6 +24,7 @@ Istilah istilah yang belum saya pikirkan padan katanya.
 - *timestamp*.
 - *trait*.
 - *typeclass*
+- *typeful programming*.
 - *worker agent*.
 
 ### Catatan

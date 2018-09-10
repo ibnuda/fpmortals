@@ -2835,9 +2835,18 @@ Sehingga, terjadi pemindahan beban kerja dari waktu jalan ke waktu kompilasi.
 The syntax for writing `signOfTheTimes` is clunky, there are some
 things we can do to clean it up.
 
+Ada beberapa hal yang bisa dirapikan pada sintaks `signOfTheTimes`
+yang terlihat kikuk.
+
 Downstream users will prefer to see our method use *context bounds*,
 since the signature reads cleanly as "takes a `T` that has a
 `Numeric`"
+
+Pengguna akan lebih senang bila mereka dapat melihat metoda kita
+menggunakan *konteks terikat* karena signature (lol) dapat terbaca
+dengan jelas bahwa metoda tersebut menerima parameter `T` yang,
+misal, merupakan `Numeric`
+
 
 {lang="text"}
 ~~~~~~~~
@@ -2847,6 +2856,9 @@ since the signature reads cleanly as "takes a `T` that has a
 but now we have to use `implicitly[Numeric[T]]` everywhere. By
 defining boilerplate on the companion of the typeclass
 
+walaupun hal itu berarti kita harus selalu menggunakan `implicitly[Numeric[T]]`.
+Dengan mendefinisikan boilerplate (lol) pada kelas tipe,
+
 {lang="text"}
 ~~~~~~~~
   object Numeric {
@@ -2855,6 +2867,8 @@ defining boilerplate on the companion of the typeclass
 ~~~~~~~~
 
 we can obtain the implicit with less noise
+
+kita bisa mengurangi derau untuk `implicit`.
 
 {lang="text"}
 ~~~~~~~~
@@ -2893,6 +2907,11 @@ Note that `-x` is expanded into `x.unary_-` by the compiler's syntax
 sugar, which is why we define `unary_-` as an extension method. We can
 now write the much cleaner:
 
+Harap diperhatikan bahwa `-x` akan dijabarkan menjadi `x.unary_-` oleh
+pemanis sintaksis kompiler. Oleh karena itu, kita mendefinisikan `unary_-`
+sebagai sebuah metode perpanjangan. Sekarang, kita dapat menulis `signOfTheTimes`
+dengan lebih rapi:
+
 {lang="text"}
 ~~~~~~~~
   import Numeric.ops._
@@ -2904,6 +2923,12 @@ The good news is that we never need to write this boilerplate because
 macro annotation that automatically generates the `apply` and `ops`. It even
 allows us to define alternative (usually symbolic) names for common methods. In
 full:
+
+Langkah langkah diatas mungkin tidak perlu dilakukan bila menggunakan [Simulacrum](https://github.com/mpilquist/simulacrum)
+yang menyediakan anotasi makro `@typeclass` yang secara otomatis menghasilkan
+`apply` dan `ops`. Pustaka ini juga menyediakan cara agar kita dapat mendefinisikan
+nama alternatif (yang biasanya berupa simbol) untuk metoda-metoda umum.
+Untuk lebih lengkapnya, bisa dilihat potongan kode berikut:
 
 {lang="text"}
 ~~~~~~~~
@@ -2930,12 +2955,19 @@ full:
 When there is a custom symbolic `@op`, it can be pronounced like its method
 name. e.g. `<` is pronounced "less than", not "left angle bracket".
 
+Saat ada simbol buatan `@op`, simbol ini diucapkan seperti nama metoda-nya.
+Misalkan simbol `<` disebut sebagai "kurang dari", bukan "kurung " (lol, apa ya?)
 
 ### Instances
 
 *Instances* of `Numeric` (which are also instances of `Ordering`) are
 defined as an `implicit val` that extends the typeclass, and can
 provide optimised implementations for the generalised methods:
+
+*Instans* dari `Numeric` (yang juga merupakan instans dari `Ordering`)
+didefinisikan sebagai sebuah `implicit val` (nilai implicit) yang merupakan
+perpanjangan dari kelas tipe dan dapat menyediakan implementasi teroptimisasi
+dari metoda tergeneralisasi: (lol, dipendekin dah. tidak natural bila dibaca.)
 
 {lang="text"}
 ~~~~~~~~
@@ -2960,8 +2992,18 @@ methods. Indeed, the Scala compiler performs special handling of
 primitives and converts these method calls into raw `dadd`, `dmul`,
 `dcmpl` and `dcmpg` bytecode instructions, respectively.
 
+Walaupun kita menggunakan operator `+`, `*`, `unary_-`, `<`, dan `>`,
+metoda-metoda tersebut sebenarnya sudah ada pada `Double`. Metoda kelas
+biasanya lebih disukai daripada metoda perpanjangan. Dan faktanya,
+kompiler Scala melakukan penanganan khusus untuk primitif dan mengubah
+metoda ini menjadi instruksi bytecode asli seperti `dadd`, `dmul`, `dcmpl`,
+dan `dcmpg`.
+
 We can also implement `Numeric` for Java's `BigDecimal` class (avoid
 `scala.BigDecimal`, [it is fundamentally broken](https://github.com/scala/bug/issues/9670))
+
+Kita juga bisa mengimplementasikan `Numeric` untuk kelas `BigDecimal` milik
+Java (bukan `scala.BigDecimal` yang [rhemuk](https://github.com/scala/bug/issues/9670))
 
 {lang="text"}
 ~~~~~~~~
@@ -2978,6 +3020,8 @@ We can also implement `Numeric` for Java's `BigDecimal` class (avoid
 
 We could create our own data structure for complex numbers:
 
+Kita bisa membuat struktur data kita sendiri untuk bilangan kompleks:
+
 {lang="text"}
 ~~~~~~~~
   final case class Complex[T](r: T, i: T)
@@ -2985,6 +3029,10 @@ We could create our own data structure for complex numbers:
 
 And derive a `Numeric[Complex[T]]` if `Numeric[T]` exists. Since these
 instances depend on the type parameter, it is a `def`, not a `val`.
+
+Dan menurunkan `Numeric[Complex[T]]` bila `Numeric[T]` sudah ada.
+Karena instans ini bergantung pada parameter tipe, penurunan ini menggunakan
+`def`, bukan `val`.
 
 {lang="text"}
 ~~~~~~~~
@@ -3008,16 +3056,29 @@ The observant reader may notice that `abs` is not at all what a
 mathematician would expect. The correct return value for `abs` should
 be `T`, not `Complex[T]`.
 
+Pembaca yang jeli mungkin memperhatikan bahwa `abs` tidak sesuai
+dengan apa yang matematikawan harapkan. Nilai kembalian untuk `abs`
+seharusnya berupa `T`, bukan `Complex[T]`.
+
 `scala.math.Numeric` tries to do too much and does not generalise
 beyond real numbers. This is a good lesson that smaller, well defined,
 typeclasses are often better than a monolithic collection of overly
 specific features.
 
+`scala.math.Numeric` mencoba untuk melakukan terlalu banyak hal dan
+tidak tergeneralisasi diluar bilangan nyata. Hal ini bisa jadi pelajaran
+yang bagus bahwa kelas tipe yang kecil dan terdefinisi dengan baik sering
+kali lebih baik daripada koleksi monolitik yang terdiri dari fitur
+fitur yang terlalu spesifik.
 
 ### Implicit Resolution
 
 We've discussed implicits a lot: this section is to clarify what
 implicits are and how they work.
+
+Kita sudah mendiskusikan mengenai implisit secara panjang lebar.
+Bagian ini akan berbicara mengenai apakah implisit itu dan bagaimana
+cara mereka bekerja.
 
 *Implicit parameters* are when a method requests that a unique
 instance of a particular type is in the *implicit scope* of the
@@ -3025,9 +3086,19 @@ caller, with special syntax for typeclass instances. Implicit
 parameters are a clean way to thread configuration through an
 application.
 
+*Parameter implisit* adalah saat sebuah metoda meminta instan khusus
+dari sebuah tipe tertentu yang ada pada *cakupan implisit* dari pemanggil
+dengan sintaks khusus untuk instans kelas tipe. Parameter implisit
+merupakan cara yang lebih rapi dalam menggalur konfigurasi pada sebuah
+aplikasi.
+
 In this example, `foo` requires that typeclass instances of `Numeric` and
 `Typeable` are available for `A`, as well as an implicit `Handler` object that
 takes two type parameters
+
+Pada contoh ini, `foo` meminta instans dari `Numeric` dan `Typeable` yang
+tersedia untuk `A` dan juga sebuah objek `Handler` implisit yang meminta
+dua parameter.
 
 {lang="text"}
 ~~~~~~~~
@@ -3041,6 +3112,15 @@ method exists on the type, then its ancestors (Java-like rules). If it
 fails to find a match, it will search the *implicit scope* for
 conversions to other types, then search for methods on those types.
 
+*Konversi implisit* adalah ketika sebuah `implicit def` ada. Salah
+satu penggunaan konversi implisit adalah untuk pembuatan perpanjangan
+metodologi. Ketika kompiler menyelesaikan pemanggilan sebuah metoda,
+kompiler pertama tama akan memeriksa apakah metoda tersebut ada pada
+tipe, yang dilanjutkan kepada bapaknya (aturan yang mirip dengan Java).
+Bila gagal menemukan yang cocok, kompiler akan mencari *cakupan implisit*
+untuk konversi ke tipe lain. Baru dilanjutkan dengan pencarian
+untuk tipe-tipe tersebut.
+
 Another use for implicit conversions is *typeclass derivation*. In the
 previous section we wrote an `implicit def` that derived a
 `Numeric[Complex[T]]` if a `Numeric[T]` is in the implicit scope. It
@@ -3048,8 +3128,20 @@ is possible to chain together many `implicit def` (including
 recursively) which is the basis of *typeful programming*, allowing for
 computations to be performed at compiletime rather than runtime.
 
+Penggunaan lain untuk konversi implisit adalah dengan *penurunan kelas tipe*
+atau *derivasi kelas tipe* (lol, pilih mana?). Pada bagian sebelumnya,
+kita menulis sebuah `implicit def` yang diturunkan dari `Numeric[Complex[T]]`
+bila sebuah `Numeric[T]` ada pada cakupan implisit. Adalah sebuah hal
+yang mungkin untuk merangkai banyak `implicit def` (juga secara rekursif).
+Hal ini juga merupakan basis dari *pemrograman typeful* (lol, help) yang
+memindahkan komputasi untuk dilakukan pada saat kompilasi daripada
+saat waktu jalan.
+
 The glue that combines implicit parameters (receivers) with implicit
 conversion (providers) is implicit resolution.
+
+Perekat yang menggabungkan parameter implisit dengan konversi implisit
+adalah resolusi implisit.
 
 First, the normal variable scope is searched for implicits, in order:
 
@@ -3060,21 +3152,48 @@ First, the normal variable scope is searched for implicits, in order:
 -   ancestor package objects (when using nested packages)
 -   the file's imports
 
+Pertama, cakupan variabel normal dicari dengan urutan:
+
+-   cakupan lokal, termasuk impor tercakup. (mis, blok atau metoda)
+-   cakupan luar, termasuk impor tercakup. (mis, anggota pada kelas)
+-   kelas orangtua
+-   objek dari paket saat ini.
+-   objek dari kelas orang tua.
+-   impor pada berkas.
+
 If that fails to find a match, the special scope is searched, which
 looks for implicit instances inside a type's companion, its package
 object, outer objects (if nested), and then repeated for ancestors.
 This is performed, in order, for the:
 
+Bila semua gagal mencari yang cocok, maka pencarian pada cakupan khusus
+akan dilakukan. Pencarian ini dikhususkan untuk instans implisit yang ada
+pada objek pasangan, objek paket, objek luar (bila berlapis), dan diulang
+untuk ancestor (lol). Pencarian ini dilakukan dengan urutan sebagai berikut:
+
+
 -   given parameter type
 -   expected parameter type
 -   type parameter (if there is one)
 
+-   tipe parameter yang ada.
+-   tipe parameter yang diminta.
+-   parameter tipe (bila ada).
+
 If two matching implicits are found in the same phase of implicit
 resolution, an *ambiguous implicit* error is raised.
+
+Bila ada dua implisit yang sesuai diketemukan pada resolusi implisit
+yang sama, galat *implisit ambigu* akan dilempar.
 
 Implicits are often defined on a `trait`, which is then extended by an
 object. This is to try and control the priority of an implicit
 relative to another more specific one, to avoid ambiguous implicits.
+
+Implisit seringkali didefinisikan pada sebuah `trait`, yang biasanya
+akan diperpanjang oleh sebuah objek. Hal ini dilakukan untuk mengotrol
+prioritas dari sebuah implisit, relatif terhadap implisit lain yang lebih
+spesifik, untuk mencegah implisit yang ambigu.
 
 The Scala Language Specification is rather vague for corner cases, and
 the compiler implementation is the *de facto* standard. There are some
@@ -3083,16 +3202,35 @@ rules of thumb that we will use throughout this book, e.g. prefer
 typing. It is a [quirk of implicit resolution](https://github.com/scala/bug/issues/10411) that `implicit object` on
 companion objects are not treated the same as `implicit val`.
 
+Spesifikasi Bahasa Scala cenderung kabur untuk kasus kasus yang kurang umum
+dan implementasi kompiler-lah yang menjadi standar de-fakto. Ada beberapa
+patokan yang akan kita gunakan sepanjang buku ini. Misalkan, kita akan
+memilih `implicit val` dibandingkan `implicit object` meskipun akan ada
+godaan untuk menulis lebih pendek. Ada sebuah [quirk (lol) atas resolusi implisit](https://github.com/scala/bug/issues/10411)
+yang memperlakukan `imlicit object` tidak sama saat memperlakukan `implicit val`.
+
 Implicit resolution falls short when there is a hierarchy of typeclasses, like
 `Ordering` and `Numeric`. If we write a function that takes an implicit
 `Ordering`, and we call it for a primitive type which has an instance of
 `Numeric` defined on the `Numeric` companion, the compiler will fail to find it.
+
+Resolusi implisit gagal saat ada hierarki kelas tipe seperti `Ordering` dan `Numeric`.
+Bila kita menulis fungsi yang mengambil sebuah `Ordering` implicit, dan kita memanggilnya
+untuk sebuah tipe primitif yang punya instans `Numeric` yang terdefinisi pada pasangan `Numeric`,
+kompiler akan gagal mencarinya.
 
 Implicit resolution is particularly hit-or-miss [if type aliases are used](https://github.com/scala/bug/issues/10582) where
 the *shape* of the implicit parameters are changed. For example an implicit
 parameter using an alias such as `type Values[A] = List[Option[A]]` will
 probably fail to find implicits defined as raw `List[Option[A]]` because the
 shape is changed from a *thing of things* of `A` to a *thing* of `A`.
+
+Resolusi implisit seringkali untung-untungan [bila kelas tipe digunakan](https://github.com/scala/bug/issues/10582)
+saat *bentuk* dari parameter imlisit berubah. Sebagai contoh, sebuah parameter
+implisit menggunakan sebuah alias seperti `type Values[A] = List[Option[A]]` mungkin
+akan gagal untuk mencari implisit yang definisikan sebagai `List[Option[A]]`.
+Hal ini disebabkan karena bentuknya berubah dari *thing of things* dari `A`
+menjadi *thing* dari `A`. (lol, thing.)
 
 
 ## Modelling OAuth2
