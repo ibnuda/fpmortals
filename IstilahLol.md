@@ -2,6 +2,7 @@
 
 Istilah istilah yang belum saya pikirkan padan katanya.
 
+- *API*. Mungkin *APA*? Antarmuka Pemrograman Aplikasi, lmao.
 - *Filter* dalam konteks `filter :: (a -> Bool) -> [a] -> [a]`.
 - *Monad transformer*
 - *Pattern match*
@@ -15,6 +16,7 @@ Istilah istilah yang belum saya pikirkan padan katanya.
 - *build-farm*.
 - *boilerplate*.
 - *callbacks**.
+- *happy path*. Mungkin *asumsi terbaik*?
 - *headless*.
 - *infinite loop*.
 - *invoke*. Mungkin *selawat*?

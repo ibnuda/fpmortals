@@ -3782,8 +3782,18 @@ OAuth2. Recall from the previous chapter that we define components that need to
 interact with the world as algebras, and we define business logic in a module,
 so it can be thoroughly tested.
 
+Bagian sebelumnya melengkapi semua pemodelan data dan fungsionalitas yang dibutuhkan
+untuk mengimplementasikan OAuth2. Sebagaimana yang sudah dibahas pada bab sebelumnya,
+kita mendefinisikan komponen yang akan berinteraksi dengan dunia luar sebagai
+aljabar. Selain itu, kita akan mendefinisikan logika bisnis pada sebuah modul
+sehingga bisa dites dengan seksama.
+
 We define our dependency algebras, and use context bounds to show that our
 responses must have a `JsDecoder` and our `POST` payload must have a
+`UrlEncodedWriter`:
+
+Kita akan mendefinisikan ketergantungan aljabar dan menggunakan batasan konteks
+untuk agar respon kita mempunyai `JsDecoder` dan muatan `POST` kita mempunyai
 `UrlEncodedWriter`:
 
 {lang="text"}
@@ -3805,6 +3815,12 @@ responses must have a `JsDecoder` and our `POST` payload must have a
 Note that we only define the happy path in the `JsonClient` API. We will get
 around to error handling in a later chapter.
 
+Harap dicatat bahwa kita hanya mendefinisikan alur dengan asumsi terbaik
+pada APA `JsonClient`.
+Untuk kejadian kejadian yang tidak diinginkan dan penangannya, kita akan
+membicarakannya pada bab selanjutnya.
+
+
 Obtaining a `CodeToken` from the Google `OAuth2` server involves
 
 1.  starting an HTTP server on the local machine, and obtaining its port number.
@@ -3814,7 +3830,20 @@ Obtaining a `CodeToken` from the Google `OAuth2` server involves
 3.  capturing the code, informing the user of next steps, and closing the HTTP
     server.
 
+Untuk mendapatkan `CodeToken` dari peladen `OAuth2` Google, ada beberapa langkah
+yang harus dilakukan.
+
+1.  Memulai sebuah peladen HTTP pada mesin lokal dan mendapatkan nomor portnya.
+2.  Memaksa pengguna untuk membuka sebuah laman web pada peramban mereka yang
+    dimaksudkan agar mereka dapat masuk dengan menggunakan kredensial mereka
+    mengizinkan aplikasi untuk menggunakan akun mereka, dan dilanjutkan dengan
+    sebuah pengalihan balik ke mesin lokal.
+3.  Mengambil kode token, menginformasikan kepada pengguna tentang langkah selanjutya,
+    lalu menutup peladen HTTP.
+
 We can model this with three methods on a `UserInteraction` algebra.
+
+Kita dapat memodelkan langkah berikut dengan tiga metoda pada aljabar di `UserInteraction`.
 
 {lang="text"}
 ~~~~~~~~
@@ -3831,6 +3860,11 @@ It almost sounds easy when put like that.
 
 We also need an algebra to abstract over the local system time
 
+Mungkin saudara/i tidak percaya dengan cuplikan diatas. Akan tetapi,
+memang kenyataannya semudah itu.
+
+Lalu, kita akan melanjutkan dengan abstraksi atas waktu pada sistem lokal.
+
 {lang="text"}
 ~~~~~~~~
   trait LocalClock[F[_]] {
@@ -3839,6 +3873,8 @@ We also need an algebra to abstract over the local system time
 ~~~~~~~~
 
 And introduce data types that we will use in the refresh logic
+
+Dan membuat tipe data yang akan kita pakai pada logika untuk memuat ulang
 
 {lang="text"}
 ~~~~~~~~
@@ -3855,6 +3891,8 @@ And introduce data types that we will use in the refresh logic
 ~~~~~~~~
 
 Now we can write an OAuth2 client module:
+
+Sekarang, kita akan menulis modul klien OAuth2:
 
 {lang="text"}
 ~~~~~~~~
@@ -3919,6 +3957,18 @@ Now we can write an OAuth2 client module:
 -   *typeclass derivation* is compiletime composition of typeclass
     instances.
 
+-   *Tipe data aljabar* didefinisikan sebagai *produk* (`final case class`) dan
+    ko-produk (`sealed abstract class`).
+-   Tipe `Refined` memperketat batasan pada nilai.
+-   Fungsi konkret dapad didefinisikan pada sebuah `implicit class` agar alur
+    pembacaan kode tetap dari kiri ke kanan.
+-   Fungsi polimorfis didefinisikan pada *kelas tipe*. Fungsionalitas disediakan
+    melalui *batasan konteks* "mempunyai", bukan pada hierarki kelas "merupakan".
+-   *Instans* kelas tipe merupakan implementasi dari kelas.
+-   Kelas tipe `@simulacrum.typeclass` menghasilkan `.ops` pada pasangan dan menyediakan
+    sintaks yang mudah pada fungsi di kelas tipe.
+-   *Derivasi kelas tipe* merupakan komposisi yang dijalankan pada saat kompilasi atas
+    instans kelas tipe.
 
 # Scalaz Typeclasses
 
