@@ -16,12 +16,15 @@ Istilah istilah yang belum saya pikirkan padan katanya.
 - *build-farm*.
 - *boilerplate*.
 - *callbacks**.
+- *code generation*.
+- *control flow*.
 - *happy path*. Mungkin *asumsi terbaik*?
 - *headless*.
 - *infinite loop*.
 - *invoke*. Mungkin *selawat*?
 - *mailboxes*. Pernah pakai, tapi apa ya?
 - *signature*.
+- *simulacrum*.
 - *state*.
 - *test-runner*.
 - *timestamp*.

@@ -3838,7 +3838,7 @@ yang harus dilakukan.
     dimaksudkan agar mereka dapat masuk dengan menggunakan kredensial mereka
     mengizinkan aplikasi untuk menggunakan akun mereka, dan dilanjutkan dengan
     sebuah pengalihan balik ke mesin lokal.
-3.  Mengambil kode token, menginformasikan kepada pengguna tentang langkah selanjutya,
+3.  Mengambil kode token, menginformasikan kepada pengguna tentang langkah selanjutnya,
     lalu menutup peladen HTTP.
 
 We can model this with three methods on a `UserInteraction` algebra.
@@ -3976,17 +3976,38 @@ In this chapter we will tour most of the typeclasses in `scalaz-core`.
 We don't use everything in `drone-dynamic-agents` so we will give
 standalone examples when appropriate.
 
+Pada bab ini, kita akan melihat-lihat tipe kelas yang ada pada `scalaz-core`.
+Tentu kita tidak akan menggunakan semuanya pada `drone-dynamic-agents`.
+Maka dari itu, kita akan menggunakan contoh sederhana bila dibutuhkan.
+
 There has been criticism of the naming in Scalaz, and functional programming in
 general. Most names follow the conventions introduced in the Haskell programming
 language, based on *Category Theory*. Feel free to set up `type` aliases if
 verbs based on the primary functionality are easier to remember when learning
 (e.g. `Mappable`, `Pureable`, `FlatMappable`).
 
+Sebenarnya, banyak sekali kritik tentang penamaan pada Scala dan pemrograman
+fungsional secara umum. Kebanyakan nama yang digunakan, menggunakan konvensi
+yang dikenalkan oleh bahasa pemrograman Haskell berdasarkan *Teori Kategori*.
+Silakan menggunakan tipe alias bila kata kerja yang melandasi fungsionalitas
+utama lebih mudah diingat saat belajar. (Mis, `Mappable` untuk yang bisa dipetakan,
+`Pureable` untuk yang bisa "diangkat" (lol, lift, help!), dll).
+
 Before we introduce the typeclass hierarchy, we will peek at the four
 most important methods from a control flow perspective: the methods we
 will use the most in typical FP applications:
 
+Sebelum kita berbincang mengenai hierarki kelas tipe, kita akan melihat
+4 metoda yang paling penting, bila dilihat dari sudut pandang "control flow"
+
 | Typeclass     | Method     | From      | Given       | To        |
+|------------- |---------- |--------- |----------- |--------- |
+| `Functor`     | `map`      | `F[A]`    | `A => B`    | `F[B]`    |
+| `Applicative` | `pure`     | `A`       |             | `F[A]`    |
+| `Monad`       | `flatMap`  | `F[A]`    | `A => F[B]` | `F[B]`    |
+| `Traverse`    | `sequence` | `F[G[A]]` |             | `G[F[A]]` |
+
+| Kelas Tipe | Metoda | Dari  | Diberikan | Untuk   |
 |------------- |---------- |--------- |----------- |--------- |
 | `Functor`     | `map`      | `F[A]`    | `A => B`    | `F[B]`    |
 | `Applicative` | `pure`     | `A`       |             | `F[A]`    |
@@ -4000,10 +4021,25 @@ context `F[_]` can be thought of as a container for an intentional
 effects `F[B]` at runtime based on the results of evaluating previous
 effects.
 
+Sebagaimana yang kita tahu bahwa operasi-operasi yang mengembalikan sebuah `F[_]`
+dapat dijalankan secara berurutan pada `for` comprehension (lol) dengan memanggil
+`.flatMap` yang didefinisikan pada `Monad[F]` terkait.
+Konteks `F[_]` bisa dianggap sebagai kontainer untuk *efek* intensional
+dengan `A` sebagai output: `flatMap` memberikan kita jalan untuk menghasilkan
+efek `F[B]` pada saat waktu jalan berdasarkan hasil dari evaluasi efek sebelumnya.
+(lol, kalimat kepanjangan)
+
 Of course, not all type constructors `F[_]` are effectful, even if
 they have a `Monad[F]`. Often they are data structures. By using the
 least specific abstraction, we can reuse code for `List`, `Either`,
 `Future` and more.
+
+Dan sudah barang tentu tidak semua konstruktor `F[_]` mempunyai efek.
+Bahkan, bila konstruktor tersebut mempunyai instans `Monad[F]`, juga
+belum tentu konstruktor tadi mempunyai efek.
+Seringkali, konstruktor tersebut hanya merupakan struktur data yang
+digunakan untuk pengabstraksian. Misalkan, kita bisa menggunakan `List`,
+`Either`, `Future`, dan lain lain untuk membuat struktur data.
 
 If we only need to transform the output from an `F[_]`, that is just
 `map`, introduced by `Functor`. In Chapter 3, we ran effects in
@@ -4011,13 +4047,30 @@ parallel by creating a product and mapping over them. In Functional
 Programming, parallelisable computations are considered **less**
 powerful than sequential ones.
 
+Bila kita hanya perlu mengubah output dari sebuah `F[_]`, maka kita
+bisa menggunakan `map` yang diperkenalkan oleh `Functor`.
+Pada bab 3, kita menjalankan banyak efek secara paralel dengan membuat
+sebuah produk dan melakukan pemetaan ("mapping") kepada produk tersebut.
+Pada pemrograman fungsional, komputasi yang bisa diparalelkan seringkali
+dianggap kurang manjur bila dibandingkan dengan komputasi sekuensial.
+
 In between `Monad` and `Functor` is `Applicative`, defining `pure`
 that lets us lift a value into an effect, or create a data structure
 from a single value.
 
+Di antara `Monad` dan `Functor` ada `Applicative` yang mendefinisikan
+`pure`. `pure` sendiri berfungsi untuk mengumpil sebuah nilai menjadi
+sebuah efek ataupun membuat sebuah struktur data dari sebuah nilai tunggal.
+
 `.sequence` is useful for rearranging type constructors. If we have an `F[G[_]]`
 but need a `G[F[_]]`, e.g. `List[Future[Int]]` but need a `Future[List[Int]]`,
 that is `.sequence`.
+
+Untuk `.sequence`, metoda ini paling manjur bila digunakan untuk menyusun-ulang
+konstruktor tipe. Bilamana kita mempunyai sebuah `F[G[_]]` namun kita butuh `G[F[_]]`, (tfw no gf)
+adalah sebuah tindakan yang bijak bila kita menggunakan `.sequence`.
+Sebagai contoh, `List[Future[Int]]` bisa diubah menjadi `Future[List[Int]]` dengan
+memanggil metoda tadi.
 
 
 ## Agenda
@@ -4027,13 +4080,29 @@ perfectly reasonable to attack it over several sittings. Remembering everything
 would require super-human powers, so treat this chapter as a way of knowing
 where to look for more information.
 
+Bab ini jauh lebih panjang dan padat informasi bila dibandingkan dengan
+bab lain. Kami sangat menyarankan pembaca nan budiman untuk membaca
+bab ini dalam beberapa kesempatan. Selain itu, juga disarankan untuk
+menganggap bab ini sebagai lumbung pencarian informasi lebih lanjut,
+tidak untuk mengingat-ingat.
+
 Notably absent are typeclasses that extend `Monad`. They get their own chapter
 later.
+
+Dan sebuah hal yang tidak mengejutkan bahwa kelas tipe yang memperpanjang
+`Monad` tidak dibahas pada bab ini karena kelas tipe tersebut akan dibahas pada
+bab tersendiri.
 
 Scalaz uses code generation, not simulacrum. However, for brevity, we present
 code snippets with `@typeclass`. Equivalent syntax is available when we `import
 scalaz._, Scalaz._` and is available under the `scalaz.syntax` package in the
 scalaz source code.
+
+Sebagai pengingat, Scalaz menggunakan code generation (lol, help), bukan
+tiruan atau simulakrum (lol, help). Namun, jangan kuatir, kita hanya akan
+menempelkan potongan kode dengan `@typeclass` dengan alasan keringkasan.
+Sintaks yang ekuivalen juga tersedia ketika kita meng-`import scalaz._, Scalaz._`.
+Lebih tepatnya, ada pada paket `scalaz.syntax` pada sumber kode scalaz.
 
 {width=100%}
 ![](images/scalaz-core-tree.png)
@@ -4070,10 +4139,17 @@ scalaz source code.
 
 A> `|+|` is known as the TIE Fighter operator. There is an Advanced TIE
 A> Fighter in an upcoming section, which is very exciting.
+A>
+A> `|+|` secara umum dikenal sebagai operator dasi. Ada dasi lanjutan
+A> pada bagian selanjutnya.
 
 A `Semigroup` can be defined for a type if two values can be combined. The
 operation must be *associative*, meaning that the order of nested operations
 should not matter, i.e.
+
+Sebuah `Semigroup` bisa didefinisikan sebagai sebuah tipe bila dua buah nilai
+bisa digabungkan. Operasi penggabungan tersebut harus *asosiatif* yang berarti
+urutan dari operasi berlapis tidak boleh berpengaruh.
 
 {lang="text"}
 ~~~~~~~~
@@ -4085,6 +4161,10 @@ should not matter, i.e.
 A `Monoid` is a `Semigroup` with a *zero* element (also called *empty*
 or *identity*). Combining `zero` with any other `a` should give `a`.
 
+Sebuah `Monoid` merupakan sebuah `Semigroup` dengan elemen "*zero*" / *nol*
+(juga dikenal dengan elemen *kosong* atau *identitas*). Penggabungan `zero`
+dengan sebuah nilai `a` harus menghasilkan `a`.
+
 {lang="text"}
 ~~~~~~~~
   a |+| zero == a
@@ -4095,6 +4175,10 @@ or *identity*). Combining `zero` with any other `a` should give `a`.
 This is probably bringing back memories of `Numeric` from Chapter 4. There are
 implementations of `Monoid` for all the primitive numbers, but the concept of
 *appendable* things is useful beyond numbers.
+
+Pembicaraan ini membuat kita teringat tentang kennagan atas `Numeric` pada bab 4.
+Semua angka primitif mempunyai implementasi `Monoid`. Namun, konsep "*appendable*" /
+*bisa dibubuhkan* berguna tidak hanya untuk angka saja.
 
 {lang="text"}
 ~~~~~~~~
