@@ -4195,9 +4195,21 @@ anything that can only be one value, such as `Unit`, least upper
 bounds, or a `Set`. `Band` provides no further methods yet users can
 make use of the guarantees for performance optimisation.
 
+Ada hukum yang membatasi perilaku dari operasi `append` pada kelas tipe
+`Band`, salah satunya adalah penambahan dari dua elemen harus idempoten.
+Idempoten yang dimaksud disini adalah selalu memberikan nilai yang sama.
+Contoh yang jamak digunakan misalkan `Unit`, yang hanya mempunyai satu
+nilai saja. `Set` juga bisa digunakan. Walaupun `Band` tidak mempunyai
+metoda lain, pengguna dapat memanfaatkan properti ini untuk optimisasi
+performa.
+
 A> Viktor Klang, of Lightbend fame, lays claim to the phrase
 A> [effectively-once delivery](https://twitter.com/viktorklang/status/789036133434978304) for message processing with idempotent
 A> operations, i.e. `Band.append`.
+A>
+A> Orang kondang dari Lightbend, Viktor Klang, lah yang memperkenalkan
+A> istilah [eksekusi sekali saja](https://twitter.com/viktorklang/status/789036133434978304)
+A> untuk pemrosesan pesan idempoten. (lol, wtf is this?)
 
 As a realistic example for `Monoid`, consider a trading system that has a large
 database of reusable trade templates. Populating the default values for a new
@@ -4206,9 +4218,21 @@ wins" merge policy if two templates provide a value for the same field. The
 "selecting" work is already done for us by another system, it is our job to
 combine the templates in order.
 
+Sebuah contoh yang cukup realistis untuk `Monoid` adalah mengenai sebuah sistem
+*trading* yang mempunyai basis data templat jual beli yang sangat besar.
+Untuk mengisi nilai bawaan dari sebuah *trade*, diperlukan pemilahan dan
+penggabungan dari banyak templat dengan aturan "aturan terbaru yang dipakai"
+bila ada dua templat sama sama menyediakan sebuah nilai untuk bidang yang sama.
+Proses pemilahan sendiri sudah dilakukan oleh sistem lain. Tugas kitalah
+yang menggabungkan templat templat tersebut.
+
 We will create a simple template schema to demonstrate the principle,
 but keep in mind that a realistic system would have a more complicated
 ADT.
+
+Kita akan membuat skema templat sederhana untuk menunjukkan prinsip
+penggunaan monad. Harap diingat bahwa sebuah sistem yang realistis tentu
+mempunyai tipe data aljabar yang jauh lebih kompleks.
 
 {lang="text"}
 ~~~~~~~~
@@ -4226,6 +4250,9 @@ ADT.
 If we write a method that takes `templates: List[TradeTemplate]`, we
 only need to call
 
+Bila kita menulis sebuah metoda yang menerima `templates: List[TradeTemplate]`,
+kita hanya perlu memanggil
+
 {lang="text"}
 ~~~~~~~~
   val zero = Monoid[TradeTemplate].zero
@@ -4234,9 +4261,17 @@ only need to call
 
 and our job is done!
 
+dan selesai.
+
 But to get `zero` or call `|+|` we must have an instance of
 `Monoid[TradeTemplate]`. Although we will generically derive this in a
 later chapter, for now we will create an instance on the companion:
+
+Tetapi, untuk bisa menggunakan `zero` atau memanggil `|+|`, kita harus
+mempunyai instans `Monoid[TradeTemplate]`. Walaupun kita bisa menurunkan
+instans ini secara otomatis, seperti yang akan ditunjukkan pada bab
+selanjutnya, demi contoh yang komprehensif, kita akan membuat instans
+secara manual pada objek pasangan:
 
 {lang="text"}
 ~~~~~~~~
@@ -4253,6 +4288,9 @@ later chapter, for now we will create an instance on the companion:
 However, this doesn't do what we want because `Monoid[Option[A]]` will append
 its contents, e.g.
 
+Yang disayangkan dari contoh di atas adalah `Monoid[Option[A]]` akan menambah
+konten dari `A`. Bisa dilihat dari hasil REPL berikut:
+
 {lang="text"}
 ~~~~~~~~
   scala> Option(2) |+| None
@@ -4263,6 +4301,10 @@ its contents, e.g.
 
 whereas we want "last rule wins". We can override the default
 `Monoid[Option[A]]` with our own:
+
+sedangkan, yang kita inginkan adalah "yang digunakan adalah aturan terakhir".
+Kita dapat mengesampingkan nilai bawaan `Monoid[Option[A]]` dengan mengganti
+dengan kode berikut:
 
 {lang="text"}
 ~~~~~~~~
@@ -4278,6 +4320,8 @@ whereas we want "last rule wins". We can override the default
 ~~~~~~~~
 
 Now everything compiles, let's try it out...
+
+Dan semua terkompil dengan baik.
 
 {lang="text"}
 ~~~~~~~~
@@ -4300,6 +4344,9 @@ Now everything compiles, let's try it out...
 All we needed to do was implement one piece of business logic and
 `Monoid` took care of everything else for us!
 
+Yang kita butuhkan hanyalah pengimplementasian sebuah logika bisnis
+dan `Monoid` menyelesaikan semuanya.
+
 Note that the list of `payments` are concatenated. This is because the
 default `Monoid[List]` uses concatenation of elements and happens to
 be the desired behaviour. If the business requirement was different,
@@ -4309,10 +4356,25 @@ polymorphism we can have a different implementation of `append`
 depending on the `E` in `List[E]`, not just the base runtime class
 `List`.
 
+Harap diperhatikan bahwa daftar `payments` digabungkan. Kenapa demikian?
+Karena perilaku bawaan dari `Monoid[List]` adalah menggabungkan elemen-elemen
+dan kebetulan perilaku tersebut juga kita harapkan. Bila persyaratan bisnis
+yang ditemui berbeda, maka kita hanya perlu menyediakan `Monoid[List[LocalDate]]`
+yang kita tulis sendiri. Dan jangan lupa bahwa dengan menggunakan polimorfisme
+saat kompilasi, kita bisa mendapatkan implementasi `append` yang berbeda
+sesuai dengan `E` pada `List[E]`.
+
+
 A> When we introduced typeclasses in Chapter 4 we said that there can only be one
 A> implementation of a typeclass for a given type parameter, e.g. there is only one
 A> `Monoid[Option[Boolean]]` in the application. *Orphan instances* such as
 A> `lastWins` are the easiest way to break coherence.
+A>
+A> Saat kita berkenalan dengan kelas tipe pada bab 4, saat itu kita
+A> berbicara bahwa implementasi kelas tipe untuk sebuah parameter tipe
+A> hanya boleh ada satu saja. Misalkan, hanya boleh ada satu `Monoid[Option[Boolean]]`
+A> pada aplikasi. *Orphan instance* semacam `lastWins` merupakan cara yang
+A> paling mudah untuk merusak koherensi kelas tipe kita.
 A> 
 A> We could try to justify locally breaking typeclass coherence by making
 A> `lastWins` private, but when we get to the `Plus` typeclass we will see a better
@@ -4320,6 +4382,14 @@ A> way to implement our `Monoid`. When we get to tagged types, we will see an ev
 A> better way: using `LastOption` instead of `Option` in our data model.
 A> 
 A> Please don't break typeclass coherence at home, kids.
+A>
+A> Bisa saja kita membuat pembenaran atas perusakan koherensi kelas tipe
+A> dengan menjadikan `lastWins` metoda privat. Namun, saat kita sampai
+A> pada pembahasan kelas tipe `Plus`, kita akan tahu bahwa ada cara lain
+A> yang lebih disarankan untuk mengimplementasikan `Monoid`.
+A> Ketika kita membahas mengenai tipe bertanda (lol, tagged type), kita akan
+A> tahu cara terbaik adalah dengan menggunakan `LastOption`, bukan `Option`,
+A> pada model data kita.
 
 
 ## Objecty Things

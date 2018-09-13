@@ -23,11 +23,14 @@ Istilah istilah yang belum saya pikirkan padan katanya.
 - *infinite loop*.
 - *invoke*. Mungkin *selawat*?
 - *mailboxes*. Pernah pakai, tapi apa ya?
+- *orphan instance*. Instans yatim? lol
 - *signature*.
 - *simulacrum*.
 - *state*.
+- *tagged type*.
 - *test-runner*.
 - *timestamp*.
+- *trade*. Berhubungan dengan saham.
 - *trait*.
 - *typeclass*
 - *typeful programming*.
