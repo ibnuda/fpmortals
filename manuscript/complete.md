@@ -1137,7 +1137,7 @@ algebras and pure functions, and can be abstracted over `F`. If an
 implementation of an algebraic interface is tied to a specific type, e.g. `IO`,
 it is called an *interpreter*.
 
-dan mengimplementaiskannya dengan sebuah *modul*.
+dan mengimplementasikannya dengan sebuah *modul*.
 Sebuah modul yang hanya bergantung ke modul-modul lain, aljabar dan fungsi
 murni (lol), dan dapat diabstraksikan melalui `F`.
 Jika sebuah implementasi dari sebuah antarmuka aljabaris terikat spesifik
@@ -3394,7 +3394,7 @@ server "headless". (lol)
 Drone doesn't implement the `/auth` endpoint, or the refresh, and simply
 provides a `BEARER_TOKEN` through their user interface.
 
-Drone tidak perlu mengimplementaiskan "endpoint" (lol) `/auth` atau refresh
+Drone tidak perlu mengimplementasikan "endpoint" (lol) `/auth` atau refresh
 karena sebuah `BEARER_TOKEN` sudah cukup untuk antarmuka.
 
 ### Data
@@ -3960,7 +3960,7 @@ Sekarang, kita akan menulis modul klien OAuth2:
 -   *Tipe data aljabar* didefinisikan sebagai *produk* (`final case class`) dan
     ko-produk (`sealed abstract class`).
 -   Tipe `Refined` memperketat batasan pada nilai.
--   Fungsi konkret dapad didefinisikan pada sebuah `implicit class` agar alur
+-   Fungsi konkret dapat didefinisikan pada sebuah `implicit class` agar alur
     pembacaan kode tetap dari kiri ke kanan.
 -   Fungsi polimorfis didefinisikan pada *kelas tipe*. Fungsionalitas disediakan
     melalui *batasan konteks* "mempunyai", bukan pada hierarki kelas "merupakan".
@@ -4401,8 +4401,19 @@ defined on `java.lang.Object` whether it makes sense or not. There is
 no way to remove `equals` and no way to guarantee that it is
 implemented.
 
+Pada bab mengenai Data dan Fungsionalitas, kita secara sekilas menyimpulkan
+mengenai gagasan JVM atas persamaan menghancurkan banyak hal yang bisa
+kita masukkan ke dalam sebuah ADT. Permasalahan mendasar mengenai hal ini
+adalah JVM didesain untuk Java. Dan Java sendiri, `equals` didefinisikan
+pada `java.lang.Object`. Hal ini diperparah dengan kenyataan bahwa metoda
+tersebut tidak bisa dihapus dan tidak ada jaminan bahwa pasti sudah diimplementasikan.
+
 However, in FP we prefer typeclasses for polymorphic functionality and even the
 concept of equality is captured at compiletime.
+
+Untungnya, pada pemprograman fungsional, kita lebih memilih untuk menggunakan
+kelas tipe untuk memenuhi kebutuhun atas fungsionalitas polimorfis.
+Ditambah dengan konsep persamaan diperiksa pada saat waktu kompilasi.
 
 {width=20%}
 ![](images/scalaz-comparable.png)
@@ -4419,19 +4430,37 @@ Indeed `===` (*triple equals*) is more typesafe than `==` (*double
 equals*) because it can only be compiled when the types are the same
 on both sides of the comparison. This catches a lot of bugs.
 
+Dan faktanya, `===` adalah lebih aman dibandingkan `==` yang hanya bisa
+dikompilasi bila tipe dari kedua belah sisi operator ini mempunyai tipe
+yang sama. Kita bisa mengatakan bahwa operator ini salah satu jaring
+pengaman yang bagus.
+
 `equal` has the same implementation requirements as `Object.equals`
+
+`equal` mempunyai persyaratan implementasi yang sama dengan `Object.equals`
 
 -   *commutative* `f1 === f2` implies `f2 === f1`
 -   *reflexive* `f === f`
 -   *transitive* `f1 === f2 && f2 === f3` implies `f1 === f3`
 
+-   *komutatif* `f1 === f2` yang juga sama dengan `f2 === f1`
+-   *refleksif* `f === f`
+-   *tarnsitif* `f1 === f2 && f2 === f3` yang juga sama dengan `f1 === f3`
+
 By throwing away the universal concept of `Object.equals` we don't
 take equality for granted when we construct an ADT, stopping us at
 compiletime from expecting equality when there is none.
 
+Dengan membuang konsep umum `Object.equals`, kita tidak akan menyia-nyiakan
+persamaan saat kita menyusun sebuah ADT. Selain itu, kita tak akan mendapatkan
+harapan palsu akan persamaan dimana sebenarnya tidak pernah ada.
+
 Continuing the trend of replacing old Java concepts, rather than data
 *being a* `java.lang.Comparable`, they now *have an* `Order` according
 to:
+
+Melanjutkan tren pengubahan konsep Java, data tidak lagi *merupakan*
+`java.lang.Comparable` namun *memiliki* `Order`, berdasarkan:
 
 {lang="text"}
 ~~~~~~~~
@@ -4463,8 +4492,19 @@ combinator*, an **implied law of substitution** for the typeclass is added. If a
 instance of `Order` were to override `.equal` for performance reasons, it must
 behave identically the same as the original.
 
+`Order` mengimplementasikan `.equal` dalam primitif baru `.order`. Ketika
+sebuah kelas tipe mengimplementasikan *kombinator primitif* bapaknya dengan
+sebuah *kombinator turunan*, maka **hukum substitusi** untuk kelas
+tipe tersebut akan ditambahkan secara tidak langsung. Bila sebuah instans
+dari `Order` digunakan untuk mengesampingkan `.equal` dengan alasan performa,
+maka instans tersebut harus punya perilaku yang identik dengan implementasi
+yang asli.
+
 Things that have an order may also be discrete, allowing us to walk
 successors and predecessors:
+
+Objek-objek yang mempunyai order bisa jadi juga merupakan objek diskrit,
+hal ini memberikan kita ruang untuk walk successors and predecessors (lol, wat?)
 
 {lang="text"}
 ~~~~~~~~
@@ -4496,14 +4536,27 @@ successors and predecessors:
 A> `|-->` is Scalaz's Lightsaber. This is the syntax of a Functional
 A> Programmer. Not as clumsy or random as `fromStepToL`. An elegant
 A> syntax... for a more civilised age.
+A>
+A> `|-->` merupakan *Lightsaber* dari Scalaz. Pengguna pemrograman fungsional
+A> biasa menggunakan sintaks seperti ini.
 
 We will discuss `EphemeralStream` in the next chapter, for now we just need to
 know that it is a potentially infinite data structure that avoids the memory
 retention problems in the stdlib `Stream`.
 
+Kita akan berdiskusi mengenai `EphemeralStream` pada bab berikutnya. Untuk
+saat ini, kita hanya perlu tahu bahwa tipe data ini bisa digunakan untuk menyusun
+struktur data tak hingga tanpa harus kuatir mengenai masalah memori sebagaimana
+struktur data `Stream` dari pustaka standar.
+
 Similarly to `Object.equals`, the concept of `.toString` on every `class` does
 not make sense in Java. We would like to enforce stringyness at compiletime and
 this is exactly what `Show` achieves:
+
+Sama halnya dengan `Object.equals`, konsep `.toString` yang ada pada tiap kelas
+sangat tidak masuk akal di Java. Idealnya, kita harus memastikan bahwa sebuah
+objek memang bisa diubah menjadi string pada saat waktu kompilasi.
+Untuk mendapatkan hasil tersebut, kita dapat menggunakan `Show`:
 
 {lang="text"}
 ~~~~~~~~
@@ -4517,6 +4570,9 @@ We will explore `Cord` in more detail in the chapter on data types, we need only
 know that it is an efficient data structure for storing and manipulating
 `String`.
 
+Kita akan membahas `Cord` lebih mendetail pada bab selanjutnya mengenai tipe data.
+Untuk saat ini, kita hanya perlu tahu bahwa `Cord` merupakan struktur data yang
+efisien yang dipergunakan untuk menyimpan dan memanipulasi `String`.
 
 ## Mappable Things
 
