@@ -18,6 +18,7 @@ Istilah istilah yang belum saya pikirkan padan katanya.
 - *callbacks**.
 - *code generation*.
 - *control flow*.
+- *hack*. Apakah *retas* sesuai untuk kata benda? Mungkin lebih cocok menggunakan terjemahan kata *kludge*.
 - *happy path*. Mungkin *asumsi terbaik*?
 - *headless*.
 - *infinite loop*.

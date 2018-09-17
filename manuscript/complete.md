@@ -4579,6 +4579,8 @@ efisien yang dipergunakan untuk menyimpan dan memanipulasi `String`.
 We're focusing on things that can be mapped over, or traversed, in
 some sense:
 
+Kita akan fokus pada benda benda yang bisa dipetakan atau dilalui:
+
 {width=100%}
 ![](images/scalaz-mappable.png)
 
@@ -4606,6 +4608,10 @@ The only abstract method is `map`, and it must *compose*, i.e. mapping
 with `f` and then again with `g` is the same as mapping once with the
 composition of `f` and `g`:
 
+Satu-satunya metoda abstrak adalah `map` yang harus bisa menggabungkan
+dua fungsi. Sebagai contoh, memetakan `f` dan dilanjutkan dengan `g`
+sama dengan memetakan dengan hasil komposisi dari `f` dan `g`:
+
 {lang="text"}
 ~~~~~~~~
   fa.map(f).map(g) == fa.map(f.andThen(g))
@@ -4613,6 +4619,9 @@ composition of `f` and `g`:
 
 The `map` should also perform a no-op if the provided function is
 `identity` (i.e. `x => x`)
+
+`map` juga harus melakukan no-op bila fungsi yang disediakan berupa
+fungsi `identity` (`x => x`).
 
 {lang="text"}
 ~~~~~~~~
@@ -4626,6 +4635,10 @@ specific instances. The documentation has been intentionally omitted in the
 above definitions to encourage guessing what a method does before looking at the
 implementation. Please spend a moment studying only the type signature of the
 following before reading further:
+
+`Functor` mendefinisikan beberapa metoda pembantu untuk `map` yang bisa dioptimisasi
+dengan instans khusus. Sangat disarankan untuk memperhatikan dengan seksama atas
+type signature berikut sebelum melanjutkan seksi ini:
 
 {lang="text"}
 ~~~~~~~~
@@ -4660,11 +4673,40 @@ following before reading further:
     signature to `pure` but requires the caller to provide the `F[A =>
        B]`.
 
+1.  `void` menerima sebuah instans dari `F[A]` dan selalu mengembalikan
+    `F[Unit]`. Metoda ini selalu menghapus semua nilai sembari menjaga
+    struktur.
+2.  `fproduct` menerima input yang sama dengan `map` namun mengembalikan `F[(A, B)]`.
+    Sebagai contoh, fungsi ini akan memasangkan konten dengan hasil dari
+    fungsi tersebut. Fungsi ini berguna bila kita ingin tetap menggunakan
+    input yang diterima oleh fungsi ini.
+3.  `fpair` menggandakan semua elemen dari `A` menjadi *tuple* `F[(A, A)]`.
+4.  `strengthL` memasangkan konten dari sebuah `F[A]` dengan konstan `B`
+    pada bagian kiri.
+5.  `strengthR` memasangkan konten dari sebuah `F[A]` dengan konstan `B`
+    pada bagian kanan.
+6.  `lift` menerima sebuah fungsi `A => B` dan mengembalikan `F[A] => F[B]`.
+    Dengan kata lain, fungsi ini menerima sebuah fungsi berdasarkan konten
+    dari `F[A]` dan mengembalikan sebuah fungsi yang beroperasi secara
+    langsung pada `F[A]`.
+7.  `mapply` sendiri merupakan fungsi yang agak janggal. Misalkan kita
+    mempunyai sebuah `F[_]` pada fungsi `A => B` dan nilai `A`. Kita bisa
+    mendapatkan hasil berupa `F[B]`. Fungsi ini mempunyai *signature* yang
+    mirip dengan `pure`, namun mengharuskan pemanggil fungsi ini untuk
+    mempunyai `F[A => B]`.
+
 `fpair`, `strengthL` and `strengthR` look pretty useless, but they are
 useful when we wish to retain some information that would otherwise be
 lost to scope.
 
+Secara sekilas, `fpair`, `strengthL`, dan `strengthR` terlihat tidak berguna.
+Namun, kita bisa menggunakannya saat kita ingin tetap menggunakan informasi
+yang bisa jadi hilang saat keluar dari cakupan fungsi. Misal, indeks dari
+sebuah `List` atau `Set` saat melakukan `traverse`.
+
 `Functor` has some special syntax:
+
+`Functor` punya beberapa sintaks khusus, antara lain:
 
 {lang="text"}
 ~~~~~~~~
@@ -4676,16 +4718,31 @@ lost to scope.
 
 `.as` and `>|` are a way of replacing the output with a constant.
 
+`.as` dan `>|` digunakan untuk mengganti keluaran fungsi dengan sebuah
+konstanta.
+
 A> When Scalaz provides additional functionality as syntax, rather than on the
 A> typeclass itself, it is because of binary compatibility.
 A> 
 A> When a `X.Y.0` version of Scalaz is released, it is not possible to add methods
 A> to typeclasses in that release series for Scala 2.10 and 2.11. It is therefore
 A> worth reading both the typeclass source and its syntax.
+A>
+A> Ketika Scalaz menyediakan fungsionalitas tambahan dalam bentuk sintaks, hal
+A> ini dilakukan dengan alasan kompatibilitas biner.
+A>
+A> Saat versi `X.Y.0` Scalaz rilis, adalah tidak mungkin bila kita harus menambah
+A> metoda ke kelas tipe untuk versi tersebut. Apalagi dengan kewajiban atas dukungan
+A> terhadap Scala versi 2.10 dan 2.11. Maka dari itu, sangat dianjurkan untuk
+A> mempelajari kode sumber dan sintaks dari kelas tipe.
 
 In our example application, as a nasty hack (which we didn't even
 admit to until now), we defined `start` and `stop` to return their
 input:
+
+Pada contoh aplikasi kita, terdapat sebuah retas (lol, help) yang tidak kita
+ungkap sampai sekarang. Retasan adalah pendefinisian `start` dan `stop`
+untuk mengembalikan input:
 
 {lang="text"}
 ~~~~~~~~
@@ -4695,6 +4752,9 @@ input:
 
 This allowed us to write terse business logic such as
 
+Pendefinisian diatas memberikan kita jalan untuk menulis logika
+bisnis yang ringkas seperti
+
 {lang="text"}
 ~~~~~~~~
   for {
@@ -4703,7 +4763,7 @@ This allowed us to write terse business logic such as
   } yield update
 ~~~~~~~~
 
-and
+dan
 
 {lang="text"}
 ~~~~~~~~
@@ -4717,12 +4777,16 @@ and
 But this hack pushes unnecessary complexity into the implementations. It is
 better if we let our algebras return `F[Unit]` and use `as`:
 
+Namun, retasan ini melimpahkan kompleksitas ke bagian implementasi secara mubazir.
+Sungguh, jauh lebih disukai bila kita mendesain aljabar kita untuk
+mengembalikan `F[Unit]` dan menggunakan `as`:
+
 {lang="text"}
 ~~~~~~~~
   m.start(node) as world.copy(pending = Map(node -> world.time))
 ~~~~~~~~
 
-and
+dan
 
 {lang="text"}
 ~~~~~~~~
