@@ -4804,8 +4804,16 @@ Technically, `Foldable` is for data structures that can be walked to produce a
 summary value. However, this undersells the fact that it is a one-typeclass army
 that can provide most of what we would expect to see in a Collections API.
 
+Secara teknis, `Foldable` merupakan struktur data yang bisa langkahi satu-per-satu
+untuk menghasilkan sebuah nilai ijmal. Namun, terlalu meremehkan bila kita hanya
+berhenti sampai disitu. Kenyataannya, `Foldable` merupakan kelas tipe yang
+bisa menjawab hampir semua apa yang diharapkan dari sebuah Koleksi APA.
+
 There are so many methods we are going to have to split them out,
 beginning with the abstract methods:
+
+Berhubung kelas tipe ini mempunyai begitu banyak metoda, ada baiknya
+kita pecah pecah. Dimulai dengan metoda abstrak:
 
 {lang="text"}
 ~~~~~~~~
@@ -4819,10 +4827,24 @@ An instance of `Foldable` need only implement `foldMap` and
 `foldRight` to get all of the functionality in this typeclass,
 although methods are typically optimised for specific data structures.
 
+Secara teori, untuk mendapatkan semua fungsionalitas dari kelas tipe `Foldable`,
+sebuah instans hanya perlu mengimplementasikan `foldMap` dan `foldRight`.
+Walaupun pada kenyataannya, banyak sekali metoda lain yang diimplementasikan
+sesuai dengan struktur data yang dibutuhkan agar waktu jalan lebih optimal.
+
 `.foldMap` has a marketing buzzword name: **MapReduce**. Given an `F[A]`, a
 function from `A` to `B`, and a way to combine `B` (provided by the `Monoid`,
 along with a zero `B`), we can produce a summary value of type `B`. There is no
 enforced operation order, allowing for parallel computation.
+
+Di pasaran, santer terdengar istilah keren **MapReduce**. Pada Scala
+sendiri, istilah tersebut dikenal dengan `.foldMap`. `.foldMap` sendiri
+berupa fungsi yang hanya membutuhkan fungsi yang memetakan `A` ke `B`,
+sebuah `F[A]`, dan cara untuk menggabungkan semua hasil pemetaan dari
+`A` ke `B` menjadi satu nilai (yang disediakan oleh `Monoid` dan `zero` dari `B`)
+untuk menghasilkan nilai ijmal `B`. Selain itu, tidak ada urutan operasi
+dari fungsi yang memetakan `A` ke `B`. Sehingga, memungkinkan untuk
+dilakukannya komputasi paralel.
 
 `foldRight` does not require its parameters to have a `Monoid`,
 meaning that it needs a starting value `z` and a way to combine each
@@ -4830,11 +4852,24 @@ element of the data structure with the summary value. The order for
 traversing the elements is from right to left and therefore it cannot
 be parallelised.
 
+Untuk `foldRight`, metoda ini tidak memaksa parameternya untuk mempunyai
+instans `Monoid` walau harus menerima sebuah nilai awal `z` dan cara
+penggabungan tiap elemen dari struktur data. Selain itu, urutan pelangkahan
+dari elemen elemen input adalah dari kiri ke kanan. Hal ini juga berarti
+bahwa metoda ini tidak bisa dijalankan secara paralel.
+
 A> `foldRight` is conceptually the same as the `foldRight` in the Scala
 A> stdlib. However, there is a problem with the stdlib `foldRight`
 A> signature, solved in Scalaz: very large data structures can stack
 A> overflow. `List.foldRight` cheats by implementing `foldRight` as a
 A> reversed `foldLeft`
+A>
+A> Secara konsep, `foldRight` dari Scalaz mempunyai perilaku yang sama
+A> dengan `foldRight` yang disediakan oleh pustaka standar. Salah satu
+A> yang menjadikan metoda dari Scalaz lebih unggul dibandingkan dengan
+A> metoda dari pustaka standar adalah metoda dari Scalaz mampu menangani
+A> sturktur data yang besar. Penyebab dari hal ini adalah penerapan `List.foldRight`
+A> dari pustaka standar dengan menggunakan `foldLeft` yang dibalik
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -4845,6 +4880,10 @@ A>
 A> but the concept of reversing is not universal and this workaround cannot be used
 A> for all data structures. Say we want to find a small number in a `Stream`, with
 A> an early exit:
+A>
+A> namun, konsep pembalikkan seperti ini tidaklah universal. Banyak struktur data
+A> tidak bisa ditangani dengan menggunakan pembalikan seperti ini. Misal, kita
+A> ingin mencari beberapa nilai kecil di sebuah `Stream` dengan penyelesaian dini:
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -4859,6 +4898,9 @@ A> ~~~~~~~~
 A> 
 A> Scalaz solves the problem by taking a *byname* parameter for the
 A> aggregate value
+A>
+A> Scalaz menyelesaikan masalah ini dengan mengambil sebuah parameter
+A> panggilan untuk nilai agregat
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -4867,10 +4909,18 @@ A>   res: Boolean = true
 A> ~~~~~~~~
 A> 
 A> which means that the `acc` is not evaluated unless it is needed.
+A>
+A> yang berarti `acc` tidak akan dievaluasi sebelum nilai tersebut benar
+A> benar dibutuhkan.
 A> 
 A> It is worth baring in mind that not all operations are stack safe in
 A> `foldRight`. If we were to require evaluation of all elements, we can
 A> also get a `StackOverflowError` with Scalaz's `EphemeralStream`
+A>
+A> Juga harap dipahami bahwa tidak semua operasi tidak berbahaya bagi
+A> *stack memory* saat menggunakan `foldRight`. Bila kita benar-benar
+A> membutuhkan evaluasi dari semua elemen, bisa saja kita mendapat galat
+A> `StackOverflowError` saat menggunakan `EphemeralStream` milik Scalaz
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -4885,6 +4935,12 @@ implemented in terms of `foldMap`, but most instances choose to
 implement it because it is such a basic operation. Since it is usually
 implemented with tail recursion, there are no *byname* parameters.
 
+`foldLeft` melangkahi semua elemen dari kiri ke kanan. Untuk mengimplementasikan
+`foldLeft`, kita bisa menggunakan `foldMap` walau kebanyakan instans
+juga mengimplementasikan sendiri `foldLeft` khusus untuk instans tersebut.
+Hal lain yang patut diperhatikan adalah implementasi metoda ini berupa
+rekursi akhir, `foldLeft` tidak menggunakan parameter panggilan.
+
 The only law for `Foldable` is that `foldLeft` and `foldRight` should
 each be consistent with `foldMap` for monoidal operations. e.g.
 appending an element to a list for `foldLeft` and prepending an
@@ -4892,10 +4948,20 @@ element to a list for `foldRight`. However, `foldLeft` and `foldRight`
 do not need to be consistent with each other: in fact they often
 produce the reverse of each other.
 
+Hukum yang mengatur `Foldable` hanya ada satu, yaitu `foldLeft` dan
+`foldRight` harus konsisten dengan `foldMap` untuk operasi monoidal.
+Misalnya, menambahkan sebuah elemen di bagian awal dari sebuah list
+untuk implmentasi `foldLeft` dan menambahkan sebuah elemen di bagian
+akhir dari sebuah list untuk `foldRight`.
+Di sisi lain, `foldLeft` dan `foldRight` tidak harus selalu konsisten
+satu sama lain. Bahkan, seringkali mereka mempunyai hasil yang berlawanan.
+
 The simplest thing to do with `foldMap` is to use the `identity`
 function, giving `fold` (the natural sum of the monoidal elements),
 with left/right variants to allow choosing based on performance
 criteria:
+
+Saya tidak paham paragraf ini. (lol, tulung!)
 
 {lang="text"}
 ~~~~~~~~
@@ -4906,12 +4972,16 @@ criteria:
 
 Recall that when we learnt about `Monoid`, we wrote this:
 
+Mengulang apa yang kita pelajari tentang `Monoid`, kita menulis:
+
 {lang="text"}
 ~~~~~~~~
   scala> templates.foldLeft(Monoid[TradeTemplate].zero)(_ |+| _)
 ~~~~~~~~
 
 We now know this is silly and we should have written:
+
+Namun, kode di atas bisa ditulis ulang menjadi
 
 {lang="text"}
 ~~~~~~~~
@@ -4925,8 +4995,15 @@ We now know this is silly and we should have written:
 `.fold` doesn't work on stdlib `List` because it already has a method
 called `fold` that does it is own thing in its own special way.
 
+Sayangnya, `.fold` tidak bisa dipanggil dari `List` milik pustaka standar.
+Hal ini dikarenakan `List` sudah memiliki metoda dengan nama `fold` yang
+berbeda dengan metoda `fold` dari kelas tipe `Foldable`.
+
 The strangely named `intercalate` inserts a specific `A` between each
 element before performing the `fold`
+
+Untuk metoda `intercalate`, metoda ini menyisipkan sebuah `A` spesifik
+diantara elemen sebelum melakukan operasi `fold`
 
 {lang="text"}
 ~~~~~~~~
@@ -4934,6 +5011,9 @@ element before performing the `fold`
 ~~~~~~~~
 
 which is a generalised version of the stdlib's `mkString`:
+
+metoda ini bisa dianggap sebagai metoda `mkString` yang diumumkan
+dari pustaka standar:
 
 {lang="text"}
 ~~~~~~~~
@@ -4943,6 +5023,10 @@ which is a generalised version of the stdlib's `mkString`:
 
 The `foldLeft` provides the means to obtain any element by traversal
 index, including a bunch of other related methods:
+
+`foldLeft` menyediakan kita cara untuk mendapatkan elemen manapun dengan
+melangkahi semua elemen satu per satu, termasuk dengan beberapa metoda
+lainnya:
 
 {lang="text"}
 ~~~~~~~~
@@ -4960,8 +5044,17 @@ an exception, `Foldable.index` returns an `Option[A]` with the convenient
 similar to the stdlib `.contains` but uses `Equal` rather than ill-defined JVM
 equality.
 
+Berbeda dengan `List(0)` yang sangat mungkin melempar eksepsi, `Foldable.index`
+lebih memilih untuk mengembalikan sebuah `Option[A]` atau bisa juga dengan
+mengembalikan sebuah `A` bila menggunakan `.indexOr` (dengan sebuah nilai
+bawaan `A`). Sama halnya dengan `.contains` punya pustaka standar yang menggunakan
+persamaan standar dari JVM, Scalaz menyediakan `.element` yang menggunakan `Equal`
+yang jauh lebih unggul.
+
 These methods *really* sound like a collections API. And, of course,
 anything with a `Foldable` can be converted into a `List`
+
+Dan yang paling utama, `Foldable` bisa diubah menjadi `List`.
 
 {lang="text"}
 ~~~~~~~~
@@ -4972,7 +5065,12 @@ There are also conversions to other stdlib and Scalaz data types such
 as `.toSet`, `.toVector`, `.toStream`, `.to[T <: TraversableLike]`,
 `.toIList` and so on.
 
+Selain itu, konversi ke tipe data lain juga ada. Sebagai contoh, `.toStream`,
+`.toSet`, `.toVector`, `.to[T <: TraversableLike]`, dan lain sebagainya.
+
 There are useful predicate checks
+
+Untuk pengecekan predikat, Foldable menyediakan
 
 {lang="text"}
 ~~~~~~~~
@@ -4985,14 +5083,29 @@ There are useful predicate checks
 predicate, `all` and `any` return `true` if all (or any) element meets
 the predicate, and may exit early.
 
+Untuk memeriksa jumlah elemen yang bernilai `true` terhadap sebuah predikat,
+kita bisa menggunakan `filterLength`. Sedangkan untuk memeriksa apakah
+semua elemen bernilai `true`, `all` adalah fungsi yang tepat guna.
+`any` sendiri hanya memastikan bahwa setidaknya ada satu elemen dari `Foldable`
+bernilai `true` terhadap predikat yang disediakan.
+
 A> We've seen the `NonEmptyList` in previous chapters. For the sake of
 A> brevity we use a type alias `Nel` in place of `NonEmptyList`.
-A> 
+A>
+A> ??? (lol, intensi tidak jelas. mungkin menyingkat `NonEmptyList` jadi `Nel`.)
+A>
 A> We've also seen `IList` in previous chapters, recall that it is an
 A> alternative to stdlib `List` with impure methods, like `apply`,
 A> removed.
+A>
+A> Kita juga sudah diperkenalkan kepadaa `IList` sebagai alternatif
+A> untuk `List` pustaka standar dengan menghilangkan metoda tidak murni (lol, pure)
+A> seperti `apply`.
 
 We can split an `F[A]` into parts that result in the same `B` with
+`splitBy`
+
+Untuk memecah sebuah `F[A]` menjadi beberapa bagian, kita bisa menggunakan
 `splitBy`
 
 {lang="text"}
@@ -5006,7 +5119,7 @@ We can split an `F[A]` into parts that result in the same `B` with
   def findRight[A](fa: F[A])(f: A => Boolean): Option[A] = ...
 ~~~~~~~~
 
-for example
+sebagai contoh
 
 {lang="text"}
 ~~~~~~~~
@@ -5016,8 +5129,14 @@ for example
 
 noting that there are two values indexed by `'b'`.
 
+patut diperhatikan bahwa ada dua nilai dengan indeks `'b'`.
+
 `splitByRelation` avoids the need for an `Equal` but we must provide
 the comparison operator.
+
+Bilamana sebuah list objek `A` yang  tidak memiliki kelas tipe `Equal`
+namun kita ingin memecahnya menjadi beberapa bagian, kita bisa menggunakan
+`splitByRelation` yang meminta operator pembanding sebagai gantinya.
 
 `splitWith` splits the elements into groups that alternatively satisfy
 and don't satisfy the predicate. `selectSplit` selects groups of
@@ -5025,11 +5144,22 @@ elements that satisfy the predicate, discarding others. This is one of
 those rare occasions when two methods share the same type signature
 but have different meanings.
 
+Bisa juga kita memecah sebuah `Foldable` menjadi dua bagian, satu bagian
+memenuhi sebuah predikat, dan sebaliknya, dengan menggunakan `splitWith`.
+Sedangkan untuk memilih himpunan yang memenuhi predikat sembari membuang
+yang lain, kita menggunakan `selectSplit`.
+
 `findLeft` and `findRight` are for extracting the first element (from
 the left, or right, respectively) that matches a predicate.
 
+Untuk `findLeft` dan `findRight` sendiri, metoda ini mengambil elemen
+pertama dari kiri atau kanan yang sesuai dengan predikat.
+
 Making further use of `Equal` and `Order`, we have the `distinct`
 methods which return groupings.
+
+Dengan menggunakan `Equal` dan `Order`, kita juga mendapat metoda lain
+yang mengembalikan himpunan.
 
 {lang="text"}
 ~~~~~~~~
@@ -5044,13 +5174,31 @@ that is much faster than the stdlib's naive `List.distinct`. Data
 structures (such as sets) can implement `distinct` in their `Foldable`
 without doing any work.
 
+`distinct`, secara pengimplementasian, lebih efisien bila dibandingkan
+dengan `distinctE`. Hal ini disebabkan karena `distinct` menggunakan
+pengurutan (menggunakan `Order`) sehingga menggunakan algoritma yang
+mirip dengan quicksort yang relatif lebih cepat bila dibandingkan dengan
+menggunakan `List.distinct` dari pustaka standar. Keuntungan lain
+adalah struktur data semacam set secara otomatis mempunyai `distinct`.
+
 `distinctBy` allows grouping by the result of applying a function to
 the elements. For example, grouping names by their first letter.
+
+Untuk mengelompokkan berdasarkan dari hasi sebuah fungsi atas tiap elemen,
+kita bisa menggunakan `distinctBy`. Sebagai contoh, kita bisa mengelompokkan
+nama berdasarkan huruf pertama.
 
 We can make further use of `Order` by extracting the minimum or
 maximum element (or both extrema) including variations using the `Of`
 or `By` pattern to first map to another type or to use a different
 type to do the order comparison.
+
+Masih dengan gigi dua, kita akan menggunakan `Order` lebih jauh untuk
+mengekstrak elemen dengan nilai terkecil maupun terbesar dari sebuah
+`Foldable`. Lebih lanjut lagi, kita juga akan menggunakan pola varian `Of`
+dan `By` untuk memetakan elemen elemen tadi ke tipe lain ataupun
+menggunakan tipe lain sebagai pembanding.
+(lol, help!)
 
 {lang="text"}
 ~~~~~~~~
@@ -5070,6 +5218,11 @@ type to do the order comparison.
 For example we can ask which `String` is maximum `By` length, or what
 is the maximum length `Of` the elements.
 
+Sebagai contoh, kita bisa memeriksa `String` manakah mempunyai nilai
+paling besar berdasarkan panjang dengan menggunakan varian `By`.
+Bisa juga kita mencari nilai paling besar dari elemen-elemen yang ada
+dengan menggunakan varian `Of`. (lol, ilang penggunaan `By` dan `Of`)
+
 {lang="text"}
 ~~~~~~~~
   scala> List("foo", "fazz").maximumBy(_.length)
@@ -5083,8 +5236,17 @@ This concludes the key features of `Foldable`. The takeaway is that anything
 we'd expect to find in a collection library is probably on `Foldable` and if it
 isn't already, it probably should be.
 
+Dengan ini, fitur utama dari `Foldable` sudah digambarkan secara sekilas.
+Dan hikmah yang bisa kita ambil dari sub-bab ini adalah apapun yang bisa
+kita gunakan pada pustaka *collection*, kita juga bisa mendapatkannya
+pada `Foldable`.
+
 We will conclude with some variations of the methods we've already seen.
 First there are methods that take a `Semigroup` instead of a `Monoid`:
+
+Kita akan menutup sub-bab ini dengan beberapa variasi metoda yang sudah
+kita lihat sebelumnya. Pertama, berikut adalah metoda yang menerima
+subah `Semigroup`, bukan `Monoid`:
 
 {lang="text"}
 ~~~~~~~~
@@ -5098,16 +5260,31 @@ First there are methods that take a `Semigroup` instead of a `Monoid`:
 returning `Option` to account for empty data structures (recall that
 `Semigroup` does not have a `zero`).
 
+yang mengembalikan `Option` dengan pertimbangan struktur data yang kosong. 
+(Harap ingat, `Semigroup` tidak mempunyai `zero`)
+
 A> The methods read "one-Option", not `10 pt` as in typesetting.
+A>
+A> Metoda tersebut menggunakan "satu-Option" bukan `10pt`
 
 The typeclass `Foldable1` contains a lot more `Semigroup` variants of
 the `Monoid` methods shown here (all suffixed `1`) and makes sense for
 data structures which are never empty, without requiring a `Monoid` on
 the elements.
 
+Kelas tipe `Foldable1` berisi jauh lebih banyak varian `Semigroup` dari
+metoda `Monoid` bila dibandingkan dengan yang ditampilkan di sini.
+Dan hal itu dirasa masuk akal untuk struktur data yang tidak bisa kosong,
+tanpa harus memaksa elemen elemennya mempunyai kelas `Monoid`.
+
 Importantly, there are variants that take monadic return values. We already used
 `foldLeftM` when we first wrote the business logic of our application, now we
 know that it is from `Foldable`:
+
+Tidak kalah penting, ada beberapa varian yang menerima nilai nilai kembalian monadik.
+Kita juga telah menggunakan `foldLeftM` saat kita menulis logika bisnis dari
+aplikasi kita.
+Sekarang, kita tahu dari mana asal fungsi tersebut.
 
 {lang="text"}
 ~~~~~~~~
