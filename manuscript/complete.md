@@ -5302,6 +5302,8 @@ Sekarang, kita tahu dari mana asal fungsi tersebut.
 
 `Traverse` is what happens when we cross a `Functor` with a `Foldable`
 
+`Traverse` bisa dikatakan sebagai penggabungan antara `Functor` dan `Foldable`
+
 {lang="text"}
 ~~~~~~~~
   trait Traverse[F[_]] extends Functor[F] with Foldable[F] {
@@ -5325,8 +5327,16 @@ At the beginning of the chapter we showed the importance of `traverse`
 and `sequence` for swapping around type constructors to fit a
 requirement (e.g. `List[Future[_]]` to `Future[List[_]]`).
 
+Pada awal bab, kita telah menunjukkan mengenai pentingnya `traverse` dan
+`sequence` untuk membolak-balik konstruktor tipe agar sesuai dengan *requirement*.
+Sebagai contoh, `List[Future[_]]` menjadi `Future[List[_]]`.
+
 In `Foldable` we weren't able to assume that `reverse` was a universal
 concept, but now we can reverse a thing.
+
+Tidak seperti `Foldable` dimana kita tidak dapat serta merta mengasumsikan
+bahwa `reverse` adalah sebuah hak asasi, dengan `Traverse` kita dapat
+dengan santai membolak-balik sesuatu.
 
 We can also `zip` together two things that have a `Traverse`, getting
 back `None` when one side runs out of elements, using `zipL` or `zipR`
@@ -5334,17 +5344,39 @@ to decide which side to truncate when the lengths don't match. A
 special case of `zip` is to add an index to every entry with
 `indexed`.
 
+Selain itu, kita juga bisa merekatkan dua buah objek yang mempunyai `Traverse`
+menjadi `F[(A, B)]`. Namun, harap diingat bahwa ada kemungkinan bahwa panjang
+kedua benda tadi tidak sama, sehingga kita harus menggunakan `Option[A]` atau
+`Option[B]` bilamana panjang salah satu benda lebih pendek bila dibandingkan
+dengan panjang benda lainnya. Untuk menangani hal tersebut, kita bisa menggunakan
+`zipL` maupun `zipR` untuk menentukan sisi mana yang "dipotong" bila panjang
+berbeda. `zip` merupakan fungsi khusus untuk menambahkan sebuah indeks untuk
+setiap entri yang terindeks.
+
 `zipWithL` and `zipWithR` allow combining the two sides of a `zip`
 into a new type, and then returning just an `F[C]`.
+
+`zipWithL` dan `zipWithR` memberikan kita kesempatan untuk membuat sebuah `F[C]`
+dengan menggabungkan kedua sisi dari panggabungan tadi.
 
 `mapAccumL` and `mapAccumR` are regular `map` combined with an accumulator. If
 we find our old Java ways make us want to reach for a `var`, and refer to it
 from a `map`, we should be using `mapAccumL`.
 
+`mapAccumR` dan `mapAccumL` sebenarnya hanya `map` yang dikombinasi dengan
+sebuah akumulator. Bilamana kita terbiasa dengan Java yang membuat kita
+ingin menggunakan sebuah `var` dan menggunakan `var` tersebut dalam sebuah
+`map`, maka kita harus menggunakan `mapAccumL`.
+
 For example, let's say we have a list of words and we want to blank
 out words we've already seen. The filtering algorithm is not allowed
 to process the list of words a second time so it can be scaled to an
 infinite stream:
+
+Sebagai contoh, anggap saja kita mempunyai sebuah daftar kata dan kita ingin
+mengabaikan kata-kata yang sudah ada. Algoritma penyaringan tidak diperkenankan
+untuk mengolah daftar kata dua kali. Keuntungan yang didapat adalah algoritma
+ini bisa mencapai urutan tak hingga:
 
 {lang="text"}
 ~~~~~~~~
@@ -5377,6 +5409,11 @@ of a `Monoid`, and an `Apply` instead of an `Applicative`. Recall that
 `Semigroup` does not have to provide an `.empty`, and `Apply` does not have to
 provide a `.point`.
 
+Pada akhirnya, `Traverse1`, sebagaimana `Foldable1`, menyediakan varian metoda
+metoda untuk struktur data yang tidak bisa kosong. Selain itu, `Traverse1` juga
+menerima `Semigroup`, bukan `Monoid`, dan sebuah `Apply`, bukan `Applicative`.
+Harap diingat bahwa `Semigroup` tidak mempunyai `.empty` dan `Apply` tidak
+mempunyai `.point`.
 
 ### Align
 
