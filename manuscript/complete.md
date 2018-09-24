@@ -5715,6 +5715,8 @@ dan `Monoid` mempunyai `InvariantFunctor` namun tidak memiliki `Functor` maupun
 
 Consider this the warm-up act to `Applicative` and `Monad`
 
+Sub-bab ini bisa dianggap sebagai pemanasan untuk `Applicative` dan `Monad`
+
 {width=100%}
 ![](images/scalaz-apply.png)
 
@@ -5725,6 +5727,11 @@ Consider this the warm-up act to `Applicative` and `Monad`
 similar to `map` in that it applies a function to values. However,
 with `ap`, the function is in the same context as the values.
 
+`Apply` memperpanjang `Functor` dengan menambahkan sebuah metoda dengan
+nama `ap` yang mirip dengan `map`, dalam batasan `ap` juga menerapkan
+sebuah fungsi ke nilai. Bedanya, fungsi yang diterima `ap` masih dalam
+konteks yang sama dengan nilai yang diterapi.
+
 {lang="text"}
 ~~~~~~~~
   @typeclass trait Apply[F[_]] extends Functor[F] {
@@ -5734,9 +5741,14 @@ with `ap`, the function is in the same context as the values.
 
 A> `<*>` is the Advanced TIE Fighter, as flown by Darth Vader. Appropriate since it
 A> looks like an angry parent.
+A>
+A> Mari kita anggap `<*>` sebagai pesawat TIE dari Star Wars.
 
 It is worth taking a moment to consider what that means for a simple data
 structure like `Option[A]`, having the following implementation of `.ap`
+
+Implikasi dari hal ini adalah struktur data sederhana seperti `Option[A]`
+juga mempunyai implementasi `.ap`
 
 {lang="text"}
 ~~~~~~~~
@@ -5754,8 +5766,18 @@ Option[A => B]`, then we can map over `fa`. The extraction of the function from
 the context is the important power that `Apply` brings, allowing multiple
 function to be combined inside the context.
 
+Untuk mengimplementasikan `.ap`, pertama-tama kita harus mengekstrak
+fungsi `ff: A => B` dari `f: Option[A => B]`, dan dilanjutkan dengan memetakan
+`ff` atas `fa`. Ekstraksi fungsi dari konteks adalah fitur penting dari `Apply`
+yang memberikan ruang untuk menggabungkan isi dari konteks yang melingkupi
+operasi pemanggilan `ap`.
+
 Returning to `Apply`, we find `.applyX` boilerplate that allows us to combine
 parallel functions and then map over their combined output:
+
+Kembali ke `Apply`, kita menemukan *boilerplate* (lol, help) `.applyX` yang
+menyediakan jalan untuk menggabungkan fungsi-fungsi paralel dan pada akhirnya
+memetakan nilai keluaran mereka:
 
 {lang="text"}
 ~~~~~~~~
@@ -5771,12 +5793,24 @@ Read `.apply2` as a contract promising: "if you give me an `F` of `A` and an `F`
 of `B`, with a way of combining `A` and `B` into a `C`, then I can give you an
 `F` of `C`". There are many uses for this contract and the two most important are:
 
+`.apply2` bisa dibaca sebagai: "bila kamu memberi saya sebuah `F` atas `A` dan
+`F` atas `B` dan sebuah cara untuk menggabungkan `A` dan `B` menjadi `C`, maka
+saya akan memberi kamu `F` atas `C`." Ada beberapa penggunaan atas metoda ini.
+Dan, dua yang paling penting adalah:
+
 -   constructing some typeclasses for a product type `C` from its constituents `A`
     and `B`
 -   performing *effects* in parallel, like the drone and google algebras we
     created in Chapter 3, and then combining their results.
+    
+-   membuat kelas tipe untuk tipe produk `C` dari `A` dan `B`
+-   melakukan *efek* secara paralel, sebagaimana drone dan aljabar google
+    yang kita buat pada Bab 3, dan menggabungkan hasilnya.
 
 Indeed, `Apply` is so useful that it has special syntax:
+
+Sudah barang tentu `Apply` mempunyai beberapa sintaks khusus yang
+berguna:
 
 {lang="text"}
 ~~~~~~~~
@@ -5799,6 +5833,8 @@ Indeed, `Apply` is so useful that it has special syntax:
 
 which is exactly what we used in Chapter 3:
 
+yang sudah kita gunakan pada Bab 3:
+
 {lang="text"}
 ~~~~~~~~
   (d.getBacklog |@| d.getAgents |@| m.getManaged |@| m.getAlive |@| m.getTime)
@@ -5813,12 +5849,23 @@ A> Things.
 The syntax `<*` and `*>` (left bird and right bird) offer a convenient way to
 ignore the output from one of two parallel effects.
 
+Sintaks `<*` dan `*>` (paruh buruh kiri dan kanan) menawarkan cara mudah untuk
+mengabaikan keluaran dari salah satu dari dua efek paralel .
+
 Unfortunately, although the `|@|` syntax is clear, there is a problem
 in that a new `ApplicativeBuilder` object is allocated for each
 additional effect. If the work is I/O-bound, the memory allocation
 cost is insignificant. However, when performing CPU-bound work, use
 the alternative *lifting with arity* syntax, which does not produce
 any intermediate objects:
+
+Walaupun sintaks `|@|` cukup jelas, ada masalah yang ada pada `ApplicativeBuilder`.
+Yaitu, pengalokasian objek dengan instans `ApplicativeBuilder` baru tiap kali
+penambahan efek. Bila tugas yang diberikan sangat bergantung pada I/O, maka
+alokasi memori tidak signifikan. Namun, bila tugas sangat bergantung pada
+CPU, maka sangat disarankan untuk menggunakan sintaks alternatif *lifting with arity* (lol, mengangkat dengan arity?)
+yang tidak membuat objek intermediate.
+
 
 {lang="text"}
 ~~~~~~~~
@@ -5828,14 +5875,14 @@ any intermediate objects:
   def ^^^^^^[F[_]: Apply, ...]
 ~~~~~~~~
 
-used like
+digunakan seperti
 
 {lang="text"}
 ~~~~~~~~
   ^^^^(d.getBacklog, d.getAgents, m.getManaged, m.getAlive, m.getTime)
 ~~~~~~~~
 
-or directly call `applyX`
+atau memanggil `applyX` secara langsung
 
 {lang="text"}
 ~~~~~~~~
@@ -5845,6 +5892,9 @@ or directly call `applyX`
 Despite being more commonly used with effects, `Apply` works just as well with
 data structures. Consider rewriting
 
+Walaupun lebih sering digunakan bersama dengan efek, `Apply` juga bisa digunakan
+dengan struktur data. Misalkan, kita bisa menulis ulang
+
 {lang="text"}
 ~~~~~~~~
   for {
@@ -5853,7 +5903,7 @@ data structures. Consider rewriting
   } yield foo + bar.shows
 ~~~~~~~~
 
-as
+sebagai
 
 {lang="text"}
 ~~~~~~~~
@@ -5862,6 +5912,9 @@ as
 
 If we only want the combined output as a tuple, methods exist to do
 just that:
+
+Bila kita hanya ingin menggabungkan keluaran sebagai sebuah tuple, ada
+metoda yang bisa memenuhi hal tersebut:
 
 {lang="text"}
 ~~~~~~~~
@@ -5879,6 +5932,8 @@ just that:
 There are also the generalised versions of `ap` for more than two
 parameters:
 
+Juga ada versi umum dari `ap` untuk lebih dari dua parameter:
+
 {lang="text"}
 ~~~~~~~~
   def ap2[A,B,C](fa: =>F[A],fb: =>F[B])(f: F[(A,B) => C]): F[C] = ...
@@ -5890,6 +5945,9 @@ parameters:
 along with `.lift` methods that take normal functions and lift them into the
 `F[_]` context, the generalisation of `Functor.lift`
 
+yang bersamaan dengan metoda `.lift` yang menerima fungsi normal dan mengangkat
+mereka pada konteks `F[_]`
+
 {lang="text"}
 ~~~~~~~~
   def lift2[A,B,C](f: (A,B) => C): (F[A],F[B]) => F[C] = ...
@@ -5900,12 +5958,16 @@ along with `.lift` methods that take normal functions and lift them into the
 
 and `.apF`, a partially applied syntax for `ap`
 
+juga ada pula aplikasi sintaks parsial untuk `ap`
+
 {lang="text"}
 ~~~~~~~~
   def apF[A,B](f: =>F[A => B]): F[A] => F[B] = ...
 ~~~~~~~~
 
 Finally `.forever`
+
+Dan terakhir, `.forever`
 
 {lang="text"}
 ~~~~~~~~
@@ -5914,6 +5976,9 @@ Finally `.forever`
 
 repeating an effect without stopping. The instance of `Apply` must be
 stack safe or we will get `StackOverflowError`.
+
+yang mengulang efek tanpa henti. Instans dari `Apply` harus aman secara
+alokasi stack atau kita bisa mendapatkan galat `StackOverflowError`.
 
 
 ### Bind
