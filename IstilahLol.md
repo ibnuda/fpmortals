@@ -15,7 +15,8 @@ Istilah istilah yang belum saya pikirkan padan katanya.
 - *ancestor*.
 - *build-farm*.
 - *boilerplate*.
-- *callbacks**.
+- *callbacks*.
+- *casting*.
 - *code generation*.
 - *control flow*.
 - *hack*. Apakah *retas* sesuai untuk kata benda? Mungkin lebih cocok menggunakan terjemahan kata *kludge*.

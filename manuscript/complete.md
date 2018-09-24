@@ -5568,6 +5568,9 @@ bila nilai pada salah satu sisi.
 We must return to `Functor` for a moment and discuss an ancestor that
 we previously ignored:
 
+Mungkin adalah sebuah keputusan yang tepat bila kita kembali membahas
+`Functor` sesaat dan mendiskusikan hierarki yang sebelumnya kita abaikan:
+
 {width=100%}
 ![](images/scalaz-variance.png)
 
@@ -5575,13 +5578,27 @@ we previously ignored:
 method `xmap` which says that given a function from `A` to `B`, and a
 function from `B` to `A`, then we can convert `F[A]` to `F[B]`.
 
+`InvariantFunctor`, yang juga dikenal sebagai *fungtor eksponensial*,
+mempunyai metoda `xmap` yang menyatakan bahwa bila kita mempunyai fungsi
+yang memetakan `A` ke `B` dan sebuah fungsi yang memetakan `B` ke `A`,
+maka kita dapat mengkonversi `F[A]` ke `F[B]`.
+
 `Functor` is a short name for what should be *covariant functor*. But
 since `Functor` is so popular it gets the nickname. Likewise
 `Contravariant` should really be *contravariant functor*.
 
+`Functor` merupakan kependekan dari yang seharusnya disebut *fungtor kovarian*.
+Dikarenakan `Functor` sudah lebih dulu dikenal, maka penyebutan ini
+diteruskan. Begitu halnya dengan `Contravariant`, fungtor ini seharusnya
+disebut sebagai *fungtor kontravarian*.
+
 `Functor` implements `xmap` with `map` and ignores the function from
 `B` to `A`. `Contravariant`, on the other hand, implements `xmap` with
 `contramap` and ignores the function from `A` to `B`:
+
+`Functor` mengimplementasikan `xmap` dengan `map` dan mengabaikan fungsi
+dari `B` ke `A`. Sedangkan `Contravariant` mengimplementasikan `xmap`
+dengan `contramap` dan mengabaikan fungsi dari `A` ke `B`:
 
 {lang="text"}
 ~~~~~~~~
@@ -5611,15 +5628,35 @@ possible to map the contents of a structure `F[A]` into `F[B]`. Using
 `identity` we can see that `A` can be safely downcast (or upcast) into
 `B` depending on the variance of the functor.
 
+Adalah hal yang penting untuk diperhatikan, walaupun secara teori berkaitan,
+kata *kovarian*, *kontravarian*, dan *invarian* tidak berhubungan secara
+langsung dengan varian tipe punya Scala (mis, `+` dan `-` yang biasa ditulis
+pada *type signature* (lol, help!)). *Invarian* yang dimaksudkan disini
+adalah bisa dilakukannya pemetaan konten dari struktur `F[A]` ke `F[B]`.
+Menggunakan `identity`, kita dapat menentukan bahwa `A` bisa dengan aman
+di-downcast atau upcast (lol, help) menjadi `B` dengan melihat varian dari
+fungtor.
+
 `.map` may be understand by its contract "if you give me an `F` of `A` and a way
 to turn an `A` into a `B`, then I can give you an `F` of `B`".
+
+`.map` bisa dipahami dengan "bila kamu punya sebuah `F` atas `A` dan cara untuk
+mengubah `A` ke `B`, maka saya bisa memberi kamu sebuah `F` atas `B`."
 
 Likewise, `.contramap` reads as "if you give me an `F` of `A` and a way to turn
 a `B` into a `A`, then I can give you an `F` of `B`".
 
+Sebaliknya, `.contramap` dapat dibaca sebagai "bila kamu mempunyai `F` atas `A`
+dan cara untuk mengubah `B` menjadi `A`, maka saya dapat memberi kamu sebuah `F`
+atas `B`."
+
 We will consider an example: in our application we introduce domain specific
 types `Alpha`, `Beta`, `Gamma`, etc, to ensure that we don't mix up numbers in a
 financial calculation:
+
+Anggap contoh berikut: pada aplikasi kita, kita memperkenalkan tipe spesifik domain
+`Alpha`, `Beta`, `Gamma`, dan lain lain untuk memastikan bahwa kita tidak akan
+mencampur aduk angka angka pada kalkulasi finansial:
 
 {lang="text"}
 ~~~~~~~~
@@ -5630,13 +5667,27 @@ but now we're faced with the problem that we don't have any typeclasses for
 these new types. If we use the values in JSON documents, we have to write
 instances of `JsEncoder` and `JsDecoder`.
 
+namun, masalah diatas tergantikan dengan masalah baru mengenai tidak adanya
+kelas tipe untuk tipe baru ini. Bilamana kita menggunakan nilai pada dokumen
+JSON, kita harus menulis instans dari `JsEncoder` dan `JsDecoder` untuk tipe
+baru tadi.
+
 However, `JsEncoder` has a `Contravariant` and `JsDecoder` has a `Functor`, so
 we can derive instances. Filling in the contract:
+
+Untungnya, `JsEncoder` mempunyai sebuah `Contravariant` dan `JsDecoder` mempunyai
+sebuah `Functor` sehingga kita dapat menurunkan instans tersebut dengan mengisi
+kontrak:
 
 -   "if you give me a `JsDecoder` for a `Double`, and a way to go from a `Double`
     to an `Alpha`, then I can give you a `JsDecoder` for an `Alpha`".
 -   "if you give me a `JsEncoder` for a `Double`, and a way to go from an `Alpha`
     to a `Double`, then I can give you a `JsEncoder` for an `Alpha`".
+    
+-  "bila kamu memberi saya sebuah `JsDecoder` untuk `Double` dan cara untuk mengubah
+   `Double` menjadi `Alpha`, maka saya akan memberikan sebuah `JsDecoder` untuk `Alpha`."
+-  "bila kamu memberi saya sebuah `JsEncoder` untuk `Double` dan cara untuk mengubah
+   `Alpha` menjadi `Double`, maka saya akan memberikan sebuah `JsEncoder` untuk `Alpha`."
 
 {lang="text"}
 ~~~~~~~~
@@ -5651,6 +5702,13 @@ position* (method parameters) or in *covariant position* (return type). If a
 typeclass has a combination of covariant and contravariant positions, it might
 have an *invariant functor*. For example, `Semigroup` and `Monoid` have an
 `InvariantFunctor`, but not a `Functor` or a `Contravariant`.
+
+Metoda pada kelas tipe bisa saja mempunyai tipe parameter dengan posisi kontravarian
+(parameter metoda) atau posisi kovarian (tipe kembalian). Bila sebuah kelas tipe
+mempunyai sebuah kombinasi atas posisi kovarian dan kontravarian, bisa jadi
+kelas tipe tersebut mempunyai *fungtor invarian*. Sebagai contoh, `Semigroup`
+dan `Monoid` mempunyai `InvariantFunctor` namun tidak memiliki `Functor` maupun
+`Contravariant`.
 
 
 ## Apply and Bind
