@@ -5412,7 +5412,7 @@ provide a `.point`.
 Pada akhirnya, `Traverse1`, sebagaimana `Foldable1`, menyediakan varian metoda
 metoda untuk struktur data yang tidak bisa kosong. Selain itu, `Traverse1` juga
 menerima `Semigroup`, bukan `Monoid`, dan sebuah `Apply`, bukan `Applicative`.
-Harap diingat bahwa `Semigroup` tidak mempunyai `.empty` dan `Apply` tidak
+Harap diingat bahwa `Semigroup` tidak mempunyai `.empty` dan `Apply` tidak harus
 mempunyai `.point`.
 
 ### Align
@@ -5420,6 +5420,11 @@ mempunyai `.point`.
 `Align` is about merging and padding anything with a `Functor`. Before
 looking at `Align`, meet the `\&/` data type (spoken as *These*, or
 *hurray!*).
+
+Untuk bab ini, kita berbicara tentang `Align`. `Align` sendiri juga berbicara
+mengenai penggabungan pelapisan `Functor`. Ada baiknya sebelum kita menyelami
+`Align`, kita memandang sekilas mengenai tipe data `\&/` yang akan kita
+panggil dengan *hore!*
 
 {lang="text"}
 ~~~~~~~~
@@ -5431,6 +5436,11 @@ looking at `Align`, meet the `\&/` data type (spoken as *These*, or
 
 i.e. it is a data encoding of inclusive logical `OR`. `A` or `B` or both `A` and
 `B`.
+
+bisa dibilang, *hore!* merupakan penyandian data logika inklusif `OR`.
+`A`, `B`, ataupun keduanya. Jadi, bilamana ada token `F[A \&/ B]`,
+kita bisa menafsirkannya sebagai "sebuah fungtor yang bisa berisi `A`
+ataupun `B`."
 
 {lang="text"}
 ~~~~~~~~
@@ -5448,10 +5458,22 @@ i.e. it is a data encoding of inclusive logical `OR`. `A` or `B` or both `A` and
 a `C` and returns a lifted function from a tuple of `F[A]` and `F[B]`
 to an `F[C]`. `align` constructs a `\&/` out of two `F[_]`.
 
+`alignWith` menerima sebuah fungsi yang menghasilkan `C`, bisa dari `A`,
+`B`, ataupun keduanya, dan mengembalikan sebuah fungsi yang terangkat
+dari tuple `F[A]` dan `F[B]` menjadi `F[C]`. Sedangkan bila kita ingin
+membuat sebuah fungtor *hore!*, kita bisa menggunakan `align` yang
+membuat sebuah `\&/` dari dua `F[_]`.
+
 `merge` allows us to combine two `F[A]` when `A` has a `Semigroup`. For example,
 the implementation of `Semigroup[Map[K, V]]` defers to `Semigroup[V]`, combining
 two entries results in combining their values, having the consequence that
 `Map[K, List[A]]` behaves like a multimap:
+
+`merge` memberikan kita jalan untuk menggabungkan dua `F[A]` bila `A`
+mempunyai `Semigroup`. Sebagai contoh, implementasi dari `Semigroup[Map[K, V]]`
+mengikuti implementasi dari `Semigroup[V]` dan menggabungkan dua entri.
+Selain mengembalikan nilai penggabungkan, implmentasi ini juga berperilaku
+sebagaimana sebuah multimap:
 
 {lang="text"}
 ~~~~~~~~
@@ -5460,6 +5482,9 @@ two entries results in combining their values, having the consequence that
 ~~~~~~~~
 
 and a `Map[K, Int]` simply tally their contents when merging:
+
+dan ketika penggabungan terjadi, `Map[K, Int]` hanya perlu menambahkan
+isi dari map tersebut:
 
 {lang="text"}
 ~~~~~~~~
@@ -5470,6 +5495,11 @@ and a `Map[K, Int]` simply tally their contents when merging:
 `.pad` and `.padWith` are for partially merging two data structures that might
 be missing values on one side. For example if we wanted to aggregate independent
 votes and retain the knowledge of where the votes came from
+
+`.pad` dan `.padWith` biasa digunakan untuk menggabungkan dua struktur data,
+yang munggkin saja tidak lengkap pada salah satunya, secara parsial.
+Sebagai contoh, kita menggunakan fungsi ini saat kita ingin mengagregasi
+penghitungan suara independen dan tetap menyimpan asal dari suara tersebut.
 
 {lang="text"}
 ~~~~~~~~
@@ -5482,6 +5512,9 @@ votes and retain the knowledge of where the votes came from
 
 There are convenient variants of `align` that make use of the
 structure of `\&/`
+
+Ada beberapa varian dari `align` yang memudahkan kita untuk menggunakan
+struktur dari `\&/`
 
 {lang="text"}
 ~~~~~~~~
@@ -5496,6 +5529,9 @@ structure of `\&/`
 ~~~~~~~~
 
 which should make sense from their type signatures. Examples:
+
+yang seharusnya bisa terlihat dari *type signature* (lol, help) mereka.
+Contoh:
 
 {lang="text"}
 ~~~~~~~~
@@ -5521,6 +5557,10 @@ which should make sense from their type signatures. Examples:
 Note that the `A` and `B` variants use inclusive `OR`, whereas the
 `This` and `That` variants are exclusive, returning `None` if there is
 a value in both sides, or no value on either side.
+
+Harap dicatat bahwa varian `A` dan `B` menggunakan inklusif `OR` sedangkan
+varian `This` dan `That` menggunakan ekslusif `OR` yang mengembalikan `None`
+bila nilai pada salah satu sisi.
 
 
 ## Variance
