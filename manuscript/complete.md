@@ -5977,8 +5977,8 @@ Dan terakhir, `.forever`
 repeating an effect without stopping. The instance of `Apply` must be
 stack safe or we will get `StackOverflowError`.
 
-yang mengulang efek tanpa henti. Instans dari `Apply` harus aman secara
-alokasi stack atau kita bisa mendapatkan galat `StackOverflowError`.
+yang mengulang operasi dengan efek tanpa henti. Instans dari `Apply` harus aman
+secara alokasi stack atau kita bisa mendapatkan galat `StackOverflowError`.
 
 
 ### Bind
@@ -5986,6 +5986,13 @@ alokasi stack atau kita bisa mendapatkan galat `StackOverflowError`.
 `Bind` introduces `.bind`, synonymous with `.flatMap`, which allows functions
 over the result of an effect to return a new effect, or for functions over the
 values of a data structure to return new data structures that are then joined.
+
+Fungsi utama yang dibawa oleh `Bind` tentu adalah `.bind` yang sama dan sebangun
+dengan `.flatMap`. Dan sebagaimana yang telah kita pelajari pada bab sebelumnya,
+fungsi ini, `.bind`, memperkenankan sebuah fungsi untuk menerima nilai input dari
+keluaran dari fungsi dengan efek, dan pada akhirnya fungsi `.bind` mengembalikan
+sebuah nilai dengan efek yang sama dari fungsi pemberi nilai input. 
+Fungsi `.bind` ini juga bisa menggabungkan dua buah struktur data.
 
 {lang="text"}
 ~~~~~~~~
@@ -6010,14 +6017,29 @@ values of a data structure to return new data structures that are then joined.
 The `.join` may be familiar to users of `.flatten` in the stdlib, it takes a
 nested context and squashes it into one.
 
+Pembaca budiman yang biasa menggunakan fungsi `.flatten` dari pustaka standar
+mungkin akan merasa familiar dengan fungsi `.join`. `.join` menerima sebuah
+konteks yang berlapis dan meratakan lapisan lapisan tadi menjadi satu.
+
 Derived combinators are introduced for `.ap` and `.apply2` that require
 consistency with `.bind`. We will see later that this law has consequences for
 parallelisation strategies.
 
+Untuk kombinator turunan yang ada pada kelas tipe ini, pembaca budiman mendapatkan
+`.ap` dan `.apply2` yang mempunyai batasan untuk selalu berkesesuaian dengan `.bind`.
+Pada nantinya, kita akan menyaksikan bahwa hukum ini berpengaruh besar dalam
+strategi paralelisasi.
+
 `mproduct` is like `Functor.fproduct` and pairs the function's input
 with its output, inside the `F`.
 
+Sebagaimana halnya dengan `Functor.fproduct`, `mproduct` juga memasangkan
+masukan dan keluaran dari fungsi tersebut di dalam `F`.
+
 `ifM` is a way to construct a conditional data structure or effect:
+
+Bilamana `if` merupakan konstruk kondisional, `ifM` merupakan konstruk
+kondisional yang menerima struktur data atau operasi dengan efek:
 
 {lang="text"}
 ~~~~~~~~
@@ -6028,6 +6050,11 @@ with its output, inside the `F`.
 `ifM` and `ap` are optimised to cache and reuse code branches, compare
 to the longer form
 
+Untuk masalah performa, pembaca budiman tidak perlu kuatir bila menggunakan
+`ifM` dan `ap` karena kedua fungsi ini sudah dioptimisasi untuk menyimpan
+hasil eksekusi cabang kode di tembolok dan menggunakannya kembali saat
+kondisi terpenuhi. Sebagai contoh, silakan perhatikan contoh berikut
+
 {lang="text"}
 ~~~~~~~~
   scala> List(true, false, true).flatMap { b => if (b) List(0) else List(1, 1) }
@@ -6036,23 +6063,48 @@ to the longer form
 which produces a fresh `List(0)` or `List(1, 1)` every time the branch
 is invoked.
 
+yang menciptakan objek `List(0)` atau `List(1, 1)` baru tiap kali percabangan
+dieksekusi.
+
 A> These kinds of optimisations are possible in FP because all methods
 A> are deterministic, also known as *referentially transparent*.
+A>
+A> Optimisasi semacam ini mungkin dilakukan pada pemrograman fungsional
+A> yang disebabkan karena semua metoda adalah fungsi deterministik.
+A> Fungsi semacam ini juga dikenal dengan *rujukan transparan*. 
 A> 
 A> If a method returns a different value every time it is called, it is
 A> *impure* and breaks the reasoning and optimisations that we can
 A> otherwise make.
+A>
+A> Bilamana sebuah metoda mengembalikan nilai yang berbeda tiap kali metoda
+A> tersebut dipanggil, maka metoda ini dianggap tidak murni (lol, murni apa sih?)
+A> dan mengaburkan penalaran dan optimisasi yang seharusnya bisa dilakukan.
 A> 
 A> If the `F` is an effect, perhaps one of our drone or Google algebras,
 A> it does not mean that the output of the call to the algebra is cached.
 A> Rather the reference to the operation is cached. The performance
 A> optimisation of `ifM` is only noticeable for data structures, and more
 A> pronounced with the difficulty of the work in each branch.
+A>
+A> Bila `F` merupakan sebuah efek, anggap saja salah satu dari drone kita
+A> atau aljabar Google, bukan berarti keluaran atas pemanggilan aljabar
+A> tersebut disimpan di tembolok. Melainkan, rujukan pada operasi pemanggilan
+A> tersebutlah yang disimpan. Sedangkan optimisasi performa dari `ifM` hanya
+A> terlihat bila kita melakukan perbandingan atas struktur data. Selain itu
+A> perbedaan semakin jelas terlihat bila tugas yang dikerjakan pada tiap
+A> cabang semakin berat.
 A> 
 A> We will explore the concept of determinism and value caching in more
 A> detail in the next chapter.
+A>
+A> Kita akan mengeksplorasi konsep atas determinisme dan penyimpanan nilai di
+A> tembolok lebih lanjut pada bab selanjutnya.
 
 `Bind` also has some special syntax
+
+Untuk pembaca yang menyukai operator sintaks, `Bind` juga menyediakan
+sintaks khusus.
 
 {lang="text"}
 ~~~~~~~~
@@ -6064,6 +6116,10 @@ A> detail in the next chapter.
 
 `>>` is when we wish to discard the input to `bind` and `>>!` is when
 we want to run an effect but discard its output.
+
+Operator `>>` biasa digunakan bila kita ingin membuang masukan `bind`.
+Sedangkan untuk `>>!` digunakan ketika kita ingin menjalankan sebuah
+efek dan membuang keluarannya.
 
 
 ## Applicative and Monad
