@@ -6118,14 +6118,18 @@ sintaks khusus.
 we want to run an effect but discard its output.
 
 Operator `>>` biasa digunakan bila kita ingin membuang masukan `bind`.
-Sedangkan untuk `>>!` digunakan ketika kita ingin menjalankan sebuah
-efek dan membuang keluarannya.
+Sebaliknya, `>>!` digunakan ketika kita ingin menjalankan sebuah efek
+dan membuang keluarannya.
 
 
 ## Applicative and Monad
 
 From a functionality point of view, `Applicative` is `Apply` with a
 `pure` method, and `Monad` extends `Applicative` with `Bind`.
+
+Bila dipandang dari sudut pandang fungsionalitas, `Applicative` merupakan
+`Apply` dengan metoda `pure`. Kurang lebih hal yang sama dengan `Monad`,
+merupakan `Applicative` yang diperluas dengan menggabungkan `Bind`.
 
 {width=100%}
 ![](images/scalaz-applicative.png)
@@ -6144,8 +6148,16 @@ In many ways, `Applicative` and `Monad` are the culmination of everything we've
 seen in this chapter. `.pure` (or `.point` as it is more commonly known for data
 structures) allows us to create effects or data structures from values.
 
+Setelah mempertimbangkan banyak hal, `Applicative` dan `Monad` bisa dianggap sebagai
+puncak atas semua yang telah kita pelajari dari bab ini.
+Sebagai contoh, `.pure`, atau `.point` bagi struktur data, acap kali digunakan
+untuk menghasilkan efek ataupun struktur data dari nilai.
+
 Instances of `Applicative` must meet some laws, effectively asserting
 that all the methods are consistent:
+
+Untuk membuat instans `Applicative`, pembaca budiman harus menerapkan sifat-sifat
+sebagai berikut:
 
 -   **Identity**: `fa <*> pure(identity) === fa`, (where `fa` is an `F[A]`) i.e.
     applying `pure(identity)` does nothing.
@@ -6156,17 +6168,43 @@ that all the methods are consistent:
     an `F[A => B]`), i.e. `pure` is a left and right identity
 -   **Mappy**: `map(fa)(f) === fa <*> pure(f)`
 
+-   Identitas: `fa <*> pure(identity) === fa` dimana `fa` merupakan sebuah `F[A]`.
+    Sebagai contoh, pengaplikasian `pure(identity)` harus tidak mempunyai efek apapun
+    tanpa mengubah apapun.
+-   Homomorfisme: `pure(a) <*> pure(ab) === pure(ab(a))` dimana `ab` merupakan
+    pemeteaan dari `A` ke `B` (`A => B`). Misalkan, penerapan sebuah fungsi `pure`
+    ke sebuah nilai `pure` adalah sama dengan penerapan fungsi tersebut ke sebuah
+    nilai yang sama dan dilanjutkan dengan menerapkan fungsi `pure` pada hasilnya.
+-   Komutatif: `pure(a) <*> fab == fab <*> pure (f => f(a))` dimana `fab` merupakan
+    sebuah `F[A => B]`. Contoh yang paling sederhana dari sifat ini adalah `pure`
+    yang merupakan sebuah fungsi identitas baik untuk sisi kiri maupun sisi kanan.
+-   Mappy (lol, ini apa, ya?): `map(fa)(f) === fa <*> pure(f)`.
+
 `Monad` adds additional laws:
+
+Dan sifat tambahan untuk `Monad` diatas adalah:
 
 -   **Left Identity**: `pure(a).bind(f) === f(a)`
 -   **Right Identity**: `a.bind(pure(_)) === a`
 -   **Associativity**: `fa.bind(f).bind(g) === fa.bind(a => f(a).bind(g))` where
     `fa` is an `F[A]`, `f` is an `A => F[B]` and `g` is a `B => F[C]`.
 
+-   Identitas Kiri: `pure(a).bind(f) === f(a)`.
+-   Identitas Kanan: `a.bind(pure(_)) === a`.
+-   Asosiatif: `fa.bind(f).bind(g) === fa.bind(a => f(a).bind(g))` dimana `fa`
+    merupkana sebuah `F[A]`, `f` merupakan sebuah `A => F[B]` dan `g` merupakan
+    `B => F[C]`.
+
 Associativity says that chained `bind` calls must agree with nested
 `bind`. However, it does not mean that we can rearrange the order,
 which would be *commutativity*. For example, recalling that `flatMap`
 is an alias to `bind`, we cannot rearrange
+
+Sifat asosiatif menentukan bahwa pemanggilan fungsi `bind` yang disambung harus
+sesuai dengan fungsi `bind` lainnya. Walaupun bukan berarti kita bisa dengan
+seenaknya mengubah urutan pemanggilan fungsi fungsi tersebut karena hal tersebut
+adalah sifat komutatif. Sebagai contoh, `flatMap` yang merupakan alias dari `bind`
+tidak dapat diubah dari
 
 {lang="text"}
 ~~~~~~~~
@@ -6176,7 +6214,7 @@ is an alias to `bind`, we cannot rearrange
   } yield true
 ~~~~~~~~
 
-as
+menjadi
 
 {lang="text"}
 ~~~~~~~~
@@ -6190,8 +6228,14 @@ as
 effect of starting then stopping a node is different to stopping then
 starting it!
 
+karena `start` dan `stop` tidak bersifat komutatif. Tentu karena efek dari
+kedua fungsi tersebut berbeda (bahkan berkebalikan!).
+
 But `start` is commutative with itself, and `stop` is commutative with
 itself, so we can rewrite
+
+Berbeda halnya dengan penerapan sifat komutatif untuk pemanggilan beberapa `start`
+maupun `stop`. Sebagai contoh, kita dapat menulis ulang fungsi berikut
 
 {lang="text"}
 ~~~~~~~~
@@ -6201,7 +6245,7 @@ itself, so we can rewrite
   } yield true
 ~~~~~~~~
 
-as
+menjadi
 
 {lang="text"}
 ~~~~~~~~
@@ -6215,9 +6259,19 @@ which are equivalent for our algebra, but not in general. We're making a lot of
 assumptions about the Google Container API here, but this is a reasonable choice
 to make.
 
+yang, bila menggunakan dipandang menggunakan kacamata aljabar kita, setara.
+Tentu hal ini tidak bisa secara buta diterapkan ke semua aljabar.
+Lalu, kenapa kita melakukan hal ini? Karena kita mengasumsikan banyak hal dari
+Antarmuka Pemrograman Aplikasi dari Google Container yang kurang lebih cukup masuk
+akal dilakukan.
+
 A practical consequence is that a `Monad` must be *commutative* if its
 `applyX` methods can be allowed to run in parallel. We cheated in
 Chapter 3 when we ran these effects in parallel
+
+Konsekuensi praktis dari hal ini adalah sebuah `Monad` harus bersifat komutatif
+bila moteda `applyX` dapat dijalankan secara paralel. Dan pada Bab 3, kita mengambil
+jalan pintas saat kita menjalankan efek efek ini secara paralel
 
 {lang="text"}
 ~~~~~~~~
@@ -6229,8 +6283,19 @@ interpreting our application, later in the book, we will have to provide
 evidence that these effects are in fact commutative, or an asynchronous
 implementation may choose to sequence the operations to be on the safe side.
 
+karena kita tahu bahwa fungsi-fungsi diatas bersifat komutatif bila dijalankan
+secara bebarengan. Bila nanti sudah waktunya untuk kita menerjemahkan aplikasi kita,
+kita harus membuktikan bahwa efek-efek yang dihasilkan oleh fungsi-fungsi diatas
+harus bersifat komutatif dan bila implementasi bersifat asinkronus, kita bisa saja
+mengubah operasi menjadi bersifat berurutan, untuk menghindari kejadian yang
+tidak diinginkan.
+
 The subtleties of how we deal with (re)-ordering of effects, and what
 those effects are, deserves a dedicated chapter on Advanced Monads.
+
+Mengenai seluk beluk tentang cara yang dianjurkan saat kita berurusan dengan
+pengurutan efek dan apa saja efek efek yang ada, akan dibahas pada bab khusus
+mengenai Monad Lanjutan.
 
 
 ## Divide and Conquer
