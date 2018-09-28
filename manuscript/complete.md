@@ -6305,6 +6305,9 @@ mengenai Monad Lanjutan.
 
 `Divide` is the `Contravariant` analogue of `Apply`
 
+Sebagaimana yang terlihat pada gambar di atas, `Divide` berkorelasi
+dengan `Contravariant` sebagaimana `Apply` berkorelasi dengan `Functor`.
+
 {lang="text"}
 ~~~~~~~~
   @typeclass trait Divide[F[_]] extends Contravariant[F] {
@@ -6320,10 +6323,20 @@ mengenai Monad Lanjutan.
 we're given an `F[A]` and an `F[B]`, then we can get an `F[C]`. Hence,
 *divide and conquer*.
 
+`divide` menyatakan bahwa bila kita bisa memecah sebuah `C` menjadi sebuah
+`A` dan `B`, dan kita mendapat sebuah `F[A]` dan `F[B]`, maka kita bisa
+mendapatkan seubah `F[C]`.
+
 This is a great way to generate contravariant typeclass instances for
 product types by breaking the products into their parts. Scalaz has an
 instance of `Divide[Equal]`, let's construct an `Equal` for a new
 product type `Foo`
+
+Hal semacam ini sangat memudahkan kita untuk membuat instans kelas tipe
+kontravarian untuk tipe produk dengan memecah produk-produk menjadi
+bagian-bagian yang menyusunnya. Sebagai contoh, mari kita membuat sebuah
+`Equal` untuk tipe produk baru, `Foo`, dari instans `Divide[Equal]` milik
+Scalaz
 
 {lang="text"}
 ~~~~~~~~
@@ -6338,6 +6351,10 @@ product type `Foo`
 
 Mirroring `Apply`, `Divide` also has terse syntax for tuples. A softer
 *divide so that we may reign* approach to world domination:
+
+Sebagaimana dengan `Apply`, `Divide` juga mempunyai sintaks untuk tuple.
+Berikut merupakan contoh memecah belah lalu menguasai dalah menyelesaikan
+permasalah pada perangkat lunak:
 
 {lang="text"}
 ~~~~~~~~
@@ -6354,8 +6371,20 @@ derive instances for any `case class`. Similarly, decoder typeclasses
 can provide an `Apply` instance. We will explore this in a dedicated
 chapter on Typeclass Derivation.
 
+Secara umum, bila kelas tipe penyandi mampu menyediakan sebuah instans
+dari `Divide`, dan tidak berhenti hanya pada `Contravariant`, adalah
+sebuah hal yang tidak mustahil untuk menurunkan instans untuk semua
+`case class`. Sama halnya dengan kelas tipe dekoder juga mampu menyediakan
+instans `Apply`. Pembahasan mengenai penurunan kelas tipe akan dibahas
+lebih lanjut pada bab berikutnya.
+
 `Divisible` is the `Contravariant` analogue of `Applicative` and introduces
 `.conquer`, the equivalent of `.pure`
+
+Seperti yang sudah dibahas pada beberapa paragraf di atas, `Divisible` ke
+`Contravariant` adalah sama halnya dengan `Applicative` ke `Functor`.
+Selain itu, kelas tipe ini menyediakan metoda `.conquer` yang sama dengan
+`.pure`
 
 {lang="text"}
 ~~~~~~~~
@@ -6368,6 +6397,12 @@ chapter on Typeclass Derivation.
 ignored. Such values are called *universally quantified*. For example, the
 `Divisible[Equal].conquer[INil[String]]` returns an implementation of `Equal`
 for an empty list of `String` which is always `true`.
+
+`.conquer` memperkenankan kita untuk membuat penerapan sederhana yang
+mengabaikan parameter tipe. Nilai nilai tersebut biasa disebut sebagai
+*terkuantifikasi secara umum* (lol, help me senpai. ;-; ). Sebagai contoh,
+`Divisible[Equal].conquer[INil[String]]` akan mengembalikan sebuah
+implementasi `Equal` untuk list `String` kosong yang akan selalu `true`.
 
 
 ## Plus
