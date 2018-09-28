@@ -6414,6 +6414,10 @@ implementasi `Equal` untuk list `String` kosong yang akan selalu `true`.
 the equivalent of `Monoid` (they even have the same laws) whereas
 `IsEmpty` is novel and allows us to query if an `F[A]` is empty:
 
+`Plus` merupakan `Semigroup` yang dikhususkan untuk konstruktor tipe.
+Sedangkan `PlusEmpty` adalah padanan untuk `Monoid`. Untuk `IsEmpty`
+lebih dikhususkan untuk menentukan apakah sebuah `F[A]` kosong atau tidak.
+
 {lang="text"}
 ~~~~~~~~
   @typeclass trait Plus[F[_]] {
@@ -6432,6 +6436,8 @@ A> Fighters...
 
 Although it may look on the surface as if `<+>` behaves like `|+|`
 
+Walaupun secara kasat mata `<+>` berperilaku seperti `|+|`
+
 {lang="text"}
 ~~~~~~~~
   scala> List(2,3) |+| List(7)
@@ -6445,6 +6451,12 @@ it is best to think of it as operating only at the `F[_]` level, never looking
 into the contents. `Plus` has the convention that it should ignore failures and
 "pick the first winner". `<+>` can therefore be used as a mechanism for early
 exit (losing information) and failure-handling via fallbacks:
+
+alangkah baiknya untuk menganggap operator ini hanya beroperasi pada `F[_]` dan
+tidak melihat isi dari fungtor tersebut. `Plus` juga mempunyai konvensi untuk
+selalu menghiraukan galat dan mengambil hasil operasi pertama. Maka dari itu,
+operator `<+>` dapat digunakan sebagai mekanisme arus pendek dan penanganan galat
+melalui gerakan mundur teratur:
 
 {lang="text"}
 ~~~~~~~~
@@ -6462,6 +6474,10 @@ For example, if we have a `NonEmptyList[Option[Int]]` and we want to ignore
 `None` values (failures) and pick the first winner (`Some`), we can call `<+>`
 from `Foldable1.foldRight1`:
 
+Sebagai contoh, bila kita mempunyai `NonEmptyList[Option[Int]]` dan kita ingin
+menghiraukan nilai `None` beserta mengambil hasil yang pertama kali munncul,
+kita akan memanggil `<+>` dari `Foldable1.foldRight1`:
+
 {lang="text"}
 ~~~~~~~~
   scala> NonEmptyList(None, None, Some(1), Some(2), None)
@@ -6475,6 +6491,13 @@ the section on Appendable Things. Our objective was to "pick the last winner",
 which is the same as "pick the winner" if the arguments are swapped. Note the
 use of the TIE Interceptor for `ccy` and `otc` with arguments swapped.
 
+Bahkan nyatanya, setelah kita tahu mengenai `Plus`, kita akan menyadari bahwa
+kita tidak perlu merusak keharmonisan atas kelas tipe (saat mendefinisikan
+sebuah `Monoid[Option[A]]` dengan cakupan lokal) pada seksi Appendable Things.
+Tujuan kita adalah "mengambil hasil pertama yang ditemui" yang sama saja dengan
+(lol, help!!!). Mohon diperhatikan, penggunaan `<+>` untuk `ccy` dan `otc` ditukar
+termpatnya.
+
 {lang="text"}
 ~~~~~~~~
   implicit val monoid: Monoid[TradeTemplate] = Monoid.instance(
@@ -6486,6 +6509,8 @@ use of the TIE Interceptor for `ccy` and `otc` with arguments swapped.
 ~~~~~~~~
 
 `Applicative` and `Monad` have specialised versions of `PlusEmpty`
+
+`Applicative` dan `Monad` juga mempunyai versi khusus dari `PlusEmpty`
 
 {lang="text"}
 ~~~~~~~~
@@ -6502,6 +6527,13 @@ use of the TIE Interceptor for `ccy` and `otc` with arguments swapped.
 `PlusEmpty[F].monoid` rather than the inner content's `Monoid`. For
 `List[Either[String, Int]]` this means `Left[String]` values are converted into
 `.empty`, then everything is concatenated. A convenient way to discard errors:
+
+`.unite` memperkenankan kita untuk menekuk struktur data menggunakan kontainer
+`PlusEmpty[F].monoid` paling luar, bukan kontainer bagian dalam. Sebagai contoh,
+untuk `List[Either[String, Int]]`, `Left[String]` lah yang akan dikonversi ke
+`.empty`, bukan `List[A]`, yang akan dikonversi menjadi `.empty`. Dan dilanjutkan
+dengan menggabungkan semuanya. Untuk pemrogram yang santai, metoda ini memberikan
+kita kenyamanan untuk membuang galat galat yang mungkin terjadi.
 
 {lang="text"}
 ~~~~~~~~
@@ -6522,8 +6554,15 @@ support as discussed in Chapter 2. It is fair to say that the Scala
 language has built-in language support for `MonadPlus`, not just
 `Monad`!
 
+`withFilter` memperkenankan kita untuk menggunakna dukungan `for` comprehension
+(lol, help) yang sudah dibahas pada Bab 2. Hal ini menunjukkan bahwa Scala
+sudah mendukung `MonadPlus` dan tidak hanya `Monad` saja.
+
 Returning to `Foldable` for a moment, we can reveal some methods that
 we did not discuss earlier
+
+Kembali ke `Foldable`, kita akan menunjukkan beberapa metoda yang tidak
+kita diskusikan sebelumnya
 
 {lang="text"}
 ~~~~~~~~
@@ -6538,6 +6577,9 @@ we did not discuss earlier
 `msuml` does a `fold` using the `Monoid` from the `PlusEmpty[G]` and
 `collapse` does a `foldRight` using the `PlusEmpty` of the target
 type:
+
+`msuml` akan mem-`fold` menggunakan `Monoid` dari `PlusEmpty[G]` dan
+`collapse` mem-`foldRight` dengan menggunakan `PlusEmpty` dari tipe target:
 
 {lang="text"}
 ~~~~~~~~
