@@ -6599,6 +6599,9 @@ type:
 Some of the typeclasses in Scalaz are stand-alone and not part of the
 larger hierarchy.
 
+Beberapa kelas tipe pada Scalaz tidak dapat menjadi bagian dari hierarki
+seperti `Monad`, `Applicative`, `Functor` dkk.
+
 {width=80%}
 ![](images/scalaz-loners.png)
 
@@ -6625,10 +6628,21 @@ The core method is `zip` which is a less powerful version of
 behave like `Apply.apply2`. Indeed, an `Apply[F]` can be created from
 a `Zip[F]` and a `Functor[F]` by calling `ap`.
 
+Metoda inti dari kelas tipe ini adalah `zip` yang bisa dianggap sebagai
+`Divide.tuple2` yang kurang fleksibel. Dan bila terdapat sebuah `Functor[F]`
+maka `zipWith` bisa berperilaku sebagaimana `Apply.apply2`.
+Dan menariknya, sebuah `Apply[F]` dapat dibuat dengan mamnggil `ap` dan
+mengaplikasikannya pada `Zip[F]` dan `Functor[F]`.
+
 `apzip` takes an `F[A]` and a lifted function from `F[A] => F[B]`,
 producing an `F[(A, B)]` similar to `Functor.fproduct`.
 
-A> `<*|*>` is the creepy Jawa operator.
+`apzip`, mirip dengan `Functor.fproduct` menerima sebuah `F[A]` dan sebuah
+fungsi terangkat dari `F[A] => F[B]` dan menghasilkan sebuah `F[(A, B)]`.
+
+A> `<*|*>` is the creepy Jaws operator.
+A>
+A> Anggap operator `<*|*>` sebagai hiu pada film Jaws.
 
 {lang="text"}
 ~~~~~~~~
@@ -6648,9 +6662,18 @@ The core method is `unzip` with `firsts` and `seconds` allowing for
 selecting either the first or second element of a tuple in the `F`.
 Importantly, `unzip` is the opposite of `zip`.
 
+Metoda utama dari kelas tipe `Unzip` adalah `unzip` dengan `firsts` 
+dan `seconds` sebagai pemilih elemen pertama ataupun kedua dari pasangan
+pada `F`. Dan yang paling penting adalah, `unzip` merupakan kebalikan
+dari `zip`.
+
 The methods `unzip3` to `unzip7` are repeated applications of `unzip`
 to save on boilerplate. For example, if handed a bunch of nested
 tuples, the `Unzip[Id]` is a handy way to flatten them:
+
+Metoda `unzip3` sampai `unzip7` merupakan pengaplikasian yang diulang
+dari `unzip` untuk menghilangkan basa basi. Sebagai contoh, bila kita
+menerima sebuah tuple berlapis, `Unzip[Id]` bisa dengan sigap meratakannya:
 
 {lang="text"}
 ~~~~~~~~
@@ -6661,6 +6684,10 @@ tuples, the `Unzip[Id]` is a handy way to flatten them:
 In a nutshell, `Zip` and `Unzip` are less powerful versions of
 `Divide` and `Apply`, providing useful features without requiring the
 `F` to make too many promises.
+
+Pendek kata, `Zip` dan `Unzip` merupakan versi yang lebih kaku dari
+`Divide` dan `Apply`. Selain itu, kedua kelas tipe sebelumnya menyediakan
+fitur fitur berguna tanpa harus menyaratkan penggunaan `F`.
 
 
 ### Optional
