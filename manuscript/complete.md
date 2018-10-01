@@ -7028,8 +7028,17 @@ and we want to `map` over both sides. For example we might be tracking
 failures in the left of an `Either` and we want to do something with the
 failure messages.
 
+Seringkali kita menemui keadaan dimana kita mempunyai sebuah benda yang
+mempunyai dua tipe, dan kita ingin memetakan keduanya ke kategori lain.
+Sebagai contoh, mungkin kita ingin melacak galat pada bagian kiri sebuah
+`Either` dan ingin melakukan sesuatu pada pesan galat tersebut. 
+
 The `Functor` / `Foldable` / `Traverse` typeclasses have bizarro
 relatives that allow us to map both ways.
+
+Kelas tipe `Functor` / `Foldable` / `Traverse` mempunyai sepupu yang
+janggal yang memperkenankan kita untuk memetakan dari satu kategori
+ke kategori lainnya secarabolak balik. 
 
 {width=30%}
 ![](images/scalaz-bithings.png)
@@ -7063,12 +7072,21 @@ relatives that allow us to map both ways.
 ~~~~~~~~
 
 A> `<-:` and `:->` are the happy operators!
+A>
+A> `<-:` dan `:->` merupakan operator om senang!
 
 Although the type signatures are verbose, these are nothing more than
 the core methods of `Functor`, `Foldable` and `Bitraverse` taking two
 functions instead of one, often requiring both functions to return the
 same type so that their results can be combined with a `Monoid` or
 `Semigroup`.
+
+Walaupun signature tipe (lol, cek ini) dari metoda-metoda di atas bisa
+dikatakan sangat lantung, mereka tidak lain dan tidak bukan hanyalah
+metoda inti dari `Functor`, `Foldable`, dan `Bitraverse` yang menerima
+dua fungsi, bukan satu. Selain itu, metoda-metoda tadi juga memaksa
+kedua fungsi untuk mengembalikan tipe yang sama dengan pertimbangan
+keluaran mereka dapat digabungkan menggunakan `Monoid` ataupun `Semigroup`.
 
 {lang="text"}
 ~~~~~~~~
@@ -7101,6 +7119,10 @@ In addition, we can revisit `MonadPlus` (recall it is `Monad` with the
 ability to `filterWith` and `unite`) and see that it can `separate`
 `Bifoldable` contents of a `Monad`
 
+Sebagai tamabahan, kita dapat meninjau kembali `MonadPlus` (yang merupakan
+`Monad` dengan tambahan `filterWith` dan `unite`) dan mempertimbangkan
+apakah kelas tipe ini bisa memisah konten `Bifoldable` dari sebuah `Monad`
+
 {lang="text"}
 ~~~~~~~~
   @typeclass trait MonadPlus[F[_]] {
@@ -7112,6 +7134,10 @@ ability to `filterWith` and `unite`) and see that it can `separate`
 
 This is very useful if we have a collection of bi-things and we want
 to reorganise them into a collection of `A` and a collection of `B`
+
+Hal ini sangat berguna bila kita mempunyai sebuah koleksi dari bi-things
+dan kita ingin me-reorganisasi menjadi sebuah koleksi atas `A` dan
+koleksi atas `B`
 
 {lang="text"}
 ~~~~~~~~
@@ -7130,16 +7156,36 @@ of polymorphic functionality. But to put it into perspective: there
 are more traits in the Scala stdlib Collections API than typeclasses
 in Scalaz.
 
+Sesungguhnya, materi pada bab ini cukup banyak dan kita sudah mengeksplorasi
+pustaka standar untuk fungsionalitas polimorfis. Namun, bila kita harus
+membandingkan satu dengan lainnya, pustaka standar Koleksi milik Scala
+memiliki *trait* yang jauh lebih banyak bila dibandingkan dengan kelas
+tipe yang dimiliki oleh Scalaz.
+
 It is normal for an FP application to only touch a small percentage of the
 typeclass hierarchy, with most functionality coming from domain-specific
 algebras and typeclasses. Even if the domain-specific typeclasses are just
 specialised clones of something in Scalaz, it is OK to refactor it later.
 
+Adalah hal yang jamak ditemui bila sebuah aplikasi pemrograman fungsional
+hanya menyentuh sebagian kecil dari hierarki kelas tipe. Hal itu juga
+dengan mempertimbangkan bahwa kebanyakan fungsionalitas berasal dari aljabar
+spesifik domain dan kelas tipe. Bahkan bila kelas tipe yang spesifik
+pada domain hanya merupakan salinan khusus dari kelas tipe Scalaz,
+kita bisa melakukan refaktor di lain waktu.
+
 To help, we have included a cheat-sheet of the typeclasses and their
 primary methods in the Appendix, inspired by Adam Rosien's [Scalaz
 Cheatsheet](http://arosien.github.io/scalaz-cheatsheets/typeclasses.pdf).
 
+Sebagai tambahan, kita juga sudah mengikutsertakan contekan untuk kelas
+tipe dan metoda utamanya pada Lampiran. Contekan ini mendapatkan inspirasi
+dari [Contekan Scalaz](http://arosien.github.io/scalaz-cheatsheets/typeclasses.pdf)
+yang ditulis oleh Adam Rosien.
+
 To help further, Valentin Kasas explains how to [combine `N` things](https://twitter.com/ValentinKasas/status/879414703340081156):
+
+Lebih lanjut, Valentin Kasas menjelaskan mengenai [Penggabungan `N` thing](https://twitter.com/ValentinKasas/status/879414703340081156):
 
 {width=70%}
 ![](images/shortest-fp-book.png)
