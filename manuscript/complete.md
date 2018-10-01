@@ -6857,7 +6857,7 @@ Consider a *neighbourhood* (`Hood` for short) for a list containing all the
 elements to the left of an element (`lefts`), the element itself (the `focus`),
 and all the elements to its right (`rights`).
 
-Misalkan, sebuah *perkampungan* (disingkat `Hood` dari *neighbourhood*) yang
+Misalkan, sebuah *daerah sekeliling* (disingkat `Hood` dari *neighbourhood*) yang
 terdiri atas sebuah daftar elemen bagian kiri (`lefts`), elemen yang dilihat
 (`focus`), dan sebuah daftar elemen pada bagian kanan (`rights`).
 
@@ -6991,6 +6991,10 @@ One application of a zipper is for *cellular automata*, which compute
 the value of each cell in the next generation by performing a
 computation based on the neighbourhood of that cell.
 
+Salah satu penggunaan dari sebuah zipper adalah *automata seluler*
+yang menghitung nilai tiap sel generasi selanjutnya dengan melakukan
+penghitungan terhadap sel-sel di sekeliling sel tadi.
+
 
 ### Cozip
 
@@ -7012,6 +7016,10 @@ its symmetry with `unzip`. Whereas `unzip` splits `F[_]` of tuples
 (products) into tuples of `F[_]`, `cozip` splits `F[_]` of
 disjunctions (coproducts) into disjunctions of `F[_]`.
 
+Walaupun dinamai sebagai `cozip`, kelas tipe ini mungkin lebih cocok
+bila dibicarakan sebagai simetri dari `unzip`. Bilamana `unzip` memisah
+`F[_]` dari tuple (produk) menjadi tuple `F[_]`, `cozip` memisah `F[_]`
+dari disjungsi (ko-produk) menjadi disjungsi `F[_]`.
 
 ## Bi-things
 
