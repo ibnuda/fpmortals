@@ -6695,9 +6695,16 @@ fitur fitur berguna tanpa harus menyaratkan penggunaan `F`.
 `Optional` is a generalisation of data structures that can optionally
 contain a value, like `Option` and `Either`.
 
+Pada dasarnya, `Optional` adalah bentuk umu dari struktur data yang
+mungkin mempunyai nilai, seperti `Option` dan `Either`.
+
 Recall that `\/` (*disjunction*) is Scalaz's improvement of
 `scala.Either`. We will also see `Maybe`, Scalaz's improvement of
 `scala.Option`
+
+Bila pembaca budiman ingat mengenai operator disjungsi (`\/`), operator
+tersebut merupakan perbaikan atas `scala.Either`. Selain itu, Scalaz juga
+memberikan operator lain sebagai peningkatan untuk `scala.Option`.
 
 {lang="text"}
 ~~~~~~~~
@@ -6728,7 +6735,16 @@ which is a way of letting the `F[_]` return some implementation
 specific `F[B]` or the value. For example, `Optional[Option].pextract`
 returns `Option[Nothing] \/ A`, i.e. `None \/ A`.
 
+Sebagaimana cuplikan diatas, tentu pembaca budiman cukup familiar
+dengan metoda-metoda di atas. Satu metoda yang mungkin agak asing adalah
+`pextract` yang menerima sebuah `Functor[A]` dan mengembalikan salah satu
+dari `F[B]` atau nilai `a`. Sebagai contoh, `Optional[Option].pextract`
+akan mengembalikan `Option[Nothing] \/ A`.
+
 Scalaz gives a ternary operator to things that have an `Optional`
+
+Selain itu, Scalaz juga memberikan operator terner untuk apapun yang
+mempunyai kelas tipe `Optional`
 
 {lang="text"}
 ~~~~~~~~
@@ -6740,7 +6756,7 @@ Scalaz gives a ternary operator to things that have an `Optional`
   }
 ~~~~~~~~
 
-for example
+sebagai contoh
 
 {lang="text"}
 ~~~~~~~~
