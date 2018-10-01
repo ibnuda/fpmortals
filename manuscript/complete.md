@@ -6846,9 +6846,20 @@ transparency to interpret an `IO[A]` into an `A`. But for collection-like *data
 structures*, it is a way to construct a view of all elements alongside their
 neighbours.
 
+`.copoint` (atau `.copure`) mengelupas sebuah elemen dari konteks yang
+melingkupinya. Efek biasanya tidak mempunyai instans `Comonad` karena
+`Comonad` akan menghapus transparansi rujukan saat penginterpretasian sebuah
+`IO[A]` menjadi `A`. Namun, untuk struktur data koleksi, penggunaan `.copoint`
+merupakan salah satu cara untuk mengakses semua elemen beserta elemen
+yang berdekatan dengannya.
+
 Consider a *neighbourhood* (`Hood` for short) for a list containing all the
 elements to the left of an element (`lefts`), the element itself (the `focus`),
 and all the elements to its right (`rights`).
+
+Misalkan, sebuah *perkampungan* (disingkat `Hood` dari *neighbourhood*) yang
+terdiri atas sebuah daftar elemen bagian kiri (`lefts`), elemen yang dilihat
+(`focus`), dan sebuah daftar elemen pada bagian kanan (`rights`).
 
 {lang="text"}
 ~~~~~~~~
@@ -6859,6 +6870,10 @@ The `lefts` and `rights` should each be ordered with the nearest to
 the `focus` at the head, such that we can recover the original `IList`
 via `.toIList`
 
+Struktur `lefts` dan `rights` harus dibuat dengan yang dimulai dari
+`focus` lalu semakin menjauh bila ditambahkan, sehingga kita bisa
+mendapatkan kembali `IList` awal dengan metoda `.toIList`.
+
 {lang="text"}
 ~~~~~~~~
   object Hood {
@@ -6868,6 +6883,9 @@ via `.toIList`
 
 We can write methods that let us move the focus one to the left
 (`previous`) and one to the right (`next`)
+
+Kita dapat menulis metoda-metoda untuk memindah fokus ke kiri (`previous`)
+ataupun ke kanan (`next`)
 
 {lang="text"}
 ~~~~~~~~
@@ -6888,6 +6906,10 @@ By introducing `more` to repeatedly apply an optional function to
 `Hood` we can calculate *all* the `positions` that `Hood` can take in
 the list
 
+Dengan mengaplikasikan `more` atas sebuah fungsi opsional secara berulang
+kepada sebuah `Hood`, kita dapat menghitung *semua* `positions` yang
+bisa digunakan pada `Hood` yang bersangkutan
+
 {lang="text"}
 ~~~~~~~~
   ...
@@ -6906,6 +6928,8 @@ the list
 
 We can now implement `Comonad[Hood]`
 
+Sekarang, kita dapat mengimplementasikan `Comonad[Hood]`
+
 {lang="text"}
 ~~~~~~~~
   ...
@@ -6921,6 +6945,9 @@ We can now implement `Comonad[Hood]`
 
 `cojoin` gives us a `Hood[Hood[IList]]` containing all the possible
 neighbourhoods in our initial `IList`
+
+`cojoin` memberikan kita sebuah `Hood[Hood[IList]]` yang berisi semua
+`Hood` ynag mungkin pada `IList` awal kita
 
 {lang="text"}
 ~~~~~~~~
@@ -6941,6 +6968,9 @@ neighbourhoods in our initial `IList`
 Indeed, `cojoin` is just `positions`! We can `override` it with a more
 direct (and performant) implementation
 
+Dan faktanya, `cojoin` sebenarnya adalah `positions`! Tentu, kita dapat
+meng-`override`-nya dengan implementasi yang lebih lugas dan performan.
+
 {lang="text"}
 ~~~~~~~~
   override def cojoin[A](fa: Hood[A]): Hood[Hood[A]] = fa.positions
@@ -6950,6 +6980,12 @@ direct (and performant) implementation
 structures. `Hood` is an example of a *zipper* (unrelated to `Zip`).
 Scalaz comes with a `Zipper` data type for streams (i.e. infinite 1D
 data structures), which we will discuss in the next chapter.
+
+`Comonad` menggeneralisasi konsep `Hood` untuk semua struktur data.
+`Hood` merupakan sebuah contoh dari *zipper* (tidak ada hubungannya
+dengan `Zip`). Scalaz sendiri juga mempunyai sebuah tipe data `Zipper`
+yang berhubungan dengan aliran (mis, struktur 1 dimensi tak hingga),
+yang akan kita bahan pada bab selanjutnya.
 
 One application of a zipper is for *cellular automata*, which compute
 the value of each cell in the next generation by performing a
