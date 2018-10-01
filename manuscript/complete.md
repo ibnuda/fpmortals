@@ -6772,6 +6772,12 @@ A *co-thing* typically has some opposite type signature to whatever
 relationship between *thing* and *co-thing*, we will include the type
 signature of *thing* wherever we can.
 
+Tipe kelas dengan awalan "ko" pada umumnya, kelas ini merupakan lawan
+dari kelas tipe yang diawali "ko" tadi. Walaupun, bukan berarti kelas tipe
+ini selalu berupa invers. Untuk menunjukkan hubungan antara, misal, "sesuatu"
+dengan "ko-sesuatu", kita akan mengikutsertakan type signature (lol, help)
+dari "sesuatu" bilamana memungkinkan.
+
 {width=100%}
 ![](images/scalaz-cothings.png)
 
@@ -6797,9 +6803,22 @@ an `F[A]` rather than its elements. But this is not necessarily the
 full `fa`, it is usually some substructure as defined by `cojoin`
 (also known as `coflatten`) which expands a data structure.
 
+`cobind` (juga dikenal sebagai `coflatmap`) menerima sebuah `F[A] => B`
+dan beroperasi atas `F[A]`, bukan `A`. Walaupun hal ini bukan berarti
+`F[A]` harus benar benar merupakan fungtor dengan isi `A`. Biasanya,
+`F[A]` yang dimaksud di sini merupakan sub-struktur yang didefinisikan
+oleh `cojoin` (atau `coflatten`) yang mempunyai fungsi untuk memperluas
+sebuah data struktur. 
+
 Compelling use-cases for `Cobind` are rare, although when shown in the
 `Functor` permutation table (for `F[_]`, `A` and `B`) it is difficult
 to argue why any method should be less important than the others:
+
+Contoh permasalahan yang cocok untuk diselesaikan oleh `Cobind` sebenarnya
+cukup sulit untuk ditemui. Walaupun, sebagaimana yang diperlihatkan pada
+tabel permutasi `Functor`, adalah sebuah hal yang sulit untuk menyanggah
+mengenai penting atau tidaknya sebuah metoda bila dibandingka dengan metoda
+lainnya:
 
 | method      | parameter          |
 |----------- |------------------ |
