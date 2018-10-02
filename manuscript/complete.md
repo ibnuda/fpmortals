@@ -7196,27 +7196,54 @@ Lebih lanjut, Valentin Kasas menjelaskan mengenai [Penggabungan `N` thing](https
 Who doesn't love a good data structure? The answer is *nobody*, because data
 structures are awesome.
 
+Siapa yang tidak suka dengan struktur data keren? Tentu tidak ada, karena
+semua struktur data keren!
+
 In this chapter we will explore the *collection-like* data types in Scalaz, as
 well as data types that augment the Scala language with useful semantics and
 additional type safety.
+
+Pada bab ini, kita akan mengeksplorasi tipe data *seperti koleksi*  yang ada
+pada Scalaz dan juga tipe data yang memperkaya Scala dengan semantik multi guna
+dan keamanan tipe data.
 
 The primary reason we care about having lots of collections at our disposal is
 performance. A vector and a list can do the same things, but their performance
 characteristics are different: a vector has constant lookup cost whereas a list
 must be traversed.
 
+Alasan utama kita memberi perhatian lebih terhadap banyaknya jenis koleksi
+yang kita miliki adalah performa. Sebuah vektor dan list mampu melakukan hal
+yang sama, namun karakteristik performa mereka berbeda: sebuah vektor mempunyai
+beban pencarian konstan sendangkan list harus melangkahi elemen satu per satu.
+
 W> Performance estimates - including claims in this chapter - should be taken with
 W> a pinch of salt. Modern processor design, memory pipelining, and JVM garbage
 W> collection can invalidate intuitive reasoning based on operation counting.
+W>
+W> Estimasi performa - termasuk klai pada bab ini - tak perlu dianggap secara serius.
+W> Desain prosesor medore, penyaluran memori, dan pengumpulan sampah JVM bisa
+W> saja mengahpuskan penalaran intuitif berdasarkan penghitungan operasi.
 W> 
 W> A hard truth of modern computers is that empirical performance tests, for a
 W> specific task, can shock and surprise: e.g. lookup in a `List` is often faster
 W> in practice than in a `Vector`. Use a tool such as [JMH](http://openjdk.java.net/projects/code-tools/jmh/) when performance testing.
+W>
+W> Kenyataan mutlak pada komputer modern pada tes performa empiris, untuk tugas
+W> khusus, hasil yang muncul bisa saja mengejutkan: mis., `lookup` pada sebuuah
+W> `List` sering kali lebih cepat bila dibandingkan dengan sebuah `Vector`.
+W> Sangat disarankan untuk menggunakan alat bantu seperti [JMH](http://openjdk.java.net/projects/code-tools/jmh) pada saat melakukan tes performa.
 
 All of the collections presented here are *persistent*: if we add or remove an
 element we can still use the old version. Structural sharing is essential to the
 performance of persistent data structures, otherwise the entire collection is
 rebuilt with every operation.
+
+Semua koleksi yang ditunjukkan di sini bersifat *persisten*: blia kita menambah
+ataupun menghapus sebuah elemen, kita masih bisa menggunakan koleksi sebelumnya.
+Pembagian struktural merupakan bagian penting bila kita berbicara mengenai performa
+dari struktur data persisten. Bila kita tidak memperhatikan pembagian struktural,
+koleksi akan dibuat ulang setiap kali operasi atas koleksi tersebut dilakukan.
 
 Unlike the Java and Scala collections, there is no hierarchy to the data types
 in Scalaz: these collections are much simpler to understand. Polymorphic
@@ -7224,6 +7251,12 @@ functionality is provided by optimised instances of the typeclasses we studied
 in the previous chapter. This makes it a lot easier to swap implementations for
 performance reasons, and to provide our own.
 
+Tidak seperti koleksi pada pustaka standar Java dan Scala, Scalaz tidak mempunyai
+hierarki tipe data: koleksi-koleksi ini lebih sederhana dan mudah dipahami.
+Fungsionalitas polimorfis tersedia dengan mengoptimisasi instans dari kelas 
+tipe yang telah kita pelajari pada bab sebelumnya. Penggunaan instans kelas tipe
+sangat mempermudah kita dalam menukar implementasi dengan alasan performa ataupun
+dengan membuat implementasi kita sendiri.
 
 ## Type Variance
 
@@ -7231,12 +7264,20 @@ Many of Scalaz's data types are *invariant* in their type parameters.
 For example, `IList[A]` is **not** a subtype of `IList[B]` when `A <:
 B`.
 
+Banyak dari tipe data Scalaz mempunyai parameter tipe yang bersifat *invarian*.
+Sebagai contoh, `IList[A]` bukan merupakan sub-tipe dari `IList[B]` walau
+`A <: B`.
+
 
 ### Covariance
 
 The problem with *covariant* type parameters, such as `class
 List[+A]`, is that `List[A]` is a subtype of `List[Any]` and it is
 easy to accidentally lose type information.
+
+Salah satu permasalahan dari parameter tipe *kovarian*, seperti `class
+List[+A]`, adalah `List[A]` juga merupakan sub-tipe dari `List[Any]`.
+Hal semacam ini sangat mempermudah hilangnya informasi tipe.
 
 {lang="text"}
 ~~~~~~~~
@@ -7248,6 +7289,11 @@ Note that the second list is a `List[Char]` and the compiler has
 unhelpfully inferred the *Least Upper Bound* (LUB) to be `Any`.
 Compare to `IList`, which requires explicit `.widen[Any]` to permit
 the heinous crime:
+
+Harap perhatikan bahwa list kedua merupakan `List[Char]` dan kompiler
+menyimpulkan, walaupun ngaco, bahwa *Batas Atas Terendah* (BAT) sebagai
+`Any`. Bila dibandingkan dengan `IList`, yang mengharuskan `.widen[Any]`
+secara eksplisit untuk memberikan celah untuk kecerobohan semacam ini:
 
 {lang="text"}
 ~~~~~~~~
@@ -7266,8 +7312,17 @@ Similarly, when the compiler infers a type `with Product with
 Serializable` it is a strong indicator that accidental widening has
 occurred due to covariance.
 
+Hal yang sama juga terjadi ketika kompiler menyimpulkan bahwa
+sebuah tipe `with Product with Serializable` (yang berupa *Product*
+dan *Serializable*), hal semacam ini merupakan indikator yang kuat
+bahwa pelebaran tanpa sengaja (lol, aku bego) telah terjadi
+dikarenakan kovarian.
+
 Unfortunately we must be careful when constructing invariant data
 types because LUB calculations are performed on the parameters:
+
+Sayangnya, kita harus berhati-hati saat menyusun tipe data invarian
+dikarenakan kalkulasi BAT dilakukan pada parameter:
 
 {lang="text"}
 ~~~~~~~~
@@ -7279,12 +7334,25 @@ Another similar problem arises from Scala's `Nothing` type, which is a subtype
 of all other types, including `sealed` ADTs, `final` classes, primitives and
 `null`.
 
+Masalah yang mirip dengan hal ini juga terjadi pada tipe `Nothing` milik Scala,
+yang merupakan sub-tipe dari semua tipe, termasuk ADT `sealed`, kelas `final`,
+primtif, dan `null`.
+
 There are no values of type `Nothing`: functions that take a `Nothing` as a
 parameter cannot be run and functions that return `Nothing` will never return.
 `Nothing` was introduced as a mechanism to enable covariant type parameters, but
 a consequence is that we can write un-runnable code, by accident. Scalaz says we
 do not need covariant type parameters which means that we are limiting ourselves
 to writing practical code that can be run.
+
+Dikarenakan tidak ada nilai dari tipe `Nothing`: fungsi yang menerima `Nothing`
+sebagai salah satu parameter tidak dapat dijalankan dan fungsi yang mengembalikan
+`Nothing` tidak akan mengembalikan kembaliannya.
+`Nothing` pada awalnya diperkenalkan sebagai sebuah mekanisme untuk memperkenankan
+kovarian pada parameter tipe. Walaupun, sebagai konsekuensinya yang tak disengaja,
+kita juga bisa menghasilkan kode yang tak bisa dijalankan. Di sisi lain Scalaz
+berpendapat bahwa kita tidak butuh parameter tipe kovarian. Hal ini berarti
+bahwa kita membatasi diri kita untuk hanya menulis kode yang bisa dijalankan saja.
 
 
 ### Contrarivariance
