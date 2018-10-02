@@ -7422,6 +7422,13 @@ Perilaku semacam ini sudah dibenahi pada Dotty.
 is unable to let us write the required type signature. Consider the
 following that appears correct, but has a subtle bug:
 
+Sebagaimana yang telah pembaca yang budiman ketahui, `scala.Option`
+mempunyai metoda `.flatten` yang akan mengubah `Option[Option[B]]` menjadi
+`Option[B]`. Namun, sistem tipe Scala akan menggagalkan usaha kita
+untuk menuliskan penanda tipe untuk metoda tersebut.
+Mohon perhatikan pada contoh berikut yang terlihat benar anmun
+mempunyai sebuah kutu yang hampir tak kasat mata:
+
 {lang="text"}
 ~~~~~~~~
   sealed abstract class Option[+A] {
@@ -7432,6 +7439,9 @@ following that appears correct, but has a subtle bug:
 The `A` introduced on `.flatten` is shadowing the `A` introduced on
 the class. It is equivalent to writing
 
+`A` yang diperkenalkan pada `.flatten` membayangi `A` yang diperkenalkan
+pada kelas. Hal seperti ini sama saja dengan menuliskan
+
 {lang="text"}
 ~~~~~~~~
   sealed abstract class Option[+A] {
@@ -7441,8 +7451,13 @@ the class. It is equivalent to writing
 
 which is not the constraint we want.
 
+yang berbeda dengan batasan yang kita inginkan.
+
 To workaround this limitation, Scala defines infix classes `<:<` and
 `=:=` along with implicit evidence that always creates a *witness*
+
+Untuk menyiasati batasan ini, Scala mendefinisikan kelas infiks `<:<` 
+dan `=:=` beserta bukti implisit yang selalu meninggalkan sebuah *saksi*
 
 {lang="text"}
 ~~~~~~~~
@@ -7456,6 +7471,11 @@ To workaround this limitation, Scala defines infix classes `<:<` and
 `=:=` can be used to require that two type parameters are exactly the
 same and `<:<` is used to describe subtype relationships, letting us
 implement `.flatten` as
+
+`=:=` bisa digunakan untuk memaksa kedua parameter tipe benar benar
+sama. Sedangkan `<:<` digunakan untuk mendeskripsikan hubungan sub-tipe.
+Kedua kelas tersebut memperkenankan kita untuk mengimplementasikan
+`.flatten` sebagai
 
 {lang="text"}
 ~~~~~~~~
@@ -7471,6 +7491,9 @@ implement `.flatten` as
 
 Scalaz improves on `<:<` and `=:=` with *Liskov* (aliased to `<~<`)
 and *Leibniz* (`===`).
+
+Scalaz memperbaiki kedua kelas tadi dengan menggunakan *Liskov* 
+(dialiaskan sebagai `<~<`) dan Leibniz (`===`).
 
 {lang="text"}
 ~~~~~~~~
@@ -7517,13 +7540,27 @@ and *Leibniz* (`===`).
 Other than generally useful methods and implicit conversions, the
 Scalaz `<~<` and `===` evidence is more principled than in the stdlib.
 
+Selain metoda-metoda umum yang tentu berguna dan konversi implisit,
+bukti dari kelas `<~<` dan `===` lebih memegang prinsip bila dibandingkan
+dengan kelas `<:<` dan `=:=` milik pustaka standar.
+
+
 A> Liskov is named after Barbara Liskov of *Liskov substitution
 A> principle* fame, the foundation of Object Oriented Programming.
 A> 
+A> Kelas Liskov dinamai berdasarkan Barbara Liskov yang meletakkan
+A> batu pondasi Pemrograman Berorientasi Objek dengan mengemukakan
+A> prinsip substitusi Liskov.
+A>
 A> Gottfried Wilhelm Leibniz basically invented *everything* in the 17th
 A> century. He believed in a [God called Monad](https://en.wikipedia.org/wiki/Monad_(philosophy)). Eugenio Moggi later reused
 A> the name for what we know as `scalaz.Monad`. Not a God, just a mere
 A> mortal.
+A>
+A> Gottfried Wilhelm Leibniz pada dasarnya menciptakan semua *yang* ada
+A> pada abad ke 17. Dia percaya pada [Tuhan yang disebut Monad](https://en.wikipedia.org/wiki/Monad_(philosophy)).
+A> Nama tersebut juga digunakan untuk apa yang kita ketahui sebagai `scalaz.Monad`
+A> oleh Eugenio Moggi. (lol, saya sensor.)
 
 
 ## Evaluation
