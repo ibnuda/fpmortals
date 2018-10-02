@@ -7362,6 +7362,12 @@ Thing[-A]`, can expose devastating [bugs in the compiler](https://issues.scala-l
 Phillips' (ex-`scalac` team) demonstration of what he calls
 *contrarivariance*:
 
+Agak berbeda dengan kovarian, parameter tipe *kontravarian*, seperti
+`trait Thing[-A]`, bisa menimbulkan masalah tak terduga sebagaimana
+yang ditunjukkan pada [kutu di kompiler](https://issues.scala-lang.org/browse/SI-2509).
+Paul Phillips (bekas anggota tim `scalac`) juga telah mendemonstrasikan
+apa yang dia sebut sebagai *kontrari-varian*.
+
 {lang="text"}
 ~~~~~~~~
   scala> :paste
@@ -7379,6 +7385,10 @@ Phillips' (ex-`scalac` team) demonstration of what he calls
 As expected, the compiler is finding the most specific argument in
 each call to `f`. However, implicit resolution gives unexpected
 results:
+
+Sebagaimana yang telah pembaca yang budiman terka, kompiler berhasil
+menentukan argumen paling spesifik untuk setiap pemanggilan `f`.
+Namun, resolusi implisit dari kompiler memberikan hasil yang tak terduga:
 
 {lang="text"}
 ~~~~~~~~
@@ -7398,6 +7408,11 @@ results:
 Implicit resolution flips its definition of "most specific" for contravariant
 types, rendering them useless for typeclasses or anything that requires
 polymorphic functionality. The behaviour is fixed in Dotty.
+
+Resolusi implisit membalik definisi kompiler atas "argumen paling spesifik"
+untuk tipe kontravarian sehingga argumen tersebut menjadi percuma bila digunakan
+dengan kelas tipe maupun semua yang menggunakan fungsionalitas polimorfis.
+Perilaku semacam ini sudah dibenahi pada Dotty.
 
 
 ### Limitations of subtyping
