@@ -15,6 +15,8 @@ Istilah istilah yang belum saya pikirkan padan katanya.
 - *ancestor*.
 - *build-farm*.
 - *boilerplate*.
+- *by-name*. Pada "call by name."
+- *by-value*. Pada "call by value."
 - *callbacks*.
 - *casting*.
 - *code generation*.

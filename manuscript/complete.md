@@ -7572,17 +7572,37 @@ syntax. These parameters are wrapped up as a zero argument function
 which is called every time the `a` is referenced. We seen *by-name* a
 lot in the typeclasses.
 
+Pada bahasa pemrograman Java, evaluasi program dijalankan secara tegas:
+semua parameter dari sebuah metoda harus dievaluasi menjadi sebuah *nilai*
+sebelum metoda tersebut dipanggil. Scala, di sisi lain, memperkenalkan
+istilah parameter *by-name* (lol, help) pada metoda dengan sintaks `a: => A`.
+Parameter ini dibungkus (lol) sebagai fungsi tanpa argumen yang dipanggil
+tiap kali `a` dirujuk. Seperti yang telah kita lihat pada bab-bab sebelumnya,
+kelas tipe cenderung menggunakan parameter *by-name*.
+
 Scala also has *by-need* evaluation of values, with the `lazy`
 keyword: the computation is evaluated at most once to produce the
 value. Unfortunately, Scala does not support *by-need* evaluation of
 method parameters.
 
+Scala juga mempunyai strategi evaluasi nilai berdasarkan pemanggilan *by-need*,
+menggunakan kata kunci `lazy`: komputasi dilakukan paling banyak satu kali
+ketika nilai parameter akan digunakan. Sayangnya, scala tidak mendukung
+evaluasi komputasi dengan pemanggilan *by-need* pada parameter metoda.
+
 A> If the calculation of a `lazy val` throws an exception, it is retried
 A> every time it is accessed. Because exceptions can break referential
 A> transparency, we limit our discussion to `lazy val` calculations that
 A> do not throw exceptions.
+A>
+A> Bila kalkulasi `lazy val` melempar pengecualian, kalkulasi ini akan
+A> diulang tiap kali nilai ini diakses. Karena pengecualian dapat merusak
+A> transparansi rujukan, kita akan membatasi diskusi kita hanya sampai pada
+A> kalkulasi `lazy val` yang tidak melempar pengecualian.
 
 Scalaz formalises the three evaluation strategies with an ADT
+
+Scalaz memformalisasi tiga strategi evaluasi yang menggunakan ADT
 
 {lang="text"}
 ~~~~~~~~
@@ -7611,11 +7631,23 @@ guarantees. Next is `Need`, guaranteeing *at most once* evaluation,
 whereas `Value` is pre-computed and therefore *exactly once*
 evaluation.
 
+Bentuk evaluasi paling lemah adalah `Name` yang tidak memberikan
+jaminan komputasi. Selanjutnya adalah `Need`, yang menjamin evaluasi
+*paling banyak satu kali*. Dan evaluasi `Value` yang merupakan nilai
+hasil dari komputasi yang terjadi sebelum pemanggilan terjadi.
+Evaluasi `Value` menjamin satu kali evaluasi.
+
 If we wanted to be super-pedantic we could go back to all the
 typeclasses and make their methods take `Name`, `Need` or `Value`
 parameters. Instead we can assume that normal parameters can always be
 wrapped in a `Value`, and *by-name* parameters can be wrapped with
 `Name`.
+
+Bila kita berbengah diri, bisa saja kita munder ke kelas tipe dan membuat
+metoda mereka untuk secara spesifik menerima parameter `Name`, `Need`,
+atau `Value`. Namun, kita memilih untuk mengasumsikan bahwa parameter
+normal akan selalu dibungkus dalam sebuah `Value` dan parameter *by-name*
+dapat dibungkus dengan `Name`.
 
 When we write *pure programs*, we are free to replace any `Name` with
 `Need` or `Value`, and vice versa, with no change to the correctness
@@ -7623,20 +7655,44 @@ of the program. This is the essence of *referential transparency*: the
 ability to replace a computation by its value, or a value by its
 computation.
 
+Ketika kita menulis *program murni* (lol), kita bebas untuk mengganti
+`Name` dengan `Need` atau `Value`, begitu juga sebaliknya, tanpa
+mengubah kebenaran program (lol). Yang menjadi esensi dari *transparansi
+rujukan* adalah keluwesan untuk mengganti sebuah komputasi dengan nilai
+komputasi tersebut atau mengganti nilai sebuah komputasi dengan komputasi
+itu sendiri.
+
 In functional programming we almost always want `Value` or `Need`
 (also known as *strict* and *lazy*): there is little value in `Name`.
 Because there is no language level support for lazy method parameters,
 methods typically ask for a *by-name* parameter and then convert it
 into a `Need` internally, getting a boost to performance.
 
+Pada pemrograman fungsional, kita hampir selalu menggunakan `Value` atau
+`Need` (dikenal dengan *tegas* dan *malas*) dikarenakan hampir tidak ada
+untungnya menggunakan `Name` secara eksplisit.
+Hal ini dikarenakan tidak dukungan pada tingkat bahasa untuk parameter
+metoda yang dipanggil secara malas. Metoda secara umum meminta parameter
+*by-name* lalu mengubahnya menjadi `Need` secara internal agar mendapatkan
+tambahan performa.
+
 A> `Lazy` (with a capital `L`) is often used in core Scala libraries for
 A> data types with *by-name* semantics: a misnomer that has stuck.
 A> 
+A> `Lazy` seringkali  digunakan pada pustaka inti Scala untuk tipe data
+A> dengan semantik *by-name* walaupun hal ini adalah sebuah salah kaprah.
+A>
 A> More generally, we're all pretty lazy about how we talk about laziness: it can
 A> be good to seek clarification about what kind of laziness is being discussed. Or
 A> don't. Because, lazy.
+A>
+A> Secara umum, kita tidak begitu semangat bila membicarakan evaluasi malas:
+A> mungkin akan lebih singkat bila kita mengklarifikasi tentang evaluasi malas
+A> apa yang sedang didiskusikan. Hal ini dikarenakan
 
 `Name` provides instances of the following typeclasses
+
+`Name` menyediakan instans dari kelas tipe berikut:
 
 -   `Monad`
 -   `Comonad`
@@ -7647,12 +7703,25 @@ A> don't. Because, lazy.
 A> *by-name* and *lazy* are not the free lunch they appear to be. When
 A> Scala converts *by-name* parameters and `lazy val` into bytecode,
 A> there is an object allocation overhead.
+A>
+A> pemanggilan *by name* yang malas dan *malas* tidak datang cuma cuma. 
+A> Saat Scala mengkonversi parameter *by-name* dan `lazy val` menjadi
+A> bytecode akan selalu ada ongkons tambahan pada saat alokasi objek. 
 A> 
 A> Before rewriting everything to use *by-name* parameters, ensure that
 A> the cost of the overhead does not eclipse the saving. There is no
 A> benefit unless there is the possibility of **not** evaluating. High
 A> performance code that runs in a tight loop and always evaluates will
 A> suffer.
+A>
+A> Selalu pastikan agar ongkos tambahan tidak lebih besar daripada penghematan
+A> saat mengubah metoda untuk menggunakan pemanggilan parameter *by-name*.
+A> Selain itu, pembaca yang budiman hanya bisa merasakan keuntungan dan manfaat
+A> dari pemanggilan parameter *by-name* bila ada kemungkinan *tidak* dievaluasi-nya
+A> sebuah statemen.
+A> Selain itu, kode dengan performa tinggi dalam sebuah ikalan ketat atau
+A> selalu mengevaluasi akan kehilangan performa bila menggunakan strategi
+A> pemanggilan ini.
 
 
 ## Memoisation
