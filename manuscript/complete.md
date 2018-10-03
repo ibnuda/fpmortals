@@ -7839,18 +7839,40 @@ is not an oversight of Scalaz: often we find that a data type can implement a
 fundamental typeclass in multiple valid ways and that the default implementation
 doesn't do what we want, or simply isn't defined.
 
+Pada bagian dimana kita memperkenalkan kelas tipe `Monoid` , kita membuat sebuah
+instans `Monoid` untuk `TradeTemplate` (yang disimbolkan dengan `Monoid[TradeTemplate]`).
+Namun, kita juga menemukan bahwa perilaku Scalaz tidak sesuai dengan ekspektasi
+kita terhadap `Monoid[Option[A]]`. Perbedaan perilaku semacam ini bukan sebuah
+keluputan dari Scalaz: Seringkali kita akan mendapatkan tipe data yang bisa menerapkan
+kelas tipe mendasar dengan banyak cara, namun tidak berperilaku sesuai dengan yang
+kita inginkan. (lol, help)
+
 Basic examples are `Monoid[Boolean]` (conjunction `&&` vs disjunction `||`) and
 `Monoid[Int]` (multiplication vs addition).
+
+Contoh sederhana atas permasalahan seperti ini adalah `Monoid[Boolean]` (konjungsi `&&`
+dan disjungsi `||`) dan `Monoid[Int]` (perkalian dan penjumlahan).
 
 To implement `Monoid[TradeTemplate]` we found ourselves either breaking
 typeclass coherency, or using a different typeclass.
 
+Untuk menerapkan `Monoid[TradeTemplate]`, kita terpaksa harus merusak harmonisasi
+kelas tipe, atau tinggal menggunakan kelas tipe lain.
+
 `scalaz.Tag` is designed to address the multiple typeclass implementation
 problem without breaking typeclass coherency.
+
+Untuk menyelesaikan masalah yang muncul pada penerapan beberapa kelas tipe pada
+satu kelas, `scalaz.Tag` bisa digunakan tanpa merusak koherensi dari kelas tipe
+yang sudah ada.
 
 The definition is quite contorted, but the syntax to use it is very clean. This
 is how we trick the compiler into allowing us to define an infix type `A @@ T`
 that is erased to `A` at runtime:
+
+Pendefinisian metoda `Tag` memang agak rancu. Namun, sintaks yang  digunakan
+sangat jelas. Beginilah cara kita untuk mengelabuhi kompiler agar kita bisa mendefinisikan
+tipe infiks `A && T` yang menghapus penanda tipe menjadi `A` pada saat waktu jalan:
 
 {lang="text"}
 ~~~~~~~~
@@ -7880,6 +7902,8 @@ A> i.e. we tag things with Princess Leia hair buns `@@`.
 
 Some useful tags are provided in the `Tags` object
 
+Beberapa label yang bermanfaat yang disediakan pada objek `Tags`
+
 {lang="text"}
 ~~~~~~~~
   object Tags {
@@ -7907,9 +7931,18 @@ last non-zero operand. `Multiplication` is for numeric multiplication instead of
 addition. `Disjunction` / `Conjunction` are to select `&&` or `||`,
 respectively.
 
+`First` / `Last` digunakan untuk memilih instans `Monoid` dengan mengambil
+oeran bukan-nol pertama / terakhir yang ditemui. `Multiplication`, tentu,
+digunakan untuk perkalian numerik, bukan penambahan. `Disjunction` / `Conjunction`
+digunakan untuk memilih `&&` atau `||`.
+
 In our `TradeTemplate`, instead of using `Option[Currency]` we can use
 `Option[Currency] @@ Tags.Last`. Indeed this is so common that we can use the
 built-in alias, `LastOption`
+
+Pada `TradeTemplate`, jauh lebih disukai untuk menggunakan `Option[Currency] @@ Tags.Last`
+bila dibandingkan hanya menggunakan `Option[Currency]` saja. Karena hal semacam ini
+sangat jamak dijumpai, maka kita bisa menggunakan alias bawaan, `LastOption`
 
 {lang="text"}
 ~~~~~~~~
@@ -7917,6 +7950,8 @@ built-in alias, `LastOption`
 ~~~~~~~~
 
 letting us write a much cleaner `Monoid[TradeTemplate]`
+
+yang memperkenankan kita untuk menulis `Monoid[TradeTemplate]` menjadi lebih jelas
 
 {lang="text"}
 ~~~~~~~~
@@ -7939,8 +7974,15 @@ letting us write a much cleaner `Monoid[TradeTemplate]`
 To create a raw value of type `LastOption`, we apply `Tag` to an `Option`. Here
 we are calling `Tag(None)`.
 
+Sedangkan bila kita harus membuat sebuah nilai mentah untuk tipe `LastOption`,
+kita bisa menggunakan `Tag` pada sebuah `Option`. Kita akan menyebut hal ini
+sebagai `Tag(None)`.
+
 In the chapter on typeclass derivation, we will go one step further and
 automatically derive the `monoid`.
+
+Pada bab mengenai derivasi kelas tipe, kita akan melangkah lebih lanjut dengan
+melakukan derivasi otomatis atas `monoid`.
 
 It is tempting to use `Tag` to markup data types for some form of validation
 (e.g. `String @@ PersonName`), but this should be avoided because there are no
@@ -7948,6 +7990,12 @@ checks on the content of the runtime value. `Tag` should only be used for
 typeclass selection purposes. Prefer the `Refined` library, introduced in
 Chapter 4, to constrain values.
 
+Tentu sangat menggiurkan untuk menggunakan `Tag` agar tipe data pada
+validasi borang (mis, `String @@ PersonName`), namun hal ini harus dihindari
+karena tidak ada pemeriksaan konten pada saat waktu jalan. `Tag` seharusnya
+hanya boleh digunakan untuk pemilihan kelas tipe saja. Pembaca budiman
+dianjurkan untuk menggunakan pustaka `Refined` yang diperkenalkan pada bab
+4 untuk membatasi nilai.
 
 ## Natural Transformations
 
