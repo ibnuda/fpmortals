@@ -7730,6 +7730,10 @@ Scalaz has the capability to memoise functions, formalised by `Memo`,
 which doesn't make any guarantees about evaluation because of the
 diversity of implementations:
 
+Scalaz mampu melakukan memoisasi fungsi yang belum pasti akan selalu
+dievaluasi dikarenakan bermacamnya implementasi.
+Secara formal, memoisasi diwakilkan dengan `Memo`:
+
 {lang="text"}
 ~~~~~~~~
   sealed abstract class Memo[K, V] {
@@ -7753,8 +7757,19 @@ doesn't memoise, evaluating the function normally. The remaining
 implementations intercept calls to the function and cache results
 backed by stdlib collection implementations.
 
+`memo` memperkenankan kita untuk membuat implementasi khusus atas kelas
+tipe `Memo`. Sedangkan untuk `nilMemo`, metoda ini tidak melakukan
+memoisasi. Dengan kata lain, `nilMemo` mengevaluasi fungsi secara normal.
+Untuk implementasi metoda lainnya, mereka hanya mencegat pemanggilan
+fungsi dan nilai yang tersimpan di tembolok dengan menggunakan
+implementasi dari pustaka koleksi standar.
+
 To use `Memo` we simply wrap a function with a `Memo` implementation
 and then call the memoised function:
+
+Untuk menggunakan `Memo`, kita hanya perlu membungkus sebuah fungsi dengan
+implmentasi `Memo` dan  dilanjutkan dengan memanggil fungsi ter-memoisasi
+tadi:
 
 {lang="text"}
 ~~~~~~~~
@@ -7777,6 +7792,11 @@ and then call the memoised function:
 If the function takes more than one parameter, we must `tupled` the
 method, with the memoised version taking a tuple.
 
+Bila sebuah fungsi menerima lebih dari sebuah parametr, kita harus mengubah
+parameter-parameter tadi menjadi sebuah *tuple* menggunakan metoda `tupled`
+sehingga fungsi tadi berubah menjadi fungsi ter-memoisasi yang menerima
+sebuah *tuple*.
+
 {lang="text"}
 ~~~~~~~~
   scala> def bar(n: Int, m: Int): String = "hello"
@@ -7797,6 +7817,18 @@ signature. Other functional programming languages have automatic
 memoisation managed by their runtime environment and `Memo` is our way
 of extending the JVM to have similar support, unfortunately only on an
 opt-in basis.
+
+`Memo` pada dasarnya dianggap sebagai konstruk khusus dan penegakan
+aturan mengenai *kemurnian* (lol, help) sedikit lebih longgar dengan
+alasan memudahkan implmentasi. Agar tetap *murni* (lol, help), yang perlu
+kita lakukan hanyalah memastikan implementasi `Memo` yang kita buat
+untuk selalu secara melakukan transparansi saat merujuk pada saat evaluasi
+`K => V`. Kita bisa juga menggunakan data yang bisa bermutasi dan melakukan
+`I/O` pada implementasi `Memo`, misal dengan LRU atau tembolok terdistribusi
+tannpa harus mendeklarasikan efek pada penanda tipe. Bahasa pemrograman
+fungsional lainnya punya mekanisme memoisasi terotomatis yang diatur oleh
+lingkungan waktu jalan mereka. `Memo` di sisi lain, merupakan satu-satunya
+cara kita untuk menambal JVM agar mempunyai dukungan yang mirip. 
 
 
 ## Tagging
