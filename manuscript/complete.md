@@ -8551,6 +8551,9 @@ menghiraukan isi dari sebuah `\/`, namun berdasarkan tipe dari isinya.
 At first sight, `Validation` (aliased with `\?/`, *happy Elvis*)
 appears to be a clone of `Disjunction`:
 
+Secara sekilas, `Validation` yang mempunyai alias dengan `\?/,
+terlihat seperti salinan dari `Disjunction`:
+
 {lang="text"}
 ~~~~~~~~
   sealed abstract class Validation[+E, +A] { ... }
@@ -8575,6 +8578,8 @@ appears to be a clone of `Disjunction`:
 
 With convenient syntax
 
+Dengan sintaks
+
 {lang="text"}
 ~~~~~~~~
   implicit class ValidationOps[A](self: A) {
@@ -8589,6 +8594,11 @@ However, the data structure itself is not the complete story.
 `Validation` intentionally does not have an instance of any `Monad`,
 restricting itself to success-biased versions of:
 
+Namun, struktur data tersebut tidak mewakili cerita yang melatar-
+belakanginya. `Validation` memang dimaksudkan untuk tidak memiliki
+instans dari `Monad` dan membatasi dirinya berdasarkan versi
+yang diharapkan dari:
+
 -   `Applicative`
 -   `Traverse` / `Bitraverse`
 -   `Cozip`
@@ -8596,6 +8606,8 @@ restricting itself to success-biased versions of:
 -   `Optional`
 
 and depending on the contents
+
+dan berdasarkan konten
 
 -   `Equal` / `Order`
 -   `Show`
@@ -8607,8 +8619,18 @@ whereas `Disjunction` is used to stop at the first failure. To
 accommodate failure accumulation, a popular form of `Validation` is
 `ValidationNel`, having a `NonEmptyList[E]` in the failure position.
 
+Keuntungan utama atas pembatasann yang hanya sampai pada `Applicative`
+adalah pada saat kita membutuhkan semua galat dilaporkan, `Validation`
+akan menerima semua galat tersebut. Berbeda dengan `Disjunction`  yang
+berhenti dieksekusi pada saat galat pertama terjadi. Untuk mengakomodasi
+akumulusai galat, bentuk paling umum yang ditemui dari `Validation` adalah
+`ValidationNel` yang mempunyai `NonEmptyList[E]` pada posisi galat.
+
 Consider performing input validation of data provided by a user using
 `Disjunction` and `flatMap`:
+
+Misalkan saat pembaca yang budiman sedang melakukan validasi terhadap
+data yang diberikan oleh pengguna menggunakan `Disjunction` dan `flatMap`:
 
 {lang="text"}
 ~~~~~~~~
@@ -8635,6 +8657,8 @@ Consider performing input validation of data provided by a user using
 
 If we use `|@|` syntax
 
+Bila kita menggunakan `|@|`
+
 {lang="text"}
 ~~~~~~~~
   scala> (username("sam halliday") |@| realname("")) (Credentials.apply)
@@ -8645,6 +8669,11 @@ we still get back the first failure. This is because `Disjunction` is
 a `Monad`, its `.applyX` methods must be consistent with `.flatMap`
 and not assume that any operations can be performed out of order.
 Compare to:
+
+Kita akan tetap mendapat galat pertama saja. Hal ini disebabkan oleh
+kelas tipe dari `Disjunction` yang juga mempunyai instans `Monad`.
+Metoda `.applyX` harus konsisten dengan `.flatMap` dan tidak mengasumsikan
+bahwa semua operasi bisa dijalankan secara bebas. Bandingkan dengan:
 
 {lang="text"}
 ~~~~~~~~
@@ -8664,8 +8693,13 @@ Compare to:
 
 This time, we get back all the failures!
 
+Sekarang, kita bakal mendapat semua galat yang terjadi. 
+
 `Validation` has many of the same methods as `Disjunction`, such as
 `.fold`, `.swap` and `+++`, plus some extra:
+
+`Validation` punya beberapa metoda yang mirip dengan yang dipunyai
+oleh `Disjunction` seperti, `.fold`, `.swap`, `+++`, dan beberapa tambahan:
 
 {lang="text"}
 ~~~~~~~~
@@ -8680,6 +8714,9 @@ This time, we get back all the failures!
 `.append` (aliased by `+|+`) has the same type signature as `+++` but
 prefers the `success` case
 
+`.append` (dengan alias `+|+`) mempunyai penanda tipe yang sama dengan `+++`
+namun lebih memilih hasil yang `success`
+
 -   `failure(v1) +|+ failure(v2)` gives `failure(v1 |+| v2)`
 -   `failure(v1) +|+ success(v2)` gives `success(v2)`
 -   `success(v1) +|+ failure(v2)` gives `success(v1)`
@@ -8692,14 +8729,32 @@ Disjunction has the mirror `.validation` and `.validationNel` to
 convert into `Validation`, allowing for easy conversion between
 sequential and parallel failure accumulation.
 
+`.disjunction` mengubah sebuah `Validated[A, B]` menjadi `A \/ B`.
+`Disjunction` mencerminkan `.validation` dan `.validationNel` dan
+mengubahnya menjadi `Validation`. Sehingga hal ini mempermudah
+konversi dari akumulasi galat berurutan dan paralel.
+
 `\/` and `Validation` are the more performant FP equivalent of a checked
 exception for input validation, avoiding both a stacktrace and requiring the
 caller to deal with the failure resulting in more robust systems.
+
+`\/` dan `Validation` merupakan solusi dari pemrograman fungsional yang
+setara dengan pemeriksaan pengecualian untuk validasi input.
+Selain itu, performa yang ditawarkan lebih tinggi dikarenakan `Validation`
+tidak menggunakan *stacktrace* dan tanpa memaksa metoda pemanggil untuk
+berurusan dengan galat. Hal semacam ini menghasilkan sistem yang lebih
+kokoh. 
 
 A> One of the slowest things on the JVM is to create an exception, due to the
 A> resources required to construct the stacktrace. It is traditional to use
 A> exceptions for input validation and parsing, which can be thousands of times
 A> slower than the equivalent functions written with `\/` or `Validation`.
+A>
+A> Salah satu hal yang paling pelan pada JVM adalah pembuatan sebuah pengecualian.
+A> Penyebab dari kelambanan ini adalah alokasi sumber daya yang dibutuhkan untuk
+A> membuat *stacktrace*. Yang jamak dilakukan saat melakukan validasi input dan
+A> penguraian adalah penggunaan eksepsi, walau eksepsi tersebut memakan waktu
+A> yang jauh lebih banyak bila dibandingkan dengan menggunakan `\/` atau `Validation`.  
 A> 
 A> Some people claim that predictable exceptions for input validation are
 A> referentially transparent because they will occur every time. However, the
@@ -8707,6 +8762,16 @@ A> stacktrace inside the exception depends on the call chain, giving a different
 A> value depending on who calls it, thus breaking referential transparency.
 A> Regardless, throwing an exception is not pure because it means the function is
 A> not *Total*.
+A>
+A> Beberapa pihak meng-klaim bahwa eksepsi terduga untuk validasi input
+A> adalah transparan secara rujukan. Alasan yang pihak tersebut gunakan adalah
+A> eksepsi tersebut pasti akan muncul bila situasi sesuai dengan yang kita
+A> definisikan. Namun, *stacktrace* yang ada pada pengecualian bergantung pada
+A> rantai panggilan metoda. Hal ini menyebabkan nilai *stacktrace* akan berbeda
+A> tergantung pada siapa yang memanggil eksepsi tersebut. Dan pada akhirnya,
+A> eksepsi mengaburkan transparansi rujukan.
+A> Bagaimanapun juga, melempar sebuah eksepsi dianggap tidak *pure* (lol) karena
+A> fungsi tersebut tidak *Total*.
 
 
 ### These
