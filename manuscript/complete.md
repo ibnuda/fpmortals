@@ -8383,6 +8383,10 @@ A> mungkin semakin jaran menemui masalah semacam ini.
 Scalaz's improvement over `scala.Either` is symbolic, but it is common
 to speak about it as *either* or `Disjunction`
 
+Untuk perbaikan yang diberikan oleh Scalaz terhadap `scala.Either`,
+walaupun hanya dalam bentuk simbol operator, adalah hal yang jamak untuk
+menyebut operator tersebut sebagai *antara* (*either*)atau `Disjunction`. 
+
 {lang="text"}
 ~~~~~~~~
   sealed abstract class \/[+A, +B] { ... }
@@ -8402,6 +8406,8 @@ to speak about it as *either* or `Disjunction`
 
 with corresponding syntax
 
+dengan sintaks
+
 {lang="text"}
 ~~~~~~~~
   implicit class EitherOps[A](val self: A) {
@@ -8414,6 +8420,12 @@ allowing for easy construction of values. Note that the extension
 method takes the type of the *other side*. So if we wish to create a
 `String \/ Int` and we have an `Int`, we must pass `String` when
 calling `.right`
+
+Harap diperhatikan, metoda ekstensi di atas menerima tipe untuk
+*sisi yang berseberangan*. Jadi, bila kita ingin membuat sebuah
+`String \/ Int` dan kita mempunyai sebuah `Int`, kita harus menyerahkan
+`String` saat memanggil `.right`
+
 
 {lang="text"}
 ~~~~~~~~
@@ -8428,8 +8440,17 @@ The symbolic nature of `\/` makes it read well in type signatures when
 shown infix. Note that symbolic types in Scala associate from the left
 and nested `\/` must have parentheses, e.g. `(A \/ (B \/ (C \/ D))`.
 
+Sifat simbolis dari `\/`-lah yang mempermudah pembacaan kontainer ini
+pada penanda tipe. Harap diperhatikan bahwa tipe simbolis pada Scala
+selalu diasosiasikan dari kiri. Ditambah lagi bila kita ingin menggunakan
+`\/` berlapis, kita harus menggunakan tanda kurung. Sebagai contoh,
+`(A \/ (B \/ (C \/ D)))`. 
+
 `\/` has right-biased (i.e. `flatMap` applies to `\/-`) typeclass
 instances for:
+
+`\/` mempunyai kecenderungan untuk memilih bagian kanan (mis, `flatMap`
+juga berlaku pada `\/-`) untuk instans kelas tipe:
 
 -   `Monad` / `MonadError`
 -   `Traverse` / `Bitraverse`
@@ -8439,10 +8460,14 @@ instances for:
 
 and depending on the contents
 
+dan bergantung pada konten
+
 -   `Equal` / `Order`
 -   `Semigroup` / `Monoid` / `Band`
 
 In addition, there are custom methods
+
+Sebagai tambahan, ada beberapa metoda khususs
 
 {lang="text"}
 ~~~~~~~~
@@ -8475,13 +8500,24 @@ In addition, there are custom methods
 `.fold` is similar to `Maybe.cata` and requires that both the left and
 right sides are mapped to the same type.
 
+`.fold` mirip dengan `Maybe.cata` dan mengharuskan kedua sisi dipetakan
+ke tipe yang sama.
+
 `.swap` swaps a left into a right and a right into a left.
+
+`.swap` menukar sisi kiri ke kanan dan sebaliknya.
 
 The `|` alias to `getOrElse` appears similarly to `Maybe`. We also get
 `|||` as an alias to `orElse`.
 
+`|` yang merupakan alias dari `getOrElse` terlihat mirip dengan `Maybe`.
+Kita juga bisa menggunakan `|||` sebagai alias untuk `orElse`.
+
 `+++` is for combining disjunctions with lefts taking preference over
 right:
+
+`+++` merupakan penggabungan disjungsi dengan kecenderungan untuk memilih
+bagian kiri:
 
 -   `right(v1) +++ right(v2)` gives `right(v1 |+| v2)`
 -   `right(v1) +++ left (v2)` gives `left (v2)`
@@ -8491,8 +8527,14 @@ right:
 `.toEither` is provided for backwards compatibility with the Scala
 stdlib.
 
+`.toEither` disediakan untuk kompatibilitas terbalik dengan pustaka
+standar Scala.
+
 The combination of `:?>>` and `<<?:` allow for a convenient syntax to
 ignore the contents of an `\/`, but pick a default based on its type
+
+Untuk kombinasi dari `:?>>` dan `<<?:` memperkenankan kita untuk
+menghiraukan isi dari sebuah `\/`, namun berdasarkan tipe dari isinya. 
 
 {lang="text"}
 ~~~~~~~~
