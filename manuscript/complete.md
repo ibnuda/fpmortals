@@ -8079,9 +8079,18 @@ compatibility problems because the compiler doesn't know what we know. This
 typically happens when we use third party code that is the same as something we
 already have.
 
+Seringkali kita mendapati dua tipe yang benar-benar sama dan mengakibatkan
+masalah kompatibilitas yang dikarenakan kompiler tidak mengetauhi asumsi-
+asumsi yang kita ketahui. Hal ini biasanya terjadi bila kita menggunakan
+kode dari pihak ketiga yang sama dengan kode kita yang sudah ada.
+
 This is when `Isomorphism` can help us out. An isomorphism defines a formal "is
 equivalent to" relationship between two types. There are three variants, to
 account for types of different shapes:
+
+Masalah sepetri ini bisa diselesaikan dengan `Isomorphism`. Sebuah isomorfisme
+mendefinisikan secara formal hubungan setara antara dua tipe. Isomorphism
+mempunyai tiga varian berdasarkan bentuk dari tipe: (lol, help)
 
 {lang="text"}
 ~~~~~~~~
@@ -8123,6 +8132,13 @@ functions allow us to generate instances from existing functions or natural
 transformations. However, it is often easier to use one of the abstract
 `Template` classes to define an isomorphism. For example:
 
+Tipe alias `IsoSet`, `IsoFunctor`, dan `IsoBifunctor` mencakup hal-hal
+umum: fungsi reguler, transformasi atural, dan  transformasi binatural.
+Fungsi fungsi pembantu mempermudah kita dalam membuat instans dari fungsi
+fungsi atau transformasi natural yang telah ada sebelumnya. Walaupun
+kadangkala, akan lebih mudah dalam pendefinisian isomorfisme dengan
+menggunakan abstrak `Template`. Sebagai contoh:
+
 {lang="text"}
 ~~~~~~~~
   val listIListIso: List <~> IList =
@@ -8134,6 +8150,9 @@ transformations. However, it is often easier to use one of the abstract
 
 If we introduce an isomorphism, we can generate many of the standard
 typeclasses. For example
+
+Bila kita memperkenalkan sebuah isomorfisme, kita juga akan membuat
+banyak instans kelas tipe standar. Sebagai contoh:
 
 {lang="text"}
 ~~~~~~~~
@@ -8148,6 +8167,12 @@ allows us to derive a `Semigroup[F]` for a type `F` if we have an `F <=> G` and
 a `Semigroup[G]`. Almost all the typeclasses in the hierarchy provide an
 isomorphic variant. If we find ourselves copying and pasting a typeclass
 implementation, it is worth considering if `Isomorphism` is the better solution.
+
+memperkenankan kita untuk menderivasi sebuah `Semigroup[F]` untuk tipe `F` bila
+kita mempunyai sebuah `F <=> G` dan `Semigroup[G]`. Hampir semua kelas tipe
+pada hierarki menyediakan varian isomorfik. Bila kita berada pada situasi
+salin-tempel saat menulis implementasi kelas tipe, mungkin ada baiknya
+mempertimbangkan `Isomorphism` sebagai solusi yng lebih baik.
 
 
 ## Containers
