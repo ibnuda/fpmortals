@@ -31,6 +31,7 @@ Istilah istilah yang belum saya pikirkan padan katanya.
 - *signature*.
 - *simulacrum*.
 - *state*.
+- *sum type*.
 - *tagged type*.
 - *test-runner*.
 - *timestamp*.

@@ -8184,9 +8184,18 @@ We have already encountered Scalaz's improvement over `scala.Option`, called
 `Maybe`. It is an improvement because it is invariant and does not have any
 unsafe methods like `Option.get`, which can throw an exception.
 
+Sebagaimana yang telah kita saksikan, Scalaz menyediakan peningkatan atas
+`scala.Option` dengan konstruk `Maybe`. `Maybe` dianggap sebagai peningkatan
+dikarenakann konstruk ini merupakan sebuah invarian dan tidak mempunyai
+metoda rawan seperti `Option.get`, yang bisa melempar pengecualian. 
+
 It is typically used to represent when a thing may be
 present or not without giving any extra context as to why it may be
 missing.
+
+Secara umum, konstruk ini digunakan untuk merepresentasikan keadaan
+dimana sebuah objek bisa ada maupun tidak, tnapa memberikan konteks
+kenapa bisa begitu.
 
 {lang="text"}
 ~~~~~~~~
@@ -8210,8 +8219,18 @@ with type inference. This pattern is often referred to as returning a
 *sum type*, which is when we have multiple implementations of a
 `sealed trait` but never use a specific subtype in a method signature.
 
+Metoda pasangan `.empty` dan `just` lebih disukai saat membuat instans
+`Empty` dan `Just` mentah karena kedua metoda tersebut mengembalikan
+sebuha `Maybe` dan membantu mempermudah pendugaan tipe. Pola ini seringkali
+digunakan karena mengembalikan a *sum type* (lol, help). *Sum type* sendiri
+merupakan keadaan dimana kita mempunyai beberapa implementasi sebuah
+`sealed trait` namun tidak menggunakan sub-tipe khusus pada sebuah penanda tipe. ``
+
 A convenient `implicit class` allows us to call `.just` on any value
 and receive a `Maybe`
+
+Kita juga bisa tinggal memanggil `.just` pada semua nilai dan mendapatkan sebuah
+`Maybe`. Hal ini dikarenakan kelas pembantu `implicit class`
 
 {lang="text"}
 ~~~~~~~~
@@ -8222,6 +8241,8 @@ and receive a `Maybe`
 
 `Maybe` has a typeclass instance for all the things
 
+`Maybe` mempunyai instans kelas tipe untuk
+
 -   `Align`
 -   `Traverse`
 -   `MonadPlus` / `IsEmpty`
@@ -8231,11 +8252,17 @@ and receive a `Maybe`
 
 and delegate instances depending on `A`
 
+dan mendelegasi instans yang bergantung pada `A`
+
 -   `Monoid` / `Band`
 -   `Equal` / `Order` / `Show`
 
 In addition to the above, `Maybe` has functionality that is not supported by a
 polymorphic typeclass.
+
+Sebagai tambahan untuk kelas tipe di atas, `Maybe` juga mempunyai
+beberapa fungsionalitas yang tidak didukung oleh kelas tipe polimorfis.
+
 
 {lang="text"}
 ~~~~~~~~
@@ -8261,14 +8288,28 @@ polymorphic typeclass.
 `.cata` is a terser alternative to `.map(f).getOrElse(b)` and has the
 simpler form `|` if the map is `identity` (i.e. just `.getOrElse`).
 
+`.cata` merupakan bentuk singkat dari `.map(f).getOrElse(b)` dan bahkan
+mempunyai bentuk yang lebih sederhana dalam bentuk `|` bila map berupa
+sebuah `identity` (mis, hanya `.getOrElse`).
+
 `.toLeft` and `.toRight`, and their symbolic aliases, create a disjunction
 (explained in the next section) by taking a fallback for the `Empty` case.
 
+`.toLeft` dan `toRight`, dan alias simbolis mereka, membuat sebuah disjungsi
+(yang akan dijelaskan pada bagian selanjutnya) dengan menerima sebuah
+penadah untuk kasus `Empty`.
+
 `.orZero` takes a `Monoid` to define the default value.
+
+`.orZero` menerima sebuah `Monoid` untuk mendefinisikan nilai bawaan.
 
 `.orEmpty` uses an `ApplicativePlus` to create a single element or
 empty container, not forgetting that we already get support for stdlib
 collections from the `Foldable` instance's `.to` method.
+
+`orEmpty` menggunakan `ApplicativePlus` untuk membuat sebuah elemen atau
+kontainer kosong, tanpa melupakan bahwa kita sudah mempunyai dukungan
+untuk pustaka koleksi standar dari metoda `.to` dari instans `Foldable`.
 
 {lang="text"}
 ~~~~~~~~
@@ -8291,6 +8332,11 @@ collections from the `Foldable` instance's `.to` method.
 A> Methods are defined in OOP style on `Maybe`, contrary to our Chapter 4
 A> lesson to use an `object` or `implicit class`. This is a common theme
 A> in Scalaz and the reason is largely historical:
+A>
+A> Metoda pada `Maybe` didefinisikan dengan menggunakan gaya OOP, walaupun
+A> berlawanan dengan apa yang telah dipelajari pada bab 4 untuk menggunakan
+A> `object` atau `implicit class`. Hal ini merupakan hal yang biasa pada
+A> Scalaz dan mempunyai alasan historis:
 A> 
 A> -   text editors failed to find extension methods, but this now works
 A>     seamlessly in IntelliJ, ENSIME and ScalaIDE.
@@ -8299,10 +8345,23 @@ A>     types and not be able to find the extension method.
 A> -   the stdlib defines some `implicit class` instances that add methods
 A>     to all values, with conflicting method names. `+` is the most
 A>     prominent example, turning everything into a concatenated `String`.
+A>
+A> -   penyunting teks gagal menemukan metoda ekstensi, walaupun saat ini
+A>     IntelliJ, ENSIME, dan ScalaIDE mendukung penuh.
+A> -   ada beberapa kasus sudut (lol) dimana kompiler gagal menerka
+A>     tipe dan tidak mampu menemunkan metoda ekstensi.
+A> -   pustaka standar mendefinisikan beberapa instans dari `implicit class`
+A>     yang menambah metoda ke semua nilai, termasuk dengan metoda dengan
+A>     nama yang bertabrakan. Contoh paling nyata adalah metoda `+`.
+A>     Metoda ini mengubah semua menjadi `String` yang disambung.
 A> 
 A> The same is true for functionality that is provided by typeclass
 A> instances, such as these methods which are otherwise provided by
 A> `Optional`
+A>
+A> Hal yang sama juga berlaku untuk fungsionalitas yang disediakan oleh
+A> instans kelas tipe, seperti metoda berikut yang bila tidak ada, akan
+A> disediakan oleh `Optional`
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -8314,6 +8373,9 @@ A> ~~~~~~~~
 A> 
 A> However, recent versions of Scala have addressed many bugs and we are
 A> now less likely to encounter problems.
+A>
+A> Namun, versi Scala baru-baru ini sudah menangani banyak kutu dan kita
+A> mungkin semakin jaran menemui masalah semacam ini.
 
 
 ### Either
