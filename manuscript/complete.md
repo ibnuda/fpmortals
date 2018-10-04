@@ -8003,8 +8003,17 @@ A function from one type to another is written as `A => B` in Scala, which is
 syntax sugar for a `Function1[A, B]`. Scalaz provides similar syntax sugar `F ~>
 G` for functions over type constructors `F[_]` to `G[_]`.
 
+Pada Scala, penulisan sebuah fungsi yang memetakan sebuah tipe ke tipe lainnya
+biasa dituliskan sebagai `A => B`. Penulisan tersebut sendiri merupakan
+pemanis sintaksis untuk `Function[A, B]`. Sedangkan untuk memetakan konstruktor
+tipe `F[_]` ke `G[_]`. Scalaz menyediakan pemanis sintaks yeang mirip dengan
+`A => B` yaitu `F ~> G`.
+
 These `F ~> G` are called *natural transformations* and are *universally
 quantified* because they don't care about the contents of `F[_]`.
+
+`F ~> G` disebut sebagai *transformasi natural* dan *secara umum terkuantifikasi*
+karena sintaks ini tidak menghiraukan isi dari `F_]`.
 
 {lang="text"}
 ~~~~~~~~
@@ -8020,6 +8029,9 @@ quantified* because they don't care about the contents of `F[_]`.
 An example of a natural transformation is a function that converts an `IList`
 into a `List`
 
+Sebagai contoh transformasi natural, mari kita lihat sebuah fungsi yang
+mengubah `IList` menjadi `List`
+
 {lang="text"}
 ~~~~~~~~
   scala> val convert = new (IList ~> List) {
@@ -8031,6 +8043,8 @@ into a `List`
 ~~~~~~~~
 
 Or, more concisely, making use of `kind-projector`'s syntax sugar:
+
+atau yang lebih ringkas,  dengan menggunakan pemanis `kind-projector`:
 
 {lang="text"}
 ~~~~~~~~
@@ -8046,6 +8060,16 @@ natural transformation to map between algebras. For example, in
 changing all our business logic and tests to use this new `BigMachines`
 interface, we may be able to write a transformation from `Machines ~>
 BigMachines`. We will return to this idea in the chapter on Advanced Monads.
+
+Namun pada tahap pengembangan sehari-hari, sangat mungkin kita menggunakan
+transformasi natural untuk memetakan dari aljabar satu ke aljabar lainnya.
+Sebagai contoh, pada `drone-dynamic-agents`, kita mungkin lebih memilih
+untuk mengimplementasikannya dengan menggunakan aljabar yang sudah ada,
+`BigMachines`. Setelah mengetahui adanya transformasi ini, kita mungkin
+akan memilih untuk melakukan transformasi dengan menggunakan `Machine ~> BigMachines`
+daripada secara manual menulis ulang logika bisnis dan test kita menggunankan
+`BigMachine`. Kita akan kembali membahas gagasan ini pada bab mengenai
+Monad Lanjutan.
 
 
 ## `Isomorphism`
