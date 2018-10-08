@@ -8907,6 +8907,9 @@ dengan `EphemeralStream` atau apapun dengan sebuah `MonadPlus`.
 The `Coproduct` data type (not to be confused with the more general concept of a
 *coproduct* in an ADT) wraps `Disjunction` for type constructors:
 
+Tipe data `Coproduct` (berbeda dengan konsep umum ko-produk pada sebuah ADT)
+membungkus `Disjunction` untuk konstruktor tipe:
+
 {lang="text"}
 ~~~~~~~~
   final case class Coproduct[F[_], G[_], A](run: F[A] \/ G[A]) { ... }
@@ -8919,8 +8922,13 @@ The `Coproduct` data type (not to be confused with the more general concept of a
 
 Typeclass instances simply delegate to those of the `F[_]` and `G[_]`.
 
+Instans kelas tipe diserahkan ke fungtor `F[_]` dan `G[_]`. 
+
 The most popular use case for `Coproduct` is when we want to create an anonymous
 coproduct for a GADT.
+
+Penggunaan `Coproduct` yang paling jamak dijumpai adalah saat kita ingin
+membuat sebuah ko-produk anonimus untuk sebuah GADT.
 
 
 ### Not So Eager
