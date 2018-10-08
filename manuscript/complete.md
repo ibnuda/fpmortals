@@ -8779,6 +8779,10 @@ A> fungsi tersebut tidak *Total*.
 We encountered `These`, a data encoding of inclusive logical `OR`,
 when we learnt about `Align`.
 
+Seperti yang telah kita temui pada bab sebelumnya mengenai `Align`,
+`These` berbicara mengenai penyandian data dengan logika inklusif atau
+yang disebut juga `OR`.
+
 {lang="text"}
 ~~~~~~~~
   sealed abstract class \&/[+A, +B] { ... }
@@ -8795,6 +8799,8 @@ when we learnt about `Align`.
 
 with convenient construction syntax
 
+dengan sintaks konstruktor
+
 {lang="text"}
 ~~~~~~~~
   implicit class TheseOps[A](self: A) {
@@ -8808,6 +8814,8 @@ with convenient construction syntax
 
 `These` has typeclass instances for
 
+`These` mempunyai instans kelas tipe untuk
+
 -   `Monad`
 -   `Bitraverse`
 -   `Traverse`
@@ -8815,12 +8823,17 @@ with convenient construction syntax
 
 and depending on contents
 
+dan bergantung dengan konten
+
 -   `Semigroup` / `Monoid` / `Band`
 -   `Equal` / `Order`
 -   `Show`
 
 `These` (`\&/`) has many of the methods we have come to expect of
 `Disjunction` (`\/`) and `Validation` (`\?/`)
+
+`These` (`\&/`) mempunyai banyak metoda yang setara dengan metoda
+dari `Disjunction` (`\/`) dan `Validation` (`\?/`)
 
 {lang="text"}
 ~~~~~~~~
@@ -8839,17 +8852,35 @@ and depending on contents
 because cases of `This` and `That` can always be converted into a
 `Both`.
 
+`.append` mempunyai 9 cara penyusunan yang mungkin dibuat dan data tidak
+pernah dibuang dikarenakan `This` dan `That` selalu bisa dikonversi menjadi
+`Both`.  
+
 `.flatMap` is right-biased (`Both` and `That`), taking a `Semigroup`
 of the left content (`This`) to combine rather than break early. `&&&`
 is a convenient way of binding over two of *these*, creating a tuple
 on the right and dropping data if it is not present in each of
 *these*.
 
+`.flatMap` merupakan metoda yang cenderung memilih parameter sebelah kanan.
+`.flatMap` menerima sebuah `Semigroup` pada konten bagian kiri (`This`)
+untuk digabungkan, bukan meng-arus-pendekkannya. `&&&` dapat digunakan
+untuk menggabungkan dua `These` dan membuat sebuah tuple di bagian kanan
+dan memmbuang data yang bersangkutan bila data tersebut tidak ada pada
+kedua sisi `These`.
+
 Although it is tempting to use `\&/` in return types, overuse is an
 anti-pattern. The main reason to use `\&/` is to combine or split
 potentially infinite *streams* of data in finite memory. Convenient
 functions exist on the companion to deal with `EphemeralStream`
 (aliased here to fit in a single line) or anything with a `MonadPlus`
+
+Walaupun merupakan hal yang menggiurkan untuk menggunakan `\&/` pada
+tipe kembalian, penggunaan berlebihan merupakan salah satu *anti-pattern*.
+Alasan utama untuk menggunakan `\&/` adalah untuk menggabungkan atau
+memecah aliran data yang bisa jadi tak hingga pada memori yang hingga.
+Fungsi pembantu ada pada objek pendamping bila dibutuhkan bila berurusan
+dengan `EphemeralStream` atau apapun dengan sebuah `MonadPlus`.
 
 {lang="text"}
 ~~~~~~~~
