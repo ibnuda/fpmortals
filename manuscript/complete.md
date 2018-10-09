@@ -9215,13 +9215,27 @@ behaviours in the typeclass hierarchy, e.g. `Foldable`, `Traverse`, `Monoid`.
 What remains to be studied are the implementations in terms of data structures,
 which have different performance characteristics and niche methods.
 
+Berbeda halnya dengan APA Koleksi dari pustaka standar, pendekatan Scalaz
+atas perilaku koleksi dideskripsikan dengan hierarki kelas tipe, misalkan
+`Foldable`, `Traverse`, `Monoid`. Yang tersisa untuk dipelajari adalah
+implementasi strukutur data yang mempunyai karakteristik performa yang
+cukup berbeda dan metoda relung.
+
 This section goes into the implementation details for each data type. It is not
 essential to remember everything presented here: the goal is to gain a high
 level understanding of how each data structure works.
 
+Bagian ini akan membahas mengenai detail implementasi untuk tiap tipe data.
+Tujuan utama dari bagian ini adalah mendapatkan pemahaman umum tentang
+cara kerja dari tiap struktur data.
+
 Because all the collection data types provide more or less the same list of
 typeclass instances, we shall avoid repeating the list, which is often some
 variation of:
+
+Karena semua tipe data koleksi menyediakan instans kelas tipe yang kurang lebih
+sama, kita akan melewatkan daftar instans tersebut, yang biasanya terdiri
+atas variasi dari:
 
 -   `Monoid`
 -   `Traverse` / `Foldable`
@@ -9234,15 +9248,23 @@ variation of:
 
 Data structures that are provably non-empty are able to provide
 
+Struktur data yang sudah terbukti tidak kosong akan menyediakan
+
 -   `Traverse1` / `Foldable1`
 
 and provide `Semigroup` instead of `Monoid`, `Plus` instead of `IsEmpty`.
+
+Dan menyediakan `Semigroup`, bukan `Monooid`, dan `Plus`, bukan `IsEmpty`.
 
 
 ### Lists
 
 We have used `IList[A]` and `NonEmptyList[A]` so many times by now that they
 should be familiar. They codify a classic linked list data structure:
+
+Kita sudah menggunakan `IList[A]` dan `NonEmptyList[A]` berulang kali
+sehingga akan terasa familiar. Kedua struktur data tersebut mengkodifikasikan
+struktur data klasik daftar tertaut:
 
 {lang="text"}
 ~~~~~~~~
@@ -9264,6 +9286,7 @@ should be familiar. They codify a classic linked list data structure:
 ~~~~~~~~
 
 A> The source code for Scalaz 7.3 reveals that `INil` is implemented as
+A> Pada kode sumber Scalaz 7.3, `INil` diimplementasikan dengan
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -9276,20 +9299,37 @@ A> ~~~~~~~~
 A> 
 A> which exploits JVM implementation details to avoid an object allocation when
 A> creating an `INil`.
+A>
+A> yang menggunakan detail implementasi JVM untuk menghindari alokasi objek pada
+A> saat membuat sebuah `INil`.
 A> 
 A> This optimisation is manually applied to all zero-parameter classes. Indeed,
 A> Scalaz is full of many optimisations of this nature: debated and accepted only
 A> when presented with evidence of a significant performance boost and no risk of a
 A> semantic change.
+A>
+A> Optimisasi semacam ini ditulis secara manual pada semua kelas tanpa parameter.
+A> Dan memang, Scalaz dipenuhi dengan optimisasi semacam ini setelah didiskusikan
+A> dan ditunjukkan bahwa terdapat peningkatan perfroma yang signifikan dan
+A> tanpa memperkenalkan perubahan semantik.
 
 The main advantage of `IList` over stdlib `List` is that there are no
 unsafe methods, like `.head` which throws an exception on an empty
 list.
 
+Keuntungan utama dari `IList` atas `List` milik pustaka standar adalah
+tidak adanya metoda yang tidak aman seperti `.head` yang melempar eksepsi
+pada sebuah daftar kosong.
+
 In addition, `IList` is a **lot** simpler, having no hierarchy and a
 much smaller bytecode footprint. Furthermore, the stdlib `List` has a
 terrifying implementation that uses `var` to workaround performance
 problems in the stdlib collection design:
+
+Sebagai tambahan, `IList` jauh lebih sederhana, tanpa hierarki dan mempunyai
+jejak bytecode yang jauh lebih kecil. Terlebih lagi, `List` pustaka standar
+mempunayi implementasi yang mengerikan dengan menggunakan `var` untuk
+mengakali masalah performa pada desain koleksi pustaka standar:
 
 {lang="text"}
 ~~~~~~~~
@@ -9311,10 +9351,20 @@ problems in the stdlib collection design:
 to ensure safe publishing. `IList` requires no such hacks and can
 therefore outperform `List`.
 
+Pembuatan `List` membutuhkan sinkronisasi `Thread` yang hati hati dan pelan
+untuk memastikan keamanan. `IList` tidak membutuhkan *hack* (lol, lupa)
+semacam itu sehingga mempunyai performa yang lebih bagus bila dibandingkan
+`List`.
+
 A> Isn't `NonEmptyList` just the same as `ICons`? Yes, at a data structure level.
 A> But the difference is that `ICons` is part of the `IList` ADT whereas
 A> `NonEmptyList` is outside it. Typeclass instances should always be provided at
 A> the level of an ADT, not for each entry, to avoid complexity.
+A>
+A> Bukannya `NonEmptyList` sama halnya dengan `ICons`? Ya, pada tingkat struktur
+A> data. Namun yang membedakan adalah `ICons` merupakan ADT dari `IList` sedangkan
+A> `NonEmptyList` tidak. Instans kelas tipe harus selalu disediakan pada tingkat
+A> ADT untuk menghindari kerumitan yang tidak perlu.
 
 
 ### `EphemeralStream`
