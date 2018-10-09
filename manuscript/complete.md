@@ -8936,8 +8936,15 @@ membuat sebuah ko-produk anonimus untuk sebuah GADT.
 Built-in Scala tuples, and basic data types like `Maybe` and
 `Disjunction` are eagerly-evaluated value types.
 
+Tipe data tuple bawaan dari pustaka standar Scala dan tipe data sederhana
+seperti `Maybe` dan `Disjunction` merupakan tipe dengan nilai yang selalu
+dievaluasi secara tegas.
+
 For convenience, *by-name* alternatives to `Name` are provided, having
 the expected typeclass instances:
+
+Untuk memudahkan pemakaian, alternatif *by-name* untuk `Name` juga disediakan
+beserta beberapa instans kelas tipe:
 
 {lang="text"}
 ~~~~~~~~
@@ -8966,11 +8973,17 @@ The astute reader will note that `Lazy*` is a misnomer, and these data
 types should perhaps be: `ByNameTupleX`, `ByNameOption` and
 `ByNameEither`.
 
+Pembaca yang teliti akan memperhatikan bahwa `Lazy*` merupakan salah kaprah
+dan tipe data ini seharusnya `ByNameTupleX`, `ByNameOption`, and `ByNameEither`.
+
 
 ### Const
 
 `Const`, for *constant*, is a wrapper for a value of type `A`, along with a
 spare type parameter `B`.
+
+`Const`, untuk konstan, merupakan pelapis untuk nilai dari tipe `A`, beserta
+sebuah tipe parameter cadangan `B`.
 
 {lang="text"}
 ~~~~~~~~
