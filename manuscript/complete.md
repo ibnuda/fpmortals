@@ -8993,6 +8993,9 @@ sebuah tipe parameter cadangan `B`.
 `Const` provides an instance of `Applicative[Const[A, ?]]` if there is a
 `Monoid[A]` available:
 
+`Const` menyediakan sebuah instans dari `Applicative[Const[A, ?]]` bila
+`Monoid[A]` tersedia:
+
 {lang="text"}
 ~~~~~~~~
   implicit def applicative[A: Monoid]: Applicative[Const[A, ?]] =
@@ -9008,9 +9011,18 @@ The most important thing about this `Applicative` is that it ignores the `B`
 parameters, continuing on without failing and only combining the constant values
 that it encounters.
 
+Yang menjadi esensi dari `Applicative` ini adalah `Applicative` tersebut
+menghiraukan parameter `B` dan melanjutkan eksekusi dengan lancar dan
+hanya mengkombinasikan nilai konstan yang ditemu.
+
 Going back to our example application `drone-dynamic-agents`, we should first
 refactor our `logic.scala` file to use `Applicative` instead of `Monad`. We
 wrote `logic.scala` before we learnt about `Applicative` and now we know better:
+
+Kembali ke contoh aplikasi `drone-dynamic-agents`, kita harus me-*refaktor*
+berkas `logic.scala` terlebih dahulu agar menggunakan `Applicative`.
+Sebelumnya, kita menggunakan `Monad` karena kita tidak tahu ada alternatif
+yang lebih sesuai untuk konteks permasalahan ini.
 
 {lang="text"}
 ~~~~~~~~
@@ -9039,6 +9051,10 @@ Since our business logic only requires an `Applicative`, we can write mock
 implementations with `F[a]` as `Const[String, a]`. In each case, we return the
 name of the function that is called:
 
+Karena logika bisnis kita hanya membutuhkan sebuah `Applicative`, kita bisa
+menulis tiruan implementasi `F[a]` dengan `Const[String, a]`. Pada setiap
+kasus, kita mengembalikan nama dari fungsi yang dipanggil.
+
 {lang="text"}
 ~~~~~~~~
   object ConstImpl {
@@ -9064,6 +9080,9 @@ name of the function that is called:
 With this interpretation of our program, we can assert on the methods that are
 called:
 
+Dengan interpretasi program kita semacam ini, kita dapat memastikan pada
+metoda-metoda yang ada bahwa ada (lol, wat?)
+
 {lang="text"}
 ~~~~~~~~
   it should "call the expected methods" in {
@@ -9079,16 +9098,30 @@ called:
 Alternatively, we could have counted total method calls by using `Const[Int, ?]`
 or an `IMap[String, Int]`.
 
+Bisa juga kita menghitung jumlah pemanggilan metoda secara keseluruhan
+dengan menggunakan `Const[Int, ?]` atau `IMap[String, Int]`. 
+
 With this test, we've gone beyond traditional *Mock* testing with a `Const` test
 that asserts on *what is called* without having to provide implementations. This
 is useful if our specification demands that we make certain calls for certain
 input, e.g. for accounting purposes. Furthermore, we've achieved this with
 compiletime safety.
 
+Dengan tes semacam ini, kita sudah jauh melampau tes tiruan tradisional
+dengan menggunakan test `Const` yang memeriksa apa yang dites tanpa harus
+menyediakan implementasi. Hal semacam ini berguna bila spesifikasi kita
+mengharuskan untuk menerima input untuk panggilan-panggilan tertentu.
+Terlebih lagi, kita mencapai hasil ini dengan keamanan waktu kompilasi.
+
 Taking this line of thinking a little further, say we want to monitor (in
 production) the nodes that we are stopping in `act`. We can create
 implementations of `Drone` and `Machines` with `Const`, calling it from our
 wrapped version of `act`
+
+Melanjutkan penggunaan pola pikir semacam ini sedikit lebih jauh, misal
+kita ingin memonitor node yang kita hentikan pada `act`. Kita bisa
+membuat implementasi `Drone` dan `Machines` dengan `Const` dan memanggilnya
+dari metoda `act`
 
 {lang="text"}
 ~~~~~~~~
@@ -9117,9 +9150,16 @@ wrapped version of `act`
 We can do this because `monitor` is *pure* and running it produces no side
 effects.
 
+Kita bisa melakukan hal semacam ini karena `monitor` merupakan metoda
+*pure* (lol, help) yang berjalan tanpa menghasilkan efek samping.
+
 This runs the program with `ConstImpl`, extracting all the calls to
 `Machines.stop`, then returning it alongside the `WorldView`. We can unit test
 this:
+
+Potongan kode ini menjalankan program dengan `ConstImpl` yang dilanjutkan
+dengan mengekstrak semua pemanggilan ke `Machines.stop` dan pada akhirnya
+mengembalikan bersama `WorldView`. Kita bisa mengetesnya dengan:
 
 {lang="text"}
 ~~~~~~~~
@@ -9139,15 +9179,33 @@ We have used `Const` to do something that looks like *Aspect Oriented
 Programming*, once popular in Java. We built on top of our business logic to
 support a monitoring concern, without having to complicate the business logic.
 
+Kita sudah menggunakan `Const` untuk melakukan apa yang terlihat seperti
+Pemrograman Berorientasi Aspek, yang dulu pernah populer di Java. Kita
+membangun logika bisnis kita untuk mendukung pemantauan tanpa harus
+mengaburkan logika bisnis.
+
 It gets even better. We can run `ConstImpl` in production to gather what we want
 to `stop`, and then provide an **optimised** implementation of `act` that can make
 use of implementation-specific batched calls.
+
+Dan menariknya, kita dapat menjalankan `ConstImpl` pada lingkungan produksi
+untuk mengumpulkan apa yang ingin kita `stop` dan menyediakan implementasi
+teroptimis dari `act` yang bisa menggunakan kelompok panggilan implementasi
+khusus.
 
 The silent hero of this story is `Applicative`. `Const` lets us show off what is
 possible. If we need to change our program to require a `Monad`, we can no
 longer use `Const` and must write full mocks to be able to assert on what is
 called under certain inputs. The *Rule of Least Power* demands that we use
 `Applicative` instead of `Monad` wherever we can.
+
+Namun, pahlawan tanpa tanda jasa dari cerita ini adalah `Applicative`.
+`Const` memperkenankan kita untuk menunjukkan apa yang bisa kita lakukan.
+Bila kita harus mengubah program kita untuk meminta sebuah `Monad`, kita
+tidak dapat lagi menggunakan `Const` dan harus menulis ulang tiruan secara
+menyeluruh untuk dapat memastikan apa yang dipanggil pada input tertentu.
+*Rule of Least Power* memaksa kita untuk memilih menggunakan `Applicative`
+dibandingkan `Monad` bila memungkinkan.
 
 
 ## Collections
