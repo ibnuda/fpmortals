@@ -9463,6 +9463,10 @@ merupakan alasan dibuatnya fs2.
 deterministically, like the `EphemeralStream.unfold` method that we just
 studied:
 
+Korekursi adalah saat kita memulai sesuatu dari sebuah kondisi awal dan
+membuat langkah-langkah selanjutnya secara deterministik yang sama halnya
+dengan `EphemerealStream.unfold` yang baru saja kita pelajari.
+
 {lang="text"}
 ~~~~~~~~
   def unfold[A, B](b: =>B)(f: B => Option[(A, B)]): EStream[A] = ...
@@ -9471,8 +9475,15 @@ studied:
 Contrast to *recursion*, which breaks data into a base state and then
 terminates.
 
+Sangat berbeda dengan rekursi, yang memecah data menjadi kondisi dasar
+lalu berakhir.
+
 A `CorecursiveList` is a data encoding of `EphemeralStream.unfold`, offering an
 alternative to `EStream` that may perform better in some circumstances:
+
+`CorecursiveList` merupakan penyandian data dari `EphemerealStream.unfold`
+yang memberikan alternatif untuk `EStream` yang berpeluang untuk memberikan
+performa yang lebih bagus dalam beberapa situasi tertentu:
 
 {lang="text"}
 ~~~~~~~~
@@ -9499,6 +9510,11 @@ Corecursion is useful when implementing `Comonad.cojoin`, like our `Hood`
 example. `CorecursiveList` is a good way to codify non-linear recurrence
 equations like those used in biology population models, control systems, macro
 economics, and investment banking models.
+
+Korekursi berguna saat mengimplementasikan `Comonad.cojoin`, seperti contoh
+pada `Hood`. `CorecursiveList` merupakan contoh untuk mengkodifikasi persamaan
+non-linear berulang seperti yang digunakan pada pemodelan biologi populasi,
+sistem kontrol, ekonomi makro, dan investasi perbankan.
 
 
 ### `ImmutableArray`
