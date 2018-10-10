@@ -26,6 +26,7 @@ Istilah istilah yang belum saya pikirkan padan katanya.
 - *headless*.
 - *infinite loop*.
 - *invoke*. Mungkin *selawat*?
+- *lazy*. Lundung saja.
 - *mailboxes*. Pernah pakai, tapi apa ya?
 - *orphan instance*. Instans yatim? lol
 - *signature*.

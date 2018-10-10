@@ -7669,10 +7669,10 @@ methods typically ask for a *by-name* parameter and then convert it
 into a `Need` internally, getting a boost to performance.
 
 Pada pemrograman fungsional, kita hampir selalu menggunakan `Value` atau
-`Need` (dikenal dengan *tegas* dan *malas*) dikarenakan hampir tidak ada
+`Need` (dikenal dengan *tegas* dan *lundung*) dikarenakan hampir tidak ada
 untungnya menggunakan `Name` secara eksplisit.
 Hal ini dikarenakan tidak dukungan pada tingkat bahasa untuk parameter
-metoda yang dipanggil secara malas. Metoda secara umum meminta parameter
+metoda yang dipanggil secara lundung. Metoda secara umum meminta parameter
 *by-name* lalu mengubahnya menjadi `Need` secara internal agar mendapatkan
 tambahan performa.
 
@@ -7686,8 +7686,8 @@ A> More generally, we're all pretty lazy about how we talk about laziness: it ca
 A> be good to seek clarification about what kind of laziness is being discussed. Or
 A> don't. Because, lazy.
 A>
-A> Secara umum, kita tidak begitu semangat bila membicarakan evaluasi malas:
-A> mungkin akan lebih singkat bila kita mengklarifikasi tentang evaluasi malas
+A> Secara umum, kita tidak begitu semangat bila membicarakan evaluasi lundung:
+A> mungkin akan lebih singkat bila kita mengklarifikasi tentang evaluasi lundung
 A> apa yang sedang didiskusikan. Hal ini dikarenakan
 
 `Name` provides instances of the following typeclasses
@@ -7704,7 +7704,7 @@ A> *by-name* and *lazy* are not the free lunch they appear to be. When
 A> Scala converts *by-name* parameters and `lazy val` into bytecode,
 A> there is an object allocation overhead.
 A>
-A> pemanggilan *by name* yang malas dan *malas* tidak datang cuma cuma. 
+A> pemanggilan *by name* yang lundung dan *lundung* tidak datang cuma cuma. 
 A> Saat Scala mengkonversi parameter *by-name* dan `lazy val` menjadi
 A> bytecode akan selalu ada ongkons tambahan pada saat alokasi objek. 
 A> 
@@ -9375,6 +9375,13 @@ references to computed values, helping to alleviate the memory
 retention problem, and removing unsafe methods in the same spirit as
 `IList`.
 
+Struktur data `Stream` dari pustaka standar merupakan bentuk lundung (lol, lupa)
+dari `List`, namun implementasinya dipenuhi dengan kebocoran memori dan metoda
+tak aman. Untuk menghilangkan masalah semacam ini, `EphemerealStream` tidak
+menyimpan rujukan pada nilai yang telah dikomputasi. Selain itu, sama halnya
+dengan apa yang dilakukan pada `IList`, `EphemerealStream` juga menghilangkan
+penggunaan metoda-metoda tidak aman.
+
 {lang="text"}
 ~~~~~~~~
   sealed abstract class EphemeralStream[A] {
@@ -9406,6 +9413,10 @@ retention problem, and removing unsafe methods in the same spirit as
 A> The use of the word *stream* for a data structure of this nature comes down to
 A> legacy. *Stream* is now used by marketing departments alongside the ✨ *Reactive
 A> Manifesto* ✨ and implementing frameworks like Akka Streams.
+A>
+A> Penggunaan kata *stream* pada struktur data semacam ini merupakan sisa-sisa
+A> peninggalan masa lalu. *Stream* sekarang digunakan oleh bagian pemasaran
+A> dan ✨ *Reactive Manifesto* ✨ beserta pembuatan *framework* seperti Akka Stream.
 
 `.cons`, `.unfold` and `.iterate` are mechanisms for creating streams, and the
 convenient syntax `##::` puts a new element at the head of a by-name `EStream`
@@ -9414,16 +9425,36 @@ repeatedly applying a function `f` to get the next value and input for the
 following `f`. `.iterate` creates an infinite stream by repeating a function `f`
 on the previous element.
 
+`.cons`, `.unfold`, dan `.iterate` digunakan untuk membuat *stream*. Sedangkan
+untuk `##::`, operator ini digunakan untuk menambah elemen baru pada bagian
+awal dari `Estream`. Untuk `.unfold`, seringkali digunakan untuk membuat
+*stream* hingga (walaupun bisa saja merupakan *stream* tak hingga) dengan
+mengaplikasikan fungsi `f` secara berulang untuk mendapatkan nilai selanjutnya
+dan input untuk fungsi `f` itu sendiri. `.iterate` membuat sebuah *stream*
+tak hingga dengan mengulang fungsi `f` pada elemen sebelumnya.
+
 `EStream` may appear in pattern matches with the symbol `##::`,
 matching the syntax for `.cons`.
 
+`Estream` bisa saja muncul pada *pattern match* dengan simobl `##::` dengan
+mencocokkan sintaks untuk `.cons`.
+
 A> `##::` sort of looks like an Exogorth: a giant space worm that lives
 A> on an asteroid.
+A>
+A> `##::` mirip dengan Exogorth, seekor cacing raksasa yang tinggal di
+A> asteroid.
 
 Although `EStream` addresses the value memory retention problem, it is
 still possible to suffer from *slow memory leaks* if a live reference
 points to the head of an infinite stream. Problems of this nature, as
 well as the need to compose effectful streams, are why fs2 exists.
+
+Walau `Estream` menjawab masalah memori, struktur data ini bisa saja
+tetap terkena masalah memori bila ada nilai yang masih dirujuk terletak
+pada bagian ujung awal dari sebuah *stream* tak hingga. Masalah semacam ini,
+sebagaimana halnya dengan kebutuhan untuk membangun *stream* dengan efek,
+merupakan alasan dibuatnya fs2.
 
 
 ### `CorecursiveList`
