@@ -9664,6 +9664,10 @@ konstan.
 Linked lists have poor performance characteristics when large lists are appended
 together. Consider the work that goes into evaluating the following:
 
+Daftar terkait mempunyai karakteristik performa yang kurang baik bila
+daftar berukuran besar digabungkan. Sebagai gambaran, silakan diperhatikan
+operasi yang berjalan saat mengevaluasi potongan kode berikut:
+
 {lang="text"}
 ~~~~~~~~
   ((as ::: bs) ::: (cs ::: ds)) ::: (es ::: (fs ::: gs))
@@ -9675,9 +9679,17 @@ together. Consider the work that goes into evaluating the following:
 This creates six intermediate lists, traversing and rebuilding every list three
 times (except for `gs` which is shared between all stages).
 
+Operasi tersebut membuat enam daftar sementara, melangkahi, dan membangun
+ulang tiap daftar sebanyak tiga kali (kecuali `gs` yang dibagi pada
+semua tahap).
+
 The `DList` (for *difference list*) is a more efficient solution for this
 scenario. Instead of performing the calculations at each stage, it is
 represented as a function `IList[A] => IList[A]`
+
+`DList` (*difference list*) merupakan solusi yang lebih efisien untuk
+skenario semacam ini. Kita tidak melakukan evaluasi pada tiap tahap,
+namun kita merepresentasikannya sebagai sebuah fungsi `IList[A] => IList[A]`
 
 {lang="text"}
 ~~~~~~~~
@@ -9693,8 +9705,15 @@ represented as a function `IList[A] => IList[A]`
 
 A> This is a simplified implementation: it has a stack overflow bug that we will
 A> fix in the chapter on Advanced Monads.
+A>
+A> Potongan kode disamping merupakan implementasi yang disederhanakan:
+A> terdapat kutu *stack overflow* yang akan kita benahi pada bab Monad
+A> Lanjutan.
 
 The equivalent calculation is (the symbols created via `DList.fromIList`)
+
+Kalkulasi yang ekuivalen adalah (simbol dibuat dengan menggunakan
+`DList.fromIList`) 
 
 {lang="text"}
 ~~~~~~~~
@@ -9703,6 +9722,8 @@ The equivalent calculation is (the symbols created via `DList.fromIList`)
 
 which breaks the work into *right-associative* (i.e. fast) appends
 
+yang membagi tugas menjadi penambahan dengan sifat asosiatif-kanan 
+
 {lang="text"}
 ~~~~~~~~
   (as ::: (bs ::: (cs ::: (ds ::: (es ::: (fs ::: gs))))))
@@ -9710,9 +9731,17 @@ which breaks the work into *right-associative* (i.e. fast) appends
 
 utilising the fast constructor on `IList`.
 
+menggunakan konstruktor pada `IList`.
+
 As always, there is no free lunch. There is a memory allocation overhead that
 can slow down code that naturally results in right-associative appends. The
 largest speedup is when `IList` operations are *left-associative*, e.g.
+
+Sebagaimana biasanya, tentu ada harga yang harus dibayar. Terdapat
+alokasi memori tambahan yang dapat memperlambat kode yang berasal dari
+penambahan yang bersifat asosiatif-kanan. Operasi yang mendapatkan
+percepatan paling besar adalah ketika operasi pada `IList` bersifat
+asosiatif kiri, mis,
 
 {lang="text"}
 ~~~~~~~~
@@ -9721,6 +9750,10 @@ largest speedup is when `IList` operations are *left-associative*, e.g.
 
 Difference lists suffer from bad marketing. If they were called a
 `ListBuilderFactory` they'd probably be in the standard library.
+
+Bila `DList` bernama `ListBuilderFactory`, sangat memungkinkan
+bahwa struktur data ini akan ada pada pustaka standar. Namun
+karena reputasi yang buruk, hal ini tidak terjadi.
 
 
 ### `ISet`
