@@ -9765,8 +9765,21 @@ other. However, naive implementations of a tree structure can become
 perfectly balanced tree, but it is incredibly inefficient as every insertion
 effectively rebuilds the entire tree.
 
+Struktur pohon dikenal sangat cocok untuk menyimpan data yang terurut
+dengan tiap simpul berisi elemen bernilai yang lebih kecil dari pada
+satu cabang dan lebih besar bila dibandingkan pada cabang lainnya.
+Namun implementasi naif atas struktur data pohon dapat menyebabkan
+tidak seimbangnya pohon tersebut pada saat penyisipan elemen. Juga
+memungkinkan untuk memiliki pohon yang seimbang namun sangat tidak
+efisien dilakukan karena tiap kali penyisipan elemen dilakukan, pohon
+tersebut akan dibangun ulang.
+
 `ISet` is an implementation of a tree of *bounded balance*, meaning that it is
 approximately balanced, using the `size` of each branch to balance a node.
+
+`ISet` merupakan implementasi dari pohon dengan keseimbangan berbatas yang
+berarti pohon ini diperkirakan seimbang, dengan menggunakan ukuran (`size`)
+dari tiap cabang untuk menyeimbangka sebuah simpul.
 
 {lang="text"}
 ~~~~~~~~
@@ -9794,12 +9807,26 @@ same between calls or internal assumptions will be invalid, leading to data
 corruption: i.e. we are assuming typeclass coherence such that `Order[A]` is
 unique for any `A`.
 
+`ISet` mengharap `A` untuk mempunyai kelas tipe `Order`. Instans `Order[A]`
+harus tetap sama disela tiap pemanggilan. Bila tidak, asumsi internal akan
+invalid dan menyebabkan korupsi data: mis, kita mengasumsikan koherensi
+kelas tipe dimana `Order[A]` unik untuk tiap `A`.
+
 The `ISet` ADT unfortunately permits invalid trees. We strive to write ADTs that
 fully describe what is and isn't valid through type restrictions, but sometimes
 there are situations where it can only be achieved by the inspired touch of an
 immortal. Instead, `Tip` / `Bin` are `private`, to stop users from accidentally
 constructing invalid trees. `.insert` is the only way to build an `ISet`,
 therefore defining what constitutes a valid tree.
+
+Sayangnya, ADT `ISet` melarang adanya pohon invalid. Kita akan berusaha untuk
+menulis ADT yang mendeskripsikan secara lengkap mengenai apa yang valid dan
+tidak dengan menggunakan pembatasan tipe. Namun, kadang kala ada beberapa
+situasi yang menyebabkan hal ini hanya dapat dicapai saat mendapat bisikan
+dari leluhur. `Tip` / `Bin` dibuat `private` untuk mencegah pengguna tanpa
+sadar membuat pohon yang invalid. `.insert` merupakan satu-satunya cara
+untuk membuat `ISet`. Sehingga, `.insert` merupakan pendefinisian dari
+sebuah pohon yang valid.
 
 {lang="text"}
 ~~~~~~~~
@@ -9825,6 +9852,11 @@ The internal methods `.balanceL` and `.balanceR` are mirrors of each other, so
 we only study `.balanceL`, which is called when the value we are inserting is
 *less than* the current node. It is also called by the `.delete` method.
 
+Metoda internal `.balanceL` dan `.balanceR` merupakan pencerminan satu sama
+lain. Sehingga, kita hanya perlu mempelajari `.balanceL` yang akan dipanggil
+ketika nilai yang kita sisipkan kurang dari nilai yang ada pada simpul saat ini.
+Metoda ini juga dipanggil oleh metoda `.delete`.
+
 {lang="text"}
 ~~~~~~~~
   def balanceL[A](y: A, left: ISet[A], right: ISet[A]): ISet[A] = (left, right) match {
@@ -9836,13 +9868,26 @@ through each possible scenario, visualising the `(y, left, right)` on the left
 side of the page, with the balanced structure on the right, also known as the
 *rotated tree*.
 
+Menyeimbangkan sebuah pohon mengharuskan kita untuk mengklasifikasi
+skenario yang mungkin terjadi. Kita akan melihat satu persatu dan memvisualisasi
+`(y, left, right)` yang ada pada bagian kira laman dan struktur yang sudah
+diseimbangkan pada bagian kanan. Hal ini juga dikenal sebagai pohon yang dirotasi.
+
 -   filled circles visualise a `Tip`
 -   three columns visualise the `left | value | right` fields of `Bin`
 -   diamonds visualise any `ISet`
 
+-   lingkaran yang terisi melambangkan sebuah `Tip`
+-   tiga kolom melambangkan nilai `left | value | right` dari `Bin`
+-   wajik melambangkan `ISet`
+
 The first scenario is the trivial case, which is when both the `left` and
 `right` are `Tip`. In fact we will never encounter this scenario from `.insert`,
 but we hit it in `.delete`
+
+Skenario pertama merupakan contoh sepele, dimana kedua sisi merupakan `Tip`.
+Nyatanya, kita tidak akan pernah menemui hal semacam ini dari pemanggilan
+`.insert`. Namun, kita akan menemukannya dengan pemanggilan `.delete`
 
 {lang="text"}
 ~~~~~~~~
@@ -9855,6 +9900,10 @@ but we hit it in `.delete`
 The second case is when `left` is a `Bin` containing only `Tip`, we don't need
 to balance anything, we just create the obvious connection:
 
+Pada contoh kedua, `left` merupakan sebuah `Bin` yang hanya berisi sebuah
+`Tip`. Kita tidak perlu menyeimbangkan apaun, cukup membuat kesimpulan
+sederhana:
+
 {lang="text"}
 ~~~~~~~~
   case (Bin(lx, Tip(), Tip()), Tip()) => Bin(y, left, Tip())
@@ -9865,6 +9914,9 @@ to balance anything, we just create the obvious connection:
 
 The third case is when it starts to get interesting: `left` is a `Bin`
 containing a `Bin` in its `right`
+
+Contoh ketiga-lah yang menarik: `left` berupa sebuah `Bin` yang merisi `Bin`
+pada `right`
 
 {lang="text"}
 ~~~~~~~~
@@ -9881,7 +9933,16 @@ size balancing) that they are always `Tip`! There is no rule in any of the
 following scenarios (or in `.balanceR`) that can produce a tree of the shape
 where the diamonds are `Bin`.
 
+Apa yang terjadi pada kedua wajik yang ada pada di bawah `lrx`?
+Apakah kita akan kehilangan informasi? Tentu tidak, kita tidak kehilangan
+informasi karena kita dapat menalar (menggunakan penyeimbangan ukuran) bahwa
+kedua wajik tersebut menjadi `Tip`.
+Tidak ada aturan khusus untuk skenario berikut (atau pada `.balanceR`) yang
+dapat membuat sebuah pohon dimana sebuah wajik-lah yang menjadi `Bin`.
+
 The fourth case is the opposite of the third case.
+
+Contoh keempat merupakan kebalikan dari contoh ketiga.
 
 {lang="text"}
 ~~~~~~~~
@@ -9894,6 +9955,10 @@ The fourth case is the opposite of the third case.
 The fifth case is when we have full trees on both sides of the `left` and we
 must use their relative sizes to decide on how to re-balance.
 
+Untuk contoh ke lima, kita mempunyai pohon yang lengkap pada kedua sisi
+dari `left` dan kita harus menggunakan ukuran relatifnya untuk menentukan
+bagaimana kita harus menyeimbangkan.
+
 {lang="text"}
 ~~~~~~~~
   case (Bin(lx, ll, lr), Tip()) if (2*ll.size > lr.size) =>
@@ -9904,10 +9969,14 @@ must use their relative sizes to decide on how to re-balance.
 
 For the first branch, `2*ll.size > lr.size`
 
+Pada cabang pertama, `2ll.size > lr.size`
+
 {width=50%}
 ![](images/balanceL-5a.png)
 
 and for the second branch `2*ll.size <= lr.size`
+
+dan untuk cabang kedua `2ll.size <= lr.size`
 
 {width=75%}
 ![](images/balanceL-5b.png)
@@ -9915,6 +9984,10 @@ and for the second branch `2*ll.size <= lr.size`
 The sixth scenario introduces a tree on the `right`. When the `left` is empty we
 create the obvious connection. This scenario never arises from `.insert` because
 the `left` is always non-empty:
+
+Pada skenario ke enam, kita akan mendapatkan sebuah pohon pada `right`.
+Saat `left` kosong, kita menarik sebuah sambungan sederhana. Skenario ini
+tidak pernah muncul dari `.insert` karena `left` tidak boleh kosong:
 
 {lang="text"}
 ~~~~~~~~
@@ -9928,6 +10001,10 @@ The final scenario is when we have non-empty trees on both sides. Unless the
 `left` is three times or more the size of the `right`, we can do the simple
 thing and create a new `Bin`
 
+Skenario akhir adalah kondisi dimana kita tidak mempunyai pohon yang tidak kosong
+pada kedua sisinya. Bila `left` tidak lebih dari tiga kali ukuran dari `right`
+kita hanya tinggal membuat sebuah `Bin`
+
 {lang="text"}
 ~~~~~~~~
   case _ if l.size <= 3 * r.size => Bin(y, l, r)
@@ -9939,6 +10016,10 @@ thing and create a new `Bin`
 However, should the `left` be more than three times the size of the `right`, we
 must balance based on the relative sizes of `ll` and `lr`, like in scenario
 five.
+
+Namun, bila `left` berukuran tiga kali ataupun lebih bila dibandingkan `right`,
+kita harus menyeimbangkan pohon tersebut dahulu berdasarkan ukuran dari
+`ll` dan `lr` seperti pada skenario ke lima.
 
 {lang="text"}
 ~~~~~~~~
@@ -9960,8 +10041,17 @@ of depth-first search along the `left` or `right`, as appropriate. Methods such
 as `.minimum` and `.maximum` are optimal because the data structure already
 encodes the ordering.
 
+Skenario ini menutup pembelajaran kita atas metoda `.insert` dan bagaimana
+`ISet` dibangun. Seharusnya bukan hal yang mengejutkan bila `Foldable`
+diimplementasikan dalam bentuk pencarian pertama mendalam pada `left` dan `right`.
+Metoda semacam `.minimum` dan `.maximum` akan optimum diimplementasikan karena
+struktur data sudah tersandikan berurutan.
+
 It is worth noting that some typeclass methods *cannot* be implemented as
 efficiently as we would like. Consider the signature of `Foldable.element`
+
+Hal yang patut diperhatikan adalah beberapa metoda pada kelas tipe tidak dapat
+diterapkan secara efisien. Misal, penanda untuk `Foldable.element`
 
 {lang="text"}
 ~~~~~~~~
@@ -9976,11 +10066,23 @@ The obvious implementation for `.element` is to defer to (almost) binary-search
 `ISet.contains`. However, it is not possible because `.element` provides `Equal`
 whereas `.contains` requires `Order`.
 
+Penerapan yang paling jelas untuk `.element` adalah dengan menunda pencarian
+biner `ISet.contains`. Walaupun demikian, hal ini tidak mungkin dilakukan karena
+`.element` menyediakan `Equal`, sedangkan `.contains` meminta `Order`.
+
 `ISet` is unable to provide a `Functor` for the same reason. In practice this
 turns out to be a sensible constraint: performing a `.map` would involve
 rebuilding the entire structure. It is sensible to convert to some other
 datatype, such as `IList`, perform the `.map`, and convert back. A consequence
 is that it is not possible to have `Traverse[ISet]` or `Applicative[ISet]`.
+
+Karena beberapa hal, `ISet` tidak dapat menyediakan `Functor`. Di lapangan,
+ternyata hal ini menjadi batasan yang masuk akal: melakukan pemetaan `.map`
+juga berarti membangun ulang struktur secara keseluruhan. Tentu hal yang
+masuk akal untuk mengkonversi tipe data lain, seperti `IList`, dilanjutkan
+dengan melakukan pemetaan `.map`, dan diakhiri dengan konversi ulang.
+Sebuah konsekuensi yang muncul adalah kita tidak mungkin mempunyai `Traverse[ISet]`
+maupun `Applicative[ISet]`.
 
 
 ### `IMap`
