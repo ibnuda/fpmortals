@@ -9564,6 +9564,11 @@ allows items to be put onto or retrieved from the front (`cons`) or
 the back (`snoc`) in constant time. Removing an element from either
 end is constant time on average.
 
+`Dequeue`, diucapkan seperti "dek" kapal, merupakan daftar tertaut
+yang memperkenankan penambahan dan pengambilan item dari depan maupun
+dari belakang dengan waktu konstan. Penghapusan elemen dari ujung-ujungnya
+juga menggunakan waktu konstan.
+
 {lang="text"}
 ~~~~~~~~
   sealed abstract class Dequeue[A] {
@@ -9599,6 +9604,10 @@ The way it works is that there are two lists, one for the front data
 and another for the back. Consider an instance holding symbols `a0,
 a1, a2, a3, a4, a5, a6`
 
+Cara kerja dari `Dequeue` adalah dengan menggunakan dua daftar, satu
+di depan dan lainnya di belakang. ANggap sebuah instans yang berisi
+simbol `a0, a1, a2, a3, a4, a5, a6`
+
 {lang="text"}
 ~~~~~~~~
   FullDequeue(
@@ -9608,10 +9617,14 @@ a1, a2, a3, a4, a5, a6`
 
 which can be visualised as
 
+yang dapat digambarkan sebagai
+
 {width=30%}
 ![](images/dequeue.png)
 
 Note that the list holding the `back` is in reverse order.
+
+Harap perhatikan bahwa daftar pada `back` disusun secara terbalik.
 
 Reading the `snoc` (final element) is a simple lookup into
 `back.head`. Adding an element to the end of the `Dequeue` means
@@ -9621,12 +9634,29 @@ all of the original structure is shared. Compare to adding a new
 element to the end of an `IList`, which would involve recreating the
 entire structure.
 
+Untuk membaca `snoc` (elemen paling akhir) hanya merupakan pencarian
+sederhana pada `back.head`. Sedangkan untuk penambahan sebuah elemen
+pada akhir `Dequeue` dilakukan dengan menambahkan sebuah elemen pada
+bagian awal dari `back` dan membuat ulang kulit `FullDequeue` (yang
+akan menambah ukuran `backSize`). Hampir semua struktur data awal
+akan digunakan ulang bila terjadi perubahan. Sebagai perbandingan,
+penambahan sebuah elemen pada ujung belakan `IList` akan menciptakan
+seluruh struktur yang baru.
+
 The `frontSize` and `backSize` are used to re-balance the `front` and
 `back` so that they are always approximately the same size.
 Re-balancing means that some operations can be slower than others
 (e.g. when the entire structure must be rebuilt) but because it
 happens only occasionally, we can take the average of the cost and say
 that it is constant.
+
+`frontSize` dan `backSize` digunakan untuk menyeimbangkan ulang `front`
+dan `back` sehingga ukuran keduanya kurang lebih sama. Penyeimbangan ulang
+juga berarti bahwa beberapa operasi akan lebih lamban bila dibandingkan
+dengan operasi lainnya (mis, saat pembangunan ulang struktur secara
+menyeluruh). Namun, hal ini hanya kadang terjadi. Untuk penyederhanaan,
+kita bisa mengambil rerata dari waktu penggunaan dan menganggapnya
+konstan.
 
 
 ### `DList`
