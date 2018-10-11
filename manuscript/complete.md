@@ -9522,6 +9522,9 @@ sistem kontrol, ekonomi makro, dan investasi perbankan.
 A simple wrapper around mutable stdlib `Array`, with primitive
 specialisations:
 
+Sebuah pembungkus sederhana untuk struktur data `Array` dengan spesialisasi
+primitif: 
+
 {lang="text"}
 ~~~~~~~~
   sealed abstract class ImmutableArray[+A] {
@@ -9546,6 +9549,12 @@ However, there is zero structural sharing when creating new arrays,
 therefore arrays are typically used only when their contents are not
 expected to change, or as a way of safely wrapping raw data from a
 legacy system.
+
+Bila kita berbicara mengenai performa pembacaan dan ukuran *heap*, tidak
+ada yang mengalahkan `Array`. Namun, pembagian struktural sama sekali
+tidak ada saat pembuatan array baru. Tiadanya penggunaan struktur memori
+yang sama seperti ini merupakan salah satu alasan untuk menggunakan deret
+(*array*) untuk data yang tidak diharapkan untuk berubah.
 
 
 ### `Dequeue`
