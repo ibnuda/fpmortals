@@ -10210,6 +10210,10 @@ data sendiri.
 Finger trees are generalised sequences with amortised constant cost lookup and
 logarithmic concatenation. `A` is the type of data, ignore `V` for now:
 
+*Finger Tree* (selanjutnya disebut pohon palem) merupakan deretan yang digeneralisasikan
+dengan beban pencarian konstan yang teramortisasi dan penggabungan logaritmik.
+`A` merupakan tipe data dan untuk saat ini hiraukan `V`:
+
 {lang="text"}
 ~~~~~~~~
   sealed abstract class FingerTree[V, A] {
@@ -10244,9 +10248,14 @@ logarithmic concatenation. `A` is the type of data, ignore `V` for now:
 A> `<++>` is the TIE Bomber. Admittedly, sending in the proton torpedoes is a bit
 A> of an overreaction: it is the same thing as the regular `Monoid` TIE Fighter
 A> `|+|`.
+A>
+A> `<++>` mirip dengan `|+|` milik `Monoid`.
 
 Visualising `FingerTree` as dots, `Finger` as boxes and `Node` as boxes within
 boxes:
+
+`FingerTree` digambarkan sebagai titk, `Finger` sebagai persegi, dan `Node`
+sebagai persegi dalam persegi:
 
 {width=35%}
 ![](images/fingertree.png)
@@ -10256,20 +10265,43 @@ Adding elements to the front of a `FingerTree` with `+:` is efficient because
 `Four`, we rebuild the `spine` to take 3 of the elements as a `Node3`. Adding to
 the end, `:+`, is the same but in reverse.
 
+Penambahanan elemen pada bagian depan sebuah `FingerTree` dengan `+:` efisien
+karena `Deep` hanya menambah elemen baru pada bagian kiri (`left`) dari palem.
+Bila palem berupa sebuah `Four`, kita akan membangun ulang batang (`spine`)
+untuk mengambil 3 elemen sebagai sebuah `Node3`. Sama halnya dengan penambahan
+sebuah elemen pada bagian belakang menggunakan `:+`, namun dibalik.
+
 Appending `|+|` (also `<++>`) is more efficient than adding one element at a
 time because the case of two `Deep` trees can retain the outer branches,
 rebuilding the spine based on the 16 possible combinations of the two `Finger`
 values in the middle.
 
+Penambahan menggunakan `|+|` dan `<++>` lebih efisien bila dibandingkan dengan
+menambahkan sebuah elemen satu persatu karena dua pohon `Deep` mampu memelihara
+cabang bagian luar, membangun batang (`spine`) berdasarkan 16 kombinasi yang
+mungkin dari dua nilai `Finger` pada bagian tengah.
+
 In the above we skipped over `V`. Not shown in the ADT description is an
 `implicit measurer: Reducer[A, V]` on every element of the ADT.
+
+Di atas, kita melewatkan `V`. Yang tidak diperlihatkan pada deskripsi
+ADT merupakan sebuah `implicit measurer: Reducer[A, V]` pada tiap elemen
+dari ADT.
 
 A> Storing typeclass instances on the ADT is considered bad style and also
 A> increases the memory requirement by 64 bits for every entry. The implementation
 A> of `FingerTree` is almost a decade old and is due a rewrite.
+A>
+A> Menyimpan instans kelas tipe pada ADT dianggap gaya penulisan yang buruk
+A> dan dapat menambah kebutuhan penggunaan memori sebanyak 64 bit untuk
+A> tiap catatan. Implementasi `FingerTree` sudah hampir satu dekade
+A> dan waktunya penulisan ulang.
 
 `Reducer` is an extension of `Monoid` that allows for single elements to be
 added to an `M`
+
+`Reducer` merupakan sebuah ekstensi dari `Monoid` yang memperkenankan agar
+sebuah elemen dapat ditambahkan ke sebuah `M`
 
 {lang="text"}
 ~~~~~~~~
@@ -10283,6 +10315,9 @@ added to an `M`
 
 For example, `Reducer[A, IList[A]]` can provide an efficient `.cons`
 
+Sebagai contoh, `Reducer[A, IList[A]]` menyediakan implementasi `.cons`
+yang efisien
+
 {lang="text"}
 ~~~~~~~~
   implicit def reducer[A]: Reducer[A, IList[A]] = new Reducer[A, IList[A]] {
@@ -10293,6 +10328,10 @@ For example, `Reducer[A, IList[A]]` can provide an efficient `.cons`
 
 A> `Reducer` should have been called `CanActuallyBuildFrom`, in honour of the
 A> similarly named stdlib `class`, since it is effectively a collection builder.
+A>
+A> `Reducer` seharusnya dinamai `CanActuallyBuildFrom` untuk menghormati
+A> `class` dari pustaka standar yang juga memiliki fungsionalitas yang sama
+A> dalam hal pembangunan koleksi.
 
 
 #### `IndSeq`
