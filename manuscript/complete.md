@@ -10380,6 +10380,10 @@ ukuran merupakan nilai terbesar dari setiap cabang:
 building up an ordered sequence, with duplicates. We can access the underlying
 `FingerTree` when needed.
 
+`OrdSeq` tidak mempunyai instans kelas tipe dikarenakan struktur data ini
+hanya berguna untuk pembangunan deret terurut secara bertahap dengan duplikat.
+Kita dapat mengakses `FingerTree` yang melandasi struktur data ini bila dibutuhkan.
+
 
 #### `Cord`
 
