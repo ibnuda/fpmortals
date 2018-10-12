@@ -9,6 +9,7 @@ Istilah istilah yang belum saya pikirkan padan katanya.
 - *Pure* dalam konteks fungsi.
 - *Purely* functional programming.
 - *Refactor*. Mungkinkah *penyederhanaan* cocok?
+- *Rose Tree*. Pohon dengan cabang yang banyak apa ya? Beringin?
 - *Syntax sugar*.
 - *Totality*. Mungkin *kesemestaan* cocok?
 - *`for` comprehension*.

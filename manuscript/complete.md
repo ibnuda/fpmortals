@@ -10146,6 +10146,12 @@ Both `StrictTree` and `Tree` are implementations of a *Rose Tree*, a tree
 structure with an unbounded number of branches in every node (unfortunately
 built from standard library collections for legacy reasons):
 
+`StrictTree` dan `Tree` merupakan penerapan dari pohon beringin (lol, cabang banyak apa, ya?)
+pohon beringin sendiri merupakan struktur pohon dengan jumlah cabang yang tak
+dibatasi pada tiap simpulnya. Kedua struktur data ini, dibangun dengan
+menggunakan pustaka koleksi dari pustaka standar dikarenakan alasan
+peninggalan masa lalu:
+
 {lang="text"}
 ~~~~~~~~
   case class StrictTree[A](
@@ -10155,6 +10161,8 @@ built from standard library collections for legacy reasons):
 ~~~~~~~~
 
 `Tree` is a *by-need* version of `StrictTree` with convenient constructors
+
+`Tree` merupakan versi *by-need* dari `StrictTree` dengan konstruktor
 
 {lang="text"}
 ~~~~~~~~
@@ -10182,8 +10190,19 @@ can be used in [clustering algorithms](https://arxiv.org/abs/1203.3468) to organ
 increasingly similar things. It is possible to represent XML documents with a
 Rose Tree.
 
+Secara umum, pengguna pohon beringin diharapkan untuk menyeimbangkan pohon ini
+secara manual. Dengan demikian, struktur ini cocok untuk digunakan pada
+domain tertentu untuk menyandikan hierarki pada struktur data. Sebagai contoh,
+pada kecerdasan buatan, sebuah pohon beringin dapat digunakan pada [algoritma pengelompokan](https://arxiv.org/abs/1203.3468)
+untuk mengelompokkan data menjadi sebuah hierarki atas hal hal yang semakin
+mirip. Struktur ini juga bisa digunakan untuk merepresentasikan dokumen XML.
+
 When working with hierarchical data, consider using a Rose Tree instead of
 rolling a custom data structure.
+
+Saat bekerja dengan struktur data hierarkis, adalah cukup bijak untuk
+mempertimbangkan untuk menggunakan struktur data ini, bukan membuat struktur
+data sendiri.
 
 
 ### `FingerTree`
