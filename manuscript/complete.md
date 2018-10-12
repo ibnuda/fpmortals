@@ -10121,6 +10121,14 @@ each binary branch, allowing it to store key/value pairs. Only the key type `A`
 needs an `Order` and a suite of convenient methods are provided to allow easy
 entry updating
 
+Terlihat familiar, bukan? Dan memang demikian adanya. `IMap` yang mempunyai
+alias `==>>`, merupakan pohon dengan ukuran yang diseimbangkan dan ditambah
+dengan sebuah bidang tambahan `value: B` pada tiap cabang biner.
+Tambahan ini memperkenankan pohon data ini untuk menyimpan pasangan kunci/nilai.
+Batasan untuk kunci/nilai pada pohon ini hanyalah tipe kunci `A` harus mempunyai
+instans `Order`. Selain itu, ada beberapa metoda tersedia yang dapat digunakan
+untuk memutakhirkan isi dari pohon ini.
+
 {lang="text"}
 ~~~~~~~~
   sealed abstract class ==>>[A, B] {
