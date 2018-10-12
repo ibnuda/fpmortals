@@ -10340,6 +10340,11 @@ If we use `Int` as `V`, we can get an indexed sequence, where the measure is
 *size*, allowing us to perform index-based lookup by comparing the desired index
 with the size at each branch in the structure:
 
+Bila kita menggunakan `Int` sebagai `V`, kita bisa mendapatkan barisan terindeks
+dimana yang menjadi ukuran adalah jumlah satuan `V`. Hal ini memperkenankan
+kita untuk melakukan pencarian berdasarkan indeks dengan membandingkan indeks
+yang diinginkan dengan ukuran dari tiap cabang pada struktur:
+
 {lang="text"}
 ~~~~~~~~
   final class IndSeq[A](val self: FingerTree[Int, A])
@@ -10351,6 +10356,9 @@ with the size at each branch in the structure:
 
 Another use of `FingerTree` is as an ordered sequence, where the measure stores
 the largest value contained by each branch:
+
+Penggunaan lain dari `FingerTree` adalah barisan terurut, dimana yang menjadi
+ukuran merupakan nilai terbesar dari setiap cabang:
 
 
 #### `OrdSeq`
