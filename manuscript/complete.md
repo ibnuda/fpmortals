@@ -10451,6 +10451,12 @@ elements, allowing duplicates, with fast access to the *minimum* value (highest
 priority). The structure is not required to store the non-minimal elements in
 order. A naive implementation of a priority queue could be
 
+Antrian prioritas merupakan struktur data yang memperkenankan untuk penyisipan
+yang relatif singkat pada elemen terurut yang memperbolehkan adanya duplikasi
+elemen dan memiliki waktu akses yang cepat pada nilai minimum atau prioritas
+tertinggi. Struktur ini tidak wajibkan untuk menyimpan elemen non-minimal
+secara berurutan. Implementasi naif dari antrian prioritas dapat berupa
+
 {lang="text"}
 ~~~~~~~~
   final case class Vip[A] private (val peek: Maybe[A], xs: IList[A]) {
@@ -10473,9 +10479,16 @@ order. A naive implementation of a priority queue could be
 This `push` is a very fast `O(1)`, but `reorder` (and therefore `pop`) relies on
 `IList.sorted` costing `O(n log n)`.
 
+`push` bisa sangat cepat (`O(1)`)  walau `reorder` (dan `pop`) sangat bergantung
+pada `IList.sorted` yang bernilai `O(n log n)`.
+
 Scalaz encodes a priority queue with a tree structure where every node has a
 value less than its children. `Heap` has fast push (`insert`), `union`, `size`,
 pop (`uncons`) and peek (`minimumO`) operations:
+
+Scalaz menyandikan antrian prioritas dengan struktur pohon dimana setiap simpul
+mempunyai nilai kurang dari anaknya. `Heap` mempunyai waktu operasi `insert`,
+`union`, `size`, `uncons, dan `minimumO`:
 
 {lang="text"}
 ~~~~~~~~
@@ -10509,12 +10522,24 @@ pop (`uncons`) and peek (`minimumO`) operations:
 A> `size` is memoized in the ADT to enable instant calculation of
 A> `Foldable.length`, at a cost of 64 bits per entry. A variant of `Heap` could be
 A> created with a smaller footprint, but slower `Foldable.length`.
+A>
+A> `size` dimemoisasi pada ADT untuk memperkenankan kalkulasi instan berdasarkan
+A> `Foldable.length` dengan ganti rugi sebesar 64 bit untuk tiap catatan.
+A> Varian dari `Heap` bisa dibuat dengan ukuran yang lebih kecil namun dengn
+A> waktu eksekusi `Foldable.length` yang lebih lamban.
 
 `Heap` is implemented with a Rose `Tree` of `Ranked` values, where the `rank` is
 the depth of a subtree, allowing us to depth-balance the tree. We manually
 maintain the tree so the `minimum` value is at the top. An advantage of encoding
 the minimum value in the data structure is that `minimumO` (also known as
 *peek*) is a free lookup:
+
+`Head` diimplementasi dengan Pohon Palem berdasarkan nilai `Ranked` dimana
+`rank`ing merupakan kedalaman dari cabang pohon. Hal ini memperkenankan kita untuk
+menyeimbangkan kedalaman dari struktur pohon tersebut. Kita juga mempertahankan
+secara manual agar nilai `minimum` selalu pada bagian paling atas. Keuntungan
+dari penyandian nilai minimum pada struktur data adalah `minimumO` adalah biaya
+pencarian gratis:
 
 {lang="text"}
 ~~~~~~~~
@@ -10526,6 +10551,9 @@ the minimum value in the data structure is that `minimumO` (also known as
 
 When inserting a new entry, we compare to the current minimum and replace if the
 new entry is lower:
+
+Ketika menpisipkan sebuah catatan, kita membandingkan nilai minimum saat ini
+dan menggantinya dengan catatan baru bila ternyata lebih rendah:
 
 {lang="text"}
 ~~~~~~~~
@@ -10540,6 +10568,10 @@ new entry is lower:
 Insertions of non-minimal values result in an *unordered* structure in the
 branches of the minimum. When we encounter two or more subtrees of equal rank,
 we optimistically put the minimum to the front:
+
+Penyisipan atas nilai nilai non-minimal menghasilkan struktur tak-urut pada
+cabang minimum. Saat kita menemukan dua atau lebih sub-pohon dengan `rank`ing
+yang sama, kita akan menempatkan nilai minimum pada bagian depan:
 
 {lang="text"}
 ~~~~~~~~
@@ -10570,11 +10602,25 @@ cost when calling `uncons`, with `deleteMin` costing `O(log n)` because it must
 search for the minimum value, and remove it from the tree by rebuilding. That Is
 fast when compared to the naive implementation.
 
+Dengan menghindari pengurutan secara menyeluruh terhadap pohon, `insert` menjadi
+sangat cepat (dengan kompleksitas `O(1)`), dimana yang melakukan operasi ini
+tidak terbebani oleh operasi ini. Namun, saat melakukan `uncons` dengan `deleteMin`,
+kita akan mendapati bahwa operasi ini mempunyai beban `O(log n)` yang disebabkan
+oleh pencarian nilai minimum dan menghapusnya dari pohon dengan membangun ulang.
+Secara umum, hal ini lebih cepat bila dibandingkan dengan implementasi naif.
+
 The `union` operation also delays ordering allowing it to be `O(1)`.
+
+Operasi `union` juga dapat menghambat pengurutan sehingga operasi ini mempunyai
+kompleksitas `O(1)`.
 
 If the `Order[Foo]` does not correctly capture the priority we want for the
 `Heap[Foo]`, we can use `Tag` and provide a custom `Order[Foo @@ Custom]` for a
 `Heap[Foo @@ Custom]`.
+
+Bila `Order[Foo]` tidak dapat dengat tepat menentukan prioritas yang kita inginkan
+atas `Heap[Foo]`, kita dapat menggunakan `Tag` dan menyediakan instans
+`Order[Foo @@ Custom]` khusus untuk `Head[Foo @@ Custom]`.
 
 
 ### `Diev` (Discrete Intervals)
