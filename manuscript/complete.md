@@ -10392,6 +10392,11 @@ representations in `Show`. Building a single `String` can be thousands of times
 faster than the default `case class` implementation of nested `.toString`, which
 builds a `String` for every layer in the ADT.
 
+Penggunaan `FingerTree` yang paling jamak adalah wadah sementara untuk representasi
+`String` pada `Show`. Pembuatan sebuah `String` bisa saja ribuan kali lebih cepat
+bila dibandingkan dengan implementasi `case class` berlapis dari `.toString` yang
+membangun sebuah `Sring` untuk tiap lapisan pada ADT.
+
 {lang="text"}
 ~~~~~~~~
   final case class Cord(self: FingerTree[Int, String]) {
@@ -10407,12 +10412,18 @@ builds a `String` for every layer in the ADT.
 For example, the `Cord[String]` instance returns a `Three` with the string in
 the middle and quotes on either side
 
+Sebagai contoh, instans `Cord[String]` mengembalikan sebuah `Three` dengan
+string pada bagian tengah dan tanda petik pada kedua sisi
+
 {lang="text"}
 ~~~~~~~~
   implicit val show: Show[String] = s => Cord(FingerTree.Three("\"", s, "\""))
 ~~~~~~~~
 
 Therefore a `String` renders as it is written in source code
+
+Sehingga, sebuah `String` memberikan hasil sebagaimana yang tertulis pada
+kode sumber
 
 {lang="text"}
 ~~~~~~~~
@@ -10427,6 +10438,10 @@ Therefore a `String` renders as it is written in source code
 A> The `Cord` in Scalaz 7.2 is unfortunately not as efficient as it could be. This
 A> has been fixed in Scalaz 7.3 by a [custom data structure optimised for `String`
 A> concatenation](https://github.com/scalaz/scalaz/pull/1793).
+A>
+A> Yang disayangkan adalah,`Cord` pada Scalaz 7.2 tidak se-efisien yang diharapkan.
+A> Hal ini sudah dibenahi pada Scalaz 7.3 dengan menggunakan [struktur data teroptimasi
+A> untuk penggabungan `String`](https://github.com/scalaz/scalaz/pull/1793).
 
 
 ### `Heap` Priority Queue
