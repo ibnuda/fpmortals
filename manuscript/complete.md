@@ -10907,7 +10907,7 @@ A> unsafe code blocks. The [Scalafix](https://scalacenter.github.io/scalafix/) l
 A> compiletime, unless called from inside a deferred `Monad` like `IO`.
 A>
 A> Kompiler Scala memperkenankan kita untuk memanggil metoda dengan efek samping
-A> pada blok kode tak aman. [Scalafix](https://scalacenter.github.io/scalafix
+A> pada blok kode tak aman. [Scalafix](https://scalacenter.github.io/scalafix)
 A> yang merupakan alat bantu untuk pelarangan metoda dengan efek samping pada
 A> saat kompilasi dapat digunakan untuk memastikan bahwa semua metoda dengan
 A> efek samping dipanggil didalam sebuah `Monad` seperti `IO`.
@@ -10922,10 +10922,24 @@ the `-Xss` flag when starting up `java`. Tail recursive methods are detected by
 the Scala compiler and do not add an entry. If we hit the limit, by calling too
 many chained methods, we get a `StackOverflowError`.
 
+Pada JVM, setiap pemanggilan metoda menambah sebuah catatan pada *stack* panggilan
+pada `Thread`, mirip dengan penambahan sebuah elemen pada bagian depan `List`.
+Ketika sebuah metoda selesai dipanggil, metoda pada bagian `head` akan dibuang.
+Jumlah maksimal dari *stack* panggilan ini ditentukan oleh panji `-Xss` ketika
+memulai `java`. Pemanggilan metoda *tail recursive* dideteksi oleh komplire
+Scala dan catatan panggilan tidak akan ditambahkan. Bila kita mencapai batas,
+misal dengan pemanggilan rantai metoda yang sangat banyak, kita akan mendapatkan
+sebuah `StackOverflowError`.
+
 Unfortunately, every nested call to our `IO`'s `.flatMap` adds another method
 call to the stack. The easiest way to see this is to repeat an action forever,
 and see if it survives for longer than a few seconds. We can use `.forever`,
 from `Apply` (a parent of `Monad`):
+
+Sayangnya, tiap panggilan berlapis pada `.flatMap` milik `IO`, sebuah metoda
+akan ditambahkan ke *stack*. Cara paling mudah untuk menebak apakah metoda ini
+akan dijalankan selamanya atau hanya beberapa saat saja, kita bisa menggunakan
+`.forever` dari `Apply` (atasan `Monad`):
 
 {lang="text"}
 ~~~~~~~~
@@ -10948,6 +10962,11 @@ from `Apply` (a parent of `Monad`):
 Scalaz has a typeclass that `Monad` instances can implement if they are stack
 safe: `BindRec` requires a constant stack space for recursive `bind`:
 
+Scalaz mempunyai sebuah kelas tipe yang dapat diimplementasikan oleh struktur
+data yang memiliki instans `Monad` bila struktur data tersebut aman dari segi
+penggunaan *stack*: `BindRec` yang mumbutuhkan ruang *stack* konstan untuk
+`bind` rekursif: 
+
 {lang="text"}
 ~~~~~~~~
   @typeclass trait BindRec[F[_]] extends Bind[F] {
@@ -10960,8 +10979,15 @@ safe: `BindRec` requires a constant stack space for recursive `bind`:
 We don't need `BindRec` for all programs, but it is essential for a general
 purpose `Monad` implementation.
 
+Kita tidak perlu menggunakan `BindRec` untk semua program. Namun, kelas tipe ini
+penting untuk implementasi umum dari `Monad`.
+
 The way to achieve stack safety is to convert method calls into references to an
 ADT, the `Free` monad:
+
+Cara yang digunakan untuk mendapatkan keamanan *stack* adalah dengan mengkonversi
+pemanggilan metoda menjadi rujukan ke sebuah ADT, atau yang dikenal dengan
+monad `Free`:
 
 {lang="text"}
 ~~~~~~~~
@@ -10979,19 +11005,37 @@ ADT, the `Free` monad:
 
 A> `SUSPEND`, `RETURN` and `GOSUB` are a tip of the hat to the `BASIC` commands of
 A> the same name: pausing, completing, and continuing a subroutine, respectively.
+A> 
+A> `SUSPEND`, `RETURN`, dan `GOSUB` merupakan penghormatan untuk perintah pada
+A> bahasa pemrograman `BASIC` untuk mejeda, menyelesaikan, dan melanjutkan
+A> sub-rutin.
 
 The `Free` ADT is a natural data type representation of the `Monad` interface:
+
+ADT `Free` merupakan representasi tipe data natural untuk antarmuka `Monad`:
 
 1.  `Return` represents `.point`
 2.  `Gosub` represents `.bind` / `.flatMap`
 
+1.  `Return` merepresentasikan `.point`
+2.  `Gosub` merepresentasikan `.bind` / `.flatMap`
+
 When an ADT mirrors the arguments of related functions, it is called a *Church
 encoding*.
+
+Ketika sebuah ADT mencerminkan argumen yang berhubungan dengan fungsi yang berhubungan,
+pencerminan ini disebut dengan penyandian Church (dari nama Alonzo Church).
 
 `Free` is named because it can be *generated for free* for any `S[_]`. For
 example, we could set `S` to be the `Drone` or `Machines` algebras from Chapter
 3 and generate a data structure representation of our program. We will return to
 why this is useful at the end of this chapter.
+
+`Free` mendapat nama seperti itu karena dapat didapatkan secara cuma-cuma (sebagaimana
+dengan "Free Beer") untuk setiap `S[_]`. Sebagai contoh, kita dapat menganggap
+`S` sebagai alkabar dari `Drone` atau `Machines` pada bab 3 dan membuat
+representasi struktur data dari program kita. Kita akan kembali mempelajari mengapa
+hal ini berguna pada akhir bab ini.
 
 
 ### `Trampoline`
