@@ -11044,6 +11044,11 @@ hal ini berguna pada akhir bab ini.
 => ?`, a deferred calculation or *thunk*, we get `Trampoline` and can implement
 a stack safe `Monad`
 
+Untuk sementara ini, `Free` lebih umum daripada yang kita butuhkan. Dengan
+mengatur aljabar `S[_]` menjadi `() => ?`, atau komputasi yang ditangguhkan,
+kita mendapatkan struktur `Trampoline` dan pada akhirnya dapat menerapkan
+`Monad` dengan aman
+
 {lang="text"}
 ~~~~~~~~
   object Free {
@@ -11068,15 +11073,28 @@ The `BindRec` implementation, `.tailrecM`, runs `.bind` until we get a `B`.
 Although this is not technically a `@tailrec` implementation, it uses constant
 stack space because each call returns a heap object, with delayed recursion.
 
+Implementasi `BindRec`, `.tailrecM`, menjalankan `.bind` sampai kita mendapat
+sebuah `B`. Walau secara teknis hal ini bukan merupakan implmentasi `@tailrec`,
+implementasi ini menggunakan ruang *stack* secara konstan karena tiap panggilan
+mengembalikan sebuah objek heap dengan rekursi yang dijeda.
+
 A> Called `Trampoline` because every time we `.bind` on the stack, we *bounce* back
 A> to the heap.
 A> 
 A> The only Star Wars reference involving bouncing is Yoda's duel with Dooku. We
 A> shall not speak of this again.
+A>
+A> Disebut sebagai `Trampoline` karena tiap kali kita memanggil `.bind` pada stack,
+A> kita akan terpantul kembali ke *heap*.
 
 Convenient functions are provided to create a `Trampoline` eagerly (`.done`) or
 by-name (`.delay`). We can also create a `Trampoline` from a by-name
 `Trampoline` (`.suspend`):
+
+Fungsi pembantu yang disediakan untuk membuat sebuah `Trampoline` secara
+sigap adalah dengan `.done` atau bisa juga dibuat dengan sebuah jeda menggunakan
+metoda `.delay`. Kita juga bisa membuat sebuah `Trampoline` dengan menggunakan
+`Trampoline` *by-name` dengan metoda `.suspend`: 
 
 {lang="text"}
 ~~~~~~~~
@@ -11093,12 +11111,24 @@ When we see `Trampoline[A]` in a codebase we can always mentally substitute it
 with `A`, because it is simply adding stack safety to the pure computation. We
 get the `A` by interpreting `Free`, provided by `.run`.
 
+Saat kita melihat `Trampoline[A]` pada basis kode, kita bisa menggantinya pada
+visualisasi mental kita dengan sebuah `A`. Hal ini disebabkan oleh penambahan
+keamanan *stack* demi kemurnian komputasi. Kita mendapatkan `A` dengan menginterpretasikan
+`Free` dengan metoda `.run` yang telah disediakan.
+
 A> It is instructive, although not necessary, to understand how `Free.run` is
 A> implemented: `.resume` evaluates a single layer of the `Free`, and `go` runs it
 A> to completion.
 A> 
+A> Walaupun tidak perlu, untuk memahami bagaimana `Free.run` diimplementasikan,
+A> namun banyak hal yang dapat dipelajari. Sebagai contoh: `.resume` mengevaluasi
+A> satu lapis dari `Free` dan `go` menjalankan `Free` sampai selesai.
+A>
 A> In the following `Trampoline[A]` is used as a synonym for `Free[() => ?, A]` to
 A> make the code easier to read.
+A>
+A> Pada `Trampoline[A]` berikut, trampoline ini digunakan sebagai sinonim dari
+A> `Free[() => ?, A]` agar kode lebih mudah untuk dipahami.
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -11127,6 +11157,11 @@ A>
 A> The case that is most likely to cause confusion is when we have nested `Gosub`:
 A> apply the inner function `g` then pass it to the outer one `f`, it is just
 A> function composition.
+A>
+A> Permasalahan yang biasanya menjadi penyebab kaburnya pemahaman adalah saat
+A> kita mempunyai `Gosub` berlapis: mengaplikasikan fungsi bagian dalam `g` lalu
+A> melewatkannya ke fungsi `f` di bagian luar. Padahal, hal ini cuma sekedar
+A> komposisi fungsi.
 
 
 ### Example: Stack Safe `DList`
