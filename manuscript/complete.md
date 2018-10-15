@@ -10766,12 +10766,23 @@ untuk ekosistem Scalaz.
 You have to know things like Advanced Monads in order to be an advanced
 functional programmer.
 
+Untuk menjadi pemrogram dengan aliran fungsional, pembaca budiman harus
+menguasai beberapa hal, seperti Monad Lanjutan.
+
 However, we are developers yearning for a simple life, and our idea of
 "advanced" is modest. To put it into context: `scala.concurrent.Future` is more
 complicated and nuanced than any `Monad` in this chapter.
 
+Namun, karena kita merupakan pengembang yang mendambakan hal yang sederhana,
+juga tidak melupakan bahwa apa yang kita sebut sebagai "lanjutan" juga tetap
+sederhana. Sebagai konteks: `scala.concurrent.Future` lebih rumit dan penuh
+dengan nuansa bila dibandingkan dengan semua `Monad` yang ada pada bab ini. 
+
 In this chapter we will study some of the most important implementations of
 `Monad`.
+
+Pada bab ini, kita akan mempelajari beberapa penerapan paling penting atas
+`Monad`. 
 
 
 ## Always in motion is the `Future`
@@ -10780,11 +10791,24 @@ The biggest problem with `Future` is that it eagerly schedules work during
 construction. As we discovered in the introduction, `Future` conflates the
 definition of a program with *interpreting* it (i.e. running it).
 
+Masalah paling besar dengan `Future` adalah struktur ini segera menjadwalkan
+tugas pada saat konstruktsi. Sebagaimana yang telah kita bicarakan pada
+perkenalan, `Future` menggabungkan antara definisi program dengan
+*mengintrepretasikannya*.
+
 `Future` is also bad from a performance perspective: every time `.flatMap` is
 called, a closure is submitted to an `Executor`, resulting in unnecessary thread
 scheduling and context switching. It is not unusual to see 50% of our CPU power
 dealing with thread scheduling, instead of doing the work. So much so that
 parallelising work with `Future` can often make it *slower*.
+
+Dan bila dilihat dari sudut pandang performa, `Future` tidak begitu menarik:
+setiap kali `.flatMap` dipanggil, sebuah *closure* diserahkan kepada sebuah
+`Executor` sehingga menyebabkan penjadwalan dan pertukaran konteks yang tak perlu.
+Bukan hal yang jarang terjadi bila kita melihat 50% penggunaan CPU saat berurusan
+dengan penjadwalan utas, bukan saat melakukan komputasi program. Bahkan, bukan
+hal yang tidak mungkin untuk mendapatkan hasil komputasi paralel yang lebih lambat
+saat menggunakan `Future`.
 
 Combined, eager evaluation and executor submission means that it is impossible
 to know when a job started, when it finished, or the sub-tasks that were spawned
@@ -10792,9 +10816,19 @@ to calculate the final result. It should not surprise us that performance
 monitoring "solutions" for `Future` based frameworks are a solid earner for the
 modern day snake oil merchant.
 
+Bila evaluasi tegas dan penyerahan eksekutor digunakan secara bersamaan, pengguna
+tidak akan tahu kapan tugas akan dimulai, selesai, atau sub-tugas yang dibuat
+untuk menghitung hasil akhir. Seharusnya, bukan hal yang mengejutkan bila
+*solusi* untuk melakukan pengawasan atas *framework* yang dibuat berdasarkan
+`Future` memang pantas disebut sebagai tukang tipe.
+
 Furthermore, `Future.flatMap` requires an `ExecutionContext` to be in implicit
 scope: users are forced to think about business logic and execution semantics at
 the same time.
+
+Terlebih lagi, `Future.flatMap` mengharuskan sebuah `ExecutionContext` berada
+pada cakupan implisit: pengguna dipaksa untuk memikirkan logika bisnis dan
+semantik dari eksekusi pada saat yang bersamaan. 
 
 A> If `Future` was a Star Wars character, it would be Anakin Skywalker: the fallen
 A> chosen one, rushing in and breaking things without thinking.
