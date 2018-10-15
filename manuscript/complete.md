@@ -10748,6 +10748,18 @@ publications appear regularly with new approaches to old problems. Implementing
 a functional data structure from the literature is a good contribution to the
 Scalaz ecosystem.
 
+Pada bab ini, kita sudah mempelajari secara sekilas tentang tipe data yang
+ditawarkan oleh Scalaz.
+
+Pembaca yang budiman tidak harus menghafal struktur data yang ada pada bab
+ini, dan cukup menganggap bab ini sebagai pengantar.
+
+Pada jagad pemrograman fungsional, struktur data fungsional merupakan area
+riset yang aktif. Publikasi akademis juga sering muncul dengan pendekatan baru
+atas permasalahan yang sudah lama dikenal. Menerapkan sebuah struktur data
+fungsional dari literatur semacam itu merupakan kontrubusi yang sangat diterima
+untuk ekosistem Scalaz.
+
 
 # Advanced Monads
 
