@@ -10630,6 +10630,12 @@ We can efficiently encode the (unordered) integer values 6, 9, 2, 13, 8, 14, 10,
 encoding of *intervals* for elements `A` that have an `Enum[A]`, getting more
 efficient as the contents become denser.
 
+Kita dapat dengan mudah menyandikan nilai integer antara 6, 9, 2, 13, 8, 14, 10,
+7, 5 sebagai interval inklusif `[2, 2], [5, 10], [13, 14]`. `Diev` merupakan
+metoda penyadian efisien atas *interval* untuk elemen `A` yangc mempunyai instans
+kelas tipe `Enum[A]` yang akan semuakin efisien bila isi dari struktur data ini
+semakin padat.
+
 {lang="text"}
 ~~~~~~~~
   sealed abstract class Diev[A] {
@@ -10660,6 +10666,9 @@ efficient as the contents become denser.
 When updating the `Diev`, adjacent intervals are merged (and then ordered) such
 that there is a unique representation for a given set of values.
 
+Saat memutakirkan `Diev`, interval yang berdekatan akan digabungkan (dan diurutkan)
+sehingga sebuah set nilai akan mempunyai sebuah representasi yang unik.
+
 {lang="text"}
 ~~~~~~~~
   scala> Diev.fromValuesSeq(List(6, 9, 2, 13, 8, 14, 10, 7, 5))
@@ -10671,6 +10680,9 @@ that there is a unique representation for a given set of values.
 
 A great usecase for `Diev` is for storing time periods. For example, in our
 `TradeTemplate` from the previous chapter
+
+Salah satu contoh penggunaan untuk `Diev` adalah penyimpanan periode waktu.
+Sebagai contoh konkret, pada `TradeTemplate` kita pada bab sebelumnya.
 
 {lang="text"}
 ~~~~~~~~
@@ -10686,6 +10698,11 @@ representation for performance reasons, without any change in our business logic
 because we used `Monoid`, not any `List` specific methods. We would, however,
 have to provide an `Enum[LocalDate]`, which is an otherwise useful thing to
 have.
+
+kita akan menemui bahwa `payments` sangat padat, kita mungkin berharap untuk
+menggantinya dengan representasi `Diev` dengan alasan performa tanpa mengubah
+logika bisnis dikarenakan kita menggunakan `Monoid`, bukan `List`. Walaupun hal
+itu berarti kita harus menyediakan instance `Enum[LocalDate]`.
 
 
 ### `OneAnd`
