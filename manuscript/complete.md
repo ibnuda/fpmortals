@@ -10843,8 +10843,18 @@ application's entrypoint. We can now refer to I/O and mutation as an *effect* on
 the world, captured by the type system, as opposed to having a hidden
 *side-effect*.
 
+Bila kita tidak boleh memanggil metoda dengan efek samping pada logika bisnis
+kita, atau pada `Future` (atau pada `Id`, `Either`, ataupun `Const`, dll),
+**kapan kita bisa**? Tentu jawabannya ada pada `Monad` yang menunda eksekusi
+sampai pada waktunya `Monad` ini diinterpretasi pada titik awal aplikasi.
+Mulai dari sini, kita akan merujuk I/O dan mutasi sebagai *efek* pada dunia luar
+yang ditangkap oleh sistem tipe, bukan sistem dengan *efek samping* tersembunyi.
+
 The simplest implementation of such a `Monad` is `IO`, formalising the version
 we wrote in the introduction:
+
+Implementasi paling sederhana dari sebuah `Monad` adalah `IO`, yang memformalkan
+apa yang telah kita tulis pada bagian perkenalan sebagai:
 
 {lang="text"}
 ~~~~~~~~
@@ -10862,6 +10872,8 @@ we wrote in the introduction:
 The `.interpret` method is only called once, in the entrypoint of an
 application:
 
+Metoda `.interpret` hanya dipanggil sekali pada titik awal sebuah aplikasi:
+
 {lang="text"}
 ~~~~~~~~
   def main(args: Array[String]): Unit = program.interpret()
@@ -10869,8 +10881,13 @@ application:
 
 However, there are two big problems with this simple `IO`:
 
+Namun, ada dua masalah utama pada `IO` sederhana semacam ini:
+
 1.  it can stack overflow
 2.  it doesn't support parallel computations
+
+1.  dapat menyebabkan *stack overflow*
+2.  tidak mendukung komputasi paralel.
 
 Both of these problems will be overcome in this chapter. However, no matter how
 complicated the internal implementation of a `Monad`, the principles described
@@ -10878,9 +10895,22 @@ here remain true: we're modularising the definition of a program and its
 execution, such that we can capture effects in type signatures, allowing us to
 reason about them, and reuse more code.
 
+Kedua masalah ini akan diselesaikan pada bab ini. Namun, serumit apapun
+implmentasi internal dari sebuah `Monad`, prinsip yang dijabarkan disini tidak
+berubah: kita memodularisasi pendefinisian dari sebuah program dan eksekusinya
+sehingga kita dapat menangkap efek yang muncul pada penanda tipe, dan pada akhirnya
+memperkenankan kita untuk menalar hasil modularisasi program tersebut dan
+menghasilkan penggunaan ulang kode yang lebih banyak.
+
 A> The Scala compiler will happily allow us to call side-effecting methods from
 A> unsafe code blocks. The [Scalafix](https://scalacenter.github.io/scalafix/) linting tool can ban side-effecting methods at
 A> compiletime, unless called from inside a deferred `Monad` like `IO`.
+A>
+A> Kompiler Scala memperkenankan kita untuk memanggil metoda dengan efek samping
+A> pada blok kode tak aman. [Scalafix](https://scalacenter.github.io/scalafix
+A> yang merupakan alat bantu untuk pelarangan metoda dengan efek samping pada
+A> saat kompilasi dapat digunakan untuk memastikan bahwa semua metoda dengan
+A> efek samping dipanggil didalam sebuah `Monad` seperti `IO`.
 
 
 ## Stack Safety
