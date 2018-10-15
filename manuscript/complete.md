@@ -10712,6 +10712,11 @@ Recall that `Foldable` is the Scalaz equivalent of a collections API and
 `NonEmptyList` to provide a `Foldable1`. The simple data structure `OneAnd`
 wraps any other collection to turn it into a `Foldable1`:
 
+Seperti yang sudah dipelajari, `Foldable` merupakan pustaka setara untuk
+pustaka koleksi dan `Foldable1` untuk koleksi non-kosong. Sementara ini, kita
+baru melihat `NonEmptyList` untuk menyediakan instans `Foldable1`. Struktur data
+sederhana `OneAnd` melapisi semua koleksi lain menkadi `Foldable1`:
+
 {lang="text"}
 ~~~~~~~~
   final case class OneAnd[F[_], A](head: A, tail: F[A])
@@ -10722,6 +10727,13 @@ create non-empty `Stream`, `DList` and `Tree` structures. However it may break
 ordering and uniqueness characteristics of the underlying structure: a
 `OneAnd[ISet, A]` is not a non-empty `ISet`, it is an `ISet` with a guaranteed
 first element that may also be in the `ISet`.
+
+`NonEmptyList` bisa merupakan alias untuk `OneAnd[IList]`. Sama halnya dengan
+alias dari struktur data ini, kita bisa membuat `Stream`, `DList`, dan `Tree`.
+Namun, penggunaan ini dapat menghapus penyusunan dan keunikan dari struktur yang
+melandasinya: sebuah `OneAnd[ISet, A]` adalah struktur non-kosong dari `ISet`.
+Namun, elemen pertama dari struktur ini pasti tidak kosong dan bisa jadi juga
+merupakan elemen dari `ISet` sehingga struktur ini tidak menjadi unik lagi.
 
 
 ## Summary
