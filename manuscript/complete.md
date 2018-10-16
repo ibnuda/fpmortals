@@ -11208,6 +11208,9 @@ melakukan penggabungan `list` dalam jumlah besar tanpa harus memenuhi *stack*.
 
 Similarly, our `IO` can be made stack safe thanks to `Trampoline`:
 
+Hal yang sama dapat dilakukan untuk mengamankan `IO` dengan menggunakan
+`Trampoline`:
+
 {lang="text"}
 ~~~~~~~~
   final class IO[A](val tramp: Trampoline[A]) {
@@ -11232,7 +11235,13 @@ A> monadically bind when you are monadically binding.
 The interpreter, `.unsafePerformIO()`, has an intentionally scary name to
 discourage using it except in the entrypoint of the application.
 
+Penerjemah di atas, `.unsafePerformIO()`, memang sengaja dinamai seperti itu
+untuk menakut-nakuti pengguna agar tidak menggunakannya selain di titik awal
+aplikasi.
+
 This time, we don't get a stack overflow error:
+
+Sekarang, kita tidak akan mendapat galat mengenai *stack overflow*:
 
 {lang="text"}
 ~~~~~~~~
@@ -11250,10 +11259,18 @@ Using a `Trampoline` typically introduces a performance regression vs a regular
 reference. It is `Free` in the sense of *freely generated*, not *free as in
 beer*.
 
+Penggunaan `Trampoline` biasanya menimbulkan penurunan performa bila dibandingkan
+dengan rujukan biasa. Hal ini dikarenakan `Free` disini adalah dibuat tanpa
+biaya, bukan digunakan tanpa biaya.
+
 A> Always benchmark instead of accepting sweeping statements about performance: it
 A> may well be the case that the garbage collector performs better for an
 A> application when using `Free` because of the reduced size of retained objects in
 A> the stack.
+A>
+A> Selalu ukur apapun mengenai performa: Bisa jadi pengumpul sampah bekerja lebih
+A> baik pada sebuah aplikasi yang menggunakan `Free` karena ukuran objek yang disimpan
+A> memang lebih kecil pada *stack*.
 
 
 ## Monad Transformer Library
