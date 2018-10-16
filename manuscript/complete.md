@@ -12316,13 +12316,28 @@ pada pemrograman fungsional.
 `StateT` lets us `.put`, `.get` and `.modify` a value that is handled by the
 monadic context. It is the FP replacement of `var`.
 
+`StateT` memperkenankan kita untuk melakukan `.put`, `.get`, dan `.modify` pada
+sebuah nilai yang sedang ditangani pada konteks monadik. Monad ini merupakan
+pengganti `var` pada pemrograman fungsional.
+
 If we were to write an impure method that has access to some mutable state, held
 in a `var`, it might have the signature `() => F[A]` and return a different
 value on every call, breaking referential transparency. With pure FP the
 function takes the state as input and returns the updated state as output, which
 is why the underlying type of `StateT` is `S => F[(S, A)]`.
 
+Bila kita harus menulis sebuah metoda tak murni (lol, help) yang mempunyai
+akses ke beberapa kondisi yang tidak tetap dan disimpan pada sebuah `var`, metoda
+ini mungkin mempunyai penanda `() => F[A]` dan mengembalikan nilai yang berbeda
+pada tiap kali pemanggilan dan pada akhirnya mengaburkan perujukan. Dengan
+pemrograman fungsional murni (lol, help), fungsi tersebut menerima sebuah keadaan
+(*state*) sebagai masukan dan mengembalikan keadaan yang termutakhirkan sebagai
+keluaran. Ini-lah yang menjadi pendasaran mengapa tipe dasar dari `StateT` adalah
+`S => F[(S, A)]`.
+
 The associated monad is `MonadState`
+
+Monad yang terasosiasi dengan `StateT` adalah `MonadState`
 
 {lang="text"}
 ~~~~~~~~
@@ -12338,9 +12353,17 @@ The associated monad is `MonadState`
 A> `S` must be an immutable type: `.modify` is not an escape hatch to update a
 A> mutable data structure. Mutability is impure and is only allowed within an `IO`
 A> block.
+A>
+A> `S` harus berupa tipe tak berubah: `.modify` bukan pintu darurat untuk memutakhirkan
+A> sebuah struktur tak tetap. Ketidak-tetapan itu tidak murni dan hanya diperkenankan
+A> pada blok `IO`.
 
 `StateT` is implemented slightly differently than the monad transformers we have
 studied so far. Instead of being a `case class` it is an ADT with two members:
+
+`StateT` diimplementasikan sedikit berbeda dengan transformator monad yang sudah
+kita pelajari sampai saat ini. `StateT` bukan berupa `case class`, namun merupakan
+sebuah ADT yang berisi dua anggota:
 
 {lang="text"}
 ~~~~~~~~
@@ -12362,6 +12385,9 @@ studied so far. Instead of being a `case class` it is an ADT with two members:
 which are a specialised form of `Trampoline`, giving us stack safety when we
 want to recover the underlying data structure, `.run`:
 
+yang merupakan bentuk khusus dari `Trampoline` dan memberikan kita keamanan
+*stack* bila kita ingin mengembalikan struktur data standar dengan `.run`:
+
 {lang="text"}
 ~~~~~~~~
   sealed abstract class StateT[F[_], S, A] {
@@ -12378,6 +12404,8 @@ want to recover the underlying data structure, `.run`:
 
 `StateT` can straightforwardly implement `MonadState` with its ADT:
 
+`StateT` dapat dengan mudah mengimplementasikan `MonadState` dengan ADT-nya:
+
 {lang="text"}
 ~~~~~~~~
   implicit def monad[F[_]: Applicative, S] = new MonadState[StateT[F, S, ?], S] {
@@ -12392,6 +12420,8 @@ want to recover the underlying data structure, `.run`:
 
 With `.pure` mirrored on the companion as `.stateT`:
 
+Dengan `.pure` mencerminkan objek pasangan sebagai `.stateT`:
+
 {lang="text"}
 ~~~~~~~~
   object StateT {
@@ -12403,9 +12433,16 @@ With `.pure` mirrored on the companion as `.stateT`:
 and `MonadTrans.liftM` providing the `F[A] => StateT[F, S, A]` constructor as
 usual.
 
+dan `MonadTrans.liftM` menyediakan konstruktor `F[A] => StateT[F, S, A]`.
+
 A common variant of `StateT` is when `F = Id`, giving the underlying type
 signature `S => (S, A)`. Scalaz provides a type alias and convenience functions
 for interacting with the `State` monad transformer directly, and mirroring
+`MonadState`:
+
+Varian umum dari `StateT` adalah saat `F = Id` yang memberikan tipe dasar sebagai
+`S => (S, A)`. Scalaz menyediakan sebuah alias tipe dan fungsi pembantu untuk
+berinteraksi dengan transformator monad `State` secara langsung, dan mencerminkan
 `MonadState`:
 
 {lang="text"}
@@ -12427,6 +12464,11 @@ For an example we can return to the business logic tests of
 interpreters for our application and we stored the number of `started` and
 `stoped` nodes in `var`.
 
+Sebagai contoh, kita dapat kembali ke tes logika bisnis dari `drone-dynamic-agents`.
+Harap diingat kembali pada bab 3 kita telah membuat `Mutable` sebagai penerjemah
+tes untuk aplikasi kita dan menyimpan perhitungan `started` dan `stoped` pada sebuah
+`var`.
+
 {lang="text"}
 ~~~~~~~~
   class Mutable(state: WorldView) {
@@ -12442,6 +12484,11 @@ We now know that we can write a much better test simulator with `State`. We will
 take the opportunity to upgrade the accuracy of the simulation at the same time.
 Recall that a core domain object is our application's view of the world:
 
+Sekarang kita tahu bahwa kita dapat membuat simulator tes yang jauh lebih baik
+dengan menggunakan `State`. Kita akan menggunakan kesempatan ini untuk meningkatkan
+akurasi dari simulasi tersebut. Mohon diingat bahwa objek domain utama kita merupakan
+pandangan aplikasi kita terhadap dunia luar:
+
 {lang="text"}
 ~~~~~~~~
   final case class WorldView(
@@ -12456,6 +12503,9 @@ Recall that a core domain object is our application's view of the world:
 
 Since we're writing a simulation of the world for our tests, we can create a
 data type that captures the ground truth of everything
+
+Karena kita menulis simulasi dari dunia luar untuk tes kita, kita dapat menulis
+sebuah tipe data yang membawa nilai-nilai kebenaran untuk aplikasi kita
 
 {lang="text"}
 ~~~~~~~~
@@ -12474,14 +12524,28 @@ A> We have not yet rewritten the application to fully make use Scalaz data types
 A> and typeclasses, and we are still relying on stdlib collections. There is no
 A> urgency to update as this is straightforward and these types can be used in a
 A> pure FP manner.
+A>
+A> Kita belum menulis ulang aplikasi kita untuk menggunakan tipe data dan kelas
+A> tipe Scalaz sepenuhnya. Saat ini, kita masih bergantung pada pustaka koleksi
+A> dari pustaka standar. Selain itu, tidak ada urgensi untuk menggantinya karena
+A> masih sederhana dan tipe-tipe ini bisa digunakan dengan gaya pemrograman
+A> fungsional murni. (lol, help. hard sentence.)
 
 The key difference being that the `started` and `stopped` nodes can be separated
 out. Our interpreter can be implemented in terms of `State[World, a]` and we can
 write our tests to assert on what both the `World` and `WorldView` looks like
 after the business logic has run.
 
+Yang menjadi pembeda utama adalah simpul `started` dan `stopped` dapat dipisahkan.
+Penerjemah kita dapat diimplementasikan menggunakan `State[World, a]` dan kita
+dapat menulis tes kita untuk memeriksa bagaimanakah bentuk dari `World` dan
+`WorldView` setelah logika bisnis berjalan.
+
 The interpreters, which are mocking out contacting external Drone and Google
 services, may be implemented like this:
+
+Penerjemah, yang meniru penghubungan layanan eksternal Drone dan Google, dapat
+diimplementasikan seperti berikut:
 
 {lang="text"}
 ~~~~~~~~
@@ -12511,12 +12575,22 @@ services, may be implemented like this:
 
 and we can rewrite our tests to follow a convention where:
 
+dan kita dapat menulis ulang tes kita agar mengikuti konvensi dimana:
+
 -   `world1` is the state of the world before running the program
 -   `view1` is the application's belief about the world
 -   `world2` is the state of the world after running the program
 -   `view2` is the application's belief after running the program
 
+-   `world1` merupakan keadaan dunia luar sebelum program berjalan
+-   `view1` merupakan apa yang aplikasi kita ketahui tentang dunia luar
+-   `world2` merupakan keadaan dunia luar setelah program berjalan
+-   `view2` merupakan apa yang aplikasi kita ketahui tentang dunia luar setelah
+    program berjalan
+
 For example,
+
+Sebagai contoh,
 
 {lang="text"}
 ~~~~~~~~
@@ -12534,6 +12608,8 @@ For example,
 
 We would be forgiven for looking back to our business logic loop
 
+Mungkin akan dimaafkan bila kita melihat kembali ikalan logika bisnis kita
+
 {lang="text"}
 ~~~~~~~~
   state = initial()
@@ -12547,6 +12623,13 @@ requires only `Applicative` and we would be violating the *Rule of Least Power*
 to require the more powerful `MonadState`. It is therefore entirely reasonable
 to handle the state manually by passing it in to `update` and `act`, and let
 whoever calls us use a `StateT` if they wish.
+
+dan menggunakan `StateT` untuk mengatur `state`. Namun, logika bisnis `DynAgents`
+kita hanya membutuhkan `Applicative` dan kita akan melanggar *Rule of Least Power*
+yang meminta kuasa lebih dari `MonadState`. Jadi, cukup masuk akal bila kita
+menangani keadaan secara manual dengan melemparnya secara langsung ke `update`
+dan `act`, dan membiarkan siapapun yang ingin memanggil kita dengan menggunakan
+`StateT`, bila itu yang mereka inginkan.
 
 
 ### `IndexedStateT`
