@@ -11168,6 +11168,8 @@ A> komposisi fungsi.
 
 In the previous chapter we described the data type `DList` as
 
+Pada bab sebelumnya, kita mendeskripsikan tipe data `DList` dengan
+
 {lang="text"}
 ~~~~~~~~
   final case class DList[A](f: IList[A] => IList[A]) {
@@ -11178,6 +11180,8 @@ In the previous chapter we described the data type `DList` as
 ~~~~~~~~
 
 However, the actual implementation looks more like:
+
+Namun, implementasi yang sesungguhnya adalah seperti berikut:
 
 {lang="text"}
 ~~~~~~~~
@@ -11192,6 +11196,12 @@ Instead of applying nested calls to `f` we use a suspended `Trampoline`. We
 interpret the trampoline with `.run` only when needed, e.g. in `toIList`. The
 changes are minimal, but we now have a stack safe `DList` that can rearrange the
 concatenation of a large number lists without blowing the stack!
+
+Kita tidak menggunakan panggilan berlapis pada `f`, namun kita menggunakan
+`Trampoline` yang dibekukan. Interpretasi `.run` hanya dilakukan bila memang
+benar dibutuhkan, seperti pada `toIList`. Perubahan yang dilakukan sebenarnya
+sedikit, namun kita berhasil mencapai keamanan *stack* atas `DList` yang dapat
+melakukan penggabungan `list` dalam jumlah besar tanpa harus memenuhi *stack*.
 
 
 ### Stack Safe `IO`
