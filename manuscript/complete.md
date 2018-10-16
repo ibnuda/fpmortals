@@ -11278,14 +11278,27 @@ A> memang lebih kecil pada *stack*.
 Monad transformers are data structures that wrap an underlying value and provide
 a monadic *effect*.
 
+Transformator monad merupakan struktur data yang membungkus nilai yang mendasari
+dan menyediakan efek monadik.
+
 For example, in Chapter 2 we used `OptionT` to let us use `F[Option[A]]` in a
 `for` comprehension as if it was just a `F[A]`. This gave our program the effect
 of an *optional* value. Alternatively, we can get the effect of optionality if
 we have a `MonadPlus`.
 
+Sebagai contoh, pada bab 2 kita menggunakan `OptionT` agar kita dapat menggunakan
+`F[Option[A]]` pada komprehensi `for` (lol, help) sebagaimana kita menggunakan
+`F[A]`. Hal semacam ini menambahkan efek dari nilai opsional pada program kita.
+Atau bisa juga kita menggunakan `MonadPlus` untuk mendapatkan efek yang sama.
+
 This subset of data types and extensions to `Monad` are often referred to as the
 *Monad Transformer Library* (MTL), summarised below. In this section, we will
 explain each of the transformers, why they are useful, and how they work.
+
+Subset tipe data ini dan perpanjangan dari `Monad` biasa disebut sebagai
+Pustaka Transformator Monad atau Monad Transformer Library (MTL) yang dirangkum
+di bawah. Pada bagian ini, kita akan membahas tiap transformator, apa guna
+mereka, dan bagaimana cara mereka bekerja.
 
 | Effect               | Underlying            | Transformer | Typeclass     |
 |-------------------- |--------------------- |----------- |------------- |
@@ -11296,12 +11309,23 @@ explain each of the transformers, why they are useful, and how they work.
 | evolving state       | `S => F[(S, A)]`      | `StateT`    | `MonadState`  |
 | keep calm & carry on | `F[E \&/ A]`          | `TheseT`    |               |
 | control flow         | `(A => F[B]) => F[B]` | `ContT`     |               |
+|                      |                       |             |               |
+| pilihan              | `F[Maybe[A]]`         | `MaybeT`    | `MonadPlus`   |
+| galat                | `F[E \/ A]`           | `EitherT`   | `MonadError`  |
+| nilai waktu jalan    | `A => F[B]`           | `ReaderT`   | `MonadReader` |
+| jurnal / tugas ganda | `F[(W, A)]`           | `WriterT`   | `MonadTell`   |
+| perubahan kondisi    | `S => F[(S, A)]`      | `StateT`    | `MonadState`  |
+| jalan terus saja     | `F[E \&/ A]`          | `TheseT`    |               |
+| kontrol alur         | `(A => F[B]) => F[B]` | `ContT`     |               |
 
 
 ### `MonadTrans`
 
 Each transformer has the general shape `T[F[_], A]`, providing at least an
 instance of `Monad` and `Hoist` (and therefore `MonadTrans`):
+
+Tiap transformator mempunyai bentuk umum `T[F[_], A]`, dan menyediakan setidaknya
+satu instans `Monad` dan `Hoist` sehingga disebut `MonadTrans`:
 
 {lang="text"}
 ~~~~~~~~
@@ -11317,22 +11341,44 @@ instance of `Monad` and `Hoist` (and therefore `MonadTrans`):
 A> `T[_[_], _]` is another example of a higher kinded type. It says that `T` takes
 A> two type parameters: the first also takes a type parameter, written `_[_]`, and
 A> the second does not take any type parameters, written `_`.
+A>
+A> `T[_[_], _]` merupakan contoh lain dari jenis tipe tinggi (lol, kill me mate).
+A> Penanda tipe ini dibaca sebagai: `T` menerima dua parameter tipe, yang pertama
+A> juga menerima sebuah parameter tipe, yang ditulis sebagai `_[_]` dan yang kedua
+A> tidak menerima parameter tipe apapun yang ditulis dengan `_`.
 
 `.liftM` lets us create a monad transformer if we have an `F[A]`. For example,
 we can create an `OptionT[IO, String]` by calling `.liftM[OptionT]` on an
 `IO[String]`.
 
+`.liftM` memperkenankan kita untuk membuat sebuah transformator monad bila kita
+mempunyai sebuah `F[A]`. Sebagai contoh, kita dapat membuat sebuah `OptionT[IO, String]`
+dengan memanggil `.liftM[OptionT]` pada sebuah `IO[String].
+
 `.hoist` is the same idea, but for natural transformations.
 
+Mirip dengan `.liftM`, `.hoist` digunakan untuk transformasi natural.
+
 Generally, there are three ways to create a monad transformer:
+
+Secara umum, ada tiga cara untuk membuat sebuah transformator monad:
 
 -   from the underlying, using the transformer's constructor
 -   from a single value `A`, using `.pure` from the `Monad` syntax
 -   from an `F[A]`, using `.liftM` from the `MonadTrans` syntax
 
+-   dengan menggunakan konstruktor transformator
+-   dari sebuah nilai `A` dengan menggunakan `.pure` dari sintaks `Monad`
+-   dari sebuah `F[A] dengan menggunakan `.liftM` dari sintaks `MonadTrans`
+
 Due to the way that type inference works in Scala, this often means that a
 complex type parameter must be explicitly written. As a workaround, transformers
 provide convenient constructors on their companion that are easier to use.
+
+Dikarenakan cara kerja dari penebak tipe pada Scala, sering kali parameter tipe
+yang kompleks harus tersurat. Untuk menyiasati hal ini, transformator biasanya
+menyediakan alat bantu konstruktor pada pasangan, sehingga dapat dengan mudah
+digunakan.
 
 
 ### `MaybeT`

@@ -25,6 +25,7 @@ Istilah istilah yang belum saya pikirkan padan katanya.
 - *hack*. Apakah *retas* sesuai untuk kata benda? Mungkin lebih cocok menggunakan terjemahan kata *kludge*.
 - *happy path*. Mungkin *asumsi terbaik*?
 - *headless*.
+- higher kinded type. jenis tipe tinggi? Tanya orang.
 - *infinite loop*.
 - *invoke*. Mungkin *selawat*?
 - *lazy*. Lundung saja.
