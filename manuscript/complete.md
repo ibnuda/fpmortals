@@ -8224,7 +8224,7 @@ Metoda pasangan `.empty` dan `just` lebih disukai saat membuat instans
 sebuha `Maybe` dan membantu mempermudah pendugaan tipe. Pola ini seringkali
 digunakan karena mengembalikan a *sum type* (lol, help). *Sum type* sendiri
 merupakan keadaan dimana kita mempunyai beberapa implementasi sebuah
-`sealed trait` namun tidak menggunakan sub-tipe khusus pada sebuah penanda tipe. ``
+`sealed trait` namun tidak menggunakan sub-tipe khusus pada sebuah penanda tipe.
 
 A convenient `implicit class` allows us to call `.just` on any value
 and receive a `Maybe`
@@ -11515,7 +11515,15 @@ don't know anything about the error. `EitherT` (and the lazy variant
 `LazyEitherT`) allows us to use any type we want as the error value, providing
 contextual information about what went wrong.
 
+Nilai opsional merupakan sebuah kasus khusus dimana sebuah nilai bisa saja
+berupa sebuah galat, namun kita tidak tahu apapun mengenai galat tersebut.
+`EitherT` (dan varian lundungnya, `LazyEitherT`) memperkenankan kita untuk
+menggunakan tipe apapun yang kita inginkan sebagai nilai galat beserta
+menyediakan informasi kontekstual mengenai apa yang salah. 
+
 `EitherT` is a wrapper around an `F[A \/ B]`
+
+`EitherT` merupakan pembungkus atas sebuah `F[A \/ B]`
 
 {lang="text"}
 ~~~~~~~~
@@ -11532,6 +11540,8 @@ contextual information about what went wrong.
 
 The `Monad` is a `MonadError`
 
+`Monad` pada konteks berikut adalah sebuah `MonadError`
+
 {lang="text"}
 ~~~~~~~~
   @typeclass trait MonadError[F[_], E] extends Monad[F] {
@@ -11543,7 +11553,13 @@ The `Monad` is a `MonadError`
 `.raiseError` and `.handleError` are self-descriptive: the equivalent of `throw`
 and `catch` an exception, respectively.
 
+`.raiseError` dan `.handleError` cukup jelas: keduanya ekuivalen dengan metoda
+`throw` dan `catch` sebuah galat.
+
 `MonadError` has some addition syntax for dealing with common problems:
+
+`MonadError` mempunyai beberapa sintaks tambahan untuk menangani masalah-masalah
+umum:
 
 {lang="text"}
 ~~~~~~~~
@@ -11557,12 +11573,23 @@ and `catch` an exception, respectively.
 `.attempt` brings errors into the value, which is useful for exposing errors in
 subsystems as first class values.
 
+`.attempt` mengubah galat menjadi nilai, yang berguna untuk menampakkan galat
+pada subsistem sebagai nilai utama.
+
 `.recover` is for turning an error into a value for all cases, as opposed to
 `.handleError` which takes an `F[A]` and therefore allows partial recovery.
 
+`.recover` digunakan untuk mengubah sebuah galat menjadi nilai untuk semua
+kasus yang mungkin terjadi. Sebaliknya, `.handleError` menerima sebuah
+`F[A]` dan pada akhirnya memperkenankan pemulihan sebagian.
+
 `.emap`, *either* map, is to apply transformations that can fail.
+`.emap`, yang merupakan pemetaan atas *either*, mengaplikasikan transformasi
+yang bisa saja gagal.
 
 The `MonadError` for `EitherT` is:
+
+`MonadError` untuk `EitherT` adalah:
 
 {lang="text"}
 ~~~~~~~~
@@ -11586,6 +11613,11 @@ The `MonadError` for `EitherT` is:
 It should be of no surprise that we can rewrite the `MonadPlus` example with
 `MonadError`, inserting informative error messages:
 
+Seharusnya bukan hal yang mengejutkan bila kita dapat menulis ulang contoh
+dari `MonadPlus` dengan menggunakan `MonadError` dan menyisipkan pesan galat
+yang informatif:
+
+
 {lang="text"}
 ~~~~~~~~
   def stars[F[_]: Twitter](name: String)
@@ -11596,6 +11628,8 @@ It should be of no surprise that we can rewrite the `MonadPlus` example with
 ~~~~~~~~
 
 where `.orError` is a convenience method on `Maybe`
+
+dimana `.orError` merupakan metoda bantuan pada `Maybe`
 
 {lang="text"}
 ~~~~~~~~
@@ -11611,8 +11645,16 @@ A> the signature of the typeclass has more than one parameter.
 A> 
 A> It is also common practice to name the implicit parameter after the primary
 A> type, in this case `F`.
+A>
+A> Adalah hal yang umum untuk menggunakan parameter blok `implicit` ketika
+A> penanda dari kelas tipe mempunyai parameter lebih dari satu.
+A>
+A> Juga hal yang umum untuk menggunakan parameter blok `implicit` setelah
+A> tipe utama yang pada hal ini adalah `F`. 
 
 The version using `EitherT` directly looks like
+
+Versi yang menggunakan `EitherT` terlihat sebagai berikut
 
 {lang="text"}
 ~~~~~~~~
@@ -11624,6 +11666,9 @@ The version using `EitherT` directly looks like
 
 The simplest instance of `MonadError` is for `\/`, perfect for testing business
 logic that requires a `MonadError`. For example,
+
+Instans paling sederhana dari `MonadError` adalah `\/` yang sangat cocok untuk
+testing logika bisnis yang membutuhkan sebuah `MonadError`. Sebagai contoh,
 
 {lang="text"}
 ~~~~~~~~
@@ -11640,6 +11685,8 @@ logic that requires a `MonadError`. For example,
 ~~~~~~~~
 
 Our unit tests for `.stars` might cover these cases:
+
+Tes unit kita untuk `.stars` mungkin mencakup hal berikut:
 
 {lang="text"}
 ~~~~~~~~
@@ -11659,7 +11706,12 @@ Our unit tests for `.stars` might cover these cases:
 As we've now seen several times, we can focus on testing the pure business logic
 without distraction.
 
+Sebagaimana yang telah kita saksikan beberapa kali, kita dapat fokus pada testing
+untuk logika bisnis seutuhnya.
+
 Finally, if we return to our `JsonClient` algebra from Chapter 4.3
+
+Dan pada akhirnya, kita kembali ke aljabar `JsonClient` pada bab 4.3
 
 {lang="text"}
 ~~~~~~~~
@@ -11677,6 +11729,12 @@ this algebra only works for an `F` having a `MonadError` we get to define the
 kinds of errors as a tangential concern. Indeed, we can have **two** layers of
 error if we define the interpreter for a `EitherT[IO, JsonClient.Error, ?]`
 
+harap diingat bahwa kita hanya menulis jalur lancar pada API. Bila interpreter
+kita untuk aljabar ini hanya bekerja pada `F` yang memiliki `MonadError`, kita
+dapat mendefinisikan jenis galat sebagai permasalahan yang berhubungan.
+Dan memang pada kenyataannya, kita dapat mempunyai **dua** lapis galat bila kita
+mendefinisikan interpreter untuk sebuah `EitherT[IO, JsonClient.Error, ?]` 
+
 {lang="text"}
 ~~~~~~~~
   object JsonClient {
@@ -11689,34 +11747,65 @@ error if we define the interpreter for a `EitherT[IO, JsonClient.Error, ?]`
 which cover I/O (network) problems, server status problems, and issues with our
 modelling of the server's JSON payloads.
 
+Yang mencakup masalah I/O, status peladen, dan masalah masalah pada pemodelan
+dari muatan JSON dari peladen.
+
 
 #### Choosing an error type
 
 The community is undecided on the best strategy for the error type `E` in
 `MonadError`.
 
+Komunitas Scalaz masih belum dapat menyimpulkan mengenai strategi terbaik
+untuk tipe galat `E` di `MonadError`.
+
 One school of thought says that we should pick something general, like a
 `String`. The other school says that an application should have an ADT of
 errors, allowing different errors to be reported or handled differently. An
 unprincipled gang prefers using `Throwable` for maximum JVM compatibility.
 
+Salah satu mahzab berpendapat bahwa kita harus memilih yang umum, seperti `String`.
+Mahzab lain berpendapat bahwa sebuah aplikasi harus mempunyai ADT untuk galat
+yang memperkenankan penanganan galat yang disesuaikan. Kaum air di daun talas
+sendiri lebih memilih untuk menggunakan `Throwable` demi kompatibilitas penuh
+atas `JVM`.
+
 There are two problems with an ADT of errors on the application level:
+
+Ada dua masalah yang muncul bila kita menggunakan ADT galat pada tingkat
+aplikasi:
 
 -   it is very awkward to create a new error. One file becomes a monolithic
     repository of errors, aggregating the ADTs of individual subsystems.
 -   no matter how granular the errors are, the resolution is often the same: log
     it and try it again, or give up. We don't need an ADT for this.
+-   sangat canggung bila kita membuat sebuah galat baru. Satu berkas menjadi
+    lumbung galat utama, mengagregasi galat dari semua subsismet.
+-   tidak peduli betapa granular galat yang ada, resolusi yang dipakai cenderung sama:
+    catat galat tersebut lalu coba lagi atau berhenti. Kita tidak perlu ADT untuk
+    hal semacam ini.
 
 An error ADT is of value if every entry allows a different kind of recovery to
 be performed.
+
+Sebuah ADT galat menjadi berguna bila tiap catatan menerima penanganan pemulihan
+yang berbeda.
 
 A compromise between an error ADT and a `String` is an intermediary format. JSON
 is a good choice as it can be understood by most logging and monitoring
 frameworks.
 
+Sebuah kompromi antara galat ADT dan `String` adalah format pertengahan.
+JSON merupakan pilihan yang bagus karena format ini dipahami oleh kebanyakan
+*framework* pengawasan dan pencatatan log.
+
 A problem with not having a stacktrace is that it can be hard to localise which
 piece of code was the source of an error. With [`sourcecode` by Li Haoyi](https://github.com/lihaoyi/sourcecode/), we can
 include contextual information as metadata in our errors:
+
+Masalah yang muncul bila kita tidak memiliki *stacktrace* adalah sulitnya
+mencari kode yang menjadi sumber galat. Dengan [`sourcecode` oleh Li Haoyi](https://github.com/lihaoyi/sourcecode/),
+kita dapat mengikutsertakan informasi kontekstual sebagai metadata pada galat kita:
 
 {lang="text"}
 ~~~~~~~~
@@ -11737,6 +11826,12 @@ two calls to `Meta.gen` (invoked implicitly when creating an `Err`) will produce
 different values because the location in the source code impacts the returned
 value:
 
+Walau `Err` dapat dirujuk secara transparan, konstruksi implisit dari sebuah
+`Meta` secara sekilas tidak terlihat bisa dirujuk secara transparan bila
+dibaca seperti biasa: dua panggilan ke `Meta.gen` (dipanggil secara implisit
+saat membuat sebuah `Err`) akan menghasilkan nilai yang berbeda karena lokasi
+dari kode sumber berhubungan dengan nilai yang dikembalikan:
+
 {lang="text"}
 ~~~~~~~~
   scala> println(Err("hello world").meta)
@@ -11750,6 +11845,10 @@ To understand this, we have to appreciate that `sourcecode.*` methods are macros
 that are generating source code for us. If we were to write the above explicitly
 it is clear what is happening:
 
+Untuk memahami hal ini, kita harus mengapresiais bahwa metoda `sourcecode.*`
+merupakan makro yang menggenerasi kode sumber untuk kita. Bila kita harus menulis
+kode di atas secara eksplisit, apa yang terjadi akan menjadi jelas:
+
 {lang="text"}
 ~~~~~~~~
   scala> println(Err("hello world")(Meta("com.acme", "<console>", 10)).meta)
@@ -11761,6 +11860,9 @@ it is clear what is happening:
 
 Yes, we've made a deal with the macro devil, but we could also write the `Meta`
 manually and have it go out of date quicker than our documentation.
+
+Betul, kita sudah bersekutu dengan iblis makro, namun kita dapat menulis `Meta`
+secara manual.
 
 
 ### `ReaderT`
