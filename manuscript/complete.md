@@ -11387,6 +11387,10 @@ digunakan.
 optionality through `Option`, `Maybe` and `LazyOption`, respectively. We will
 focus on `MaybeT` to avoid repetition.
 
+`OptionT`, `MaybeT`, dan `LazyOptionT` mempunyai implementasi yang mirip.
+Mereka sama sama menyediakan opsionalitas melalui `Option`, `Maybe`, dan `LazyOption`.
+Kita akan fokus pada `MaybeT` untuk menghindari pengulangan pembahasan.
+
 {lang="text"}
 ~~~~~~~~
   final case class MaybeT[F[_], A](run: F[Maybe[A]])
@@ -11400,6 +11404,8 @@ focus on `MaybeT` to avoid repetition.
 ~~~~~~~~
 
 providing a `MonadPlus`
+
+menyediakan sebuah instans untuk `MonadPlus`
 
 {lang="text"}
 ~~~~~~~~
@@ -11416,12 +11422,24 @@ providing a `MonadPlus`
 This monad looks fiddly, but it is just delegating everything to the `Monad[F]`
 and then re-wrapping with a `MaybeT`. It is plumbing.
 
+Monad ini memang terlihat agak janggal. Namun, monad ini hanya mendelegasi
+semuanya ke `Monad[F]` dan pada akhirnya membungkus ulang dengan sebuah `MaybeT`.
+Hal ini yang disebut dengan pertukangan.
+
 With this monad we can write logic that handles optionality in the `F[_]`
 context, rather than carrying around `Option` or `Maybe`.
+
+Dengan monad ini, kita dapat menulis logika yang menangani opsionalitas pada
+konteks `F[]`, tidak dengan membawa-bawa `Option` maupun `Maybe`.
 
 For example, say we are interfacing with a social media website to count the
 number of stars a user has, and we start with a `String` that may or may not
 correspond to a user. We have this algebra:
+
+Sebagai contoh, misalkan kita menggunakan sebuah situs media sosial untuk menghitung
+jumlah bintang yang dimiliki oleh seorang pengguna. Situs tersebut memberikan sebuah
+`String` yang mungkin bisa berisi informasi tentang pengguna dan bisa juga tidak.
+Selain itu, kita memilki aljabar berikut:
 
 {lang="text"}
 ~~~~~~~~
@@ -11435,6 +11453,10 @@ correspond to a user. We have this algebra:
 We need to call `getUser` followed by `getStars`. If we use `Monad` as our
 context, our function is difficult because we have to handle the `Empty` case:
 
+Kita harus memanggil `getUser` dan dilanjutkan dengan `getStars`. Bila kita
+menggunakan `Monad` sebagai konteks dari pemanggilan ini, kita akan kesulitan
+menulis fungsi untuk ini karena kita harus menangani kondisi `Empty`:
+
 {lang="text"}
 ~~~~~~~~
   def stars[F[_]: Monad: Twitter](name: String): F[Maybe[Int]] = for {
@@ -11445,6 +11467,10 @@ context, our function is difficult because we have to handle the `Empty` case:
 
 However, if we have a `MonadPlus` as our context, we can suck `Maybe` into the
 `F[_]` with `.orEmpty`, and forget about it:
+
+Namun, bila kita mempunyai sebuah `MonadPlus` sebagai konteks, kita dapat
+memasukkan `Maybe` ke dalam `F[]` dengan `.orEmpty` dan mengabaikan apa yang
+terjadi selanjutnya:
 
 {lang="text"}
 ~~~~~~~~
@@ -11459,6 +11485,12 @@ context does not have one. The solution is to either change the context of the
 program to `MaybeT[F, ?]` (lifting the `Monad[F]` into a `MonadPlus`), or to
 explicitly use `MaybeT` in the return type, at the cost of slightly more code:
 
+Namun, dengan menambahkan persyaratan `MonadPlus`, akan muncul permasalah
+bila konteks hilir tidak mempunyai instans monad tersebut. Solusi yang bisa
+digunakan adalah antara mengganti konteks menjadi `MaybeT[F, ?]` (mengangkat
+`Monad[F]` menjadi `MonadPlus`), atau secara tersurat menggunakan `MaybeT` pada
+tipe kembalian, walaupun harus menulis kode sedikit lebih banyak:
+
 {lang="text"}
 ~~~~~~~~
   def stars[F[_]: Monad: Twitter](name: String): MaybeT[F, Int] = for {
@@ -11470,6 +11502,10 @@ explicitly use `MaybeT` in the return type, at the cost of slightly more code:
 The decision to require a more powerful `Monad` vs returning a transformer is
 something that each team can decide for themselves based on the interpreters
 that they plan on using for their program.
+
+Keputusan untuk menggunakan `Monad` atau mengembalikan sebuah transformator
+pada akhirnya merupakan hal yang harus diputuskan oleh tim pembaca yang budiman
+berdasarkan pada interpreter yang digunakan pada program pembaca budiman.
 
 
 ### `EitherT`
