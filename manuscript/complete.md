@@ -11872,8 +11872,17 @@ runtime value `A`. For those familiar with dependency injection, the reader
 monad is the FP equivalent of Spring or Guice's `@Inject`, without the XML and
 reflection.
 
+Monad pembaca membungkus `A => F[B]` sehingga memperkenankan program `F[B]` untuk
+bergantung kepada nilai waktu-jalan `A`. Bagi pembaca yang sudah akrab dengan
+penyuntikan dependensi (dependency injection), monad pembaca ekuivalen dengan
+anotasi `@Inject` milik Spring maupun Guice. Namun, tanpa disertai dengan refleksi
+maupun XML.
+
 `ReaderT` is just an alias to another more generally useful data type named
 after the mathematician *Heinrich Kleisli*.
+
+`ReaderT` hanya merupakan alias untuk tipe data yang lebih umum yang dinamai
+berdasarkan matematikawan *Heinrich Kleisli*.
 
 {lang="text"}
 ~~~~~~~~
@@ -11895,10 +11904,19 @@ after the mathematician *Heinrich Kleisli*.
 
 A> Some people call `>=>` the *fish operator*. There's always a bigger fish, hence
 A> `>==>`. They are also called *Kleisli arrows*.
+A>
+A> Beberapa orang menyebut `>=>` sebagai operator ikan. Tentu selalu ada ikan
+A> yang lebih besar, seperti `>==>`. Operator itupun juga disebut sebagai
+A> panah Kleisli.
 
 An `implicit` conversion on the companion allows us to use a `Kleisli` in place
 of a function, so we can provide it as the parameter to a monad's `.bind`, or
 `>>=`.
+
+Konversi `implicit` pada objek pendamping memperkenankan kita untuk menggunakan
+sebuah `Kleisli` pada bagian yang seharusnya menjadi tempat untuk sebuah fungsi.
+Hal ini memperkenankan kita untuk menggunakan struktur data ini sebagai
+parameter pada `.bind` atau `>>=` dari sebuah monad.
 
 The most common use for `ReaderT` is to provide environment information to a
 program. In `drone-dynamic-agents` we need access to the user's Oauth 2.0
@@ -11907,8 +11925,19 @@ Refresh Token to be able to contact Google. The obvious thing is to load the
 `RefreshToken` parameter. In fact, this is such a common requirement that Martin
 Odersky has proposed [implicit functions](https://www.scala-lang.org/blog/2016/12/07/implicit-function-types.html).
 
+Penggunaan paling jamak untuk `ReaderT` adalah sebagai penyedia informasi lingkungan
+jalan untuk sebuah progarm. Pada `drone-dynamic-agents`, kita membutuhkan akses
+untuk OAuth 2.0 Refresh Token milik pengguna agar dapat menghubungi Google.
+Tentu hal yang paling mudah dilakukan adalah memuat informasi tersebut dari diska
+dan membuat tiap metoda menerima sebuah parameter `RefreshToken`. Bahkan,
+hal semacam ini merupakan persyaratan umum yang diajukan oleh Martin Odersky
+pada proposal [implicit function](https://www.scala-lang.org/blog/2016/12/07/implicit-function-types.html).
+
 A better solution is for our program to have an algebra that provides the
 configuration when needed, e.g.
+
+Sebuah solusi yang lebih jitu untuk program kita adalah dengan membuat sebuah
+aljabar yang menyediakan konfigurasi saat dibutuhkan. Misalnya,
 
 {lang="text"}
 ~~~~~~~~
@@ -11920,6 +11949,10 @@ configuration when needed, e.g.
 We have reinvented `MonadReader`, the typeclass associated to `ReaderT`, where
 `.ask` is the same as our `.token`, and `S` is `RefreshToken`:
 
+Kita sudah membuat ulang `MonadReader`, kelas tipe yang berhubungan dekat dengan
+`ReaderT`, dimana `.ask` sama dengan `.token` pada potongan diatas, dan `S` sebagai
+`RefreshToken`:
+
 {lang="text"}
 ~~~~~~~~
   @typeclass trait MonadReader[F[_], S] extends Monad[F] {
@@ -11930,6 +11963,8 @@ We have reinvented `MonadReader`, the typeclass associated to `ReaderT`, where
 ~~~~~~~~
 
 with the implementation
+
+dengan implmentasi
 
 {lang="text"}
 ~~~~~~~~
@@ -11950,8 +11985,17 @@ read once. If we decide later that we want to reload configuration every time we
 need it, e.g. allowing us to change the token without restarting the
 application, we can reintroduce `ConfigReader` which has no such law.
 
+Hukum dari `MonadReader` adalah `S` tidak boleh berubah diantara tiap pemanggilan.
+Sebagai contoh, `ask >> ask === ask`. Untuk penggunaan `MonadReader` pada program
+kita, kita hanya perlu membaca konfigurasi kita satu kali saja. Bila kita ingin
+memuat ulang konfigurasi tiap kali kita membutuhkannya, misalkan agar kita dapat
+mengubah token tanpa harus menjalankan ulang aplikasi, kita dapat memperkenalkan
+`ConfigReader` yang tidak mempunyai hukum semacam ini.
+
 In our OAuth 2.0 implementation we could first move the `Monad` evidence onto the
 methods:
+
+Pada implementasi OAuth 2.0 kita, kita dapat memindah `Monad` ke metoda:
 
 {lang="text"}
 ~~~~~~~~
@@ -11960,6 +12004,9 @@ methods:
 ~~~~~~~~
 
 and then refactor the `refresh` parameter to be part of the `Monad`
+
+lalu dilanjutkan dengan me-refaktor (lol, help) parameter `refresh` agar
+menjadi bagian dari `Monad`
 
 {lang="text"}
 ~~~~~~~~
@@ -11973,7 +12020,14 @@ immediate callers when they simply want to thread through this information from
 above. With `ReaderT`, we can reserve `implicit` parameter blocks entirely for
 the use of typeclasses, reducing the mental burden of using Scala.
 
+Tiap parameter dapat dipindahkan ke `MonadReader`. Yang paling penting untuk pemanggil
+adalah saat pemanggil hanya perlu untuk menelisik infromsai ini dari hierarki
+pemanggilan paling atas. Dengan `ReaderT`, kita tidak perlu menggunakan blok
+parameter `implicit` sehingga mengurang beban mental saat menggunakan Scala.
+
 The other method in `MonadReader` is `.local`
+
+Metoda lain pada `MonadReader` adalah `.local`
 
 {lang="text"}
 ~~~~~~~~
@@ -11985,6 +12039,12 @@ the original `S`. A use case for `.local` is to generate a "stack trace" that
 makes sense to our domain. giving us nested logging! Leaning on the `Meta` data
 structure from the previous section, we define a function to checkpoint:
 
+Kita dapat mengubah `S` dan menjalankan sebuah program `fa` delam konteks lokal
+tersebut dan mengembalikan `S` asli. Contoh penggunaan `.local` adalah saat
+membuat "stack trace" yang sesuai untuk domain kita, pencatatan log berlapis!
+Sebagaimana pada struktur data `Meta` pada bab sebelumnya, kita mendefinisikan
+sebuah fungsi pada titik pemeriksaan:
+
 {lang="text"}
 ~~~~~~~~
   def traced[A](fa: F[A])(implicit F: MonadReader[F, IList[Meta]]): F[A] =
@@ -11992,6 +12052,9 @@ structure from the previous section, we define a function to checkpoint:
 ~~~~~~~~
 
 and we can use it to wrap functions that operate in this context.
+
+dan kita dapat menggunakannya untuk membungkus fungsi yang beroperasi pada
+konteks ini.
 
 {lang="text"}
 ~~~~~~~~
@@ -12001,26 +12064,52 @@ and we can use it to wrap functions that operate in this context.
 automatically passing through anything that is not explicitly traced. A compiler
 plugin or macro could do the opposite, opting everything in by default.
 
+akan lolos secara otomatis untuk semua yang tidak ditentukan sebelumnya.
+Sebuah tambahan kompilasi atau sebuah makro dapat melakukan hal yang sebaliknya,
+memaksa untuk memilih semuanya.
+
 If we access `.ask` we can see the breadcrumb trail of exactly how we were
 called, without the distraction of bytecode implementation details. A
 referentially transparent stacktrace!
 
+Bila kita mengakses `.ask`, kita dapat melihat jejak langkah bagaimana kita
+dipanggil, tanpa harus dikaburkan oleh detail implementasi bytecode.
+Hal ini merupakan contoh dari *stack trace* yang dirujuk secara transparan.
+
 A defensive programmer may wish to truncate the `IList[Meta]` at a certain
 length to avoid the equivalent of a stack overflow. Indeed, a more appropriate
 data structure is `Dequeue`.
+
+Pengembang yang memilih untuk bermain aman mungkin berharap untuk memecah `IList[Meta]`
+pada ukuran tertentu untuk menghindari sesuatu yang mirip dengan *stack overflow*.
+Dan memang pada kenyataannya, struktu data yang cocok adalah `Dequeue`.
 
 `.local` can also be used to keep track of contextual information that is
 directly relevant to the task at hand, like the number of spaces that must
 indent a line when pretty printing a human readable file format, bumping it by
 two spaces when we enter a nested structure.
 
+`.local` juga dapat digunakan untuk mencatat informasi kontekstual yang relevan
+secara langsung pada tugas saat itu, seperti jumlah spasi yang harus digunakan
+untuk melekuk sebuah baris saat mencetak format berkas yang dapat dibaca manusia
+dengan mudah. Misal, menambah dua spasi ketika kita memasuki sebuah struktur
+berlapis.
+
 A> Not four spaces. Not eight spaces. Not a TAB.
 A> 
 A> Two spaces. Exactly two spaces. This is a magic number we can hardcode, because
 A> every other number is **wrong**.
+A>
+A> Bukan empat spasi. Bukan delapan spasi. Bukan TAB.
+A>
+A> Dua spasi. Pas dua spasi. Ini satu-satunya angka yang bisa kita gunakan
+A> secara langsung karena angka lain adalah sesat!
 
 Finally, if we cannot request a `MonadReader` because our application does not
 provide one, we can always return a `ReaderT`
+
+Dan paling penting, bila kita tidak dapat meminta sebuah `MonadReader` karena
+aplikasi kita tidak menyediakannya, kita dapat mengembalikan sebuah `ReaderT`
 
 {lang="text"}
 ~~~~~~~~
@@ -12032,8 +12121,14 @@ provide one, we can always return a `ReaderT`
 If a caller receives a `ReaderT`, and they have the `token` parameter to hand,
 they can call `access.run(token)` and get back an `F[BearerToken]`.
 
+Bila sebuah pemanggil menerima `ReaderT` dan mereka mempunyai parameter `token`,
+mereka dapat memanggil `access.run(token)` dan mendapatkan sebuah `F[BearerToken]`.
+
 Admittedly, since we don't have many callers, we should just revert to a regular
 function parameter. `MonadReader` is of most use when:
+
+Terus terang, karena kita tidak mempunyai banyak pemanggil, kita hanya perlu mengubah
+sebuah parameter fungsi. `MonadReader` paling berguna saat:
 
 1.  we may wish to refactor the code later to reload config
 2.  the value is not needed by intermediate callers
@@ -12041,6 +12136,11 @@ function parameter. `MonadReader` is of most use when:
 
 Dotty can keep its implicit functions... we already have `ReaderT` and
 `MonadReader`.
+
+1.  kita ingin melakukan refaktor (lol, help) kode suatu saat untuk memuat ulang
+    konfigurasi
+2.  nilai tidak dibutuhkan oleh pemanggil perantara
+3.  atau kita ingin menentukan cakupan beberapa variabel secara lokal
 
 
 ### `WriterT`
