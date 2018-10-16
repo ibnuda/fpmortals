@@ -12103,7 +12103,7 @@ A>
 A> Bukan empat spasi. Bukan delapan spasi. Bukan TAB.
 A>
 A> Dua spasi. Pas dua spasi. Ini satu-satunya angka yang bisa kita gunakan
-A> secara langsung karena angka lain adalah sesat!
+A> secara langsung karena angka lain adalah **sesat**!
 
 Finally, if we cannot request a `MonadReader` because our application does not
 provide one, we can always return a `ReaderT`
@@ -12134,19 +12134,25 @@ sebuah parameter fungsi. `MonadReader` paling berguna saat:
 2.  the value is not needed by intermediate callers
 3.  or, we want to locally scope some variable
 
-Dotty can keep its implicit functions... we already have `ReaderT` and
-`MonadReader`.
-
 1.  kita ingin melakukan refaktor (lol, help) kode suatu saat untuk memuat ulang
     konfigurasi
 2.  nilai tidak dibutuhkan oleh pemanggil perantara
 3.  atau kita ingin menentukan cakupan beberapa variabel secara lokal
+
+Dotty can keep its implicit functions... we already have `ReaderT` and
+`MonadReader`.
+
+Dotty boleh saja tetap menggunakan fungsi implisit, karena kita mempunyai `ReaderT`
+dan `MonadReader`.
 
 
 ### `WriterT`
 
 The opposite to reading is writing. The `WriterT` monad transformer is typically
 for writing to a journal.
+
+Yang menjadi kebalikan dari pembacaan adalah penulisan nilai. Transformator monad
+`WriterT` biasanya digunakan untuk menulis ke sebuah jurnal.
 
 {lang="text"}
 ~~~~~~~~
@@ -12160,7 +12166,12 @@ for writing to a journal.
 
 The wrapped type is `F[(W, A)]` with the journal accumulated in `W`.
 
+Tipe yang dibungkus adalah `F[(W, A)]` dengan jurnal yang terakumulasi pada `W`.
+
 There is not just one associated monad, but two! `MonadTell` and `MonadListen`
+
+Tidak hanya satu monad yang berhubungan dengan `WriterT`, namun ada 2.
+`MonadTell` dan `MonadListen`
 
 {lang="text"}
 ~~~~~~~~
@@ -12182,6 +12193,10 @@ There is not just one associated monad, but two! `MonadTell` and `MonadListen`
 `MonadTell` is for writing to the journal and `MonadListen` is to recover it.
 The `WriterT` implementation is
 
+`MonadTell` digunakan untuk menulis pada jurnal sedangkan `MonadListen` digunakan
+untuk memperoleh nilai yang sudah ditulis. Implementasi dari `WriterT` adalah
+sebagai berikut
+
 {lang="text"}
 ~~~~~~~~
   implicit def monad[F[_]: Monad, W: Monoid] = new MonadListen[WriterT[F, W, ?], W] {
@@ -12199,6 +12214,11 @@ The most obvious example is to use `MonadTell` for logging, or audit reporting.
 Reusing `Meta` from our error reporting we could imagine creating a log
 structure like
 
+Contoh paling jelas adalah dengan menggunakan `MonadTell` untuk pencatatan log
+ataupun pelaporan audit. Dengan menggunakan ulang `Meta` dari pelaporan galat,
+kita dapat membayangkan untuk membuat struktur log sebagai berikut
+
+
 {lang="text"}
 ~~~~~~~~
   sealed trait Log
@@ -12209,6 +12229,9 @@ structure like
 
 and use `Dequeue[Log]` as our journal type. We could change our OAuth2
 `authenticate` method to
+
+dan menggunakan `Dequeue[Log]` sebagai tipe jurnal kita. Kita dapat mengganti
+metoda `authenticate` OAuth2 kita menjadi
 
 {lang="text"}
 ~~~~~~~~
@@ -12226,12 +12249,22 @@ and use `Dequeue[Log]` as our journal type. We could change our OAuth2
 
 We could even combine this with the `ReaderT` traces and get structured logs.
 
+Kita juga bisa menggabungkannya dengan bekas jejak dari `ReaderT` untuk mendapatkan
+log terstruktur.
+
 The caller can recover the logs with `.written` and do something with them.
+
+Pemanggil dapat mengembalikan log dengan menggunakan `.written` dan bebas melakukan
+apapun dengannya.
 
 However, there is a strong argument that logging deserves its own algebra. The
 log level is often needed at the point of creation for performance reasons and
 writing out the logs is typically managed at the application level rather than
 something each component needs to be concerned about.
+
+Namun, ada sebuah argumen kuat yang menyatakan bahwa pencatatan log berhak mendapatkan
+aljabarnya sendiri. Pembagian tingkat log seringkali dibutuhkan dengan alasan performa.
+Dan sering kali, penulisan log dilakukan pada tingkat aplikasi, bukan pada komponen.
 
 The `W` in `WriterT` has a `Monoid`, allowing us to journal any kind of
 *monoidic* calculation as a secondary value along with our primary program. For
@@ -12239,8 +12272,18 @@ example, counting the number of times we do something, building up an
 explanation of a calculation, or building up a `TradeTemplate` for a new trade
 while we price it.
 
+`W` pada `WriterT` mempunyai sebuah `Monoid` yang memperkenankan kita untuk
+mencatat semua jenis kalkulasi *monoidik* sebagai nilai sekunder bersamaan dengan
+program utama kita. Sebagai contoh, menghitung berapa kali kita melakukan sesuatu,
+membangun sebuah penjelasan dari sebuah kalkulasi, ataupun membangun sebuah
+`TradeTemplate` untuk *trade* (lol, help) baru saat kita menakar harganya.
+
 A popular specialisation of `WriterT` is when the monad is `Id`, meaning the
 underlying `run` value is just a simple tuple `(W, A)`.
+
+Spesialisasi yang populer dari `WriterT` adalah saat monad yang digunakan adalah
+`Id`, yang juga berarti bahwa nilai `run` yang melandasinya hanyalah merupakan
+sebuah tuple sederhana `(W, A)`.
 
 {lang="text"}
 ~~~~~~~~
@@ -12259,7 +12302,13 @@ underlying `run` value is just a simple tuple `(W, A)`.
 which allows us to let any value carry around a secondary monoidal calculation,
 without needing a context `F[_]`.
 
+yang memperkenankan kita agar nilai apapun dapat membawa kalkulasi monoidal kedua
+tanpa harus membutuhkan konteks `F[_]`.
+
 In a nutshell, `WriterT` / `MonadTell` is how to multi-task in FP.
+
+Singkat kata, `WriterT` / `MonadTell` merupakan cara untuk melakukan tugas-ganda
+pada pemrograman fungsional.
 
 
 ### `StateT`
