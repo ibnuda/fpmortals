@@ -12971,12 +12971,22 @@ never return, instead *continuing* to the next computation. CPS is popular in
 Javascript and Lisp as they allow non-blocking I/O via callbacks when data is
 available. A direct translation of the pattern into impure Scala looks like
 
+*Continuation Passing Style* merupakan gaya pemrograman dimana fungsi tidak
+pernah mengembalikan nilai, namun *melanjutkan* komputasi selanjutnya. CPS
+populer pada Javascript dan Lisp karena gaya ini memperkenankan operasi I/O
+asinkronus melalui panggilan balik saat data tersedia. Penulisan ulang untuk
+pola semacam ini pada Scala dengan gaya tidak murni (lol, help) kurang lebih
+seperti ini:
+
 {lang="text"}
 ~~~~~~~~
   def foo[I, A](input: I)(next: A => Unit): Unit = next(doSomeStuff(input))
 ~~~~~~~~
 
 We can make this pure by introducing an `F[_]` context
+
+Kita dapat membuatnya menjadi murni (lol, help) dengan memperkenalkan konteks
+`F[_]`
 
 {lang="text"}
 ~~~~~~~~
@@ -12985,12 +12995,18 @@ We can make this pure by introducing an `F[_]` context
 
 and refactor to return a function for the provided input
 
+dan melakukan refaktor (lol, help) agar mengembalikan sebuah fungsi yang
+menerima masukan yang disediakan
+
 {lang="text"}
 ~~~~~~~~
   def foo[F[_], I, A](input: I): (A => F[Unit]) => F[Unit]
 ~~~~~~~~
 
 `ContT` is just a container for this signature, with a `Monad` instance
+
+`ContT` sebenarnya hanya berupa kontainer untuk penanda ini, dengan sebuah instans
+`Monad`
 
 {lang="text"}
 ~~~~~~~~
@@ -13008,6 +13024,8 @@ and refactor to return a function for the provided input
 
 and convenient syntax to create a `ContT` from a monadic value:
 
+dan sintaks pembantu untuk membuat sebuah `ContT` dari sebuah nilai monadik:
+
 {lang="text"}
 ~~~~~~~~
   implicit class ContTOps[F[_]: Monad, A](self: F[A]) {
@@ -13021,11 +13039,22 @@ potentially distributed, computations: that is what `Monad` is for and we can do
 this with `.bind` or a `Kleisli` arrow. To see why continuations are useful we
 need to consider a more complex example under a rigid design constraint.
 
+Namun, penggunaan panggilan ulang sederhana untuk *continuation* (lol, help)
+tidak memberikan apapun untuk pemrograman fungsional murni (lol, help) karena
+kita sudah mengetahui bagaimana mengurutkan komputasi asinkoronus yang memungkinkan
+untuk didistribusi dengan menggunakan `Monad` beserta `bind` atau panah `Kleisli`. 
+Agar kita dapat melihat mengapa *continuation* berguna, kita harus memperhitungkan
+contoh yang lebih kompleks pada batasan desain yang lebih kaku.
+
 
 #### Control Flow
 
 Say we have modularised our application into components that can perform I/O,
 with each component owned by a different development team:
+
+Misalkan, bila kita telah memodularkan aplikasi kita menjadi beberapa komponen
+yang dapat melakukan operasi I/O, dan tiap komponen dimiliki oleh tim pengembang
+lain:
 
 {lang="text"}
 ~~~~~~~~
@@ -13045,6 +13074,11 @@ Our goal is to produce an `A0` given an `A1`. Whereas Javascript and Lisp would
 reach for continuations to solve this problem (because the I/O could block) we
 can just chain the functions
 
+Tukuan kita adalah menghasilkan sebuah `A0` bila kita memiliki sebuah `A1`.
+Bila Javascript dan Lisp akan memilih untuk menggunakan kontinyuasi untuk
+menyelesaikan masalah ini (karena operasi I/O dapat mencegah operasi lainnya
+dijalankan), kita cukup merangkai fungsi-fungsi di atas
+
 {lang="text"}
 ~~~~~~~~
   def simple(a: A1): IO[A0] = bar2(a) >>= bar3 >>= bar4 >>= bar0
@@ -13052,6 +13086,10 @@ can just chain the functions
 
 We can lift `.simple` into its continuation form by using the convenient `.cps`
 syntax and a little bit of extra boilerplate for each step:
+
+Kita dapat mengangkat `.simple` menjadi bentuk kontinyuasi dengan menggunakan
+sintaks pembantu, `.cps`, dan sedikit *boilerplate* (lol, help) untuk tiap
+langkah:
 
 {lang="text"}
 ~~~~~~~~
@@ -13065,6 +13103,9 @@ syntax and a little bit of extra boilerplate for each step:
 So what does this buy us? Firstly, it is worth noting that the control flow of
 this application is left to right
 
+Jadi, apa yang kita dapatkan dari perubahan diatas? Pertama, alur eksekusi aplikasi
+ini berjalan dari kiri ke kanan
+
 {width=60%}
 ![](images/contt-simple.png)
 
@@ -13072,20 +13113,34 @@ What if we are the authors of `foo2` and we want to post-process the `a0` that
 we receive from the right (downstream), i.e. we want to split our `foo2` into
 `foo2a` and `foo2b`
 
+Bila kita merupakan penulis untuk `foo2` dan ingin melakukan pemrosesan lebih
+lanjut terhadap `a0` yang kita terima dari bagian kanan, misal kita ingin memecah
+menjadi `foo2a` dan `foo2b`
+
 {width=75%}
 ![](images/contt-process1.png)
 
 Add the constraint that we cannot change the definition of `flow` or `bar0`.
 Perhaps it is not our code and is defined by the framework we are using.
 
+Juga jangan lupa untuk menambah batasan bahwa kita tidak dapat mengubah definisi
+dari `flow` atau `bar0`. Bisa jadi karena keduanya bukan kode kita maupun sudah
+ditentukan oleh *framework* yang kita gunakan.
+
 It is not possible to process the output of `a0` by modifying any of the
 remaining `barX` methods. However, with `ContT` we can modify `foo2` to process
 the result of the `next` continuation:
+
+Kita juga tidak bisa memproses keluaran dari `a0` dengan mengubah metoda `barX`
+lainnya. Namun, dengan `ContT` kita dapat mengubah `foo2`agar memproses hasil
+dari kontinyuasi selanjutnya (`next`):
 
 {width=45%}
 ![](images/contt-process2.png)
 
 Which can be defined with
+
+Yang bisa kita definisikan sebagai
 
 {lang="text"}
 ~~~~~~~~
@@ -13099,6 +13154,10 @@ Which can be defined with
 
 We are not limited to `.map` over the return value, we can `.bind` into another
 control flow turning the linear flow into a graph!
+
+Kita tidak hanya bisa untuk menggunakan `.map` pada nilai kembalian, namun juga
+bisa melakukan menempelkan `.bind` pada kontrol alur lain. Sehingga mengubah alur
+linier menjadi sebuah graf.
 
 {width=50%}
 ![](images/contt-elsewhere.png)
@@ -13118,6 +13177,9 @@ control flow turning the linear flow into a graph!
 
 Or we can stay within the original flow and retry everything downstream
 
+Atau kita tetap menggunakan alur eksekusi yang lama dan mengulangi
+semua eksekusi hilir
+
 {width=45%}
 ![](images/contt-retry.png)
 
@@ -13136,8 +13198,16 @@ Or we can stay within the original flow and retry everything downstream
 This is just one retry, not an infinite loop. For example, we might want
 downstream to reconfirm a potentially dangerous action.
 
+Potongan diatas hanya melakukan perulangan sekali saja, tidak tak hingga.
+Sebagai contoh, kita mungkin meminta operasi hilir untuk mengkonfirmasi ulang
+sebuah operasi yang mungkin berbahya.
+
 Finally, we can perform actions that are specific to the context of the `ContT`,
 in this case `IO` which lets us do error handling and resource cleanup:
+
+Pada akhirnya, kita dapat melakukan operasi yang khusus untuk konteks dari
+`ContT`, dalam kasus ini `IO`, yang memperkenankan kita untuk menangani galat
+dan membersihkan sumber daya komputasi:
 
 {lang="text"}
 ~~~~~~~~
