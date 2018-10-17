@@ -12904,8 +12904,14 @@ secara manual.
 `TheseT` allows errors to either abort the calculation or to be accumulated if
 there is some partial success. Hence *keep calm and carry on*.
 
+`TheseT` memperkenankan agar galat dapat diakumulasi bila ada beberapa komputasi
+berhasil diselesaikan atau untuk membatalkan komputasi secara keseluruhan.
+
 The underlying data type is `F[A \&/ B]` with `A` being the error type,
 requiring a `Semigroup` to enable the accumulation of errors.
+
+Tipe data yang melandasi `TheseT` adalah `F[A \&/ B]` dengan `A` sebagai tipe
+galat yang menyaratkan instans `Semigroup` agar bisa diakumulasi.
 
 {lang="text"}
 ~~~~~~~~
@@ -12938,11 +12944,24 @@ There is no special monad associated with `TheseT`, it is just a regular
 accumulate errors when we return a `Both` which also contains a successful part
 of the calculation.
 
+Tidak ada monad khusus yang diasosiasikan dengan `TheseT` karena `TheseT` hanya
+merupakan `Monad` biasa. Bila kita ingin membatalkan sebuah kalkulasi, kita dapat
+mengembalikan nilai `This`. Namun, bila kita ingin mengakumulasi galat, kita harus
+mengembalikan sebuah `Both` yang juga berisi bagian komputasi yang berhasil
+diselesaikan.
+
 `TheseT` can also be thought of from a different angle: `A` does not need to be
 an *error*. Similarly to `WriterT`, the `A` may be a secondary calculation that
 we are computing along with the primary calculation `B`. `TheseT` allows early
 exit when something special about `A` demands it, like when Charlie Bucket found
 the last golden ticket (`A`) he threw away his chocolate bar (`B`).
+
+`TheseT` juga bisa dilihat dari sudut pandang lain: `A` tidak harus berupa sebuah
+galat. Hal yang sama dengan `Writer`, `A` bisa saja berupa hasil kalkulasi kedua
+yang kita proses bersama dengan kalkulasi utama `B`. `TheseT` memperkenankan
+pemutusan dini bila sesuatu yang tak biasa terjadi pada `A` dan mengaharuskannya.
+Sebagaimana ketika Charlie Bucket menemukan tiket emas (`A`), dia membuang
+batang coklatnya (`B`).
 
 
 ### `ContT`
