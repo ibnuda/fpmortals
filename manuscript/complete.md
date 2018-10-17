@@ -12857,6 +12857,11 @@ will not be disappointed. The transformer `IndexedReaderWriterStateT` wraps `(R,
 S1) => F[(W, A, S2)]` with `R` having `Reader` semantics, `W` for monoidic
 writes, and the `S` parameters for indexed state updates.
 
+Bagi pembaca yang menginginkan untuk menggabungkan `ReaderT`, `WriterT`, dan
+`IndexedStateT` dapat menggunakan `IndexedReaderWriterStateT` yang mempunyai
+penanda tipe `(R, S1) => F[(W, A, S2)]` dengan `R` yang memiliki semantik `Reader`,
+`W` memiliki semantik penulisan monoidik, dan `S` untuk pembaruan keadaan terindeks.
+
 {lang="text"}
 ~~~~~~~~
   sealed abstract class IndexedReaderWriterStateT[F[_], -R, W, -S1, S2, A] {
@@ -12876,6 +12881,8 @@ writes, and the `S` parameters for indexed state updates.
 Abbreviations are provided because otherwise, let's be honest, these types are
 so long they look like they are part of a J2EE API:
 
+Singkatan disediakan karena bila tidak, tidak ada yang mau menulis kata sepanjang itu:
+
 {lang="text"}
 ~~~~~~~~
   type IRWST[F[_], -R, W, -S1, S2, A] = IndexedReaderWriterStateT[F, R, W, S1, S2, A]
@@ -12886,6 +12893,10 @@ so long they look like they are part of a J2EE API:
 
 `IRWST` is a more efficient implementation than a manually created transformer
 *stack* of `ReaderT[WriterT[IndexedStateT[F, ...], ...], ...]`.
+
+`IRWST` merupakan implementasi yang lebih efisien bila dibandingkan dengan
+membuat transformator *stack* dari `ReaderT[WriterT[IndexedStateT[F, ...], ...], ...]`
+secara manual.
 
 
 ### `TheseT`
