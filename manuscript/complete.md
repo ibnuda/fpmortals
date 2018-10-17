@@ -12637,6 +12637,10 @@ dan `act`, dan membiarkan siapapun yang ingin memanggil kita dengan menggunakan
 The code that we have studied thus far is not how Scalaz implements `StateT`.
 Instead, a type alias points to `IndexedStateT`
 
+Kode yang telah kita pelajari selama ini masih belum menunjukkan bagaimana
+Scalaz mengimplementasikan `StateT`. Dan pada kenyataannya, `StateT` hanya
+berupa alias tipe untuk `IndexedStateT`
+
 {lang="text"}
 ~~~~~~~~
   type StateT[F[_], S, A] = IndexedStateT[F, S, S, A]
@@ -12644,6 +12648,10 @@ Instead, a type alias points to `IndexedStateT`
 
 The implementation of `IndexedStateT` is much as we have studied, with an extra
 type parameter allowing the input state `S1` and output state `S2` to differ:
+
+Implementasi dari `IndexedStateT` kurang lebih sama dengan dengan apa yang telah
+kita pelajari sampai pada bab ini, dengan beberapa tambahan parameter tipe
+yang memperbolehkan agar masukan `S1` dan keluaran `S2` berbeda: 
 
 {lang="text"}
 ~~~~~~~~
@@ -12670,10 +12678,20 @@ type parameter allowing the input state `S1` and output state `S2` to differ:
 `IndexedStateT` does not have a `MonadState` when `S1 != S2`, although it has a
 `Monad`.
 
+`IndexedStateT` tidak mempunyai instans `MonadState` bila `S1 != S2`, walaupun
+mempunyai `Monad`.
+
 The following example is adapted from [Index your State](https://www.youtube.com/watch?v=JPVagd9W4Lo) by Vincent Marquez.
 Consider the scenario where we must design an algebraic interface for an `Int`
 to `String` lookup. This may have a networked implementation and the order of
 calls is essential. Our first attempt at the API may look something like:
+
+Contoh berikut diadaptasi dari presentasi [Index Your State](https://www.youtube.com/watch?v=JPVagd9W4Lo)
+oleh Vincent Marquez. Bayangkan sebuah skenario dimana kita harus mendesain antarmuka
+aljabaris untuk sebuah pencarian `String` berdasarkan sebuah `Int`. Antarmuka ini
+bisa saja mempunyai implementasi yang berhubungan dengan implementasi lainnya
+dan urutan panggilan sangat penting. Percobaan pertama kita mungkin akan terlihat
+seperti berikut:
 
 {lang="text"}
 ~~~~~~~~
@@ -12690,8 +12708,16 @@ with runtime errors if `.update` or `.commit` is called without a `.lock`. A
 more complex design may involve multiple traits and a custom DSL that nobody
 remembers how to use.
 
+dengan galat waktu-jalan bila `.update` atau `.commit` dipanggil tanpa sebuah
+`.lock`. Desain yang lebih kompleks mungkin menggunakan beberapa *trait* dan
+DSL khusus yang tidak ada yan mengingat tentangnya.
+
 Instead, we can use `IndexedStateT` to require that the caller is in the correct
 state. First we define our possible states as an ADT
+
+Atau, kita bisa menggunakan `IndexedStateT` yang memaksa pemanggil memang pada
+tempat yang tepat. Pertama, kita mendefinisikan keadaan yang mungkin sebagai
+sebuah ADT
 
 {lang="text"}
 ~~~~~~~~
@@ -12702,6 +12728,8 @@ state. First we define our possible states as an ADT
 ~~~~~~~~
 
 and then revisit our algebra
+
+dan memeriksa kembali aljabar kita
 
 {lang="text"}
 ~~~~~~~~
@@ -12720,6 +12748,9 @@ and then revisit our algebra
 
 which will give a compiletime error if we try to `.update` without a `.lock`
 
+yang akan memberikan galat waktu-kompilasi bila kita mencoba untuk melakukan
+`.update` tanpa `.lock`
+
 {lang="text"}
 ~~~~~~~~
   for {
@@ -12737,6 +12768,9 @@ which will give a compiletime error if we try to `.update` without a `.lock`
 but allowing us to construct functions that can be composed by explicitly
 including their state:
 
+namun memperkenankan kita untuk membuat fungsi yang dapat dikomposisi dengan
+mengikutsertakannya secara tersurat:
+
 {lang="text"}
 ~~~~~~~~
   def wibbleise[M[_]: Monad](C: Cache[M]): F[Ready, Ready, String] =
@@ -12751,6 +12785,9 @@ including their state:
 
 A> We introduced code duplication in our API when we defined multiple `.read`
 A> operations
+A>
+A> Kita memperkenalkan duplikasi kode pada API kita saat kita mendefinisikan
+A> beberapa operasi `.read`
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -12760,6 +12797,8 @@ A>   def readUncommitted(k: Int): F[Updated, Updated, Maybe[String]]
 A> ~~~~~~~~
 A> 
 A> Instead of
+A>
+A> Bukan
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -12768,6 +12807,9 @@ A> ~~~~~~~~
 A> 
 A> The reason we didn't do this is, *because subtyping*. This (broken) code would
 A> compile with the inferred type signature `F[Nothing, Ready, Maybe[String]]`
+A>
+A> Alasan kita tidak mempergunakan kode tersebut adalah karena *subtyping*.
+A> Kode ini bisa dikompilasi setelah menebak penanda tipe `F[Nothing, Ready, Maybe[String]]`
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -12781,10 +12823,20 @@ A>
 A> Scala has a `Nothing` type which is the subtype of all other types. Thankfully,
 A> this code can not make it to runtime, as it would be impossible to call it, but
 A> it is a bad API since users need to remember to add type ascriptions.
+A>
+A> Scala mempunyai tipe `Nothing` yang merupakan subtipe dari semua tipe lainnya.
+A> Untungnya, kode ini bisa digunakan pada waktu-jalan, karena tidak mungkin memanggilnya.
+A> Selain itu, API ini merupakan API yang buruk karena pengguna harus mengingat
+A> untuk menambah tipe tambahan.
 A> 
 A> Another approach would be to stop the compiler from inferring `Nothing`. Scalaz
 A> provides implicit evidence to assert that a type is not inferred as `Nothing`
 A> and we can use it instead:
+A>
+A> Pendekatan lain yang mungkin dilakukan adalah dengan memaksa kompiler untuk
+A> tidak menebak `Nothing`. Scalaz menyediakan bukti tersirat untuk memeriksa
+A> apakah sebuah tipe ditebak sebagai `Nothing` atau tidak. Kita akan menggunakan
+A> bukti ini:
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -12793,6 +12845,9 @@ A> ~~~~~~~~
 A> 
 A> The choice of which of the three alternative APIs to prefer is left to the
 A> personal taste of the API designer.
+A>
+A> Mana yang dipilih dari tiga alternatif API ini diserahkan kepada selera
+A> perancang API sendiri. Dan ingat, Pria Punya Selera!
 
 
 ### `IndexedReaderWriterStateT`
