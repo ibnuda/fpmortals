@@ -13222,9 +13222,20 @@ happens when we start messing with control flow. All the mechanisms we've
 discussed in this section are simple to implement directly if we can edit the
 definition of `flow`, therefore we do not typically need to use `ContT`.
 
+Bukanlah sebuah kebetulan bila diagram-diagram diatas terlihat seperti benang kusut.
+Hal semacam ini memang terjadi bila kita main-main dengan kontrol alur. Semua
+mekanisme yang telah kita diskusikan pada bagian ini memang mudah diterapkan
+bila kita dapat menyunting definisi dari `flow`, sehingga kita tidak perlu
+menggunakan `ContT`.
+
 However, if we are designing a framework, we should consider exposing the plugin
 system as `ContT` callbacks to allow our users more power over their control
 flow. Sometimes the customer just really wants the spaghetti.
+
+Namun, bila kita merancang sebuah *framework*, kita harus mempertimbangkan
+penyingkapan sistem plugin karena panggilan balik `ContT` memperkenankan
+pengguna untuk lebih leluasa mengkontrol alur program mereka. Dan memang
+kenyataanya, kadang kala pengguna memang ingin main benang kusut.
 
 For example, if the Scala compiler was written using CPS, it would allow for a
 principled approach to communication between compiler phases. A compiler plugin
@@ -13232,8 +13243,18 @@ would be able to perform some action based on the inferred type of an
 expression, computed at a later stage in the compile. Similarly, continuations
 would be a good API for an extensible build tool or text editor.
 
+Sebagai contoh, bila kompiler Scala ditulis menggunakan *CPS*, kompiler tersebut
+akan memperkenankan pendekatan yang jelas dalam komunikasi antar fase kompilasi.
+Sebuah plugin kompiler akan mampu melakukan beberapa hal berdasarkan hasil
+penebakan dari tipe sebuah ekspresi yang dikomputasi pada tahap selanjutnya
+di proses kompilasi. Hal yang sama, kontinyuasi bisa jadi *API* yang baik untuk
+penyunting teks ataupun alat bangun yang luwes.
+
 A caveat with `ContT` is that it is not stack safe, so cannot be used for
 programs that run forever.
+
+Kekurangan `ContT` adalah tidak terjaminnya keamanan *stack*. Hal ini menyebabkan
+`ContT` tidak dapat digunakan untuk program yang berjalan selamanya.
 
 
 #### Great, kid. Don't get `ContT`.
