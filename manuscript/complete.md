@@ -13567,12 +13567,24 @@ kita dapat melakukannya mengimpornya
 An `EitherT[StateT[...], ...]` has a `MonadError` but does not have a
 `MonadState`, whereas `StateT[EitherT[...], ...]` can provide both.
 
+`EitherT[StateT[...], ...]` memiliki sebuah instans `MonadError` namun tidak
+mempunyai `MonadState`. Sedangkan `StateT[EitherT[...], ..]` mampu menyediakan
+keduanya.
+
 The workaround is to study the implicit derivations on the companion of the
 transformers and to make sure that the outer most transformer provides
 everything we need.
 
+Untuk menyiasati hal tersebut, kita dapat mempelajari derivasi implisit pada
+objek pendamping dari transformator tersebut dan memastikan bahwa transformator
+paling luar menyediakan semua yang kita butuhkan.
+
 A rule of thumb is that more complex transformers go on the outside, with this
 chapter presenting transformers in increasing order of complex.
+
+Patokan yang dipakai adalah semakin kompleks sebuah transformator, semakin luar
+tempat transformator tersebut berada pada susunan. Bab ini akan menyajikan
+transformator yang semakin tinggi tingkat kompleksitasnya.
 
 
 #### Lifting Interpreters
