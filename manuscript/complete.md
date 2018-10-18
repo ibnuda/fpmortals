@@ -13592,6 +13592,9 @@ transformator yang semakin tinggi tingkat kompleksitasnya.
 Continuing the same example, let's say our `Lookup` algebra has an `IO`
 interpreter
 
+Melanjutkan contoh yang sama, misalkan aljabar `Lookup` kita memiliki interpreter
+`IO`
+
 {lang="text"}
 ~~~~~~~~
   object LookupRandom extends Lookup[IO] {
@@ -13601,6 +13604,8 @@ interpreter
 
 but we want our context to be
 
+namun kita menginginkan agar konteks kita seperti
+
 {lang="text"}
 ~~~~~~~~
   type Ctx[A] = StateT[EitherT[IO, Problem, ?], Table, A]
@@ -13609,11 +13614,20 @@ but we want our context to be
 to give us a `MonadError` and a `MonadState`. This means we need to wrap
 `LookupRandom` to operate over `Ctx`.
 
+agar dapat memberi kita sebuah `MonadError` dan `MonadState`. Hal ini berarti
+kita harus membungkus `LookupRandom` agar dapat beroperasi pada `Ctx`.
+
 A> The odds of getting the types correct on the first attempt are approximately
 A> 3,720 to one.
+A>
+A> Kemungkinan mendapatkan tipe yang benar pada percobaan pertama kurang lebih
+A> 1/3720.
 
 Firstly, we want to make use of the `.liftM` syntax on `Monad`, which uses
 `MonadTrans` to lift from our starting `F[A]` into `G[F, A]`
+
+Pertama, kita akan menggunakan sintaks `.liftM` pada `Monad` yang memberikan
+`MonadTrans` sehingga dapat mengangkat `F[A]` menjadi `G[F, A]`
 
 {lang="text"}
 ~~~~~~~~
@@ -13627,6 +13641,10 @@ It is important to realise that the type parameters to `.liftM` have two type
 holes, one of shape `_[_]` and another of shape `_`. If we create type aliases
 of this shape
 
+Yang penting untuk diperhatikan adalah parameter tipe untuk `.liftM` mempunyai
+dua celah tipe dengan bentuk `_[_]` dan `_`. Bila kita membuat alias tipe dengan
+bentuk seperti
+
 {lang="text"}
 ~~~~~~~~
   type Ctx0[F[_], A] = StateT[EitherT[F, Problem, ?], Table, A]
@@ -13636,6 +13654,9 @@ of this shape
 
 We can abstract over `MonadTrans` to lift a `Lookup[F]` to any `Lookup[G[F, ?]]`
 where `G` is a Monad Transformer:
+
+Kita dapat mengabstraksi `MonadTrans` agar mengangkat `Lookup[F]` menjadi
+`Lookup[G[F, ?]]` dimana G merupakan Transformator Monad:
 
 {lang="text"}
 ~~~~~~~~
@@ -13647,6 +13668,9 @@ where `G` is a Monad Transformer:
 
 Allowing us to wrap once for `EitherT`, and then again for `StateT`
 
+Memperkenankan kita untuk membungkus `EitherT` satu kali, dan kemudian
+membungkus `StateT`
+
 {lang="text"}
 ~~~~~~~~
   val wrap1 = Lookup.liftM[IO, Ctx1](LookupRandom)
@@ -13655,6 +13679,9 @@ Allowing us to wrap once for `EitherT`, and then again for `StateT`
 
 Another way to achieve this, in a single step, is to use `MonadIO` which enables
 lifting an `IO` into a transformer stack:
+
+Cara lain untuk mencapai ini dalam satu langkah adalah dengan menggunakan
+`MoonadIO` yang mampu mengangkat sebuah `IO` menjadi sebuah susunan transformator:
 
 {lang="text"}
 ~~~~~~~~
@@ -13665,10 +13692,17 @@ lifting an `IO` into a transformer stack:
 
 with `MonadIO` instances for all the common combinations of transformers.
 
+dengan instans `MonadIO` untuk semua kombinasi umum dari transformator.
+
 The boilerplate overhead to lift an `IO` interpreter to anything with a
 `MonadIO` instance is therefore two lines of code (for the interpreter
 definition), plus one line per element of the algebra, and a final line to call
 it:
+
+Tambahan berlebih untuk mengangkat sebuah interpreter `IO` menjadi semua monad
+apapun yang mempunyai instans `MonadIO` hanya dua baris kode untuk definisi
+interpreter, ditambah satu baris untuk tiap elemen dari aljabar, dan satu baris
+terakhir untuk memanggilnya.
 
 {lang="text"}
 ~~~~~~~~
@@ -13682,6 +13716,10 @@ it:
 A> A compiler plugin that automatically produces `.liftM`, `.liftIO`, and
 A> additional boilerplate that arises in this chapter, would be a great
 A> contribution to the ecosystem!
+A>
+A> Sebuah tambahan kompiler yang secara otomatis membuat `.liftM`, `liftIO`,
+A> dan tambahan lain yang diperkenalkan pada bab ini akan sangat membantu
+A> ekosistem Scala dan Scalaz!
 
 
 #### Performance
