@@ -13307,10 +13307,19 @@ penggeneralisasian yang berlebihan konsisten dengan kontinyuasi.
 
 This concludes our tour of the monad transformers in Scalaz.
 
+Sub-sub-bab ini menututup perbincangan kita mengenai transformator monad
+pada Scalaz.
+
 When multiple transformers are combined, we call this a *transformer stack* and
 although it is verbose, it is possible to read off the features by reading the
 transformers. For example if we construct an `F[_]` context which is a set of
 composed transformers, such as
+
+Saat beberapa transformator digabungkan, kita memanggil hasil penggabungan ini
+sebagai *susunan transformator*. Walaupun lantung, sangat memungkinkan untuk
+mengetahui fiturnya dengan membaca transformator yang ada. Sebagai contoh, bila
+kita membangun sebuah konteks `F[_]` yang merupakan set dari transformator
+yang digabungkan, seperti
 
 {lang="text"}
 ~~~~~~~~
@@ -13321,8 +13330,14 @@ we know that we are adding error handling with error type `E` (there is a
 `MonadError[Ctx, E]`) and we are managing state `A` (there is a `MonadState[Ctx,
 S]`).
 
+kita tahu bahwa kita menambah penanganan galat dengan tipe galat `E` (ada monad
+`MonadError[Ctx, E]` dan kita mengatur keadaan `A` (ada `MonadState[Ctx, S]`).
+
 But there are unfortunately practical drawbacks to using monad transformers and
 their companion `Monad` typeclasses:
+
+Namun, ada beberapa kekurangan dari sisi praktik bila menggunakan transformator
+monad dan kelas tipe `Monad` pasangannya:
 
 1.  Multiple implicit `Monad` parameters mean that the compiler cannot find the
     correct syntax to use for the context.
@@ -13340,12 +13355,29 @@ their companion `Monad` typeclasses:
     `EitherT` can cause memory allocation problems for high throughput
     applications.
 
+1.  Beberapa parameter `Monad` implisit mengakibatkan kompiler tidak dapat
+    menentukan sintaks yang tepat untuk konteks tersebut.
+2.  Secara umum, monad tidak dapat digabungkan. Hal ini berarti bahwa urutan
+    pelapisan transformator sangat penting.
+3.  Semua interpreter harus diangkat ke konteks umum. Sebagai contoh, mungkin
+    saja kita mempunyai sebuah implementasi dari aljabar yang menggunakan `IO`
+    dan kita harus membungkusnya dengan `StateT` dan `EitherT`, walau kedua
+    transformator tersebut tidak digunakan di dalam interpreter.
+4.  Akan ada beban performa yang harus dibayar untuk tiap lapis. Dan beberapa
+    transformator monad meminta biaya lebih bila dibandingkan monad lain
+    terutama `StateT`. Bahkan, `EitherT` dapat menyebabkan masalah alokasi
+    memori untuk aplikasi dengan keluaran tinggi.
+
 We need to talk about workarounds.
+
+Maka dari itu, kita harus membahas penyiasatannya
 
 
 #### No Syntax
 
 Say we have an algebra
+
+Misal kita punya sebuah aljabar
 
 {lang="text"}
 ~~~~~~~~
@@ -13356,6 +13388,8 @@ Say we have an algebra
 
 and some data types
 
+dan beberapa tipe data
+
 {lang="text"}
 ~~~~~~~~
   final case class Problem(bad: Int)
@@ -13363,6 +13397,8 @@ and some data types
 ~~~~~~~~
 
 that we want to use in our business logic
+
+yang akan kita gunakan pada logika bisnis kita
 
 {lang="text"}
 ~~~~~~~~
@@ -13380,6 +13416,8 @@ that we want to use in our business logic
 
 The first problem we encounter is that this fails to compile
 
+Masalah pertama yang kita temui adalah potongan kode ini gagal dikompilasi
+
 {lang="text"}
 ~~~~~~~~
   [error] value flatMap is not a member of type parameter F[Table]
@@ -13389,6 +13427,9 @@ The first problem we encounter is that this fails to compile
 
 There are some tactical solutions to this problem. The most obvious is to make
 all the parameters explicit
+
+Ada beberapa solusi untuk masalah ini. Yang paling jelas adalah membuat semua
+parameter menjadi eksplisit
 
 {lang="text"}
 ~~~~~~~~
@@ -13404,10 +13445,21 @@ this means that we must manually wire up the `MonadError` and `MonadState` when
 calling `foo1` and when calling out to another method that requires an
 `implicit`.
 
+dan mengharuskan hanya `Monad` yang bisa dilewatkan secara implisit melalui
+batasan konteks. Namun, hal ini berarti kita harus menyambungkan `MonadError`
+dan `MonadState` secara manual ketika memanggil `foo1` dan saat memanggil metoda
+lain yang meminta sebuah `implicit`
+
 A second solution is to leave the parameters `implicit` and use name shadowing
 to make all but one of the parameters explicit. This allows upstream to use
 implicit resolution when calling us but we still need to pass parameters
 explicitly if we call out.
+
+Solusi kedua adalah menghilangkan parameter `implicit` dan menggunakan pembayangan
+nama agar semua parameter menjadi eksplisit dengan satu pengecualian. Hal ini
+memperkenankan operasi hulu untuk menggunakan resolusi implisit saat memanggil
+aljabar ini walaupun kita harus tetap mengumpankan parameter secara eksplisit
+bila aljabar ini dipanggil.
 
 {lang="text"}
 ~~~~~~~~
@@ -13422,6 +13474,10 @@ explicitly if we call out.
 
 or we could shadow just one `Monad`, leaving the other one to provide our syntax
 and to be available for when we call out to other methods
+
+bila kita dapat melakukan pembayangan hanya satu monad saja, atau dengan kata
+lain menyerahkan sintaks pada monad lain, dan baru menghapus pembayangan tersebut
+saat aljabar ini dipanggil oleh metoda lain
 
 {lang="text"}
 ~~~~~~~~
@@ -13439,6 +13495,10 @@ A third option, with a higher up-front cost, is to create a custom `Monad`
 typeclass that holds `implicit` references to the two `Monad` classes that we
 care about
 
+Pilihan ketiga, walaupun lebih berat di awal, adalah dengan membuat kelas tipe
+`Monad` khusus yang membawa rujukan `implicit` ke dua kelas `Monad` yang kita
+pilih 
+
 {lang="text"}
 ~~~~~~~~
   trait MonadErrorState[F[_], E, S] {
@@ -13448,6 +13508,9 @@ care about
 ~~~~~~~~
 
 and a derivation of the typeclass given a `MonadError` and `MonadState`
+
+dan sebuah derivasi dari kelas tipe berdasarkan sebuah `MonadError` dan
+`MonadState`
 
 {lang="text"}
 ~~~~~~~~
@@ -13465,6 +13528,9 @@ and a derivation of the typeclass given a `MonadError` and `MonadState`
 
 Now if we want access to `S` or `E` we get them via `F.S` or `F.E`
 
+Sekarang, bila kita ingin mengakses `S` atau `E`, kita bisa mendapatkannya
+dengan `F.S` maupun `F.E`
+
 {lang="text"}
 ~~~~~~~~
   def foo3a[F[_]: Monad](L: Lookup[F])(
@@ -13480,6 +13546,10 @@ Now if we want access to `S` or `E` we get them via `F.S` or `F.E`
 
 Like the second solution, we can choose one of the `Monad` instances to be
 `implicit` within the block, achieved by importing it
+
+Sebagaimana halnya dengan solusi kedua, kita bisa memilih salah satu dari
+instans `Monad` dan menjadikannya sebagai konteks `implicit` dalam blok,
+kita dapat melakukannya mengimpornya
 
 {lang="text"}
 ~~~~~~~~
