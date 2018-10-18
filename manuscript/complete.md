@@ -13264,9 +13264,18 @@ F[C]`. The new type parameter `C` allows the return type of the entire
 computation to be different to the return type between each component. But if
 `B` is not equal to `C` then there is no `Monad`.
 
+Varian yang lebih kompleks dari `ContT` adalah `IndexedContT` yang membungkus
+`(A => F[B]) => F[C]`. Parameter tipe baru `C` memperkenankan untuk tipe
+pengembalian dari komputasi berbeda pada tiap komponennya. Namun, bila `B` tidak
+setara dengan `C` maka `Monad` tidak ada.
+
 Not missing an opportunity to generalise as much as possible, `IndexedContT` is
 actually implemented in terms of an even more general structure (note the extra
 `s` before the `T`)
+
+Tanpa melewatkan kesempatan untuk menggeneralisasi sebanyak mungkin, `IndexedContT`
+sebenarnya diimplmentasikan dalam struktur yang bahkan lebih general. Harap
+diperhatikan bahwa ada huruf `s` sebagai penanda jamak sebelum huruf `T`
 
 {lang="text"}
 ~~~~~~~~
@@ -13282,9 +13291,16 @@ where `W[_]` has a `Comonad`, and `ContT` is actually implemented as a type
 alias. Companion objects exist for these type aliases with convenient
 constructors.
 
+dimana `W[_]` mempunyai sebuah `Comonad` dan `ContT` diimplementasikan sebagai
+sebuah alias tipe. Objek pendamping tersedia untuk alias tipe ini sebagai
+konstruktor pembantu.
+
 Admittedly, five type parameters is perhaps a generalisation too far. But then
 again, over-generalisation is consistent with the sensibilities of
 continuations.
+
+Memang, lima parameter tipe agak berlebihan dalam penggeneralisasian. Namun,
+penggeneralisasian yang berlebihan konsisten dengan kontinyuasi.
 
 
 ### Transformer Stacks and Ambiguous Implicits
