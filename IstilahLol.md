@@ -15,7 +15,7 @@ Istilah istilah yang belum saya pikirkan padan katanya.
 - *`for` comprehension*.
 - *ancestor*.
 - *build-farm*.
-- *boilerplate*.
+- *boilerplate*. Mungkin "plat cetak".
 - *by-name*. Pada "call by name."
 - *by-value*. Pada "call by value."
 - *callbacks*.

@@ -13824,15 +13824,30 @@ Fundamentally, a monad describes a sequential program where every step depends
 on the previous one. We are therefore limited to modifications that only know
 about things that we've already run and the next thing we are going to run.
 
+Pada dasarnya, sebuah monad mendeskripsikan program berurutan dimana setiap
+tahap bergantung pada tahap sebelumnya. Maka dari itu, kita tidak bisa serta-merta
+mengubah sesuatu yang hanya tahu apa yang telah dijalankan dan apa yang akan
+dijalankan.
+
 A> It was trendy, circa 2015, to write FP programs in terms of `Free` so this is as
 A> much an exercise in how to understand `Free` code as it is to be able to write
 A> or use it.
 A> 
 A> There is a lot of boilerplate to create a free structure. We shall use this
 A> study of `Free` to learn how to generate the boilerplate.
+A>
+A> Sekitar tahun 2015, sangat trendi untuk menggunakan struktur *free* saat
+A> menulis program dengan bahasa pemrograman fungsional. Jadi, dengan mempelajari
+A> `Free` kita dapat memahami cara penggunaan dan penulisannya.
+A>
+A> Selain itu, ada banyak plat cetak yang digunakan untuk membuat struktur *free*.
+A> Kita akan menggunakannya untuk mempelajari bagaimana cara membuat plat cetak. 
 
 As a refresher, `Free` is the data structure representation of a `Monad` and is
 defined by three members
+
+Sebagai pengingat, `Free` merupakan representasi struktur data dari sebuah `Monad`
+dan didefinisikan dengan tiga anggota
 
 {lang="text"}
 ~~~~~~~~
@@ -13860,8 +13875,15 @@ defined by three members
 -   `Return` is `.pure`
 -   `Gosub` is `.bind`
 
+-   `Suspend` merepresentasikan sebuah program yang belum diinterpretasi
+-   `Return` sama dengan `.pure`
+-   `Gosub` sama dengan `.bind`
+
 A `Free[S, A]` can be *freely generated* for any algebra `S`. To make this
 explicit, consider our application's `Machines` algebra
+
+Sebuah `Free[S, A]` dapat digenerasi secara cuma-cuma untuk semua aljabar `S`.
+Agar lebih jelas, anggap aljabar `Machines` pada aplikasi kita
 
 {lang="text"}
 ~~~~~~~~
@@ -13879,6 +13901,11 @@ data type for each element of the algebra. Each data type has the same input
 parameters as its corresponding element, is parameterised over the return type,
 and has the same name:
 
+Kita mendefinisikan `Free` yang dibuat secara cuma cuma untuk `Machine` dengan
+membuat GADT dengan tipe data untuk tiap elemen dari aljabar. Tiap tipe data
+mempunyai parameter masukan yang sama dengan elemen yang sesuai dan diparemeterisasi
+atas nilai kembalian dengan nama yang sama:
+
 {lang="text"}
 ~~~~~~~~
   object Machines {
@@ -13894,12 +13921,23 @@ and has the same name:
 The GADT defines an Abstract Syntax Tree (AST) because each member is
 representing a computation in a program.
 
+GADT yang mendefinisikan Pohon Sintaks Abstrak (PSA) karena tiap anggota
+merepresentasikan sebuah komputasi pada sebuah program.
+
 W> The freely generated `Free` for `Machines` is `Free[Machines.Ast, ?]`, i.e. for
 W> the AST, not `Free[Machines, ?]`. It is easy to make a mistake, since the latter
 W> will compile, but is meaningless.
+W>
+W> `Free` yang digenerasi secara cuma-cuma untuk `Machine` mempunyai bentuk
+W> `Free[Machines.Ast, ?], atau untuk PSA, bukan `Free[Machines, ?]`. Sangat mudah
+W> terkecoh karena yang akhir juga dapat dikompilasi, namun tidak ada gunanya.
 
 We then define `.liftF`, an implementation of `Machines`, with `Free[Ast, ?]` as
 the context. Every method simply delegates to `Free.liftT` to create a `Suspend`
+
+Lalu kita akan mendefinisikan `.liftF`, sebuah implementasi dari `Machines` dengan
+`Free[AST, ?]` sebagai konteksnya. Setiap metoda cukup mendelegasi ke `Free.liftT`
+untuk membuat sebuah `Suspend`
 
 {lang="text"}
 ~~~~~~~~
@@ -13919,6 +13957,12 @@ providing an *interpreter* (a natural transformation `Ast ~> M`) to the
 `.foldMap` method. For example, if we could provide an interpreter that maps to
 `IO` we can construct an `IO[Unit]` program via the free AST
 
+Saat kita membangun program kita yang terparametrisasi atas sebuah `Free`, kita
+menjalankannya dengan menyediakan sebuah *interpreter* (transformasi natural
+`Ast ~> M`) ke metoda `.foldMap`. Sebagai contoh, bila kita dapat menyediakan
+sebuah interpreter yang memetakan ke `IO`, kita dapat membangun sebuah program
+`IO[Unit]` dengan menggunakan PSA *free*.
+
 {lang="text"}
 ~~~~~~~~
   def program[F[_]: Monad](M: Machines[F]): F[Unit] = ...
@@ -13934,6 +13978,11 @@ easy to write. This might be useful if the rest of the application is using
 `Free` as the context and we already have an `IO` implementation that we want to
 use:
 
+Agar lebih lengkap, sebuah interpreter yang mendelegasikan kepada sebuah implementasi
+langsung biasanya mudah dalam penulisan. Hal ini mungkin berguna bila bagian aplikasi
+yang lain menggunakan `Free` sebagai konteks dan kita juga sudah mempunyai
+implementasi `IO` yang ingin kita gunakan:
+
 {lang="text"}
 ~~~~~~~~
   def interpreter[F[_]](f: Machines[F]): Ast ~> F = λ[Ast ~> F] {
@@ -13947,6 +13996,9 @@ use:
 
 But our business logic needs more than just `Machines`, we also need access to
 the `Drone` algebra, recall defined as
+
+Namun, logika bisnis kita butuh lebih dari `Machines`, kita juga butuh akses ke
+aljabar `Drone` seperti ini
 
 {lang="text"}
 ~~~~~~~~
@@ -13965,6 +14017,10 @@ the `Drone` algebra, recall defined as
 What we want is for our AST to be a combination of the `Machines` and `Drone`
 ASTs. We studied `Coproduct` in Chapter 6, a higher kinded disjunction:
 
+Yang kita inginkan adalah PSA kita menjadi sebuah kombinasi dari PSA `Machines`
+dan `Drone`. Kita telah mempelajari `Coproduct` pada bab 6 yang merupakan
+sebuah disjungsi jenis tinggi (lol, help):
+
 {lang="text"}
 ~~~~~~~~
   final case class Coproduct[F[_], G[_], A](run: F[A] \/ G[A])
@@ -13972,10 +14028,18 @@ ASTs. We studied `Coproduct` in Chapter 6, a higher kinded disjunction:
 
 We can use the context `Free[Coproduct[Machines.Ast, Drone.Ast, ?], ?]`.
 
+Kita dapat menggunakan konteks `Free[Coproduct[Machines.Ast, Drone.Ast, ?], ?]`.
+
 We could manually create the coproduct but we would be swimming in boilerplate,
 and we'd have to do it all again if we wanted to add a third algebra.
 
+Kita juga bisa saja membuat ko-produk secara manual, namun kita akan mempunyai
+plat cetak yang terlalu banyak. Selain itu, kita harus melakukannya berulang kali
+bila kita ingin menambah aljabar ketiga.
+
 The `scalaz.Inject` typeclass helps:
+
+Kelas tipe `scalaz.Inject` membantu:
 
 {lang="text"}
 ~~~~~~~~
@@ -13993,6 +14057,10 @@ The `scalaz.Inject` typeclass helps:
 The `implicit` derivations generate `Inject` instances when we need them,
 letting us rewrite our `liftF` to work for any combination of ASTs:
 
+Derivasi `implicit` menghasilkan instans `Inject` saat kita membutuhkannya.
+Hal ini memperkenankan kita untuk menulis ulang `liftF` agar dapat beroperasi
+pada semua kombinasi dari PSA:
+
 {lang="text"}
 ~~~~~~~~
   def liftF[F[_]](implicit I: Ast :<: F) = new Machines[Free[F, ?]] {
@@ -14007,12 +14075,24 @@ letting us rewrite our `liftF` to work for any combination of ASTs:
 It is nice that `F :<: G` reads as if our `Ast` is a member of the complete `F`
 instruction set: this syntax is intentional.
 
+Sungguh apik bila `F :<: G` dibaca sebagaimana bila `Ast` sebagai salah satu anggota
+dari set instruksi lengkap dari `F`.
+
 A> A compiler plugin that automatically produces the `scalaz.Free` boilerplate
 A> would be a great contribution to the ecosystem! Not only is it painful to write
 A> the boilerplate, but there is the potential for a typo to ruin our day: if two
 A> members of the algebra have the same type signature, we might not notice.
+A>
+A> Sebuah plugin kompiler yang secara otomatis memproduksi plat cetak `scalaz.Free`
+A> akan sangat membantu ekosistem Scalaz! Tidak hanya menyusahkan bila kita harus
+A> menulis plat cetak secara manual, namun juga ada kemungkinan sebuah salah ketik
+A> merusak hari kita: bila ada dua anggota dari aljabar yang mempunyai dua penanda
+A> tipe yang sama, bisa saja kita tidak memperhatikannya.
 
 Putting it all together, lets say we have a program that we wrote abstracting over `Monad`
+
+Dan menggabungkan semuanya, misalkan kita mempunyai sebuah program yang kita tulis
+untuk mengabstraksi `Monad`
 
 {lang="text"}
 ~~~~~~~~
@@ -14021,6 +14101,9 @@ Putting it all together, lets say we have a program that we wrote abstracting ov
 
 and we have some existing implementations of `Machines` and `Drone`, we can
 create interpreters from them:
+
+dan kita mempunyai implementasi dari `Machines` dan `Drone` yang sudah ada,
+kita dapat membuat interpreter dari implementasi tersebut:
 
 {lang="text"}
 ~~~~~~~~
@@ -14033,6 +14116,9 @@ create interpreters from them:
 
 and combine them into the larger instruction set using a convenience method from
 the `NaturalTransformation` companion
+
+dan menggabungkannya menjadi sebuah set instruksi dengan menggunakan metoda bantuan
+dari pasangan `NaturalTransformation`
 
 {lang="text"}
 ~~~~~~~~
@@ -14048,6 +14134,8 @@ the `NaturalTransformation` companion
 
 Then use it to produce an `IO`
 
+Lalu menggunakannya untuk menghasilkan `IO`
+
 {lang="text"}
 ~~~~~~~~
   val app: IO[Unit] = program[Free[Ast, ?]](Machines.liftF, Drone.liftF)
@@ -14057,6 +14145,10 @@ Then use it to produce an `IO`
 But we've gone in circles! We could have used `IO` as the context for our
 program in the first place and avoided `Free`. So why did we put ourselves
 through all this pain? Here are some examples of where `Free` might be useful.
+
+Nah, kita jadi berputar-putar! Kita bisa saja menggunakan `IO` sebagai konteks
+program kita dan menghindari `Free`. Lalu, kenapa kita harus seperti ini?
+Berikut merupakan beberapa contoh dimana `Free` bisa jadi berguna.
 
 
 #### Testing: Mocks and Stubs
