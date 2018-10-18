@@ -13767,17 +13767,34 @@ kita membahas mengenai dua struktur data yang sudah kita lihat sebelumnya:
 Our industry craves safe high-level languages, trading developer efficiency and
 reliability for reduced runtime performance.
 
+Industri perangkat lunak sangat menginginkan bahasa pemrograman tingkat tinggi
+yang memberikan jaminan keamanan sedangkan pengembang *trading* menginginkan
+efisiensi dan keandalan dengan performa waktu-jalan yang tinggi.
+
 The Just In Time (JIT) compiler on the JVM performs so well that simple
 functions can have comparable performance to their C or C++ equivalents,
 ignoring the cost of garbage collection. However, the JIT only performs *low
 level optimisations*: branch prediction, inlining methods, unrolling loops, and
 so on.
 
+Kompiler tepat waktu (KTM) pada JVM bekerja dengan sangat baik sampai pada tahap
+fungsi-fungsi sederhana dapat mempunyai performa yang setara dengan ekuivalen
+yang ditulis pada bahasa pemrograman C maupun C++, bila mengabaikan beban pada
+pengumpulan sampah. Namun, KTM hanya bekerja pada *optimisasi tingkat rendah*
+seperti: prediksi cabang operasi, *inline* fungsi (lol, help!), membuka ikalan,
+dan sejenisnya. 
+
 The JIT does not perform optimisations of our business logic, for example
 batching network calls or parallelising independent tasks. The developer is
 responsible for writing the business logic and optimisations at the same time,
 reducing readability and making it harder to maintain. It would be good if
 optimisation was a tangential concern.
+
+KTM tidak melakukan optimasi pada logika bisnis kita, sebagai contoh, pengelompokan
+panggilan jaringan atau paralelisasi tugas tugas independen. Pengembang bertanggung
+jawab untuk menulis logika bisnis dan optimasi pada saat yang bersamaan sehingga
+menyebabkan penurunan keterbacaan dan mempersulit pemeliharaan. Akan sangat bagus
+bila optimasi menjadi perhatian tangensial.
 
 If instead, we have a data structure that describes our business logic in terms
 of high level concepts, not machine instructions, we can perform *high level
@@ -13786,8 +13803,19 @@ structures and can be generated for free for the members of the algebraic
 interfaces of our program. For example, a *Free Applicative* can be generated
 that allows us to batch or de-duplicate expensive network I/O.
 
+Bila kita memiliki struktur data yang mendeskripsikan logika bisnis kita pada
+konsep tingkat tinggi, bukan instruksi mesin, kita dapat melakukan *optimasi
+tingkat tinggi*. Struktur data semacam ini biasanya disebut struktur data *Free*
+dan dapat dibuat tanpa membayar apapun untuk anggota dari antarmuka aljabarik
+dari program kita. Sebagai contoh, sebuah *Free Applicative* dapat dibuat
+sehingga kita dapat mengelompokkan atau penghapusan duplikasi atas I/O jaringan
+intensif.
+
 In this section we will learn how to create free structures, and how they can be
 used.
+
+Pada bagian ini, kita akan mempelajari cara untuk membuat struktur data *free*
+(gratis) dan cara penggunaannya.
 
 
 ### `Free` (`Monad`)
