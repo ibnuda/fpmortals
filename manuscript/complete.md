@@ -13730,8 +13730,20 @@ handful of objects, but this can impact high throughput applications where every
 object allocation matters. Other transformers, such as `StateT`, effectively add
 a trampoline, and `ContT` keeps the entire call-chain retained in memory.
 
+Masalah paling besar pada Transformator Monad adalah tambahan beban sehingga
+performa menurun. Walaupun `EitherT` memiliki tambahan beban yang kecil, tiap
+kali pemanggilan `.flatMap` akan membuat banyak objek. Dampak dari hal seperti
+ini akan terlihat pada aplikasi yang mempunyai keluaran besar dimana tiap alokasi
+objek turut andil dalam gambaran besar. Transformator lain, seperti `StateT`,
+akan menambah trampolin yang juga tak kecil bebannya. Terlebih lagi untuk
+transformator `ContT` yang menahan semua rantai panggilan pada memori.
+
 A> Some applications do not care about allocations if they are bounded by network
 A> or I/O. Always measure.
+A>
+A> Beberapa aplikasi tidak begitu mempedulikan mengenai alokasi memori bila
+A> aplikasi tersebut bergantung pada jaringan ataupun I/O. Sangat disarankan
+A> untuk selalu mengukur performa aplikasi secara mendetail.
 
 If performance becomes a problem, the solution is to not use Monad Transformers.
 At least not the transformer data structures. A big advantage of the `Monad`
@@ -13739,6 +13751,15 @@ typeclasses, like `MonadState` is that we can create an optimised `F[_]` for our
 application that provides the typeclasses naturally. We will learn how to create
 an optimal `F[_]` over the next two chapters, when we deep dive into two
 structures which we have already seen: `Free` and `IO`.
+
+Bila performa menjadi masalah, maka solusi satu-satunya adalah dengan tidak
+menggunakan Transformator Monad. Atau setidaknya struktur data transformator.
+Keuntungan paling besar dari kelas tipe `Monad`, seperti `MonadState` adalah
+kita dapat membuat konteks `F[_]` yang teroptimasi untuk aplikasi kita yang
+menyediakan kelas tipe secara alami. Kita akan mempelajari bagaimana cara untuk
+membuat sebuah konteks `F[_]` yang optimal pada dua bab selanjutnya pada saat
+kita membahas mengenai dua struktur data yang sudah kita lihat sebelumnya:
+`Free` dan `IO`.
 
 
 ## A Free Lunch
