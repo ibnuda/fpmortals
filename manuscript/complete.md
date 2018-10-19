@@ -14964,14 +14964,27 @@ Persyaratan semacam ini akan kita bahas selanjutnya
 There are two effectful operations that we almost always want to run in
 parallel:
 
+Ada dua operasi dengan efek yang hampir selalu kita jalankan secara paralel:
+
 1.  `.map` over a collection of effects, returning a single effect. This is
     achieved by `.traverse`, which delegates to the effect's `.apply2`.
 2.  running a fixed number of effects with the *scream operator* `|@|`, and
     combining their output, again delegating to `.apply2`.
 
+1.  `.map` atas sebuah koleksi dengan efek, mengembalikan sebuah efek. Hal ini
+    dapat dicapai dengan `.traverse` yang mendelegasikannya ke `.apply2` milik
+    sistem efek tadi.
+2.  menjalankan beberapa efek dengan jumlah tetap dengan *operator jerit* `|@|`,
+    dan menggabungkan input efek-efek tadi, dan pada akhirnya mendelegasikan
+    ke `.apply2`.
+
 However, in practice, neither of these operations execute in parallel by
 default. The reason is that if our `F[_]` is implemented by a `Monad`, then the
 derived combinator laws for `.apply2` must be satisfied, which say
+
+Namun, praktik di lapangan, kedua operasi tersebut tidak dijalankan secara paralel
+secara default. Alasannya adalah, bila `F[_]` diimplementasikan dengan sebuah
+`Monad, maka hukum kombinator turunan untuk `.apply2` harus dipenuhi, yang berisi
 
 {lang="text"}
 ~~~~~~~~
@@ -14986,10 +14999,17 @@ derived combinator laws for `.apply2` must be satisfied, which say
 In other words, **`Monad` is explicitly forbidden from running effects in
 parallel.**
 
+Dengan kata lain, **`Monad` dilarang menjalankan efek secara paralel.**
+
 However, if we have an `F[_]` that is **not** monadic, then it may implement
 `.apply2` in parallel. We can use the `@@` (tag) mechanism to create an instance
 of `Applicative` for `F[_] @@ Parallel`, which is conveniently assigned to the
 type alias `Applicative.Par`
+
+Namun, bila kita mempunyai sebuah `F[_]` yang tidak bersifat monadik, maka konteks
+ini bisa saja mengimplementasikan `.apply2` secara paralel. Kita bisa menggunakan
+`@@` mekanisme untuk membuat sebuah instans dari `Applicative` untuk `F[_] @@ Paralel`,
+yang mempermudah menentukan instans ke alias tipe `Applicative.Par`
 
 {lang="text"}
 ~~~~~~~~
@@ -15001,12 +15021,16 @@ type alias `Applicative.Par`
 
 Monadic programs can then request an implicit `Par` in addition to their `Monad`
 
+Program monadik dapat meminta `Par` implisit sebagai tambahan pada `Monad` mereka
+
 {lang="text"}
 ~~~~~~~~
   def foo[F[_]: Monad: Applicative.Par]: F[Unit] = ...
 ~~~~~~~~
 
 Scalaz's `Traverse` syntax supports parallelism:
+
+Sintaks `Traverse` dari Scalaz mendukung paralelisme:
 
 {lang="text"}
 ~~~~~~~~
@@ -15021,6 +15045,9 @@ Scalaz's `Traverse` syntax supports parallelism:
 If the implicit `Applicative.Par[IO]` is in scope, we can choose between
 sequential and parallel traversal:
 
+Bila `Applicative.Par[IO]` ada pada cakupan secara implisit, kita dapat memilih
+pelangkahan secara berurutan maupun paralel:
+
 {lang="text"}
 ~~~~~~~~
   val input: IList[String] = ...
@@ -15031,6 +15058,9 @@ sequential and parallel traversal:
 ~~~~~~~~
 
 Similarly, we can call `.parApply` or `.parTupled` after using scream operators
+
+Tidak berbeda jauh, kita dapat memanggil `.parApply` atau `.parTupled` setelah
+menggunakan operator jerit
 
 {lang="text"}
 ~~~~~~~~
@@ -15045,6 +15075,8 @@ Similarly, we can call `.parApply` or `.parTupled` after using scream operators
 
 It is worth nothing that when we have `Applicative` programs, such as
 
+Harap diperhatikan bahwa saat kita mempunyai program `Applicative`, seperti
+
 {lang="text"}
 ~~~~~~~~
   def foo[F[_]: Applicative]: F[Unit] = ...
@@ -15055,6 +15087,12 @@ the default on `.traverse` and `|@|`. Converting between the raw and `@@
 Parallel` versions of `F[_]` must be handled manually in the glue code, which
 can be painful. Therefore it is often easier to simply request both forms of
 `Applicative`
+
+kita dapat menggunakan `F[A] @@ Parallel` sebagai konteks dari program kita dan
+kita mendapatkan paralelisme sebagai perilaku bawaan untuk `.traverse` dan `|@|`.
+Konversi antara operasi mentah dan `@@ Paralel` dari `F[_]` harus ditangani secara
+manual pada kode bantuan yang bisa melelahkan. Sehingga, akan lebih mudah bila
+langsung meminta bentuk `Applicative`
 
 {lang="text"}
 ~~~~~~~~
