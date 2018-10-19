@@ -14240,17 +14240,34 @@ It is typical for server applications to be monitored by runtime agents that
 manipulate bytecode to insert profilers and extract various kinds of usage or
 performance information.
 
+Sudah pada umumnya ketika aplikasi peladen diawasi dengan agen waktu-jalan
+yang memanipulasi *bytecode* untuk menyisipkan profiler dan mengekstrak
+informasi penggunaan dan performa.
+
 If our application's context is `Free`, we do not need to resort to bytecode
 manipulation, we can instead implement a side-effecting monitor as an
 interpreter that we have complete control over.
+
+Bila konteks dari aplikasi kita adalah `Free`, kita tidak perlu menggunakan
+manipulasi *bytecode*. Kita dapat mengimplementasikan monitor dengan efek samping
+sebagai sebuah interpreter yang bisa kita atur sepenuhnya.
 
 A> Runtime introspection is one of the few cases that can justify use of a
 A> side-effect. If the monitoring is not visible to the program itself, referential
 A> transparency will still hold. This is also the argument used by teams that use
 A> side-effecting debug logging, and our argument for allowing mutation in the
 A> implementation of `Memo`.
+A>
+A> Introspeksi waktu-jalan merupakan salah satu dari sedikit kasus yang dapat
+A> membenarkan penggunaan efek samping. Bila pengawasan tidak terlihat dari
+A> program itu sendiri, transparansi rujukan masih tetap berlaku. Argumen ini
+A> digunakan oleh tim yang menggunakan pencatatan log debug dengan efek samping,
+A> dan juga kita gunakan sebagai argumen yang memperkenankan mutasi pada
+A> implementasi `Memo`.
 
 For example, consider using this `Ast ~> Ast` "agent"
+
+Sebagai contoh, misal penggunaan "agen" `Ast ~> Ast`
 
 {lang="text"}
 ~~~~~~~~
@@ -14269,7 +14286,15 @@ which records method invocations: we would use a vendor-specific routine in real
 code. We could also watch for specific messages of interest and log them as a
 debugging aid.
 
+yang mencatat metoda penyelawatan: kita bisa menggunakan rutin dari vendor khusus
+pada kode yang nyata digunakan di produksi atau kita bisa melihat pesan khusus
+yang kita inginkan dan mencatatnya sebagai alat bantu debug.
+
+
 We can attach `Monitor` to our production `Free` application with
+
+Kita dapat menempelkan `Monitor` ke aplikasi `Free` kita yang sudah ada di
+tahap produksi dengan
 
 {lang="text"}
 ~~~~~~~~
@@ -14277,6 +14302,9 @@ We can attach `Monitor` to our production `Free` application with
 ~~~~~~~~
 
 or combine the natural transformations and run with a single
+
+atau menggabungkannya dengan transformasi natural dan menjalankannya dengan
+sebaris
 
 {lang="text"}
 ~~~~~~~~
