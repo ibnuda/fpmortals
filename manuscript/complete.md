@@ -14318,19 +14318,39 @@ As engineers, we are used to requests for bizarre workarounds to be added to the
 core logic of the application. We might want to codify such corner cases as
 *exceptions to the rule* and handle them tangentially to our core logic.
 
+Sebagai tenaga ahli, kita terbiasa dengan permintaan penyiasatan aneh yang akan
+ditambahkan pada logika utama dari aplikasi. Mungkin juga kita ingin mengkodifikasi
+kasus di luar parameter normal sebagai sebuah *pengecualian* dan menanganinya
+sesuai dengan logika inti kita.
+
 For example, suppose we get a memo from accounting telling us
+
+Sebagai contoh, misalkan kita mendapat memo dari bagian keuangan yang berisi
 
 > *URGENT: Bob is using node `#c0ffee` to run the year end. DO NOT STOP THIS
 > MACHINE!1!*
+>
+> *PENTING: Bob menggunakan simpul `#c0ffee` untuk menjalankan laporan keuangan
+> akhir tahun. JANGAN MATIKEUN MESINNYA BEGO!!SEBELAS111
 
 There is no possibility to discuss why Bob shouldn't be using our machines for
 his super-important accounts, so we have to hack our business logic and put out
 a release to production as soon as possible.
 
+Sangat tidak mungkin untuk mendiskusikan mengapa Bob tidak boleh menggunakan
+mesin kita untuk keperluan akuntansinya yang sangat penting. Jadi, kita harus
+membedah logika bisnis kita dan menelurkan sebuah rilis ke tahap produksi
+secepat mungkin.
+
 Our monkey patch can map into a `Free` structure, allowing us to return a
 pre-canned result (`Free.pure`) instead of scheduling the instruction. We
 special case the instruction in a custom natural transformation with its return
 value:
+
+Tambalan kita dapat dipetakan menjadi sebuah struktur `Free` yang memperkenankan
+kita untuk mengembalikan sebuah hasil yang sudah jadi (`Free.pure`), bukan
+instruksi terjadwal. Kita mengkhususkan instruksi tersebut pada sebuah transformasi
+natural dengan nilai kembalian:
 
 {lang="text"}
 ~~~~~~~~
@@ -14343,8 +14363,15 @@ value:
 eyeball that it works, push it to prod, and set an alarm for next week to remind
 us to remove it, and revoke Bob's access to our servers.
 
+pastikan sepasti-pastinya bahwa kode di atas memang benar berjalan sesuai keinginan,
+lalu gunakan di lingkungan produksi, atur alarm agar minggu depan untuk mengingatkan
+agar kita hapus kode ini, dan hapus akses Bob ke server kita.
+
 Our unit test could use `State` as the target context, so we can keep track of
 all the nodes we stopped:
+
+Tes unit kita dapat menggunakan `State` sebagai konteks target, sehingga kita
+dapat melacak semua simpul yang kita hentikan:
 
 {lang="text"}
 ~~~~~~~~
@@ -14364,6 +14391,8 @@ all the nodes we stopped:
 
 along with a test that "normal" nodes are not affected.
 
+juga dengan tes untuk simpul "normal" yang tidak kita hentikan.
+
 An advantage of using `Free` to avoid stopping the `#c0ffee` nodes is that we
 can be sure to catch all the usages instead of having to go through the business
 logic and look for all usages of `.stop`. If our application context is just an
@@ -14372,6 +14401,13 @@ implementation but an advantage of using `Free` is that we don't need to touch
 the existing code and can instead isolate and test this (temporary) behaviour,
 without being tied to the `IO` implementations.
 
+Keuntungan menggunakan `Free` untuk menghindari penghentian simpul `#c0ffee`
+adalah kita dapat memastikan bahwa semua penggunaan tercatat, bukan harus mencari
+logika bisnis dan mencari penggunaan `.stop` satu per satu. Bila konteks aplikasi
+kita hanya berupa `IO` kita dapat mengimplementasikan logika ini pada implementasi
+`Machines,IO]`. Namun, keuntungan menggunakan `Free` adalah kita tidak harus
+menyentuk kode yang sudah ada, namun kita hanya perlu mengisolasi dan mengetes
+perilaku (sementara) ini tanpa harus terikat pada implementasi `IO`.
 
 ### `FreeAp` (`Applicative`)
 
