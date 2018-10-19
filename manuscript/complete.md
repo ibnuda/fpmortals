@@ -14158,8 +14158,18 @@ boilerplate, given how much code we have written. However, there is a tipping
 point where the `Ast` pays for itself when we have many tests that require stub
 implementations.
 
+Mungkin terlihat tidak masuk akal bila kita mengusulkan untuk menggunakan `Free`
+agar kita dapat mengurangi plat cetak namun, di sisi lain, kita telah menulis
+kode yang sangat banyak yang berkaitan dengan `Free` sendiri. Akan tetapi,
+ada titik kritis dimana `Ast` melunasi semua biaya yang telah kita tulis
+saat kita mempunyai banyak tes yang membutuhkan banyak potongan implementasi
+kode.
+
 If the `.Ast` and `.liftF` is defined for an algebra, we can create *partial
 interpreters*
+
+Bila `.Ast` dan `.liftF` didefinisikan untuk sebuah aljabar, kita dapat membuat
+*interpreter parsial*
 
 {lang="text"}
 ~~~~~~~~
@@ -14173,6 +14183,8 @@ interpreters*
 
 which can be used to test our `program`
 
+yang dapat digunakan untuk mengetes program kita
+
 {lang="text"}
 ~~~~~~~~
   program[Free[Ast, ?]](Machines.liftF, Drone.liftF)
@@ -14184,15 +14196,30 @@ By using partial functions, and not total functions, we are exposing ourselves
 to runtime errors. Many teams are happy to accept this risk in their unit tests
 since the test would fail if there is a programmer error.
 
+Dengan menggunakan fungsi parsial, dan bukan fungsi total, kita memaparkan diri
+kita pada galat waktu-jalan. Banyak tim yang dengan ringan hati menerima risiko
+ini pada tes unit mereka karena tes akan gagal bila pemrogram melakukan kesalahan.
+
 Arguably we could also achieve the same thing with implementations of our
 algebras that implement every method with `???`, overriding what we need on a
 case by case basis.
+
+Walaupun kita juga bisa mencapai hal yang sama dengan menulis implementasi dari
+aljabar kita yang mengimplementasikan setiap metoda dengan `???` dan mengesampingkan
+apa yang kita butuhkan sesuai dengan per kasus.
 
 A> The library [smock](https://github.com/djspiewak/smock) is more powerful, but for the purposes of this short example
 A> we can define `stub` ourselves using a type inference trick that can be found
 A> all over the Scalaz source code. The reason for `Stub` being a separate class is
 A> so that we only need to provide the `A` type parameter, with `F` and `G`
 A> inferred from the left hand side of the expression:
+A>
+A> Pustaka [smock](https://github.com/djspiewak/smock) lebih luwes untuk keperluan
+A> testing. Namun, demi contoh pendek ini, kita akan mendefinisikan `stub` sendiri
+A> menggunakan trik inferensi tipe yang dapat ditemukan di banyak tempat pada
+A> kode sumber Scalaz. Penyebab `Stub` didefinisikan pada kelas tersendiri adalah
+A> agar kita hanya perlu menyediakan parameter tipe `A` dengan `F` dan `G` ditebak
+A> dari penjabaran sisi kiri:
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
