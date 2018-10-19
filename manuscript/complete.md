@@ -14483,9 +14483,17 @@ berarti kita harus membuat plat cetak lagi...
 
 We opened this chapter with grand claims about performance. Time to deliver.
 
+Kita akan membuka bab ini dengan klaim luar biasa mengenai performa. Saatnya
+membuktikannya.
+
 [Philip Stark](https://gist.github.com/hellerbarde/2843375#file-latency_humanized-markdown)'s Humanised version of [Peter Norvig's Latency Numbers](http://norvig.com/21-days.html#answers) serve as
 motivation for why we should focus on reducing network calls to optimise an
 application:
+
+Versi [manusiawi](https://gist.github.com/hellerbarde/2843375#file-latency_humanized-markdown)
+dari [angka latensi](https://norvig.com/21-days.html#answers) dari Peter Norvig
+yang ditulis oleh Philip Stark akan menjadi motivasi mengapa kita harus fokus
+untuk mengurangi panggilan melalui jaringan untuk mengoptimasi sebuah aplikasi:
 
 | Computer                          | Human Timescale | Human Analogy                  |
 |--------------------------------- |--------------- |------------------------------ |
@@ -14504,15 +14512,43 @@ application:
 | Read 1MB sequentially from disk   | 7.8 months      | Fully paid maternity in Norway |
 | Send packet CA->Netherlands->CA   | 4.8 years       | Government's term              |
 
+| Komputer                          | Skala Waktu Manusia | Analogi Manusia                |
+|--------------------------------- |--------------- |------------------------------ |
+| Perujukan tembolok L1             | 0.5 detik           | Satu detak jantung             |
+| Salah prediksi cabang             | 5 detik             | Satu kali menguap              |
+| Perujukan tembolok L2             | 7 detik             | Satu kali menguap panjang      |
+| Buka / tutup mutex                | 25 detik            | Buat satu cangkir teh          |
+| Perujukan memori utama            | 100 detik           | Gosok gigi                     |
+| Kompresi 1Kb dengan Zippy         | 50 menit            | Satu putaran CI kompiler scala |
+| Kirim 2Kb melalu jaringan 1Gbps   | 5.5 jam             | Kereta London ke Edinburg      |
+| Baca acak SSD                     | 1.7 hari            | Akhir pekan                    |
+| Baca 1MB berurutan dari memori    | 2.9 hari            | Akhir pekan panjang            |
+| Mengelilingi pusat data yang sama | 5.8 hari            | Liburan panjang AS             |
+| Baca 1MB berurutan dari SSD       | 11.6 hari           | Liburan pendek UE              |
+| Pencarian di diska                | 16.5 minggu         | Satu semester kampus           |
+| Baca 1MB berurutan dari diska     | 7.8 bulan           | Cuti melahirkan di Norwegia    |
+| Kirim paket CA->Belanda->CA       | 4.8 tahun           | Satu periode pemerintahan      |
+
 Although `Free` and `FreeAp` incur a memory allocation overhead, the equivalent
 of 100 seconds in the humanised chart, every time we can turn two sequential
 network calls into one batch call, we save nearly 5 years.
+
+Walaupun `Free` dan `FreeAp` memberikan beban memori tambahan, ekuivalen dari
+100 detik untuk manusia, tiap kali kita memanggil dua panggilan berurutan di
+sebuah kelompok panggilan, kita bisa menghemat 5 tahun.
 
 When we are in a `Applicative` context, we can safely optimise our application
 without breaking any of the expectations of the original program, and without
 cluttering the business logic.
 
+Saat kita berada pada konteks `Applicative`, kita dapat mengoptimasi aplikasi
+kita dengan aman, tanpa harus menggagalkan ekspektasi apapun dari program asli.
+Terlebih lagi, bisa menghindari pengaburan logika bisnis.
+
 Luckily, our main business logic only requires an `Applicative`, recall
+
+Untungnya, logika bisnis utamakita hanya meminta sebuah `Applicative`. Harap
+diingat
 
 {lang="text"}
 ~~~~~~~~
@@ -14524,6 +14560,8 @@ Luckily, our main business logic only requires an `Applicative`, recall
 ~~~~~~~~
 
 To begin, we create the `lift` boilerplate for a new `Batch` algebra
+
+Kita akan mengawali dengan membuat plat cetak `lift` untuk aljabar `Batch` baru
 
 {lang="text"}
 ~~~~~~~~
@@ -14542,6 +14580,9 @@ To begin, we create the `lift` boilerplate for a new `Batch` algebra
 
 and then we will create an instance of `DynAgentsModule` with `FreeAp` as the context
 
+dan kita akan membuat sebuah instans `DynAgentsModule` dengan `FreeAp` sebagai
+konteks
+
 {lang="text"}
 ~~~~~~~~
   type Orig[a] = Coproduct[Machines.Ast, Drone.Ast, a]
@@ -14555,6 +14596,10 @@ In Chapter 6, we studied the `Const` data type, which allows us to analyse a
 program. It should not be surprising that `FreeAp.analyze` is implemented in
 terms of `Const`:
 
+Pada bab 6, kita telah mempelajari tipe data `Const` yang memperkenankan kita
+untuk menganalisis sebuah program. Tidak mengherankan bahwa `FreeAp.analyze`
+diimplementasikan menggunakan `Const`:
+
 {lang="text"}
 ~~~~~~~~
   sealed abstract class FreeAp[S[_], A] {
@@ -14566,6 +14611,10 @@ terms of `Const`:
 
 We provide a natural transformation to record all node starts and `.analyze` our
 program to get all the nodes that need to be started:
+
+Kita menyediakan sebuah transformasi natural untuk mencatat semua pemulaian
+simpul dan meng-`.analyze`-is program kita untuk mendapatkan semua simpul
+yang harus dijalankan:
 
 {lang="text"}
 ~~~~~~~~
@@ -14580,6 +14629,11 @@ The next step is to extend the instruction set from `Orig` to `Extended`, which
 includes the `Batch.Ast` and write a `FreeAp` program that starts all our
 `gathered` nodes in a single network call
 
+Langkah selanjutnya adalah memperluas set instruksi dari `Orig` menjadi `Extended`
+yang juga mengikutsertakan `Batch.Ast` dan menulis sebuah program `FreeAp` yang
+memulai semua simpul yang sudah dikumpulkan menggunakan metoda `gathered` dalam
+satu panggilan jaringan
+
 {lang="text"}
 ~~~~~~~~
   type Extended[a] = Coproduct[Batch.Ast, Orig, a]
@@ -14592,6 +14646,9 @@ includes the `Batch.Ast` and write a `FreeAp` program that starts all our
 
 We also need to remove all the calls to `Machines.Start`, which we can do with a natural transformation
 
+Kita juga harus menghapus semua panggilan ke `Machise.Start` yang dapat kita
+lakukan dengan transformasi natural
+
 {lang="text"}
 ~~~~~~~~
   val nostart = λ[Orig ~> FreeAp[Extended, ?]] {
@@ -14603,12 +14660,17 @@ We also need to remove all the calls to `Machines.Start`, which we can do with a
 Now we have two programs, and need to combine them. Recall the `*>` syntax from
 `Apply`
 
+Saat ini, kita mempunyai dua program dan harus menggabungkan keduanya. Harap
+diingat bahwa sintaks `*>` dari `Apply`
+
 {lang="text"}
 ~~~~~~~~
   val patched = batch(gathered) *> freeap.foldMap(nostart)
 ~~~~~~~~
 
 Putting it all together under a single method:
+
+Dan menggabungkannya dalam sebuah metoda:
 
 {lang="text"}
 ~~~~~~~~
@@ -14618,6 +14680,9 @@ Putting it all together under a single method:
 
 That Is it! We `.optimise` every time we call `act` in our main loop, which is
 just a matter of plumbing.
+
+Demikian! Kita meng-`.optimise` tiap kali kita memanggil `act` pada ikalan utama
+kita yang hanya berupa pekerjaan pertukangan.
 
 
 ### `Coyoneda` (`Functor`)
