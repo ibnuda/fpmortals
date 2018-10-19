@@ -14808,18 +14808,32 @@ However it is arguably a lot easier to just make this kind of change in the
 original function by hand, or to wait for the [`scalaz-plugin`](https://github.com/scalaz/scalaz-plugin) project to be
 released and automatically perform these sorts of optimisations.
 
+Namun, bisa dibilang jauh lebih mudah bila kita membuat perubahan semacam ini
+pada fungsi awal secara manual atau menunggu proyek [`scalaz-plugin`](https://github.com/scalaz/scalaz-plugin)
+dirilis dan secara otomatis melakukan optimasi semacam ini.
+
 
 ### Extensible Effects
 
 Programs are just data: free structures help to make this explicit and give us
 the ability to rearrange and optimise that data.
 
+Program sebenarnya hanya data saja: struktur bebas membantu memperjelas hal ini
+dan memberikan kita kemampuan untuk mengatur ulang dan mengoptimasi data tersebut.
+
 `Free` is more special than it appears: it can sequence arbitrary algebras and
 typeclasses.
+
+`Free` lebih istimewa daripada yang terlihat: struktur ini dapat mengurutkan
+aljabar dan kelas tipe secara arbiter.
 
 For example, a free structure for `MonadState` is available. The `Ast` and
 `.liftF` are more complicated than usual because we have to account for the `S`
 type parameter on `MonadState`, and the inheritance from `Monad`:
+
+Sebagai contoh, sebuah struktur `free` untuk `MonadState` tersedia. `Ast` dan
+`.liftF` lebih rumit daripada biasanya karena kita harus memperhitungkan 
+parameter tipe `S` pada `MonadState` dan pewarisan dari `Monad`:
 
 {lang="text"}
 ~~~~~~~~
@@ -14845,16 +14859,31 @@ This gives us the opportunity to use optimised interpreters. For example, we
 could store the `S` in an atomic field instead of building up a nested `StateT`
 trampoline.
 
+Hal ini merupakan kesempatan yang bisa digunakan untuk mengoptimasi interpreter.
+Sebagai contoh, kita dapat menyimpan `S` pada bidang atomik, bukan pada trampolin
+`StateT` berlapis.
+
 We can create an `Ast` and `.liftF` for almost any algebra or typeclass! The
 only restriction is that the `F[_]` does not appear as a parameter to any of the
 instructions, i.e. it must be possible for the algebra to have an instance of
 `Functor`. This unfortunately rules out `MonadError` and `Monoid`.
 
+Kita dapat membuat sebuah `Ast` dan `.liftF` untuk hampir semua aljabar ataupun
+kelas tipe. Satu-satunya batasan adalah `F[_]` tidak muncul sebagai parameter
+untuk instruksi apapun, misal, harus dimungkinkan agar aljabar mempunyai instans
+`Functor`. Sayangnya, hal ini menghapus kemungkinan `MonadError` dan `Monoid`.
+
 A> The reason why free encodings do not work for all algebras and typeclasses is
 A> quite subtle.
+A>
+A> Alasan mengapa penyandian *free* tidak berfungsi untuk semua aljabar dan kelas
+A> tipe cukup samar.
 A> 
 A> Consider what happens if we create an Ast for `MonadError`, with `F[_]` in
 A> contravariant position, i.e. as a parameter.
+A>
+A> Misalkan bila kita membuat sebuah Ast untuk `MonadError` dengan `F[_]` pada
+A> posisi kontravarian, mis. sebagai sebuah parameter.
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -14870,6 +14899,10 @@ A> ~~~~~~~~
 A> 
 A> When we come to interpret a program that uses `MonadError.Ast` we must construct
 A> the coproduct of instructions. Say we extend a `Drone` program:
+A>
+A> Saat kita menginterpretasi sebuah program yang menggunakan `MonadError.Ast`,
+A> kita harus membuat koproduk dari instruksi yang ada. Misal, kita memperluas
+A> program `Drone`:
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -14877,19 +14910,36 @@ A>   type Ast[a] = Coproduct[MonadError.Ast[Ast, String, ?], Drone.Ast, a]
 A> ~~~~~~~~
 A> 
 A> This fails to compile because `Ast` refers to itself!
+A>
+A> Kode diatas akan gagal kompil karena `Ast` merujuk ke dirinya sendiri!
 A> 
 A> Algebras that are not entirely made of covariant functor signatures, i.e. `F[_]`
 A> in return position, are impossible to interpret because the resulting type of
 A> the program is self-referential. Indeed the name *algebra* that we have been
 A> using has its roots in [F-Algebras](https://en.wikipedia.org/wiki/F-algebra), where the F is for Functor.
+A>
+A> Aljabar yang tidak sepenuhnya terbuat dari penanda kovarian fungtor, mis. `F[_]`
+A> pada posisi kembalian, tidak mungkin diinterpretasi karena tipe hasil dari
+A> program berupa hasil swa-rujuk. Dan memang, nama *aljabar* yang kita gunakan
+A> sebagai akar pada [*F-Algebras*](https://en.wikipedia.org/wiki/F-algebra) dimana
+A> F merupakan fungtor.
 A> 
 A> *Thanks to Edmund Noble for initiating this discussion.*
+A>
+A> *Terima kasih untuk Edmund Noble yang mengawali diskusi ini.*
 
 As the AST of a free program grows, performance degrades because the interpreter
 must match over instruction sets with an `O(n)` cost. An alternative to
 `scalaz.Coproduct` is [iotaz](https://github.com/frees-io/iota)'s encoding, which uses an optimised data structure
 to perform `O(1)` dynamic dispatch (using integers that are assigned to each
 coproduct at compiletime).
+
+Sebagaimana dengan PSA dari sebuah program *free* berkembang, performa mengalami
+penurunan karena interpreter harus menyocokkan kepada set instruksi dengan biaya
+`O(n)`. Alternatif dari `scalaz.Coproduct` adalah penyandian [iotaz](https://github.com/frees-io/iota)
+yang menggunakan struktur data teroptimasi agar dapat bekerja pada `O(1)` dengan
+pelepasan dinamis yang menggunakan integer untuk tiap koproduk yang ditetapkan
+pada saat kompilasi.
 
 For historical reasons a free AST for an algebra or typeclass is called *Initial
 Encoding*, and a direct implementation (e.g. with `IO`) is called *Finally
@@ -14898,6 +14948,15 @@ generally accepted that finally tagless is superior. But to use finally tagless
 style, we need a high performance effect type that provides all the monad
 typeclasses we've covered in this chapter. We also still need to be able to run
 our `Applicative` code in parallel. This is exactly what we will cover next.
+
+Untuk alasan sejarah, sebuah PSA *free* untuk sebuah aljabar atau kelas tipe
+disebut *Penyandian Awal*. Dan, implementasi langsung (misal, dengan `IO`) disebut
+*Akhirnya Kosong*. Walau kita telah menjelajahi ide ide menarik dengan `Free`,
+secara umum diterima bahwa tanpa-label lebih unggul. Namun, untuk menggunakan
+gaya *akhirnya kosong* (tanpa label), kita membutuhkan tipe efek dengan performa
+tinggi yang menyediakan semua kelas tipe monad yang kita bahas pada bab ini. Kita
+juga harus mampu menjalankan kode `Applicative` kita secara paralel.
+Persyaratan semacam ini akan kita bahas selanjutnya
 
 
 ## `Parallel`
