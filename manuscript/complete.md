@@ -14415,8 +14415,16 @@ Despite this chapter being called **Advanced Monads**, the takeaway is: *we
 shouldn't use monads unless we really **really** have to*. In this section, we
 will see why `FreeAp` (free applicative) is preferable to `Free` monads.
 
+Walaupun bab ini berjudul **Monad Lanjutan*, poin utama adalah: *kita tidak boleh
+menggunakan monad kecuali bila kita memang **benar benar** harus*. Pada bagian
+ini, kita akan tahu mengapa `FreeAp` (aplikatif *free*) lebih disukai dibandingkan
+monad `Free`.
+
 `FreeAp` is defined as the data structure representation of the `ap` and `pure`
 methods from the `Applicative` typeclass:
+
+`FreeAp` didefinisikan sebagai representasi struktur data dari metoda `ap` dan `pure`
+dari kelas tipe `Applicative`:
 
 {lang="text"}
 ~~~~~~~~
@@ -14445,11 +14453,22 @@ methods from the `Applicative` typeclass:
 The methods `.hoist` and `.foldMap` are like their `Free` analogues
 `.mapSuspension` and `.foldMap`.
 
+Metoda `.hoist` dan `.foldMap` seperti analog mereka dari `Free`, `.mapSuspension`
+dan `.foldMap`.
+
 As a convenience, we can generate a `Free[S, A]` from our `FreeAp[S, A]` with
 `.monadic`. This is especially useful to optimise smaller `Applicative`
 subsystems yet use them as part of a larger `Free` program.
 
+Agar lebih mudah, kita dapat membuat `Free[S, A]` dari `FreeAp[S, A]` yang sudah
+kita punyai dengan menggunakan metoda `.monadic`. Pembuatan ini sangat berguna
+terutama saat kita mengoptimasi subsistem `Applicative` yang belum digunakan
+sebagai bagian dari program `Free` yang lebih besar.
+
 Like `Free`, we must create a `FreeAp` for our ASTs, more boilerplate...
+
+Sebagaimana `Free`, kita harus membuat `FreeAp` untuk PSA kita. Hal ini juga
+berarti kita harus membuat plat cetak lagi...
 
 {lang="text"}
 ~~~~~~~~
