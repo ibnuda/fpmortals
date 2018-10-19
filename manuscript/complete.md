@@ -14690,6 +14690,9 @@ kita yang hanya berupa pekerjaan pertukangan.
 Named after mathematician Nobuo Yoneda, we can freely generate a `Functor` data
 structure for any algebra `S[_]`
 
+Dinamai menggunakan nama dari matematikawan Nobuo Yoneda, kita dapat membuat
+sebuah struktur data `Functor` untuk semua aljabar `S[_]`
+
 {lang="text"}
 ~~~~~~~~
   sealed abstract class Coyoneda[S[_], A] {
@@ -14708,6 +14711,8 @@ structure for any algebra `S[_]`
 ~~~~~~~~
 
 and there is also a contravariant version
+
+dan juga ada versi kontravariannya
 
 {lang="text"}
 ~~~~~~~~
@@ -14729,16 +14734,31 @@ and there is also a contravariant version
 
 A> The colloquial for `Coyoneda` is *coyo* and `ContravariantCoyoneda` is *cocoyo*.
 A> Just some Free Fun.
+A>
+A> Sebutan santai untuk `Coyoneda` adalah *koyo* dan `ContravariantCoyoneda`
+A> adalah *kokoyo*. Semakin lama semakin meresap.
 
 The API is somewhat simpler than `Free` and `FreeAp`, allowing a natural
 transformation with `.trans` and a `.run` (taking an actual `Functor` or
 `Contravariant`, respectively) to escape the free structure.
+
+API dari koyo cenderung lebih sederhana dari `Free` dan `FreeAp`, dan memperkenankan
+sebuah transformasi natural dengan `.trans` dan `.run` (yang menerima sebuah
+`Functor` atau `Contravariant`) untuk lepas dari struktur *free*.
 
 Coyo and cocoyo can be a useful utility if we want to `.map` or `.contramap`
 over a type, and we know that we can convert into a data type that has a Functor
 but we don't want to commit to the final data structure too early. For example,
 we create a `Coyoneda[ISet, ?]` (recall `ISet` does not have a `Functor`) to use
 methods that require a `Functor`, then convert into `IList` later on.
+
+Koyo dan kokoyo berguna bila kita ingin menggunakan `.map` atau `.contramap`
+kepada sebuah tipe dan kita tahu bahwa kita bisa mengkonversi menjadi sebuah
+tipe data yang mempunyai instans `Functor`, namun kita tidak mau benar-benar
+melakukannya terlalu dini. Sebagai contoh, kita membuat sebuah `Coyoneda[ISet, ?]`
+(harap diingat bahwa `ISet` tidak mempunyai instans `Functor`) untuk menggunakan
+metoda lain yang membutuhkan sebuah `Functor`, lalu mengkonversinya menjadi sebuah
+`List` di lain waktu.
 
 If we want to optimise a program with coyo or cocoyo we have to provide the
 expected boilerplate for each algebra:
@@ -14758,12 +14778,18 @@ expected boilerplate for each algebra:
 An optimisation we get by using `Coyoneda` is *map fusion* (and *contramap
 fusion*), which allows us to rewrite
 
+Sebuah optimasi yang kita dapatkan dengan menggunakan `Coyoneda` adalah
+*map fusion* (dan *contramap fusion*), yang memperkenankan kita untuk menulis
+ulang
+
 {lang="text"}
 ~~~~~~~~
   xs.map(a).map(b).map(c)
 ~~~~~~~~
 
 into
+
+menjadi
 
 {lang="text"}
 ~~~~~~~~
@@ -14773,6 +14799,10 @@ into
 avoiding intermediate representations. For example, if `xs` is a `List` of a
 thousand elements, we save two thousand object allocations because we only map
 over the data structure once.
+
+sehingga menghindari representasi sementara. Sebagai contoh, bila `xs` merupakan
+sebuah `List` dengan seribu elemen, kita dapat menghemat dua ribu alokasi objek
+karena kita hanya memetakan struktur data satu kali.
 
 However it is arguably a lot easier to just make this kind of change in the
 original function by hand, or to wait for the [`scalaz-plugin`](https://github.com/scalaz/scalaz-plugin) project to be
