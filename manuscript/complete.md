@@ -15688,6 +15688,9 @@ A> konstruksi dari semua instans seperti itu pada titik-awal aplikasi.
 The `MonadIO` that we previously studied was simplified to hide the `E`
 parameter. The actual typeclass is
 
+`MonadIO` yang kita pelajari sebelumnya telah disederhanakan untuk menyembunyikan
+parameter `E`. Kelas tipe yang sebenarnya adalah
+
 {lang="text"}
 ~~~~~~~~
   trait MonadIO[M[_], E] {
@@ -15697,6 +15700,9 @@ parameter. The actual typeclass is
 
 with a minor change to the boilerplate on the companion of our algebra,
 accounting for the extra `E`:
+
+dengan perubahan kecil di plat cetak pada pendamping aljabar kita, untuk
+mengikutsertakan tambahan `E`: 
 
 {lang="text"}
 ~~~~~~~~
