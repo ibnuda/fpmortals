@@ -15594,7 +15594,12 @@ A> mereka sendiri.
 
 `IORef` is the `IO` equivalent of an atomic mutable variable.
 
+`IORef` merupakan ekuivalen dari `IO` untuk variabel atomik tidak tetap.
+
 We can read the variable and we have a variety of ways to write or update it.
+
+Kita dapat membaca variabel tersebut dan memiliki beberapa car untuk menulis
+atau memutakhirkannya.
 
 {lang="text"}
 ~~~~~~~~
@@ -15621,6 +15626,10 @@ We can read the variable and we have a variety of ways to write or update it.
 `IORef` is another building block and can be used to provide a high performance
 `MonadState`. For example, create a newtype specialised to `Task`
 
+`IORef` merupakan blok bangun lain yang dapat digunakan untuk menyediakan `MonadState`
+dengan performa tinggi. Sebagai contoh, buat sebuah *newtype* terspesialisasi
+untuk `Task`
+
 {lang="text"}
 ~~~~~~~~
   final class StateTask[A](val io: Task[A]) extends AnyVal
@@ -15640,6 +15649,10 @@ We can read the variable and we have a variety of ways to write or update it.
 We can make use of this optimised `StateMonad` implementation in a `SafeApp`,
 where our `.program` depends on optimised MTL typeclasses:
 
+Kita dapat menggunakan implementasi teroptimasi `StateMonad` ini pada sebuah
+`SafeApp` dimana `.program` kita bergantung pada kelas tipe Pustaka Transformator
+Monad:
+
 {lang="text"}
 ~~~~~~~~
   object FastState extends SafeApp {
@@ -15656,10 +15669,18 @@ where our `.program` depends on optimised MTL typeclasses:
 A more realistic application would take a variety of algebras and typeclasses as
 input.
 
+Sebuah aplikasi yang realistis akan menerima beberapa aljabar dan kelas tipe sebagai
+masukan.
+
 A> This optimised `MonadState` is constructed in a way that breaks typeclass
 A> coherence. Two instances having the same types may be managing different state.
 A> It would be prudent to isolate the construction of all such instances to the
 A> application's entrypoint.
+A>
+A> `MonadState` teroptimasi ini dibangun sedemikian rupa sehingga mengaburkan
+A> koherensi kelas tipe. Dua instans yang memiliki tipe yangsama bisa saja
+A> mengatur keadaan yang berbeda. Adalah hal yang bijak untuk mengisolasi
+A> konstruksi dari semua instans seperti itu pada titik-awal aplikasi.
 
 
 #### `MonadIO`
