@@ -16337,8 +16337,15 @@ To derive the `Equal` for our case class with two parameters, we reused the
 instance that Scalaz provides for tuples. But where did the tuple instance come
 from?
 
+Untuk menderivasi `Equal` pada kelas dengan dua parameter kita, kita akan
+menggunakan ulang instans yang disediakan oleh Scalaz untuk tuple. Namun, dari
+mana instans tuple itu berasal?
+
 A more specific typeclass than `Contravariant` is `Divisible`. `Equal` has an
 instance:
+
+Kelas tipe yang lebih spesifik untuk `Contravariant` adalah `Divisible`. `Equal`
+mempunyai sebuah instans:
 
 {lang="text"}
 ~~~~~~~~
@@ -16358,6 +16365,10 @@ instance:
 A> When implementing `Divisible` the compiler will require us to provide
 A> `.contramap`, which we can do directly with an optimised implementation or with
 A> this derived combinator:
+A>
+A> Saat mengimplementasikan `Divisible`, kompiler akan meminta kita untuk
+A> menyediakan `.contramap`, yang dapat kita penuhi dengan sebuah implmentasi
+A> teroptimasi atau dengan kombinator terderivasi berikut:
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -16366,9 +16377,14 @@ A>     divide2(conquer[Unit], fa)(c => ((), f(c)))
 A> ~~~~~~~~
 A> 
 A> This has been added to `Divisible` in Scalaz 7.3.
+A>
+A> Kombinator ini ditambahkan ke `Divisible` pada Scalaz 7.3.
 
 And from `divide2`, `Divisible` is able to build up derivations all the way to
 `divide22`. We can call these methods directly for our data types:
+
+Dan dari `divide2`, `Divisible` mampu membangun derivasi sampai ke `divide22`.
+Kita dapat memanggil metoda ini langsung ke tipe data kita:
 
 {lang="text"}
 ~~~~~~~~
@@ -16380,6 +16396,8 @@ And from `divide2`, `Divisible` is able to build up derivations all the way to
 ~~~~~~~~
 
 The equivalent for type parameters in covariant position is `Applicative`:
+
+Ekuivalen untuk parameter tipe ini pada posisi kovarian adalah `Applicative`:
 
 {lang="text"}
 ~~~~~~~~
@@ -16395,13 +16413,22 @@ But we must be careful that we do not break the typeclass laws when we implement
 composition* which says that the following two codepaths must yield exactly the
 same output
 
+Namun, kita harus berhati hati agar kita tidak melanggar hukum kelas tipe
+saat kita mengimplementasikan `Divisible` atau `Applicative`. Terlebih lagi,
+sangat mudah untuk melanggar *hukum komposisi* yang menyatakan bahwwa kedua
+alur-kode ini harus menghasilkan keluaran yang sama
+
 -   `divide2(divide2(a1, a2)(dupe), a3)(dupe)`
 -   `divide2(a1, divide2(a2, a3)(dupe))(dupe)`
--   for any `dupe: A => (A, A)`
+-   untuk semua `dupe: A => (A, A)`
 
 with similar laws for `Applicative`.
 
+dengan hukum yang sama untuk `Applicative`.
+
 Consider `JsEncoder` and a proposed instance of `Divisible`
+
+Misalk, `JsEncoder` dan instans `Divisible` yang diajukan
 
 {lang="text"}
 ~~~~~~~~
@@ -16420,12 +16447,17 @@ Consider `JsEncoder` and a proposed instance of `Divisible`
 
 On one side of the composition laws, for a `String` input, we get
 
+Pada satu sisi dari hukum komposisi, untuk sebuah input `String`, kita akan
+mendapatkan
+
 {lang="text"}
 ~~~~~~~~
   JsArray([JsArray([JsString(hello),JsString(hello)]),JsString(hello)])
 ~~~~~~~~
 
 and on the other
+
+dan pada sisi lain
 
 {lang="text"}
 ~~~~~~~~
@@ -16435,13 +16467,24 @@ and on the other
 which are different. We could experiment with variations of the `divide`
 implementation, but it will never satisfy the laws for all inputs.
 
+yang berbeda. Kita dapat bereksperimen dengan implementasi `divide`, namun
+tidak akan pernah memenuhi hukum komposisi untuk semua input.
+
 We therefore cannot provide a `Divisible[JsEncoder]` because it would break the
 mathematical laws and invalidates all the assumptions that users of `Divisible`
 rely upon.
 
+Hal ini mengakibatkan kita tidak dapat menyediakan sebuah `Divisible[JsEncoder]
+karena akan melanggar hukum matematika dan membatalkan semua asumsi yang digunakan
+oleh pengguna `Divisible`.
+
 To aid in testing laws, Scalaz typeclasses contain the codified versions of
 their laws on the typeclass itself. We can write an automated test, asserting
 that the law fails, to remind us of this fact:
+
+Untuk membantu mengetes hukum, kelas tipe Scalaz berisi versi terkodifikasi
+dari hukum hukum atas kelas tipe itu sendiri. Kita dapat menulis tes terotomatis,
+memastikan bahwa hukum tersebut terlanggar, dan mengingatkan kita bahwa:
 
 {lang="text"}
 ~~~~~~~~
@@ -16452,6 +16495,8 @@ that the law fails, to remind us of this fact:
 ~~~~~~~~
 
 On the other hand, a similar `JsDecoder` test meets the `Applicative` composition laws
+
+Di sisi lain, sebuah tes `JsDecoder` memenuhi huku komposisi `Applicative`
 
 {lang="text"}
 ~~~~~~~~
@@ -16473,6 +16518,8 @@ On the other hand, a similar `JsDecoder` test meets the `Applicative` compositio
 
 for some test data
 
+untuk beberapa data tes
+
 {lang="text"}
 ~~~~~~~~
   composeTest(JsObject(IList("a" -> JsString("hello"), "b" -> JsInteger(1))))
@@ -16483,18 +16530,35 @@ for some test data
 
 Now we are reasonably confident that our derived `MonadError` is lawful.
 
+Sekarang, kita cukup yakin bathwa `MonadError` yang telah kita derivasi memenuhi
+hukum hukum yang berlaku.
+
 However, just because we have a test that passes for a small set of data does
 not prove that the laws are satisfied. We must also reason through the
 implementation to convince ourselves that it **should** satisfy the laws, and try
 to propose corner cases where it could fail.
 
+Namun, bukan berarti bila kita lulus tes untuk set data kecil, hukum tidak terpenuhi.
+Kita harus menalar implementasi sampai tuntas agar kita yakin bahwa implementasi
+ini **seharusnya** sudah memenuhi hukum yang berlaku, dan mencoba permasalahan
+di luar batas normal yang bisa saja gagal.
+
 One way of generating a wide variety of test data is to use the [scalacheck](https://github.com/rickynils/scalacheck)
 library, which provides an `Arbitrary` typeclass that integrates with most
 testing frameworks to repeat a test with randomly generated data.
 
+Salah satu cara untuk menghasilkan data tes yang bervariasi adalah dengan menggunakan
+pustaka [scalacheck](https://gihtub.com/rickynils/scalacheck) yang menyediakan
+kelas tipe `Arbitrary` yang dapat terintegrasi ke kebanyakan kerangka testing
+untuk mengulang sebuah test dengan data yang dihasilkan secara acak.
+
 The `jsonformat` library provides an `Arbitrary[JsValue]` (everybody should
 provide an `Arbitrary` for their ADTs!) allowing us to make use of Scalatest's
 `forAll` feature:
+
+Pustaka `jsonformat` menyediakan sebuah `Arbitrary[JsValue]` (dan semua orang
+harus menyediakan `Arbitrary` pada DTA mereka!) memperkenankan kita untuk menggunakan
+fitur `forall` dari Scalatest:
 
 {lang="text"}
 ~~~~~~~~
@@ -16505,9 +16569,18 @@ This test gives us even more confidence that our typeclass meets the
 `Applicative` composition laws. By checking all the laws on `Divisible` and
 `MonadError` we also get **a lot** of smoke tests for free.
 
+Tes ini memberikan kita lebih percaya pada kelas tipe kita memenuhi hukum komposisi
+`Applicative`. Dengan memeriksa seuma hukum pada `Divisible` dan `MonadError`
+kita juga mendapat **banyak** tes secara cuma-cuma.
+
 A> We must restrict `forAll` to have a `SizeRange` of `10`, which limits both
 A> `JsObject` and `JsArray` to a maximum size of 10 elements. This avoids stack
 A> overflows as larger numbers can generate gigantic JSON documents.
+A>
+A> Kita harus membatasi `forAll` dengan `SizeRange` `10` yang membatasi
+A> `JsObject` dan `JsArray` sampai maksimum 10 elemen saja. Hal ini untuk
+A> menghindari lubernya karena jumlah yang lebih besar dapat menghasilkan
+A> dokumen JSON yang sangat besar.
 
 
 ### `Decidable` and `Alt`
