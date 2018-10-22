@@ -15108,7 +15108,16 @@ works well for the majority of real world applications. we must first audit our
 codebase (including third party dependencies) to ensure that nothing is making
 use of the `.apply2` implied law.
 
+Kita dapat mengambil pendekatan yang lebih berani terhadap paralelisme: dengan
+tidak menaati hukum yang menyatakan bahwa `.apply2` harus berurutan untuk `Monad`.
+Pendekatan ini sangat kontroversial, namun bekerja dengan sangat baik untuk
+kebanyakan aplikasi di dunia nyata. Pertama, kita harus mengaudit basis kode
+kita (termasuk ketergantungan pihak ketiga) untuk memastikan bahwa tidak ada
+yang menggunakan hukum dari `.apply2`.
+
 We wrap `IO`
+
+Kita bungkus `IO`
 
 {lang="text"}
 ~~~~~~~~
@@ -15117,6 +15126,9 @@ We wrap `IO`
 
 and provide our own implementation of `Monad` which runs `.apply2` in parallel
 by delegating to a `@@ Parallel` instance
+
+dan sediakan implementasi buatan kita sendiri untuk `Monad` yang menjalakan
+`.apply` secara paralel dengan mendelegasikan ke sebuah instans `@@ Parallel`
 
 {lang="text"}
 ~~~~~~~~
@@ -15132,17 +15144,34 @@ by delegating to a `@@ Parallel` instance
 We can now use `MyIO` as our application's context instead of `IO`, and **get
 parallelism by default**.
 
+Sekarang kita bisa menggunakan `MyIO` sebagai konteks aplikasi kita sebagai
+pengganti `IO` dan **mendapatkan implementasi paralelisme secara default**.
+
 A> Wrapping an existing type and providing custom typeclass instances is known as
 A> *newtyping*.
+A>
+A> Pelapisan sebuah tipe yang sudah ada dan menyediakan instans kelas tipe buatan
+A> sendiri dikenal sebagai *newtyping*.
 A> 
 A> `@@` and newtyping are complementary: `@@` allows us to request specific
 A> typeclass variants on our domain model, whereas newtyping allow us to define the
 A> instances on the implementation. Same thing, different insertion points.
+A>
+A> `@@` dan *newtyping* bersifat komplementer: `@@` memperkenankan kita untuk
+A> meminta varian kelas tipe spesifik pada model domain kita, dimana *newtyping*
+A> memperkenankan kita untuk mendefinisikan instans pada implementasi. Keduanya
+A> merupakan hal yang sama, namun memiliki titip sisip yang berbeda.
 A> 
 A> The `@newtype` macro [by Cary Robbins](https://github.com/estatico/scala-newtype) has an optimised runtime representation
 A> (more efficient than `extends AnyVal`), that makes it easy to delegate
 A> typeclasses that we do not wish to customise. For example, we can customise
 A> `Monad` but delegate the `Plus`:
+A>
+A> Makro `@newtype` oleh [Carry Robbins](https://github.com/estatico/scala-newtype)
+A> mempunyai representasi waktu jalan yang teroptimasi (lebih efisien bila dibandingkan
+A> dengan `extends AnyVal`), yang mempermudah pendelegasian kelas tipe yang
+A> tidak ingin kita utak atik. Sebagai contoh, kita dapat menyesuaikan `Monad`
+A> namun mendelegasikan `Plus`:
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -15155,6 +15184,9 @@ A> ~~~~~~~~
 
 For completeness: a naive and inefficient implementation of `Applicative.Par`
 for our toy `IO` could use `Future`:
+
+Agar lebih lengkap: sebuah implementsai naif dan tidak efisien dari `Applicative.Par`
+untuk `IO` sederhana kita dapat menggunakan `Future`:
 
 {lang="text"}
 ~~~~~~~~
@@ -15177,6 +15209,10 @@ for our toy `IO` could use `Future`:
 and due to [a bug in the Scala compiler](https://github.com/scala/bug/issues/10954) that treats all `@@` instances as
 orphans, we must explicitly import the implicit:
 
+dan karena sebuah [kutu](https://github.com/scala/bug/issues/10954) pada kompiler
+Scala yang memperlakukan semua instans `@@` sebagai objek yatim, kita harus
+secara tersurat mengimpor yang tersirat:
+
 {lang="text"}
 ~~~~~~~~
   import IO.ParApplicative
@@ -15184,6 +15220,9 @@ orphans, we must explicitly import the implicit:
 
 In the final section of this chapter we will see how Scalaz's `IO` is actually
 implemented.
+
+Pada bagian akhir bab ini, kita akan melihat bagaimana `IO` Scalaz diimplementasikan
+sebenar-benarnya.
 
 
 ## `IO`
