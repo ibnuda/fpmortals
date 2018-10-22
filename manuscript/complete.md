@@ -15557,6 +15557,10 @@ lupakan*. Sebagai conoth, pencatatan log prioritas rendah melalui jaringan.
 A promise represents an asynchronous variable that can be set exactly once (with
 `complete` or `error`). An unbounded number of listeners can `get` the variable.
 
+Sebuah *promise* merepresentasikan variable asinkronus yang dapat diatur tepat
+satu kali (dengan `complete` atau `error`). Pendengar yang bisa mendapatkan nilai
+variabel dengan `get` tidak dibatasi.
+
 {lang="text"}
 ~~~~~~~~
   final class Promise[E, A] private (ref: AtomicReference[State[E, A]]) {
@@ -15575,8 +15579,15 @@ A promise represents an asynchronous variable that can be set exactly once (with
 `Promise` is not something that we typically use in application code. It is a
 building block for high level concurrency frameworks.
 
+Secara umum, kita jaran menggunakan `Promise` pada kode aplikasi. `Promise`
+merupakan blok bangun untuk *framework* konkurensi tingkat tinggi.
+
 A> When an operation is guaranteed to succeed, the error type `E` is left as a free
 A> type parameter so that the caller can specify their preference.
+A>
+A> Bila sebuah operasi terjamin kesuksesannya, tipe galat `E` dibiarkan sebagai
+A> sebuah parameter tipe bebas, sehingga pemanggil dapat menentukan pilihan
+A> mereka sendiri.
 
 
 ### `IORef`
