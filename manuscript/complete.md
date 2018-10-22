@@ -15367,8 +15367,15 @@ The `IO` interpreter is called `RTS`, for *runtime system*. Its implementation
 is beyond the scope of this book. We will instead focus on the features that
 `IO` provides.
 
+Interpreter `IO` disebut sebagai `RTS`, dari *runtime system* (sistem waktu-jalan).
+Imlementasi interpreter ini diluar cakupan buku ini, kita akan fokus pada
+fitur yang disediakan oleh `IO`.
+
 `IO` is just a data structure, and is interpreted *at the end of the world* by
 extending `SafeApp` and implementing `.run`
+
+`IO` hanya merupakan struktur data dan diinterpretasikan *pada akhir waktu*
+dengan mengeksten `SafeApp` dan menerapkan `.run`
 
 {lang="text"}
 ~~~~~~~~
@@ -15391,13 +15398,27 @@ A> `Void` is a type that has no values, like `scala.Nothing`. However, the Scala
 A> compiler infers `Nothing` when it fails to correctly infer a type parameter,
 A> causing confusing error messages, whereas `Void` will fail fast during
 A> compilation.
+A>
+A> `Void` merupakan tipe yang tidak mempunyai nilai, seperti `scala.Nothing`.
+A> Namun, karena kompiler Scala akan menebak `Nothing` walaupun gagal menebak
+A> parameter tipe, hal ini menyebabkan pesan galat yang membingungkan. Di sisi
+A> lain, `Void` akan menggagalkan diri pada saat kompilasi sehingga tidak ada
+A> menyebabkan pesan yang membingungkan.
 A> 
 A> A `Void` error type means that the effect **cannot fail**, which is to say that we
 A> have handled all errors by this point.
+A>
+A> Sebuah tipe galat `Void` berarti bahwa efek yang dibuat **tidak bisa gagal**
+A> yang berarti bahwa kita sudah menangani semua galat pada titik ini.
 
 If we are integrating with a legacy system and are not in control of the entry
 point of our application, we can extend the `RTS` and gain access to unsafe
 methods to evaluate the `IO` at the entry point to our principled FP code.
+
+Bila kita mengintegrasikan dengan sebuah sistem warisan dan tidak berkuasa
+atas titik awal aplikasi kita, kita dapat mengeksten `RTS` dan mendapatkan akses
+pada metoda tak-aman untuk mengevaluasi `IO` pada titik awal agar dapat mengacu
+ke kode kita yang berprinsip pada pemrograman fungsional.
 
 
 ### Features
