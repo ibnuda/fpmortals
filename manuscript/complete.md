@@ -15813,6 +15813,9 @@ leluasa) untuk kelas tipe dengan logika derivasi kompleks.
 This chapter will show how to define derivations for five specific typeclasses.
 Each example exhibits a feature that can be generalised:
 
+Bab ini akan menunjukkan bagaimana cara mendefinisikan derivasi dari lima
+kelas tipe spesifik. Tiap contoh menunjukkan fitur yang dapat digeneralisasi:
+
 {lang="text"}
 ~~~~~~~~
   @typeclass trait Equal[A]  {
@@ -15847,6 +15850,13 @@ A> XML, should **not** have typeclass encoders and decoders, because it can lead
 A> typeclass decoherence (i.e. more than one encoder or decoder may exist for the
 A> same type). The alternative is to use algebras and avoid using the `implicit`
 A> language feature entirely.
+A>
+A> Ada mahdzab yang berpendapat bahwa format serialisasi, seperti JSON dan XML,
+A> **tidak** boleh mempunyai kelas tipe penyandi dan pembaca sandi karena akan
+A> menghasilkan dekoherensi kelas tipe (mis., ada kemungkinan lebih dari satu
+A> penyandi atau pembaca sandi untuk tipe yang sama). Alternatif yang disediakan
+A> adalah dengan menggunakan aljabar dan menghindari penggunaan fitur bahasa
+A> `implisit`.
 A> 
 A> Although it is possible to apply the techniques in this chapter to either
 A> typeclass or algebra derivation, the latter involves a **lot** more boilerplate.
@@ -15854,6 +15864,14 @@ A> We therefore consciously choose to restrict our study to encoders and decoder
 A> that are coherent. As we will see later in this chapter, use-site automatic
 A> derivation with Magnolia and Shapeless, combined with limitations of the Scala
 A> compiler's implicit search, commonly leads to typeclass decoherence.
+A>
+A> Walaupun mungkin untuk menerapkan teknik pada bab ini ke kelas tipe atau
+A> derivasi aljabar, penerapan teknik pada derivasi aljabar akan melibatkan
+A> plat cetak yang **jauh lebih banyak**. Maka dari itu, kita akan memilih
+A> untuk membatasi pembelajaran ini pada penyandi dan pembaca sandi yang koheren.
+A> Sebagaimana yang akan kita lihat selanjutnya pada bab ini, derivasi otomatis
+A> dari Magnolia dan Shapeless, digabungkan dengan batasan pencarian `implicit`
+A> dari kompiler Scala, biasanya berakhir pada dekoherensi kelas tipe.
 
 
 ## `scalaz-deriving`
