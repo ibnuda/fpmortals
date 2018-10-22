@@ -15293,6 +15293,9 @@ A> Gunakan varian `scalaz.ioeffect` untuk semua kelas tipe dan tipe data.
 There are multiple ways to create an `IO` that cover a variety of eager, lazy,
 safe and unsafe code blocks:
 
+Ada berapa cara untuk membuat `IO` yang meliputi varian blok kode lugas, lundung,
+aman, dan tidak aman:
+
 {lang="text"}
 ~~~~~~~~
   object IO {
@@ -15315,6 +15318,8 @@ safe and unsafe code blocks:
 
 with convenient `Task` constructors:
 
+dengan konstruktor pembantu `Task`:
+
 {lang="text"}
 ~~~~~~~~
   object Task {
@@ -15328,6 +15333,9 @@ with convenient `Task` constructors:
 The most common constructors, by far, when dealing with legacy code are
 `Task.apply` and `Task.fromFuture`:
 
+Konstruktor yang paling jamak ditemui saat berurusan dengan kode warisan, sampai
+saat ini, adalah `Task.apply` dan `Task.fromFuture`:
+
 {lang="text"}
 ~~~~~~~~
   val fa: Task[Future[String]] = Task { ... impure code here ... }
@@ -15338,10 +15346,19 @@ The most common constructors, by far, when dealing with legacy code are
 We cannot pass around raw `Future`, because it eagerly evaluates, so must always
 be constructed inside a safe block.
 
+Kita tidak dapat mengumpankan `Future` mentah dengan leluasa karena struktur data
+ini dievaluasi secara tegas. Sehingga, kita harus selalu dibuat dalam blok yang
+aman.
+
 Note that the `ExecutionContext` is **not** `implicit`, contrary to the
 convention. Recall that in Scalaz we reserve the `implicit` keyword for
 typeclass derivation, to simplify the language: `ExecutionContext` is
 configuration that must be provided explicitly.
+
+Harap diperhatikan bahwa `ExecutionContext` **tidak** `implicit`. Dan juga harap
+diingat bahwa kita mencadangkan kata kunci `implicit` untuk penurunan kelas tipe
+untuk menyederhanakan bahasa: `ExecutionContext` merupakan konfigurasi yang harus
+disediakan secara tersurat.
 
 
 ### Running
