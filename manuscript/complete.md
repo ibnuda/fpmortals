@@ -15745,10 +15745,19 @@ mengikutsertakan tambahan `E`:
 Typeclasses provide polymorphic functionality to our applications. But to use a
 typeclass we need instances for our business domain objects.
 
+Kelas tipe menyediakan fungsionalitas polimorfis untuk aplikasi kita. Namun, untuk
+menggunakan sebuah kelas tipe, kita butuh instans kelas tipe tersebut untuk objek
+domain bisnis kita.
+
 The creation of a typeclass instance from existing instances is known as
 *typeclass derivation* and is the topic of this chapter.
 
+Pembuatan instans kelas tipe dari instans yang sudah ada dikenal dengan *derivasi
+kelas tipe* dan menjadi topik pada bab ini.
+
 There are four approaches to typeclass derivation:
+
+Ada empat pendekatan atas derivasi kelas tipe:
 
 1.  Manual instances for every domain object. This is infeasible for real world
     applications as it results in hundreds of lines of boilerplate for every line
@@ -15768,11 +15777,35 @@ There are four approaches to typeclass derivation:
     is a language within the Scala language and can be used to write programs at
     the type level.
 
+1.  Instans manual untuk tiap objek domain. Pendekatan ini tidak mungkin dilakukan
+    pada aplikasi nyata karena akan menghasilkan ratusan baris plat cetak untuk
+    tiap baris `case class`. Namun, pendekatan ini berguna untuk tujuan pembelajaran
+    dan optimasi performa.
+
+2.  Abstrak atas kelas tipe dari kelas tipe Scalaz yang sudah ada. Merupakan pendekatan
+    yang digunakan oloh `scalaz-deriving`, menyediakan tes terotomatisasi dan
+    derivasi atas produk dan ko-produk.
+
+3.  Makro. Namun, penulisan makro untuk tiap kelas tipe harus dilakukan oleh
+    pengembang yang sangat berpengalaman. Untungnya, pustaka [Magnolia](https://github.com/propensive/magnolia)
+    yang ditulis oleh Jon Pretty, mengabstraksi makro dengan APA yang sederhana
+    dan memusatkan interaksi kompleks kepada kompiler.
+
+4.  Menulis program generik dengan menggunakan pustaka [Shapeless](https://github.com/milessabin/shapeless).
+    Mekanisme `implicit` merupakan sub-bahasa pada bahasa Scala dan dapat digunakan
+    untuk menulis program pada tingkat tipe.
+
 In this chapter we will study increasingly complex typeclasses and their
 derivations. We will begin with `scalaz-deriving` as the most principled
 mechanism, repeating some lessons from Chapter 5 "Scalaz Typeclasses", then
 Magnolia (the easiest to use), finishing with Shapeless (the most powerful) for
 typeclasses with complex derivation logic.
+
+Pada bab ini, kita akan mempelajari kelas tipe yang semakin rumit dan derivasinya.
+Kita akan memulai dengan `scalaz-deriving` sebagai mekanisme paling sesuai dengan
+prinsip, mengulangi beberapa pelajaran pada bab 5 mengenai Kelas Tipe Scalaz,
+dan Magnolia (paling mudah digunakan), dan diakhiri dengan Shapeless (paling
+leluasa) untuk kelas tipe dengan logika derivasi kompleks.
 
 
 ## Running Examples
