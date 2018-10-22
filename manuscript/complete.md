@@ -15729,6 +15729,16 @@ mengikutsertakan tambahan `E`:
 6.  `IO` gives us the ability to implement algebras as effects on the world.
 7.  `IO` can perform effects in parallel and is a high performance backbone for any application.
 
+1.  `Future` cacat, jangan digunakan.
+2.  Mengatur keamanan susunan memori dengan `Trampoline`.
+3.  Pustaka Transformator Monad (PTM) mengabstraksi efek-efek umum dengan kelas tipe.
+4.  Transformator monad menyediakan implementasi default dari PTM.
+5.  Struktur data `Free` memperkenankan kita untuk menganalisis, mengoptimasi, dan
+    mengetes program kita.
+6.  `IO` memberi kita jalan untuk mengimplementasi aljabar sebagai efek dari dunia luar.
+7.  `IO` dapat menjalankan efek secara paralel dan merupakan tulang punggung dari
+    aplikasi dengan performa tinggi.
+
 
 # Typeclass Derivation
 
