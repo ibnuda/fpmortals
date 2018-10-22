@@ -15427,8 +15427,14 @@ ke kode kita yang berprinsip pada pemrograman fungsional.
 `BindRec`, `Plus`, `MonadPlus` (if `E` forms a `Monoid`), and an
 `Applicative[IO.Par[E, ?]]`.
 
+`IO` menyediakan instans kelas tipe untuk `Bifunctor`, `MonadError[E, ?]`, `BindRec`,
+`Plus`, `MonadPlus` (bila `E` membentuk sebuah `Monoid`), dan `Applicative[IO.Par[E, ?]]`.
+
 In addition to the functionality from the typeclasses, there are implementation
 specific methods:
+
+Sebagai tambahan atas fungsionalitas dari kelas tipe, ada beberapa implementasi
+metoda-metoda spesifik:
 
 {lang="text"}
 ~~~~~~~~
@@ -15460,6 +15466,10 @@ specific methods:
 It is possible for an `IO` to be in a *terminated* state, which represents work
 that is intended to be discarded (it is neither an error nor a success). The
 utilities related to termination are:
+
+Adalah hal yang memungkinkan bila sebuah `IO` berada pada kondisi *terminated*
+yang merepresentasikan tugas yang dimaksudkan untuk dibuang (bukan galat maupun
+sukses). Perkakas yang berhubungan dengan terminasi adalah:
 
 {lang="text"}
 ~~~~~~~~
