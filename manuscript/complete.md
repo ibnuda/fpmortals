@@ -15879,6 +15879,9 @@ A> dari kompiler Scala, biasanya berakhir pada dekoherensi kelas tipe.
 The `scalaz-deriving` library is an extension to Scalaz and can be added to a
 project's `build.sbt` with
 
+Pustaka `scalaz-deriving` merupakan perpanjangan dari Scalaz dan dapat ditambahkan
+ke `build.sbt` proyek dengan
+
 {lang="text"}
 ~~~~~~~~
   val derivingVersion = "1.0.0"
@@ -15887,12 +15890,19 @@ project's `build.sbt` with
 
 providing new typeclasses, shown below in relation to core Scalaz typeclasses:
 
+menyediakan kelas tipe baru, yang ditunjukkan dibawah, yang berhubungan dengan
+kelas tipe Scalaz 
+
 {width=60%}
 ![](images/scalaz-deriving-base.png)
 
 A> In Scalaz 7.3, `Applicative` and `Divisible` will inherit from `InvariantApplicative`
+A>
+A> Pada Scalaz 7.3, `Applicative` dan `Divisible` akan mewarisi dari `InvariantApplicative`
 
 Before we proceed, here is a quick recap of the core Scalaz typeclasses:
+
+Sebelum kita memulai, berikut merupakan rekap ulang dari kelas tipe utama Scalaz:
 
 {lang="text"}
 ~~~~~~~~
