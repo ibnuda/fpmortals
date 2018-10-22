@@ -16589,6 +16589,10 @@ Where `Divisible` and `Applicative` give us typeclass derivation for products
 (built from tuples), `Decidable` and `Alt` give us the coproducts (built from
 nested disjunctions):
 
+Bila `Divisible` dan `Applicative` memberikan kita derivasi kelas tipe untuk
+produk (dibangun dari tuple) `Decidable` dan `Alt` memberikan kita ko-prooduk
+yang dibangun dari disjungsi berlapis:
+
 {lang="text"}
 ~~~~~~~~
   @typeclass trait Alt[F[_]] extends Applicative[F] with InvariantAlt[F] {
@@ -16612,7 +16616,10 @@ nested disjunctions):
 
 The four core typeclasses have symmetric signatures:
 
+Empat kelas tipe utama mempunyai penanda simetris:
+
 | Typeclass     | method    | given          | signature         | returns |
+| Kelas Tipe    | metoda    | diberi         | penanda           | kembali |
 |------------- |--------- |-------------- |----------------- |------- |
 | `Applicative` | `apply2`  | `F[A1], F[A2]` | `(A1, A2) => Z`   | `F[Z]`  |
 | `Alt`         | `altly2`  | `F[A1], F[A2]` | `(A1 \/ A2) => Z` | `F[Z]`  |
@@ -16622,7 +16629,13 @@ The four core typeclasses have symmetric signatures:
 supporting covariant products; covariant coproducts; contravariant products;
 contravariant coproducts.
 
+mendukung kovarian produk, kovarian koproduk, kontravarian produk, dan kontravarian
+koproduk.
+
 We can write a `Decidable[Equal]`, letting us derive `Equal` for any ADT!
+
+Kita dapat menulis sebuah instans `Decidable[Equal]` yang memperkenankan kita
+untuk menderivasi `Equal` untuk semua TDA!
 
 {lang="text"}
 ~~~~~~~~
@@ -16642,6 +16655,8 @@ We can write a `Decidable[Equal]`, letting us derive `Equal` for any ADT!
 
 For an ADT
 
+Untuk TDA
+
 {lang="text"}
 ~~~~~~~~
   sealed abstract class Darth { def widen: Darth = this }
@@ -16650,6 +16665,8 @@ For an ADT
 ~~~~~~~~
 
 where the products (`Vader` and `JarJar`) have an `Equal`
+
+dimana produk (`Vader` dan `JarJar`) mempunyai instans `Equal`
 
 {lang="text"}
 ~~~~~~~~
@@ -16664,6 +16681,8 @@ where the products (`Vader` and `JarJar`) have an `Equal`
 ~~~~~~~~
 
 we can derive the equal for the whole ADT
+
+kita dapat menderivasi persamaan untuk semua TDA
 
 {lang="text"}
 ~~~~~~~~
@@ -16681,11 +16700,19 @@ we can derive the equal for the whole ADT
 
 A> Scalaz 7.2 does not provide a `Decidable[Equal]` out of the box, because it was
 A> a late addition.
+A>
+A> Scalaz 7.2 tidak menyediakan instans `Decidable[Equal]` secara otomatis karena
+A> instans tersebut merupakan tambahan susulan.
 
 Typeclasses that have an `Applicative` can be eligible for an `Alt`. If we want
 to use our `Kleisli.iso` trick, we have to extend `IsomorphismMonadError` and
 mix in `Alt`. Upgrade our `MonadError[Default, String]` to have an
 `Alt[Default]`:
+
+Kelas tipe yang mempunyai `Applicative` berhak memiliki sebuah instans dari `Alt`.
+Bila kita ingin menggunakan trik `Kleisli.iso`, kita dapat mengeksten `IsomorphismMonadError`
+dan mencampurnya pada `Alt` dan meningkatkan `MonadError[Default, String]` agar
+memililki `Alt[Default]`:
 
 {lang="text"}
 ~~~~~~~~
@@ -16701,6 +16728,10 @@ mix in `Alt`. Upgrade our `MonadError[Default, String]` to have an
 A> The primitive of `Alt` is `alt`, much as the primitive of `Applicative` is `ap`,
 A> but it often makes more sense to use `altly2` and `apply2` as the primitives
 A> with the following overrides:
+A>
+A> Nilai primitif dari `Alt` adalah `alt`, sebagaimana primitif dari `Applicative`
+A> yang berupa `ap`, namun seringkali lebih masuk akal untuk menggunakan `altly2`
+A> dan `apply2` dan primitif dengan penimpaan berikut:
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -16715,8 +16746,13 @@ A> ~~~~~~~~
 A> 
 A> Just don't forget to implement `apply2` and `altly2` or there will be an
 A> infinite loop at runtime.
+A>
+A> Jangan lupa untuk mengimplementasikan `apply2` dan `altly2` atau akan ada
+A> ikalan tak-hingga pada saat waktu-jalan.
 
 Letting us derive our `Default[Darth]`
+
+Memperkenankan kita untuk menderivasi `Default[Darth]`
 
 {lang="text"}
 ~~~~~~~~
@@ -16746,6 +16782,9 @@ Letting us derive our `Default[Darth]`
 Returning to the `scalaz-deriving` typeclasses, the invariant parents of `Alt`
 and `Decidable` are:
 
+Kembali ke kelas tipe `scalaz-deriving`, orangtua invarian dari `Alt` dan `Decidable`
+adalah:
+
 {lang="text"}
 ~~~~~~~~
   @typeclass trait InvariantApplicative[F[_]] extends InvariantFunctor[F] {
@@ -16765,6 +16804,8 @@ and `Decidable` are:
 ~~~~~~~~
 
 supporting typeclasses with an `InvariantFunctor` like `Monoid` and `Semigroup`.
+
+mendukung kelas tipe dengan `InvarianFunctor` seperti `Monad` dan `Semigroup`
 
 
 ### Arbitrary Arity and `@deriving`
