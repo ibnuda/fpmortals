@@ -15949,7 +15949,13 @@ Sebelum kita memulai, berikut merupakan rekap ulang dari kelas tipe utama Scalaz
 
 The simplest way to derive a typeclass is to reuse one that already exists.
 
+Cara paling sederhana untuk menderivasi sebuah kelas tipe adalah menggunakan
+ulang derivasi yang sudah ada.
+
 The `Equal` typeclass has an instance of `Contravariant[Equal]`, providing
+`.contramap`:
+
+Kelas tipe `Equal` mempunyai instans `Contravariant[Equal]` yang menyediakan
 `.contramap`:
 
 {lang="text"}
@@ -15967,6 +15973,10 @@ As users of `Equal`, we can use `.contramap` for our single parameter data
 types. Recall that typeclass instances go on the data type companions to be in
 their implicit scope:
 
+Sebagai pengguna dari `Equal`, kita dapat menggunakan `.contramap` untuk tipe
+data parameter tunggal kita. Harap diingat bahwa instans kelas tipe masuk pada
+pendamping tipe data agar masuk pada cakupan implisit mereka:
+
 {lang="text"}
 ~~~~~~~~
   final case class Foo(s: String)
@@ -15981,6 +15991,10 @@ their implicit scope:
 However, not all typeclasses can have an instance of `Contravariant`. In
 particular, typeclasses with type parameters in covariant position may have a
 `Functor` instead:
+
+Namun, tidak semua kelas tipe mempunyai instans `Contravariant`. Terlebih lagi,
+kelas tipe dengan parameter tipe pada posisi kovarian mungkin malah memiliki
+instans `Functor`:
 
 {lang="text"}
 ~~~~~~~~
@@ -15997,6 +16011,8 @@ particular, typeclasses with type parameters in covariant position may have a
 
 We can now derive a `Default[Foo]`
 
+Kita dapat menderivasi sebuah `Default[Foo]`
+
 {lang="text"}
 ~~~~~~~~
   object Foo {
@@ -16007,6 +16023,10 @@ We can now derive a `Default[Foo]`
 
 If a typeclass has parameters in both covariant and contravariant position, as
 is the case with `Semigroup`, it may provide an `InvariantFunctor`
+
+Bila sebuah kelas tipe mempunyai parameter pada posisi kovarian dan kontravarian,
+seperti halnya `Semigroup`, kelas tipe ini mungkin menyediakan sebuah instans
+`IntravariantFunctor`
 
 {lang="text"}
 ~~~~~~~~
@@ -16022,6 +16042,8 @@ is the case with `Semigroup`, it may provide an `InvariantFunctor`
 
 and we can call `.xmap`
 
+dan kita akan memanggil `.xmap`
+
 {lang="text"}
 ~~~~~~~~
   object Foo {
@@ -16031,6 +16053,9 @@ and we can call `.xmap`
 ~~~~~~~~
 
 Generally, it is simpler to just use `.xmap` instead of `.map` or `.contramap`:
+
+Secara umum, jauh lebih mudah untuk menggunakan `.xmap` bila dibandingkan dengan
+menggunakan `.map` atau `.contramap`:
 
 {lang="text"}
 ~~~~~~~~
@@ -16044,6 +16069,9 @@ Generally, it is simpler to just use `.xmap` instead of `.map` or `.contramap`:
 
 A> The `@xderiving` annotation automatically inserts `.xmap` boilerplate. Add the
 A> following to `build.sbt`
+A>
+A> Anotasi `@xderiving` secara otomatis menyisipkan plat cetak `.xmap`. Tambahkan
+A> potongan berikut pada `build.sbt`
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -16052,6 +16080,8 @@ A>   libraryDependencies += "org.scalaz" %% "deriving-macro" % derivingVersion %
 A> ~~~~~~~~
 A> 
 A> and use it as
+A>
+A> dan gunakan seperti
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
