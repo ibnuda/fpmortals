@@ -16098,6 +16098,12 @@ very much expected that reading can fail. For example, if we have a default
 `String` it does not mean that we can simply derive a default `String Refined
 NonEmpty` from it
 
+Biasanya, sesuatu yang *menulis* dari sebuah nilai polimorfis mempunyai sebuah
+`Contravariant`. Dan, sesuatu yang *membaca* ke sebuah nilai polimorfis mempunyai
+sebuah `Functor`. Namun, sangat wajar bila pembacaan dapat gagal. Sebagai contoh,
+bila kita mempunyai sebuah `String` default, bukan berarti kita tinggal menurunkan
+`String Refined NonEmpty` darinya 
+
 {lang="text"}
 ~~~~~~~~
   import eu.timepit.refined.refineV
@@ -16109,6 +16115,8 @@ NonEmpty` from it
 ~~~~~~~~
 
 fails to compile with
+
+yang gagal dikompilasi dengan galat
 
 {lang="text"}
 ~~~~~~~~
@@ -16122,8 +16130,14 @@ fails to compile with
 Recall from Chapter 4.1 that `refineV` returns an `Either`, as the compiler has
 reminded us.
 
+Mohon diingat bahwa pada bab 4.1, `refineV` mengembalikan sebuah `Either`,
+sesuai dengan apa yang telah kompiler peringatkan.
+
 As the typeclass author of `Default`, we can do better than `Functor` and
 provide a `MonadError[Default, String]`:
+
+Sebaga penulis dari kelas tipe `Default`, kita dapat berbuat lebih daripada
+`Functor` dan menyediakan sebuah `MonadError[Default, String]`:
 
 {lang="text"}
 ~~~~~~~~
@@ -16141,6 +16155,8 @@ provide a `MonadError[Default, String]`:
 
 Now we have access to `.emap` syntax and can derive our refined type
 
+Setelah mendapatkan akses ke sintaks `.emap` dan dapat menderivasi tipe *refined*
+
 {lang="text"}
 ~~~~~~~~
   implicit val nes: Default[String Refined NonEmpty] =
@@ -16148,6 +16164,8 @@ Now we have access to `.emap` syntax and can derive our refined type
 ~~~~~~~~
 
 In fact, we can provide a derivation rule for all refined types
+
+Nyatanya, kita dapat menyediakan aturan derivasi untuk semua tipe terrefinasi
 
 {lang="text"}
 ~~~~~~~~
@@ -16158,8 +16176,13 @@ In fact, we can provide a derivation rule for all refined types
 
 where `Validate` is from the refined library and is required by `refineV`.
 
+dimana `Validate` berasal dari pustaka `refined` dan dibutuhkan oleh `refineV`.
+
 A> The `refined-scalaz` extension to `refined` provides support for automatically
 A> deriving all typeclasses for refined types with the following import
+A>
+A> Ekstensi `refined-scalaz` untuk pustaka `refined` menyediakan dukungan untuk
+A> menderivasi semua kelas tipe untuk tipe terrefinasi dengan impor berikut
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -16167,12 +16190,22 @@ A>   import eu.timepit.refined.scalaz._
 A> ~~~~~~~~
 A> 
 A> if there is a `Contravariant` or `MonadError[?, String]` in the implicit scope.
+A>
+A> bila ada `Contravariant` atau `MonadError[?, String]` pada cakupan implisit.
 A> 
 A> However, due to [limitations of the Scala compiler](https://github.com/scala/bug/issues/10753) it rarely works in practice
 A> and we must write `implicit def refined` derivations for each typeclass.
+A>
+A> Namun, karena [batasan dari kompiler Scala](https://github.com/scala/bug/issues/10753), hal ini jarang
+A> berfungsi di praktik pada lapangan dan kita harus menulis derivasi
+A> tiap kelas tipe `implicit def refined`.
 
 Similarly we can use `.emap` to derive an `Int` decoder from a `Long`, with
 protection around the non-total `.toInt` stdlib method.
+
+Kita juga dapat menggunakan `.emap` untuk menderivasi sebuah pembaca sandi
+`Int` dari sebuah `Long` dengan perlindungan atas metoda non-total `.toInt`
+dari pustaka standar.
 
 {lang="text"}
 ~~~~~~~~
@@ -16186,6 +16219,10 @@ protection around the non-total `.toInt` stdlib method.
 As authors of the `Default` typeclass, we might want to reconsider our API
 design so that it can never fail, e.g. with the following type signature
 
+Sebagai penulis dari kelas tipe `Default`, kita mungkin ingin mempertimbangkan
+ulang desain APA kita sehingga tidak akan gagal, misalkan dengan menggunakan
+penanda tipe berikut
+
 {lang="text"}
 ~~~~~~~~
   @typeclass trait Default[A] {
@@ -16198,6 +16235,11 @@ that always succeed. This will result in more boilerplate but gains compiletime
 safety. However, we will continue with `String \/ A` as the return type as it is
 a more general example.
 
+Kita tidak akan dapat mendefinisikan sebuah `MonadError`, sehingga kita terpaksa
+untuk menyediakan instans yang selalu sukses. Hal ini akan menghasilkan plat cetak
+yang lebih banyak sebagai ganti atas keamanan tipe. Namun, kita akan tetap
+menggunakan `String \/ A` sebagai nilai kembalian karena ini merupakan contoh
+yang lebih umum.
 
 ### `.fromIso`
 
