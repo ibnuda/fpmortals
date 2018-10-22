@@ -15231,6 +15231,11 @@ Scalaz's `IO` is the fastest asynchronous programming construct in the Scala
 ecosystem: up to 50 times faster than `Future`. `IO` is a free data structure
 specialised for use as a general effect monad.
 
+`IO` Scalaz merupakan konstruk pemrograman asinkronus yang paling cepat pada
+ekosistem Scala: hampir 50 kali lebih cepat bila dibandingkan dengan `Future`.
+`IO` merupakan struktur data *free* yang khusus digunakan sebagai monad efek
+umum.
+
 {lang="text"}
 ~~~~~~~~
   sealed abstract class IO[E, A] { ... }
@@ -15250,6 +15255,11 @@ be an application specific ADT. But because we are on the JVM, and must interact
 with legacy libraries, a convenient type alias is provided that uses exceptions
 for the error type:
 
+`IO` mempunyai **dua** parameter tipe: `IO` memiliki `Bifunctor` yang memperkenankan
+tipe galat agar menjadi ADT spesifik aplikasi. Namun, karena kita berada pada JVM,
+dan harus berinteraksi dengan pusaka warisan, sebuah tipe bantuan disediakan
+agar dapat menggunakan tipe galat dari pengecualian:
+
 {lang="text"}
 ~~~~~~~~
   type Task[A] = IO[Throwable, A]
@@ -15258,6 +15268,10 @@ for the error type:
 A> `scalaz.ioeffect.IO` is a high performance `IO` by John de Goes. It has a
 A> separate lifecycle to the core Scalaz library and must be manually added to our
 A> `build.sbt` with
+A>
+A> `scalaz.ioeffect.IO` merupakan `IO` dengan performa tinggi yang ditulis oleh
+A> John de Goes. `IO` ini mempunyai siklus hidup yang terpisah dari pustaka standar
+A> Scalaz dan harus ditambah secara manual ke `build.sbt` dengan
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -15265,8 +15279,13 @@ A>   libraryDependencies += "org.scalaz" %% "scalaz-ioeffect" % "2.10.1"
 A> ~~~~~~~~
 A> 
 A> Do not use the deprecated `scalaz-effect` and `scalaz-concurrency` packages.
+A>
+A> Jangan gunakan paket `scalaz-effect` dan `scalaz-concurrency` yang sudah
+A> tidak digunakan lagi.
 A> 
 A> Prefer the `scalaz.ioeffect` variants of all typeclasses and data types.
+A>
+A> Gunakan varian `scalaz.ioeffect` untuk semua kelas tipe dan tipe data.
 
 
 ### Creating
