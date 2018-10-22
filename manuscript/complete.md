@@ -16246,6 +16246,9 @@ yang lebih umum.
 All of the typeclasses in Scalaz have a method on their companion with a
 signature similar to the following:
 
+Semua kelas tipe di Scalaz mempunyai sebuah metoda pada objek pendampingnya
+dengan sebuah penanda yang mirip sebagai berikut:
+
 {lang="text"}
 ~~~~~~~~
   object Equal {
@@ -16262,8 +16265,15 @@ signature similar to the following:
 These mean that if we have a type `F`, and a way to convert it into a `G` that
 has an instance, we can call `Equal.fromIso` to obtain an instance for `F`.
 
+Potongan diatas berarti bila kita mempunyai sebuah tipe `F` dan sebuah cara untuk
+mengkonversinya menjadi sebuah `G` yang mempunyai sebuah instans, kita dapat
+memanggil `Equal.fromIso` untuk mendapatkan instans dari `F`.
+
 For example, as typeclass users, if we have a data type `Bar` we can define an
 isomorphism to `(String, Int)`
+
+Sebagai contoh, sebagai pengguna kelas tipe, bila kita mempunyai tipe data `Bar`,
+kita dapat mendefinisikan sebuah isomorfisme ke `(String, Int)`
 
 {lang="text"}
 ~~~~~~~~
@@ -16276,6 +16286,8 @@ isomorphism to `(String, Int)`
 ~~~~~~~~
 
 and then derive `Equal[Bar]` because there is already an `Equal` for all tuples:
+
+dan menderivasi `Equal[Bar]` karena sudah ada `Equal` untuk semua tuple:
 
 {lang="text"}
 ~~~~~~~~
@@ -16290,9 +16302,18 @@ The `.fromIso` mechanism can also assist us as typeclass authors. Consider
 `default` method is in fact isomorphic to `Kleisli[F, Unit, A]`, the `ReaderT`
 monad transformer.
 
+Mekanisme `.fromIso` juga dapat membantu kita sebagai penulis kelas tipe.
+Sebagai contoh, `Default` yang mempunyai penanda tipe utama dengan bentuk `Unit => F[A]`.
+Metoda `default` kita sebenarnya isomorfik terhadap `Kleisli[F, Unit, A]`,
+atau transformator monad `ReaderT`.
+
 Since `Kleisli` already provides a `MonadError` (if `F` has one), we can derive
 `MonadError[Default, String]` by creating an isomorphism between `Default` and
 `Kleisli`:
+
+Karena `Kleisli` sudah menyediakan sebuah `MonadError` (bila `F` sudah mempunyainya),
+kita dapat menderivasi `MonadError[Default, String]` dengan membuat sebuah
+isomorfisme antara `Default` dan `Kleisli`:
 
 {lang="text"}
 ~~~~~~~~
@@ -16306,6 +16327,8 @@ Since `Kleisli` already provides a `MonadError` (if `F` has one), we can derive
 
 giving us the `.map`, `.xmap` and `.emap` that we've been making use of so far,
 effectively for free.
+
+memberikan kita `.map`, `.xmap`, dan `.emap` yang sudah kita gunakan selama ini.
 
 
 ### `Divisible` and `Applicative`
