@@ -15493,6 +15493,11 @@ An `IO` may spawn *fibers*, a lightweight abstraction over a JVM `Thread`. We
 can `.fork` an `IO`, and `.supervise` any incomplete fibers to ensure that they
 are terminated when the `IO` action completes
 
+Sebuah `IO` bisa saja membuat fiber, abstraksi ringan atas `Thread` JVM.
+Kita dapat melakukan `.fork` kepada sebuah `IO` dan melakukan pengawasan
+(`.supervise`) terhadap semua fiber yang belum lengkap untuk memastikan bahwa
+fiber tersebut akan di-terminasi saat tindakan atas `IO` selesai
+
 {lang="text"}
 ~~~~~~~~
   ...
@@ -15503,6 +15508,9 @@ are terminated when the `IO` action completes
 
 When we have a `Fiber` we can `.join` back into the `IO`, or `interrupt` the
 underlying work.
+
+Saat kita mempunyai sebuah `Fiber`, kita dapat menggabungkannya kembali ke `IO`
+dengan `.join`, atau juga menghentikan dengan menggunakan `interrupt`.
 
 {lang="text"}
 ~~~~~~~~
@@ -15516,6 +15524,12 @@ We can use fibers to achieve a form of optimistic concurrency control. Consider
 the case where we have `data` that we need to analyse, but we also need to
 validate it. We can optimistically begin the analysis and cancel the work if the
 validation fails, which is performed in parallel.
+
+Kita dapat menggunakan fiber untuk mencapai bentuk kontrol konkuren optimistis.
+Anggap sebuah situasi dimana kita mempunyai `data` yang harus kita analis namun
+kita juga harus memvalidasinya. Kita dapat secara optimistis memulai analisis
+dan membatalkan tugas bila gagal divalidasi. Dan semua ini dilakukan secara
+paralel.
 
 {lang="text"}
 ~~~~~~~~
@@ -15533,6 +15547,9 @@ validation fails, which is performed in parallel.
 
 Another usecase for fibers is when we need to perform a *fire and forget*
 action. For example, low priority logging over a network.
+
+Contoh penggunaan fiber lain adalah saat kita harus melakukan aksi *tembak dan
+lupakan*. Sebagai conoth, pencatatan log prioritas rendah melalui jaringan.
 
 
 ### `Promise`
