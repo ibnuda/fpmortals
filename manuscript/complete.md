@@ -17967,6 +17967,11 @@ A typical pattern to follow is to extend the typeclass that we wish to derive,
 and put the Shapeless code on its companion. This gives us an implicit scope
 that the compiler can search without requiring complex imports
 
+Pola yang umum digunakan adalah mengeksten kelas tipe yang ingin kita derivasi
+dan menempatkan kode Shapeless pada objek pendampingnya. Pola ini memberikan
+kita cakupan implisit yang dapat dicari oleh kompiler tanpa harus melakukan
+impor yang rumit.
+
 {lang="text"}
 ~~~~~~~~
   trait DerivedEqual[A] extends Equal[A]
@@ -17980,6 +17985,12 @@ parameters: the `A` that we are deriving and the `R` for its generic
 representation. We then ask for the `Generic.Aux[A, R]`, relating `A` to `R`,
 and an instance of the `Derived` typeclass for the `R`. We begin with this
 signature and simple implementation:
+
+Titik mulai dari derivasi Shapeless adalah metoda `gen` yang meminta dua parameter
+tipe: `A` sebagai yang kita derivasikan dan `R` sebagai representasi generiknya.
+Lalu kita akan meminta `Generic.Aux[A, R]`, menghubungkan `A` ke `R`, dan sebuah
+instans dari kelas tipe `Derived` untuk `R`. Kita memulai dengan penanda dan
+implementasi sederhana berikut:
 
 {lang="text"}
 ~~~~~~~~
@@ -17995,6 +18006,10 @@ We've reduced the problem to providing an implicit `Equal[R]` for an `R` that is
 the `Generic` representation of `A`. First consider products, where `R <:
 HList`. This is the signature we want to implement:
 
+Kita telah mereduksi permasalahan atas penyediaan sebuah `Equal[R]` implisit
+untuk `R` yang merupakan representasi generik dari `A`. Pertam, perhatikan produk
+yang berupa `R <: HList`. Penanda inilah yang kita inginkan untuk diimplementasikan:
+
 {lang="text"}
 ~~~~~~~~
   implicit def hcons[H: Equal, T <: HList: DerivedEqual]: DerivedEqual[H :: T]
@@ -18004,12 +18019,18 @@ because if we can implement it for a head and a tail, the compiler will be able
 to recurse on this method until it reaches the end of the list. Where we will
 need to provide an instance for the empty `HNil`
 
+karena bila kita dapat mengimplementasikannya untuk *head* dan *tail*, komplire
+akan dapat mengulang metoda ini sampai pada akhir daftar. Hal ini membawa kita
+pada keharusan untuk menyediakan sebuah instans untuk `HNil` kosong
+
 {lang="text"}
 ~~~~~~~~
   implicit def hnil: DerivedEqual[HNil]
 ~~~~~~~~
 
 We implement these methods
+
+Kita akan mengimplementasikan metoda berikut
 
 {lang="text"}
 ~~~~~~~~
@@ -18021,6 +18042,8 @@ We implement these methods
 
 and for coproducts we want to implement these signatures
 
+dan untuk kooproduk, kita ingin mengimplementasikan penanda berikut
+
 {lang="text"}
 ~~~~~~~~
   implicit def ccons[H: Equal, T <: Coproduct: DerivedEqual]: DerivedEqual[H :+: T]
@@ -18029,6 +18052,9 @@ and for coproducts we want to implement these signatures
 
 A> Scalaz and Shapeless share many type names, when mixing them we often need to
 A> exclude certain elements from the import, e.g.
+A>
+A> Scalaz dan Shapeless berbagi banyak nama tipe. Saat menggunakan secara bersamaan,
+A> sering kali kita harus mengecualikan beberapa elemen dari impor. Mis,
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -18040,6 +18066,10 @@ A> ~~~~~~~~
 only in contravariant position, but the compiler doesn't know that so we have to
 provide a stub:
 
+`.cnil` tidak akan pernah dipanggil untuk kelas tipe dengan parameter tipe yang
+hanya ada pada posisi kontravarian, seperti `Equal`, namun koompiler tidak tahu
+mengenai hal tersebut. Jadi, kita akan menyediakan potongan kode berikut:
+
 {lang="text"}
 ~~~~~~~~
   implicit val cnil: DerivedEqual[CNil] = (_, _) => sys.error("impossible")
@@ -18047,6 +18077,9 @@ provide a stub:
 
 For the coproduct case we can only compare two things if they align, which is
 when they are both `Inl` or `Inr`
+
+Untuk koproduk, kita hanya bisa membandingkan dua hal bila mereka selaras. Atau
+keduanya `Inl` atau `Inr`
 
 {lang="text"}
 ~~~~~~~~
@@ -18062,7 +18095,14 @@ It is noteworthy that our methods align with the concept of `conquer` (`hnil`),
 advantages of implementing `Decidable`, as now we must start from scratch when
 writing tests for this code.
 
+Hal yang patut dicatat adalah metoda kita selaras dengan konsep `conquer` (`hnil`),
+`divide2` (`hlist`), dan `alt2` (`coproduct`). Namun, kita tidak mendapat
+keuntungan apapun seperti pengimplementasian `Decidable`. Hal ini berarti kita
+harus memulai dari awal bila kita menulis tes untuk kode ini.
+
 So let's test this thing with a simple ADT
+
+Mari kita tes kode berikut dengan TDA sederhana
 
 {lang="text"}
 ~~~~~~~~
@@ -18073,6 +18113,8 @@ So let's test this thing with a simple ADT
 ~~~~~~~~
 
 We need to provide instances on the companions:
+
+Kita harus menyediakan instans pada objek pendamping:
 
 {lang="text"}
 ~~~~~~~~
@@ -18092,6 +18134,8 @@ We need to provide instances on the companions:
 
 But it doesn't compile
 
+Namun, kode tersebut tidak dapat dikompilasi
+
 {lang="text"}
 ~~~~~~~~
   [error] shapeless.scala:41:38: ambiguous implicit values:
@@ -18104,9 +18148,15 @@ But it doesn't compile
 
 Welcome to Shapeless compilation errors!
 
+Nah, galat kompilasi Shapeless terlihat seperti ini.
+
 The problem, which is not at all evident from the error, is that the compiler is
 unable to work out what `R` is, and gets caught thinking it is something else.
 We need to provide the explicit type parameters when calling `gen`, e.g.
+
+Masalah ini, yang sama sekali tidak jelas terlihat dari pesan galat, terjadi
+karena kompiler tidak dapat menentukan `R` dan mengira `R` sebagai tipe lainnya.
+Kita harus menyediakan parameter tipe eksplisit saat memanggil `gen`, mis.
 
 {lang="text"}
 ~~~~~~~~
@@ -18114,6 +18164,9 @@ We need to provide the explicit type parameters when calling `gen`, e.g.
 ~~~~~~~~
 
 or we can use the `Generic` macro to help us and let the compiler infer the generic representation
+
+atau kita dapat menggunakan makro `Generic` agar kompiler dapat menebak representasi
+generiknya
 
 {lang="text"}
 ~~~~~~~~
@@ -18126,8 +18179,13 @@ or we can use the `Generic` macro to help us and let the compiler infer the gene
 
 A> At this point, ignore any red squigglies and only trust the compiler. This is
 A> the point where Shapeless departs from IDE support.
+A>
+A> Sampai disini, abaikan semua coretan merah dan hanya percaya pada kompiler.
+A> Disinilah dimana Shapeless tidak didukung oleh IDE.
 
 The reason why this fixes the problem is because the type signature
+
+Penanda tipe-lah yang menyelesaikan masalah tersebut
 
 {lang="text"}
 ~~~~~~~~
@@ -18135,6 +18193,8 @@ The reason why this fixes the problem is because the type signature
 ~~~~~~~~
 
 desugars into
+
+yang dijabarkan menjadi
 
 {lang="text"}
 ~~~~~~~~
@@ -18145,16 +18205,32 @@ The Scala compiler solves type constraints left to right, so it finds many
 different solutions to `DerivedEqual[R]` before constraining it with the
 `Generic.Aux[A, R]`. Another way to solve this is to not use context bounds.
 
+Kompiler Scala menyelesaikan batasan tipe dari kiri ke kanan. Jadi kompiler
+akan mencari banyak solusi untuk `DerivedEqual[R]` sebelum membatasinya menjadi
+`Generic.Aux[A, R]`. Cara lain untuk menyelesaikan masalah ini adalah dengan
+tidak menggunakan batasan konteks.
+
 A> Rather than present the fully working version, we feel it is important to show
 A> when obvious code fails, such is the reality of Shapeless. Another thing we
 A> could have reasonably done here is to have `sealed` the `DerivedEqual` trait so
 A> that only derived versions are valid. But `sealed trait` is not compatible with
 A> SAM types! Living at the razor's edge, expect to get cut.
+A>
+A> Kita merasa penunjukkan gagalnya kompilasi kode, bukan versi yang benar-benar
+A> berjalan dengan baik, adalah karena memang keseharian nyata dari Shapeless
+A> begitu. Hal lain yang mungkin bisa saja kita lakukan disini adalah menggunakan
+A> `sealed` pada *trait* `DerivedEqual` sehingga hanya versi terderivasi saja
+A> yang valid. Namun, `sealed trait` tidak kompatibel dengan tipe SAM.
 
 With this in mind, we no longer need the `implicit val generic` or the explicit
 type parameters on the call to `.gen`. We can wire up `@deriving` by adding an
 entry in `deriving.conf` (assuming we want to override the `scalaz-deriving`
 implementation)
+
+Berbekal pengetahuan ini, kita tidak perlu lagi `implicit val generic` atau tipe
+parameter eksplisit pada panggilan `.gen`. Kita dapat menggunakan `@deriving`
+dan menambahkan sebuah catatan pada `deriving.conf` (dengan asumsi kita ingin
+menimpa implementasi `scalaz-deriving`)
 
 {lang="text"}
 ~~~~~~~~
@@ -18162,6 +18238,8 @@ implementation)
 ~~~~~~~~
 
 and write
+
+dan menulis
 
 {lang="text"}
 ~~~~~~~~
@@ -18176,10 +18254,22 @@ This is because the compiler is solving `N` implicit searches for each product
 of `N` fields or coproduct of `N` products, whereas `scalaz-deriving` and
 Magnolia do not.
 
+Namun, mengganti versi `scalaz-deriving` juga berarti waktu kompilasi akan semakin
+panjang. Hal ini disebabkan karena kompiler menyelesaikan pencarian implisit `N`
+untuk tiap produk bidang `N` atau koproduk dari produk `N`. Hal semacam ini
+tidak terjadi pada `scalaz-deriving` dan Magnolia.
+
 Note that when using `scalaz-deriving` or Magnolia we can put the `@deriving` on
 just the top member of an ADT, but for Shapeless we must add it to all entries.
 
+Harap dicatat saat menggunakan `scalaz-deriving` atau Magnolia, kita dapat
+menuliskan `@deriving` pada bagian atas anggota dari sebuah TDA. Shapeless
+meminta perlakuan yang berbeda dengan mengharuskan kita untuk menambahkannya pada
+semua bagian.
+
 However, this implementation still has a bug: it fails for recursive types **at runtime**, e.g.
+
+Namun, implementasi ini masih memiliki kutu: kegagalan pada tipe rekursif **saat waktu jalan**, mis.
 
 {lang="text"}
 ~~~~~~~~
@@ -18206,15 +18296,31 @@ The reason why this happens is because `Equal[Tree]` depends on the
 `Equal[Branch]`, which depends on the `Equal[Tree]`. Recursion and BANG!
 It must be loaded lazily, not eagerly.
 
+Alasan hal ini terjadi adalah `Equal[Tree]` bergantung pada `Equal[Branch]` yang
+bergantung pada `Equal[Tree]`. Dan terjadilah rekursi. Maka dari itu, implementasi
+ini harus dipanggil secara lantung.
+
 Both `scalaz-deriving` and Magnolia deal with lazy automatically, but in
 Shapeless it is the responsibility of the typeclass author.
+
+`scalaz-deriving` dan Magnolia secara otomatis melakukan evaluasi lantung dan
+lagi-lagi Shapeless mengambil penekatan yang berbeda karena menyerahkan sepenuhnya
+ke penulis kelas tipe.
 
 The macro types `Cached`, `Strict` and `Lazy` modify the compiler's type
 inference behaviour allowing us to achieve the laziness we require. The pattern
 to follow is to use `Cached[Strict[_]]` on the entry point and `Lazy[_]` around
 the `H` instances.
 
+Tipe makro `Cached`, `Strict`, dan `Lazy` mengubah perilaku inferensi kompiler
+dan memperkenankan kita untuk mendapatkan kelantungan yang kita butuhkan. Pola
+yang harus diikut adalah dengan menggunakan `Cached[Strict[_]]` pada titik masuk
+dan `Lazy[_]` pada instans `H`.
+
 It is best to depart from context bounds and SAM types entirely at this point:
+
+Akah jauh lebih baik untuk tidak lagi menggunakan batasan konteks dan tipe
+SAM pada titik ini:
 
 {lang="text"}
 ~~~~~~~~
@@ -18264,7 +18370,12 @@ It is best to depart from context bounds and SAM types entirely at this point:
 While we were at it, we optimised using the `quick` shortcut from
 `scalaz-deriving`.
 
+Sembari melepas batasan konteks, kita juga mengoptimasi dengan menggunakan
+jalan pintas `quick` dari `scalaz-deriving`.
+
 We can now call
+
+Sekarang, kita dapat memanggil
 
 {lang="text"}
 ~~~~~~~~
@@ -18272,6 +18383,8 @@ We can now call
 ~~~~~~~~
 
 without a runtime exception.
+
+tanpa mendapatkan pengecualian waktu-jalan.
 
 
 ### Example: `Default`
