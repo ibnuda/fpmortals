@@ -17310,20 +17310,37 @@ akses ke nama bidang, nama tipe, anotasi, dan nilai default.
 
 We have some design choices to make with regards to JSON serialisation:
 
+Kita mempunyai beberapa pilihan desain mengenai serialisasi JSON yang harus dipilih:
+
 1.  Should we include fields with `null` values?
 2.  Should decoding treat missing vs `null` differently?
 3.  How do we encode the name of a coproduct?
 4.  How do we deal with coproducts that are not `JsObject`?
 
+1.  Haruskah kita mengikut-sertakan bidang dengan nilai `null`?
+2.  Haruskah pembacaan sandi memperlakukan nilai yang hilang dan `null` secara berbeda?
+3.  Bagaimana kita menyandikan nama dari sebuah koproduk?
+4.  Bagaimana kita memperlakukan koproduk yang bukan berupa `JsObject`?
+
 We choose sensible defaults
+
+Kita akan memilih beberapa pengaturan default
 
 -   do not include fields if the value is a `JsNull`.
 -   handle missing fields the same as `null` values.
 -   use a special field `"type"` to disambiguate coproducts using the type name.
 -   put primitive values into a special field `"xvalue"`.
 
+-   tidak mengikut sertakan bidang bila nilai bidang tersebut berupa `JsNull`.
+-   menangani bidang yang hilang sama dengan nilai `null`.
+-   menggunakan bidang khusus `"type"` untuk membedakan koproduk yang menggunakan nama tipe.
+-   menempatkan nilai primitif pada bidang khusus `"xvalue"`.
+
 and let the users attach an annotation to coproducts and product fields to
 customise their formats:
+
+dan memperkenankan pengguna untuk menambahkan anotasi ke bidang koproduk dan produk
+agar dapat mengubah format sesuai keinginan mereka:
 
 {lang="text"}
 ~~~~~~~~
@@ -17337,8 +17354,14 @@ customise their formats:
 
 A> Magnolia is not limited to one annotation family. This encoding is so that we
 A> can do a like-for-like comparison with Shapeless in the next section.
+A>
+A> Magnolia tidak terbatas pada satu keluarga anotasi saja. Penyandian ini
+A> dimaksudkan agar kita dapat melakukan perbandingan semacam Shapeless pada
+A> bab selanjutnya.
 
 For example
+
+Sebagai contoh
 
 {lang="text"}
 ~~~~~~~~
@@ -17349,6 +17372,8 @@ For example
 ~~~~~~~~
 
 Start with a `JsDecoder` that handles only our sensible defaults:
+
+Dimulai dengan `JsDecoder` yang hanya menangani pengaturan default kita:
 
 {lang="text"}
 ~~~~~~~~
@@ -17382,11 +17407,21 @@ Start with a `JsDecoder` that handles only our sensible defaults:
 We can see how the Magnolia API makes it easy to access field names and
 typeclasses for each parameter.
 
+Kita dapat melihat bagaimana APA Magnolia mempermudah pengaksesan nama bidang
+dan kelas tipe untuk tiap parameter.
+
 Now add support for annotations to handle user preferences. To avoid looking up
 the annotations on every encoding, we will cache them in an array. Although field
 access to an array is non-total, we are guaranteed that the indices will always
 align. Performance is usually the victim in the trade-off between specialisation
 and generalisation.
+
+Sekarang, kita akan menambah anotasi untuk menangani prarasa pengguna. Untuk
+menghindari mengingat-ingat anotasi pada tiap penyandian, kita akan menyimpannya
+pada tembolok dalam bentuk larik. Walaupun akses bidang pada sebuah larik tidak
+total, sebagai gantinya, kita mendapat jaminan bahwa indeks akan selalu selaras.
+Yang menjadi korban pada tarik-ulur antara spesialisasi dan generalisasi semacam
+ini adalah performa.
 
 {lang="text"}
 ~~~~~~~~
@@ -17449,6 +17484,9 @@ and generalisation.
 For the decoder we use `.constructMonadic` which has a type signature similar to
 `.traverse`
 
+Untuk pembaca sandi, kita menggunakan `.constructMonadic` yang mempunyai penanda
+tipe mirip dengan `.traverse`
+
 {lang="text"}
 ~~~~~~~~
   object JsMagnoliaDecoder {
@@ -17483,6 +17521,9 @@ For the decoder we use `.constructMonadic` which has a type signature similar to
 
 Again, adding support for user preferences and default field values, along with
 some optimisations:
+
+Hal yang sama, penambahan dukungan untuk prarasa pengguna dan nilai bidang default,
+dan juga bebarapa optimasi:
 
 {lang="text"}
 ~~~~~~~~
@@ -17566,6 +17607,9 @@ some optimisations:
 We call the `JsMagnoliaEncoder.gen` or `JsMagnoliaDecoder.gen` method from the
 companion of our data types. For example, the Google Maps API
 
+Kita memanggil metoda `JsMagnoliaEncoder.gen` atau `JsMagnoliaDecoder.gen` dari
+objek pendamping tipe data kita. Sebagai contoh, APA Google Maps
+
 {lang="text"}
 ~~~~~~~~
   final case class Value(text: String, value: Int)
@@ -17599,6 +17643,9 @@ companion of our data types. For example, the Google Maps API
 Thankfully, the `@deriving` annotation supports Magnolia! If the typeclass
 author provides a file `deriving.conf` with their jar, containing this text
 
+Untungnya, anotasi `@deriving` mendukung Magnolia. Bila penulis kelas tipe menyediakan
+berkas `deriving.conf` bersamaan dengan berkas jar mereka yang berisi teks berikut
+
 {lang="text"}
 ~~~~~~~~
   jsonformat.JsEncoder=jsonformat.JsMagnoliaEncoder.gen
@@ -17606,6 +17653,8 @@ author provides a file `deriving.conf` with their jar, containing this text
 ~~~~~~~~
 
 the `deriving-macro` will call the user-provided method:
+
+`deriving-macro` akan memanggil metoda yang disediakan oleh pengguna:
 
 {lang="text"}
 ~~~~~~~~
