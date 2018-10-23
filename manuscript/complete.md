@@ -17209,12 +17209,18 @@ A> yang taat hukum.
 The Magnolia macro library provides a clean API for writing typeclass
 derivations. It is installed with the following `build.sbt` entry
 
+Pustaka makro Magnolia menyediakan APA yang rapi untuk menulis derivasi kelas
+tipe. Pemasangan Magnolia dapat dilakukan dengan menambah potongan berikut
+pada `build.sbt`
+
 {lang="text"}
 ~~~~~~~~
   libraryDependencies += "com.propensive" %% "magnolia" % "0.10.1"
 ~~~~~~~~
 
 A typeclass author implements the following members:
+
+Seorang penulis kelas tipe mengimplementasikan anggota-anggota berikut:
 
 {lang="text"}
 ~~~~~~~~
@@ -17231,6 +17237,8 @@ A typeclass author implements the following members:
 ~~~~~~~~
 
 The Magnolia API is:
+
+Sedangkan APA Magnolia:
 
 {lang="text"}
 ~~~~~~~~
@@ -17251,6 +17259,8 @@ The Magnolia API is:
 ~~~~~~~~
 
 with helpers
+
+dengan pembantu
 
 {lang="text"}
 ~~~~~~~~
@@ -17279,11 +17289,21 @@ with helpers
 The `Monadic` typeclass, used in `constructMonadic`, is automatically generated
 if our data type has a `.map` and `.flatMap` method when we `import mercator._`
 
+Kelas tipe `Monadic`, yang digunakan pada `constructMonadic`, dibuat secara
+otomatis bila tipe data kita mempunyai metoda `.map` dan `.flatMap` saat kita
+mengimpor `mercator._`.
+
 It does not make sense to use Magnolia for typeclasses that can be abstracted by
 `Divisible`, `Decidable`, `Applicative` or `Alt`, since those abstractions
 provide a lot of extra structure and tests for free. However, Magnolia offers
 features that `scalaz-deriving` cannot provide: access to field names, type
 names, annotations and default values.
+
+Sebenarnya, tidak masuk akal bila kita menggunakan Magnolia untuk kelas tipe
+yang dapat diabstraksi dengan `Divisible`, `Decidable`, `Applicative`, atau `Alt`
+karena abstraksi tersebut menyediakan struktur dan tes tambahan secara otomatis.
+Namun, Magnolia menawarkan fitur yang tidak dapat diberikan oleh `scalaz-deriving`:
+akses ke nama bidang, nama tipe, anotasi, dan nilai default.
 
 
 ### Example: JSON
