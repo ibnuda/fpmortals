@@ -17166,6 +17166,10 @@ It is not possible to define a `Semigroup` for general coproducts, however it is
 possible to define one for general products. We can use the arbitrary arity
 `InvariantApplicative`:
 
+Pendefinisian `Semigroup` untuk koproduk umum tidak mungkin didefinisikan, namun
+masih memungkinkan bila mendefinisikannya untuk produk umum. Kita dapat menggunakan
+*arity* arbiter `InvariantApplicative`:
+
 {lang="text"}
 ~~~~~~~~
   new InvariantApplicativez[Semigroup] {
