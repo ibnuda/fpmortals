@@ -16812,11 +16812,19 @@ mendukung kelas tipe dengan `InvarianFunctor` seperti `Monad` dan `Semigroup`
 
 There are two problems with `InvariantApplicative` and `InvariantAlt`:
 
+Ada dua masalah dengan `InvariantApplicative` dan `InvariantAlt`:
+
 1.  they only support products of four fields and coproducts of four entries.
 2.  there is a **lot** of boilerplate on the data type companions.
 
+1.  keduanya hanya mendukung produk dari 4 bidang dan koproduk dari 4 catatan.
+2.  ada **banyak** plat cetak pada tipe data pendamping.
+
 In this section we solve both problems with additional typeclasses introduced by
 `scalaz-deriving`
+
+Pada bagian ini, kita akan menyelesaikan kedua permasalahan tersebut dengan kelas
+tipe tambahan yang diperkenalkan oleh `scalaz-deriving`
 
 {width=75%}
 ![](images/scalaz-deriving.png)
@@ -16825,14 +16833,27 @@ Effectively, our four central typeclasses `Applicative`, `Divisible`, `Alt` and
 `Decidable` all get extended to arbitrary arity using the [iotaz](https://github.com/frees-io/iota) library, hence
 the `z` postfix.
 
+Empat tipe kelas utama kita, `Applicative`, `Divisible`, `Alt`, dan `Decidable`,
+diperluas menjadi *arity* arbiter menggunakan pustaka [iotaz](https://github.com/frees-io/iota),
+maka dari itu mendapatkan akhiran `z`.
+
 The iotaz library has three main types:
+
+Pustaka iotaz mempunyai tiga tipe utama:
 
 -   `TList` which describes arbitrary length chains of types
 -   `Prod[A <: TList]` for products
 -   `Cop[A <: TList]` for coproducts
 
+-   `TList` yang mendeskripsikan panjang rantai tipe arbiter
+-   `Prod[A <: TList]` untuk produk
+-   `Cop[A <: TList]` untuk koproduk
+
 By way of example, a `TList` representation of `Darth` from the previous
 section is
+
+Sebagai contoh, sebuah representasi `TList` dari `Darth` pada bagian sebelumnya
+adalah
 
 {lang="text"}
 ~~~~~~~~
@@ -16844,6 +16865,8 @@ section is
 ~~~~~~~~
 
 which can be instantiated:
+
+yang dapat diinstansiasi:
 
 {lang="text"}
 ~~~~~~~~
@@ -16857,6 +16880,10 @@ which can be instantiated:
 To be able to use the `scalaz-deriving` API, we need an `Isomorphism` between
 our ADTs and the `iotaz` generic representation. It is a lot of boilerplate,
 we will get to that in a moment:
+
+Agar dapat menggunakan APA `scalaz-deriving`, kita membutuhkan `Isomorphism`
+antara TDA kita dengan representasi generik `iotaz`. Akan sangat banyak plat cetak
+yang terjadi:
 
 {lang="text"}
 ~~~~~~~~
@@ -16898,6 +16925,10 @@ we will get to that in a moment:
 With that out of the way we can call the `Deriving` API for `Equal`, possible
 because `scalaz-deriving` provides an optimised instance of `Deriving[Equal]`
 
+Setelah menulis plat cetak diatas, kita dapat memanggil APA `Deriving` untuk `Equal`.
+Hal ini mungkin terjadi karena `scalaz-deriving` menyediakan instans teroptimasi
+untuk `Deriving[Equal]`
+
 {lang="text"}
 ~~~~~~~~
   object Darth {
@@ -16920,10 +16951,19 @@ because `scalaz-deriving` provides an optimised instance of `Deriving[Equal]`
 A> Typeclasses in the `Deriving` API are wrapped in `Need` (recall `Name` from
 A> Chapter 6), which allows lazy construction, avoiding unnecessary work if the
 A> typeclass is not needed, and avoiding stack overflows for recursive GADTs.
+A>
+A> Kelas tipe pada APA `Deriving` terlapisi oleh `Need` (harap ingat `Name` pada
+A> bab 6) yang memperkenankan konstruksi luntung sehingga menghindari tugas
+A> yang tak perlu bila kelas tipe tidak dibutuhkan. Selain itu, *stack overflow*
+A> dapat dihindari untuk GADT rekursi.
 
 To be able to do the same for our `Default` typeclass, we need to provide an
 instance of `Deriving[Default]`. This is just a case of wrapping our existing
 `Alt` with a helper:
+
+Agar kelas tipe `Default` dapat diperlakukan sama, kita harus menyediakan sebuah
+instans `Deriving[Default]`. Untuk hal ini, kita tinggal melapisi `Alt` dengan
+objek pembantu:
 
 {lang="text"}
 ~~~~~~~~
@@ -16934,6 +16974,8 @@ instance of `Deriving[Default]`. This is just a case of wrapping our existing
 ~~~~~~~~
 
 and then calling it from the companions
+
+dan memanggilnya dari objek pendamping
 
 {lang="text"}
 ~~~~~~~~
@@ -16957,9 +16999,16 @@ and then calling it from the companions
 We have solved the problem of arbitrary arity, but we have introduced even more
 boilerplate.
 
+Kita telah menyelesaikan masalah *arity* arbiter, namun kita juga menambah plat
+cetak jauh lebih banyak.
+
 The punchline is that the `@deriving` annotation, which comes from
 `deriving-plugin`, generates all this boilerplate automatically and only needs
 to be applied at the top level of an ADT:
+
+Dan yang paling menjengkelkan, anotasi `@deriving` yang disediakan oleh `deriving-plugin`,
+membuat semua plat cetak ini secara manual dan hanya perlu diterapkan pada bagian
+atas sebuah TDA:
 
 {lang="text"}
 ~~~~~~~~
@@ -16973,7 +17022,13 @@ Also included in `scalaz-deriving` are instances for `Order`, `Semigroup` and
 `Monoid`. Instances of `Show` and `Arbitrary` are available by installing the
 `scalaz-deriving-magnolia` and `scalaz-deriving-scalacheck` extras.
 
+Yang juga diikut-sertakan pada `scalaz-deriving` adalah instans dari `Order`,
+`Semigroup`, dan `Monoid`. Instans dari `Show` dan `Arbitrary` tersedia dengan
+memasang `scalaz-deriving-magnolia` dan `scalaz-deriving-scalacheck`.
+
 You're welcome!
+
+Terima kasih? Sama-sama.
 
 
 ### Examples
