@@ -17038,6 +17038,11 @@ all the example typeclasses. Before we do that we need to know about a new data
 type: `/~\`, aka the *snake in the road*, for containing two higher kinded
 structures that share the same type parameter:
 
+Kita akan menutup pembelajaran kita mengenai `scalaz-deriving` dengan implementasi
+dari contoh kelas tipe yang bekerja seutuhnya. Sebelum kita melakukannya, kita
+harus tahu tentang tipe data baru: `/~\` yang juga dikenal dengan *uler kasur*,
+yang berisi dua jenis struktur lebih tinggi yang berbagi tipe parameter yang sama:
+
 {lang="text"}
 ~~~~~~~~
   sealed abstract class /~\[A[_], B[_]] {
@@ -17056,10 +17061,20 @@ We typically use this in the context of `Id /~\ TC` where `TC` is our typeclass,
 meaning that we have a value, and an instance of a typeclass for that value,
 without knowing anything about the value.
 
+Biasanya, kita menggunakan uler-kasur pada konteks `Id /~\ TC` dimana `TC` merupakan
+kelas tipe, yang berarti kita mempunyai sebuah nilai dan sebuah instans dari
+sebuah kelas tipe untuk nilai tersebut tanpa harus tahu apapun mengenai nilai
+tadi.
+
 In addition, all the methods on the `Deriving` API have implicit evidence of the
 form `A PairedWith FA`, allowing the `iotaz` library to be able to perform
 `.zip`, `.traverse`, and other operations on `Prod` and `Cop`. We can ignore
 these parameters, as we don't use them directly.
+
+Sebagai tambahan, semua metoda pada APA `Deriving` mempunyai bukti tersirat
+dengan bentuk `A PairedWith FA`, memperkenankan pustaka `iotaz` agar dapat melaksanakan
+metoda `.zip`, `.traverse`, dan operasi lainnya pada `Prod` dan `Cop`. Kita dapat
+mengabaikan parameter ini karena kita tidak menggunakannya secara langsung.
 
 
 #### `Equal`
