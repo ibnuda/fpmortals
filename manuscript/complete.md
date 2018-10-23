@@ -17680,6 +17680,10 @@ Generating `implicit` instances on the companion of the data type is
 historically known as *semi-auto* derivation, in contrast to *full-auto* which
 is when the `.gen` is made `implicit`
 
+Penghasilan instans `implicit` pada objek pendamping tipe data, secara historis,
+dikenal sebagai derivasi *semi-otomatis*. Berbeda dengan derivasi otomatis dimana
+`.gen` dibuat implisit
+
 {lang="text"}
 ~~~~~~~~
   object JsMagnoliaEncoder {
@@ -17695,6 +17699,9 @@ is when the `.gen` is made `implicit`
 Users can import these methods into their scope and get magical derivation at
 the point of use
 
+Penggguna dapat mengimpor metoda ini ke cakupan kode mereka dan mendapatkan
+derivasi otomatis pada saat penggunaan
+
 {lang="text"}
 ~~~~~~~~
   scala> final case class Value(text: String, value: Int)
@@ -17706,13 +17713,24 @@ the point of use
 This may sound tempting, as it involves the least amount of typing, but there
 are two caveats:
 
+Mungkin terlihat menggiurkan, karena pengguna tidak perlu repot menulis kode,
+namun ada dua kerugian penting:
+
 1.  the macro is invoked at every use site, i.e. every time we call `.toJson`.
     This slows down compilation and also produces more objects at runtime, which
     will impact runtime performance.
 2.  unexpected things may be derived.
 
+1.  makro diselawat pada setiap penggunaan, misal tiap kali kita memanggil `.toJson`.
+    Hal semacam ini memperlambat kompilasi dan juga menghasilkan objek lebih banyak
+    pada saat waktu-jalan, yang secara tidak langsung berdampak pada performa waktu-jalan.
+2.  kemungkinan derivasi tak terduga.
+
 The first caveat is self evident, but unexpected derivations manifests as
 subtle bugs. Consider what would happen for
+
+Kerugian pertama cukup jelas, namun derivasi yang tak terduga akan terejawantah
+sebagai kutu yang hampir tidak kasat mata. Anggap contoh berikut
 
 {lang="text"}
 ~~~~~~~~
@@ -17723,6 +17741,9 @@ subtle bugs. Consider what would happen for
 if we forgot to provide an implicit derivation for `Option`. We might expect a
 `Foo(Some("hello"))` to look like
 
+bila kita lupa menyediakan derivasi implisit untuk `Option`. Mungkin kita berharap
+`Foo(Some("hello"))` akan menjadi
+
 {lang="text"}
 ~~~~~~~~
   {
@@ -17731,6 +17752,8 @@ if we forgot to provide an implicit derivation for `Option`. We might expect a
 ~~~~~~~~
 
 But it would instead be
+
+Namun yang muncul adalah
 
 {lang="text"}
 ~~~~~~~~
@@ -17744,8 +17767,14 @@ But it would instead be
 
 because Magnolia derived an `Option` encoder for us.
 
+karena Magnolia menderivasikan penyandi `Option` untuk kita.
+
 This is confusing, we would rather have the compiler tell us if we forgot
 something. Full auto is therefore not recommended.
+
+Hal semacam ini sangat membingungkan. Kita lebih memilih agar kompiler memberi-tahu
+kita bila kita lupa sesuatu. Maka dari itu, penderivasian otomatis tidak
+direkomendasikan.
 
 
 ## Shapeless
