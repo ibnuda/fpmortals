@@ -17084,11 +17084,23 @@ with `ExtendedInvariantAlt` (the simplest approach), but we choose to implement
 `Decidablez` directly for the performance benefit. We make two additional
 optimisations:
 
+Sebagaimana dengan `Default`, kita dapat mendefinisikan `Decidable` biasa yang
+memiliki *arity* tetap dan melapisinya dengan `ExtendedInvariantAlt` (pendekatan
+paling sederhana), namun kita memilih untuk mengimplementasikan `Decidablez`
+secara langsung dengan alasa performa yang lebih baik. Kita juga menambah dua
+optimasi tambahan:
+
 1.  perform instance equality `.eq` before applying the `Equal.equal`, allowing
     for shortcut equality between identical values.
 2.  `Foldable.all` allowing early exit when any comparison is `false`. e.g. if
     the first fields don't match, we don't even request the `Equal` for remaining
     values.
+
+1.  melakukan persamaan instans `.eq` sebelum menerapkan `Equal.equal`, memperkenankan
+    persamaan antar nilai-nilai identik.
+2.  `Foldable.all` memperkenankan untuk kelar awal saat hasil salah satu perbandingan
+    bernilai `false`. Misalkan, bila bidang pertama tidak cocok satu sama lain,
+    maka kita perlu memeriksa persamaan pada bidang-bidang lainnya.
 
 {lang="text"}
 ~~~~~~~~
