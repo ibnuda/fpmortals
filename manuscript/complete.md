@@ -17191,9 +17191,17 @@ masih memungkinkan bila mendefinisikannya untuk produk umum. Kita dapat mengguna
 `scalaz-deriving` does not provide access to field names so it is not possible
 to write a JSON encoder or decoder.
 
+`scalaz-deriving` tidak menyediakan akses ke nama bidang. Jadi tidak memungkinkan
+untuk menulis penyandi dan pembaca sandi JSON.
+
 A> An earlier version of `scalaz-deriving` supported field names but it was clear
 A> that there was no advantage over using Magnolia, so the support was dropped to
 A> remain focused on typeclasses with lawful `Alt` and `Decidable`.
+A>
+A> Versi awal dari `scalaz-deriving` mendukung pembacaan nama bidang, namun tetap
+A> saja tidak ada keuntungan yang didapat bila dibandingkan bila menggunakan Magnolia.
+A> Jadi, dukungan dihapus agar tetap fokus pada kelas tipe `Alt` dan `Decidable`
+A> yang taat hukum.
 
 
 ## Magnolia
