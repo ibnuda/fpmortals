@@ -17130,6 +17130,10 @@ Unfortunately, the `iotaz` API for `.traverse` (and its analogy, `.coptraverse`)
 requires us to define natural transformations, which have a clunky syntax, even
 with the `kind-projector` plugin.
 
+Sayangnya, APA `iotaz` untuk `.traverse` (dan analognya, `.coptraverse`) meminta
+kita untuk mendefinisikan transformasi natural, yang mempunyai sintaks kikuk,
+bahkan dengan tambahan kompiler `kind-projector`.
+
 {lang="text"}
 ~~~~~~~~
   private type K[a] = Kleisli[String \/ ?, Unit, a]
