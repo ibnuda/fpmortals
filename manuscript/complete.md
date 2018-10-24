@@ -19869,6 +19869,8 @@ sebagai latihan bagi pembaca. Silakan lihat `README` untuk instruksi lebih lanju
 
 Our main application only requires an implementation of the `DynAgents` algebra.
 
+Aplikasi utama kita hanya membutuhkan sebuah implementasi untuk aljabar `DynAgents`.
+
 {lang="text"}
 ~~~~~~~~
   trait DynAgents[F[_]] {
@@ -19882,8 +19884,15 @@ We have an implementation already, `DynAgentsModule`, which requires
 implementations of the `Drone` and `Machines` algebras, which require a
 `JsonClient`, `LocalClock` and OAuth2 algebras, etc, etc, etc.
 
+Kita sudah memiliki sebuah implementasi, `DynAgentsModule`, yang membutuhkan
+implementasi dari aljabar `Drone` dan `Machines`, yang juga membutuhkan sebuah
+aljabar `JsonClient`, `LocalClock`, OAuth2, dan lain lain.
+
 It is helpful to get a complete picture of all the algebras, modules and
 interpreters of the application. This is the layout of the source code:
+
+Gambaran utuh dari semua aljabar, modul, dan interpreter sangat berguna. Berikut
+tata letak kode sumber:
 
 {lang="text"}
 ~~~~~~~~
@@ -19919,6 +19928,8 @@ interpreters of the application. This is the layout of the source code:
 ~~~~~~~~
 
 The signatures of all the algebras can be summarised as
+
+Penanda dari semua aljabar dapat diikhtisarkan sebagai
 
 {lang="text"}
 ~~~~~~~~
@@ -19979,7 +19990,13 @@ The signatures of all the algebras can be summarised as
 Note that some signatures from previous chapters have been refactored to use
 Scalaz data types, now that we know why they are superior to the stdlib.
 
+Harap diperhatikan bahwa beberapa penanda dari bab sebelumnya sudah difaktorisasi
+ulang agar menggunakan tipe data Scalaz karena kita tahu bahwa tipe data tersebut
+lebih unggul bila dibandingkan dengan pustaka standar.
+
 The data types are:
+
+Tipe data tersebut adalah:
 
 {lang="text"}
 ~~~~~~~~
@@ -20010,6 +20027,8 @@ The data types are:
 
 and the typeclasses are
 
+dan kelas tipe yang digunakan adalah:
+
 {lang="text"}
 ~~~~~~~~
   @typeclass trait UrlEncodedWriter[A] {
@@ -20024,8 +20043,15 @@ We derive useful typeclasses using `scalaz-deriving` and Magnolia. The
 `ConfigReader` typeclass is from the `pureconfig` library and is used to read
 runtime configuration from HOCON property files.
 
+Kita menderivasi kelas tipe yang berguna menggunakan `scalaz-deriving` dan Magnolia.
+Kelas tipe `ConfigReader` berasal dari pustaka `pureconfig` dan digunakan untuk
+membaca konfigurasi waktu-jalan dari berkas properti HOCON.
+
 And without going into the detail of how to implement the algebras, we need to
 know the dependency graph of our `DynAgentsModule`.
+
+Dan tanpa membahas detail bagaimana mengimplementasikan aljabar, kita harus tahu
+graf ketergantungan dari `DynAgentsModule`.
 
 {lang="text"}
 ~~~~~~~~
@@ -20044,6 +20070,10 @@ know the dependency graph of our `DynAgentsModule`.
 ~~~~~~~~
 
 There are two modules implementing `OAuth2JsonClient`, one that will use the OAuth2 `Refresh` algebra (for Google) and another that reuses a non-expiring `BearerToken` (for Drone).
+
+Ada dua modul yang mengimplementasikan `OAuth2JsonClient`, satu yang digunakan untuk
+aljabar OAuth2 `Refresh` (untuk Google) dan satunya yang menggunakan ulang `BearerToken`
+tanpa kadaluarsa (untuk Drone).
 
 {lang="text"}
 ~~~~~~~~
@@ -20068,7 +20098,14 @@ So far we have seen requirements for `F` to have an `Applicative[F]`, `Monad[F]`
 and `MonadState[F, BearerToken]`. All of these requirements can be satisfied by
 using `StateT[Task, BearerToken, ?]` as our application's context.
 
+Sampai disini, kita sudah melihat persyaratan untuk `F` agar mempunyai `Applicative[F]`,
+`Monad[F]`, dan `MonadState[F, BearerToken]`. Semua persyaratan ini dapat dipenuhi
+dengan menggunakan `StateT[Task, BearerToken, ?]` sebagai konteks aplikasi kita.
+
 However, some of our algebras only have one interpreter, using `Task`
+
+Walaupun demikian, beberapa aljabar kita hanya mempunyai satu interpreter,
+menggunakan `Task`
 
 {lang="text"}
 ~~~~~~~~
@@ -20081,9 +20118,18 @@ Chapter 7.4 on the Monad Transformer Library, allowing us to lift a
 `LocalClock[Task]` into our desired `StateT[Task, BearerToken, ?]` context, and
 everything is consistent.
 
+Namun harap diingat bahwa aljabar kita dapat menyediakan sebuah `liftM` pada objek
+pendampingnya, lihat pada bab 7.4 pada bagian Pustaka Transformator Monad, dan
+memperkenankan kita untuk mengangkat `LocalClock[Task]` pada konteks `StateT[Task, BearerToken, ?]`
+dan pada akhirnya semuanya konsisten.
+
 Unfortunately, that is not the end of the story. Things get more complicated
 when we go to the next layer. Our `JsonClient` has an interpreter using a
 different context
+
+Sayangnya, cerita tidak berhenti disini. Beberapa hal menjadi semakin kompleks
+saat kita beralih pada lapisan selanjutya. `JsonClient` kita mempunyai sebuah
+*interpreter* yang memiliki konteks yang berbeda
 
 {lang="text"}
 ~~~~~~~~
@@ -20105,9 +20151,18 @@ Note that the `BlazeJsonClient` constructor returns a `Task[JsonClient[F]]`, not
 a `JsonClient[F]`. This is because the act of creating the client is effectful:
 mutable connection pools are created and managed internally by http4s.
 
+Harap perhatikan bahwa konstruktor `BlazeJsonClient` mengembalikan sebuah
+`Task[JsonClient[F]]` dan bukan `JsonClient[F]`. Hal ini disebabkan karena
+pembuatan klien tersebut memiliki efek: kumpulan koneksi tak tetap dibuat dan
+diatur secara internal oleh http4s.
+
 A> `OAuth2JsonClientModule` requires a `MonadState` and `BlazeJsonClient` requires
 A> `MonadError` and `MonadIO`. Our application's context will now likely be the
 A> combination of both:
+A>
+A> `OAuth2JsonClientModuel` membutuhkan sebuah `MonadState` dan `BlazeJsonClient`
+A> membutuhkan `MonadError` dan `MonadIO`. Konteks aplikasi kita kemungkinan besar
+A> merupkan kombinasi keduanya.
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -20119,6 +20174,12 @@ A> `MonadState` and `MonadError` when nested, so we don't need to think about it
 A> If we had hard-coded the implementation in the interpreter, and returned an
 A> `EitherT[Task, Error, ?]` from `BlazeJsonClient`, it would make it a lot harder
 A> to instantiate.
+A>
+A> Susunan monad. Susunan monad secara otomatis menyediakan instans dari `MonadState`
+A> dan `MonadError` saat dilapiskan, jadi kita tidak perlu memikirkan tentang hal ini.
+A> Bila kita sudah mempermanenkan implementasi pada *interpreter*, dan mengembalikan
+A> sebuah `EitherT[Task, Error, ?]` dari `BlazeJsonClient`, maka instansiasi akan
+A> menjadi jauh lebih sulit.
 
 We must not forget that we need to provide a `RefreshToken` for
 `GoogleMachinesModule`. We could ask the user to do all the legwork, but we are
@@ -20126,6 +20187,12 @@ nice and provide a separate one-shot application that uses the `Auth` and
 `Access` algebras. The `AuthModule` and `AccessModule` implementations bring in
 additional dependencies, but thankfully no change to the application's `F[_]`
 context.
+
+Kita juga tidak boleh lupa bahwa kita harus menyediakan sebuah `RefreshTokon` untuk
+`GoogleMachinesModule`. Kita dapat meminta pengguna untuk repot, namun karena kita
+baik hati dan menyediakan aplikasi sekali pakai yang menggunakan aljabar `Auth`
+dan `Access`. Implementasi `AuthModule` dan `AccessModule` membawa ketergantungan
+tambahan. Namun, tidak ada perubahan pada konteks aplikasi `F[_]`.
 
 {lang="text"}
 ~~~~~~~~
@@ -20156,6 +20223,11 @@ it starts an HTTP server, sends the user to visit a webpage in their browser,
 captures a callback in the server, and then returns the result while safely
 shutting down the web server.
 
+*Interpreter* untuk `UserInteraction` merupakan bagian paling kompleks dari
+basis kode kita: bagian ini memulai peladen HTTP, mengirim pengguna untuk mengunjungi
+sebuah laman web pada peramban mereka, menangkap panggilan balik pada peladen, dan
+mengembalikan hasil sembari mematikan peladen web secara aman.
+
 Rather than using a `StateT` to manage this state, we use a `Promise` primitive
 (from `ioeffect`). We should always use `Promise` (or `IORef`) instead of a
 `StateT` when we are writing an `IO` interpreter since it allows us to contain
@@ -20164,6 +20236,15 @@ performance impact on the entire application, but it would also leak internal
 state management to the main application, which would become responsible for
 providing the initial value. We also couldn't use `StateT` in this scenario
 because we need "wait for" semantics that are only provided by `Promise`.
+
+Kita tidak menggunakan `StateT` untuk mengatur keadaan ini, namun kita menggunakan
+primitif `Promise` (dari `ioeffect`). Kita harus selalu menggunakan `Promise`
+atau `IORef`, bukan `StateT` bila kita menulis *interpreter* `IO`. Tidak saja
+`StateT` memiliki dampak performa pada aplikasi utama, namun juga membocorkan
+manajemen keadaan internal ke aplikasi utama, dan pada akhirnya harus bertanggung
+jawab untuk menyediakan nilai awal. Kita juga tidak dapat menggunakan `StateT`
+pada skenario ini karena kita membutuhkan semantik "menanti" yang hanya disediakan
+oleh `Promise`.
 
 
 ## `Main`
