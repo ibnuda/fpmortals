@@ -20252,7 +20252,12 @@ oleh `Promise`.
 The ugliest part of FP is making sure that monads are all aligned and this tends
 to happen in the `Main` entrypoint.
 
+Bagian paling buruk dari PF adalah memastikan bahwa semua monad selaras dan hal
+semacam ini biasa terjadi pada titik mulai `Main`.
+
 Our main loop is
+
+Ikalan utama kita adalah
 
 {lang="text"}
 ~~~~~~~~
@@ -20263,6 +20268,8 @@ Our main loop is
 ~~~~~~~~
 
 and the good news is that the actual code will look like
+
+dan kabar baiknya, kode yang asli terlihat seperti
 
 {lang="text"}
 ~~~~~~~~
@@ -20279,11 +20286,22 @@ where `F` holds the state of the world in a `MonadState[F, WorldView]`. We can
 put this into a method called `.step` and repeat it forever by calling
 `.step[F].forever[Unit]`.
 
+dimana `F` menyimpan keadaan keseluruhan pada sebuah `MonadState[F, WorldView]`.
+Kita dapat menempatkannya pada sebuah metoda dengan nama `.step` dan mengulang
+selamanya dengan memanggil `.step[F].forever[Unit]`.
+
 There are two approaches we can take, and we will explore both. The first, and
 simplest, is to construct one monad stack that all algebras are compatible with.
 Everything gets a `.liftM` added to it to lift it into the larger stack.
 
+Ada dua pendekatan yang dapat kita ambil, dan kita akan mempelajari keduanya.
+Yang pertama, dan paling sederhana, adalah membangun sebuah susunan monad yang
+sesuai dengan semua aljabar. Semua mendapatkan sebuah metoda `.liftM` agar dapat
+diangkat ke susunan yang lebih tinggi.
+
 The code we want to write for the one-shot authentication mode is
+
+Kode yang ingin kita tulis untuk mode otentikasi sekali pakai adalah
 
 {lang="text"}
 ~~~~~~~~
@@ -20306,11 +20324,22 @@ where `.readConfig` and `.putStrLn` are library calls. We can think of them as
 `Task` interpreters of algebras that read the application's runtime
 configuration and print a string to the screen.
 
+dimana `.readConfig` dan `.putStrLn` merupakan panggilan pustaka. Kita dapat
+menganggap mereka sebagai *interpreter* `Task` untuk aljabar yang membaca konfigurasi
+waktu-jalan dari aplikasi dan mencetak sebuah *string* ke layar.
+
 But this code does not compile, for two reasons. Firstly, we need to consider
 what our monad stack is going to be. The `BlazeJsonClient` constructor returns a
 `Task` but the `JsonClient` methods require a `MonadError[...,
 JsonClient.Error]`. This can be provided by `EitherT`. We can therefore
 construct the common monad stack for the entire `for` comprehension as
+
+Namun, kode ini tidak dapat dikompilasi karena dua alasan. Pertama, kita harus
+mempertimbangkan bagaimana bentuk susunan monad kita. Konstruktor `BlazeJsonClient`
+mengembalikan `Task` namun metoda milik `JsonClient` membutuhkan sebuah
+`MonadError[..., JsonClient.Error]`. Dan monad tersebut dapat disediakan oleh
+`EitherT`. Maka dari itu, kita dapat membangun susunan monad umum untuk semua
+*for comprehension* (lol, help) sebagai
 
 {lang="text"}
 ~~~~~~~~
@@ -20322,6 +20351,12 @@ which adds quite a lot of boilerplate. Unfortunately, the `.liftM` method does
 not take a type of shape `H[_]`, it takes a type of shape `H[_[_], _]`, so we
 need to create a type alias to help out the compiler:
 
+Sayangnya, hal ini juga berarti kita harus mengangkat semua yang mengembalikan
+`Task` dengan `.liftM`. Hal semacam ini menambah plat cetak cukup banyak.
+Sayangnya, metoda `.liftM` tidak menerima tipe dengan bentuk `H[_]`. `.liftM`
+menerima tipe dengan bentuk `H[_[_], _]` sehingga kita harus membuat sebuah
+alias tipe untuk membantu kompiler:
+
 {lang="text"}
 ~~~~~~~~
   type HT[f[_], a] = EitherT[f, JsonClient.Error, a]
@@ -20329,6 +20364,8 @@ need to create a type alias to help out the compiler:
 ~~~~~~~~
 
 we can now call `.liftM[HT]` when we receive a `Task`
+
+sekarang kita dapat memanggil `.liftM[HT]` saat kita menerima sebuah `Task`
 
 {lang="text"}
 ~~~~~~~~
@@ -20347,6 +20384,11 @@ we can now call `.liftM[HT]` when we receive a `Task`
 
 But this still doesn't compile, because `clock` is a `LocalClock[Task]` and `AccessModule` requires a `LocalClock[H]`. We simply add the necessary `.liftM` boilerplate to the companion of `LocalClock` and can then lift the entire algebra
 
+Namun, kode diatas masih belum dapat dikompilasi karena `clock` berupa `LocalClock[Task]`
+dan `AccessModule` membutuhkan sebuah `LocalClock[H]`. Kita tinggal menambahkan
+plat cetak `.liftM` yang dibutuhkan pada objek pendamping dari `LocalClock` dan
+pada akhirnya dapat mengangkat semua aljabar
+
 {lang="text"}
 ~~~~~~~~
   clock     = LocalClock.liftM[Task, HT](new LocalClockTask)
@@ -20354,20 +20396,38 @@ But this still doesn't compile, because `clock` is a `LocalClock[Task]` and `Acc
 
 and now everything compiles!
 
+dan semuanya berhasil dikompilasi.
+
 The second approach to wiring up an application is more complex, but necessary
 when there are conflicts in the monad stack, such as we need in our main loop.
 If we perform an analysis we find that the following are needed:
 
+Pendekatan kedua adalah dengan membuat sebuah aplikasi yang lebih kompleks,
+namun dibutuhkan bila terjadi konflik pada susunan monad, seperti yang kita
+butuhkan pada ikalan utama kita. Bila kita melakukan analisis, kita akan menemukan
+bahwa monad berikutlah yang kita butuhkan:
+
 -   `MonadError[F, JsonClient.Error]` for uses of the `JsonClient`
 -   `MonadState[F, BearerToken]` for uses of the `OAuth2JsonClient`
 -   `MonadState[F, WorldView]` for our main loop
+
+-   `MonadError[F, JsonClient.Error]` untuk penggunaan `JsonClient`
+-   `MonadState[F, BearerToken]` untuk penggunaan`OAuth2JsonClient`
+-   `MonadState[F, WorldView]` untuk ikalan utama kita
 
 Unfortunately, the two `MonadState` requirements are in conflict. We could
 construct a data type that captures all the state of the program, but that is a
 leaky abstraction. Instead, we nest our `for` comprehensions and provide state
 where it is needed.
 
+Sayangnya, persyaratan dua `MonadState` menyebabkan konflik. Kita dapat membuat
+sebuah tipe data yang menangkap semua keadaan program. Namun, hal tersebut merupakan
+abstraksi yang penuh kebocoran. Maka dari itu, kita akan melapiskan komprehensi
+*for* (lol, help) kita dan menyediakan keadaan saat dibutuhkan.
+
 We now need to think about three layers, which we will call `F`, `G`, `H`
+
+Sekarang kita harus berpikir mengenai tiga lapisan, yang kita sebut `F`, `G`, dan `H`
 
 {lang="text"}
 ~~~~~~~~
@@ -20385,6 +20445,13 @@ have a `Task[A]` and we want an `F[A]`, we have to go through each step and type
 `ta.liftM[HT].liftM[GT].liftM[FT]`. Likewise, when lifting algebras we have to
 call `liftM` multiple times. To get a `Sleep[F]`, we have to type
 
+Dan sekarang saatnya berita buruk mengenai `.liftM`. Metoda ini hanya berlaku
+pada satu lapisan pada satu waktu. Bila kita mempunyai sebuah `Task[A]` dan kita
+ingin sebuah `F[A]`, kita harus melangkahi semua lapisan dan menulis
+`ta.liftM[HT].liftM[GT].liftM[FT]`. Hal yang sama saat kita mengangkat aljabar,
+kita harus memanggil `liftM` berulang kali. Untuk mendapatkan `Sleep[F]`, kita
+harus menulis
+
 {lang="text"}
 ~~~~~~~~
   val S: Sleep[F] = {
@@ -20395,6 +20462,8 @@ call `liftM` multiple times. To get a `Sleep[F]`, we have to type
 
 and to get a `LocalClock[G]` we do two lifts
 
+dan untuk mendapatkan `LocalClock[G]` kita harus melakukan dua kali pengangkatan
+
 {lang="text"}
 ~~~~~~~~
   val T: LocalClock[G] = {
@@ -20404,6 +20473,8 @@ and to get a `LocalClock[G]` we do two lifts
 ~~~~~~~~
 
 The main application then becomes
+
+Dan aplikasi utama menjadi
 
 {lang="text"}
 ~~~~~~~~
@@ -20435,11 +20506,20 @@ The main application then becomes
 where the outer loop is using `Task`, the middle loop is using `G`, and the
 inner loop is using `F`.
 
+dimana ikalan bagian luar menggunakan `Task`, ikalan tengah menggunakan `G`,
+dan ikalan dalam menggunakan `F`.
+
 The calls to `.run(start)` and `.eval(bearer)` are where we provide the initial
 state for the `StateT` parts of our application. The `.run` is to reveal the
 `EitherT` error.
 
+Panggilan ke `.run(start)` dan `.eval(bearer)` adalah dimana kita menyediakan
+keadan awal untuk bagian `StateT` aplikasi kita. `.run` digunakan untuk menyingkap
+galat `EitherT`.
+
 We can call these two application entry points from our `SafeApp`
+
+Kita dapat memanggil dua titik awal aplikasi ini dari `SafeApp` kita
 
 {lang="text"}
 ~~~~~~~~
@@ -20455,6 +20535,8 @@ We can call these two application entry points from our `SafeApp`
 ~~~~~~~~
 
 and then run it!
+
+dan menjalankannya.
 
 {lang="text"}
 ~~~~~~~~
@@ -20473,6 +20555,8 @@ and then run it!
 ~~~~~~~~
 
 Yay!
+
+Hore!
 
 
 ## Blaze
