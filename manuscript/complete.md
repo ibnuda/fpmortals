@@ -19562,26 +19562,49 @@ harus dibunuh.
 
 If we move to runtime performance, the answer is always *it depends*.
 
+Bila kita berbicara mengenai performa waktu-jalan, tentu jawabannya selalu *tergantung*.
+
 Assuming that the derivation logic has been written in an efficient way, it is
 only possible to know which is faster through experimentation.
+
+Bila kita mengasumsikan logika derivasi sudah ditulis secara efisien, kita dapat
+mengetahui mana yang lebih cepat dengan menggunakan eksperimentasi.
 
 The `jsonformat` library uses the [Java Microbenchmark Harness (JMH)](http://openjdk.java.net/projects/code-tools/jmh/) on models
 that map to GeoJSON, Google Maps, and Twitter, contributed by Andriy
 Plokhotnyuk. There are three tests per model:
 
+Pustaka `jsonformat` menggunakan [Java Microbenchmark Harness (JMH)](http://openjdk.java.net/projects/code-tools/jmh/)
+pada model yang memetakan ke GeoJSON, GoogleMaps, dan Twitter. Pustaka ini dikontribusikan
+oleh Andriy Plokhotnyuk. Ada tiga tes untuk tiap model:
+
 -   encoding the `ADT` to a `JsValue`
 -   a successful decoding of the same `JsValue` back into an ADT
 -   a failure decoding of a `JsValue` with a data error
 
+-   penyandian TDA ke `JsValue`
+-   pembacaan sandi yang berhasil dari `JsValue` dari poin pertama kembali ke TDA
+-   pembacaan sandi yang gagal dari `JsValue` dengan data galat
+
 applied to the following implementations:
+
+diterapkan pada implementasi berikut:
 
 -   Magnolia
 -   Shapeless
 -   manually written
 
+-   Magnolia
+-   Shapeless
+-   manual
+
 with the equivalent optimisations in each. The results are in operations per
 second (higher is better), on a powerful desktop computer, using a single
 thread:
+
+dengan optimisasi yang setara untuk semua implementasi. Hasil berupa operasi
+per detik (lebih tinggi lebih baik), pada sebuah komputer *desktop* bertenaga,
+menggunakan satu utas:
 
 {lang="text"}
 ~~~~~~~~
@@ -19605,6 +19628,10 @@ We see that the manual implementations are in the lead, followed by Magnolia,
 with Shapeless from 30% to 70% the performance of the manual instances. Now for
 decoding
 
+Sebagaimana yang kita lihat, implementasi manual memimpin dan diikuti oleh Magnolia.
+Implementasi dengan Shapeless memiliki performa 30 - 70% lebih buruk bila dibandingkan
+dengan instans manual. Sekarang untuk pembacaan sandi
+
 {lang="text"}
 ~~~~~~~~
   > jsonformat/jmh:run -i 5 -wi 5 -f1 -t1 -w1 -r1 .*decode.*Success
@@ -19626,6 +19653,11 @@ decoding
 This is a tighter race for second place, with Shapeless and Magnolia keeping
 pace. Finally, decoding from a `JsValue` that contains invalid data (in an
 intentionally awkward position)
+
+Pacuan kali ini lebih ketat untuk tempat kedua, dengan Shapeless dan Magnolia
+menorehkan hasil yang mirip. Dan pada akhirnya, pembacaan sandi dari sebuah
+`JsValue` yang berisi data tidak valid (pada posisi yang memang disengaja agak
+kikuk)
 
 {lang="text"}
 ~~~~~~~~
@@ -19649,9 +19681,18 @@ Just when we thought we were seeing a pattern, both Magnolia and Shapeless win
 the race when decoding invalid GeoJSON data, but manual instances win the Google
 Maps and Twitter challenges.
 
+Saat kita mengira kita menemukan sebuah pola, Magnolia dan Shapeless menang pacuan
+tersebut saat membaca penyandian tidak valid dari data GeoJSON. Namun, instans
+manual memenangkan pacuan Google Maps dan Twitter.
+
 We want to include `scalaz-deriving` in the comparison, so we compare an
 equivalent implementation of `Equal`, tested on two values that contain the same
 contents (`True`) and two values that contain slightly different contents
+(`False`)
+
+Kita ingin mengikut-sertakan `scalaz-deriving` pada perbandingan, jadi kita akan
+membandingan implementasi setara dari `Equal` yang dites pada dua nilai yang
+berisi nilai yang sama (`True`) dan dua nilai yang memiliki isi yang sedikit berbeda
 (`False`)
 
 {lang="text"}
@@ -19680,6 +19721,11 @@ mostly leading the automatic derivations. `scalaz-deriving` makes a great effort
 for GeoJSON but falls far behind in both the Google Maps and Twitter tests. The
 `False` tests are more of the same:
 
+Sesuai dengan perkiraan kita, instans manual jauh lebih cepat bila dibandingkan
+dengan yang lainnya. Disusul dengan Shapeless dengan derivasi otomatis. `scalaz-deriving`
+bekerja keras untuk GeoJSON namun kalah mengenaskan pada pacuan Google Maps dan
+Twitter. Tes tentang `False` kurang lebih memiliki hasil yang sama:
+
 {lang="text"}
 ~~~~~~~~
   > jsonformat/jmh:run -i 5 -wi 5 -f1 -t1 -w1 -r1 .*equal*
@@ -19706,13 +19752,26 @@ good enough. We should be realistic: we are not writing applications that need t
 be able to encode more than 130,000 values to JSON, per second, on a single
 core, on the JVM. If that is a problem, look into C++.
 
+Performa waktu-jalan dari `scalaz-deriving`, Magnolia, dan Shapeless biasanya
+cukup baik. Tentu kita juga harus realistis: kita tidak menulis aplikasi yang
+harus mampu menyandikan 130.000 nilai ke JSON tiap detiknya, pada satu *core*,
+di JVM. Bila hal semacam itu menjadi masalah, silakan berpaling ke C++.
+
 It is unlikely that derived instances will be an application's bottleneck. Even
 if it is, there is the manually written escape hatch, which is more powerful and
 therefore more dangerous: it is easy to introduce typos, bugs, and even
 performance regressions by accident when writing a manual instance.
 
+Agak tidak mungkin instans terderivasi menjadi penyebab macetnya performa aplikasi.
+Bahkan bila memang demikian adanya, ada perahu penyelamat dengan penulisan ulang,
+yang jauh lebih leluasa dan berbahaya: lebih mudah terjadi salah ketik, pengenalan
+kutu, dan kemunduran performa tanpa sengaja saat menulis instans manual.
+
 In conclusion: hokey derivations and ancient macros are no match for a good hand
 written instance at your side, kid.
+
+Kesimpulannya: derivasi tipu-tipu dan makro jaman baheula bukan tandingan untuk
+instans yang ditulis secara manual, tong.
 
 A> We could spend a lifetime with the [`async-profiler`](https://github.com/jvm-profiling-tools/async-profiler) investigating CPU and object
 A> allocation flame graphs to make any of these implementations faster. For
@@ -19721,6 +19780,15 @@ A> reproduced here, such as a more optimised `JsObject` field lookup, and inclus
 A> of `.xmap`, `.map` and `.contramap` on the relevant typeclasses, but it is fair
 A> to say that the codebase primarily focuses on readability over optimisation and
 A> still achieves incredible performance.
+A>
+A> Kita dapat mengabiskan sisa hidup kita dengan [`async-profiler`](https://github.com/jvm-profiling-tools/async-profiler)
+A> untuk menyidik graf api CPU dan alokasi objek untuk membuat implementasi diatas
+A> menjadi lebih cepat. Sebagai contoh, ada beberapa optimasi pada basis kode
+A> `jsonformat` tidak direproduksi disini seperti pencarian bidang `JsObject` yang
+A> lebih teroptimasi, dan pengikutsertaan `.xmap`, `.map`, dan `.contramap` pada
+A> kelas tipe yang relevan. Namun, kita harus mengakui bahwa basis kode tersebut
+A> memiliki fokus utama keterbacaan, bukan optimasi, dan masih mencapai performa
+A> yang luar biasa.
 
 
 ## Summary
