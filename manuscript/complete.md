@@ -19281,6 +19281,11 @@ Shapeless allows for a lot more kinds of derivations than are possible with
 `scalaz-deriving` or Magnolia. As an example of an encoder / decoder that are
 not possible with Magnolia, consider this XML model from [`xmlformat`](https://github.com/scalaz/scalaz-deriving/tree/master/examples/xmlformat)
 
+Shapeless memperkenankan lebih banyak jenis derivasi bila dibandingkan dengan
+`scalaz-deriving` atau Magnolia. Sebagai contoh, sebuah penyandi / pembaca sandi
+yang tidak mungkin bisa dilakukan dengan Magnolia. Sebagai contoh, model XML dari
+[`xmlformat`](https://github.com/scalaz/scalaz-deriving/tree/master/example/xmlformat)
+
 {lang="text"}
 ~~~~~~~~
   @deriving(Equal, Show, Arbitrary)
@@ -19314,10 +19319,25 @@ fields are annotated with their encoded name. In addition, when decoding we wish
 to have different strategies for handling XML element bodies, which can be
 multipart, depending on if our type has a `Semigroup`, `Monoid` or neither.
 
+Dikarenakan sifat dari XML, akan masuk akal bila kita memiliki pasangan penyandi /
+pembaca sandi untuk konten `XChildren` dan `XString`. Kita dapat menyediakan
+sebuah derivasi untuk `XChildren` dengan Shapeless, namun kita ingin sebuah
+bidang khusus untuk jenis kelas tipe yang dimilikinya dan juga untuk bidang `Option`.
+Kita harus mewajibkan bidang-bidang dianotasi dengan nama tersandi. Sebagai
+tambahan, saat membaca penyandian, akan lebih baik bila kita memiliki strategi
+yang berbeda untuk menangani elemen dari XML, yang mungkin berupa banyak bagian,
+tergantung bila tipe kita mempunyai `Semigroup`, `Monoid`, ataupun tidak sama sekali.
+
 A> Many developers believe XML is simply a more verbose form of JSON, with angle
 A> brackets instead of curlies. However, an attempt to write a round trip converter
 A> between `XNode` and `JsValue` should convince us that JSON and XML are different
 A> species, with conversions only possible on a case-by-case basis.
+A>
+A> Banyak pengembang yang percaya XML hanya bentuk lebih lantung dari JSON dengan
+A> kurung sudut sebagai pengganti kurung kurawal. Namun, hanya dengan sebuah percobaan
+A> penulisan pengubah bolak balik antara `XNode` dan `JsValue` bisa meyakinkan
+A> bahwa XML dan JSON merupakan hal yang berbeda, dengan konversi yang hanya mungkin
+A> pada kasus-per-kasus.
 
 
 ### Example: `UrlQueryWriter`
