@@ -18394,6 +18394,11 @@ parameter in covariant position. Here we create `HList` and `Coproduct` values,
 and must provide a value for the `CNil` case as it corresponds to the case where
 no coproduct is able to provide a value.
 
+Tidak ada jebakan baru pada implementasi dari kelas tipe dengan parameter tipe
+di posisi kovarian. Disini, kita membuat nilai `HList` dan `Coproduct` dan harus
+menyediakan nilai untuk `CNil` karena nilai ini berhubungan dengan permasalah
+dimana tidak ada koproduk yang mampu menyediakan nilai tersebut.
+
 {lang="text"}
 ~~~~~~~~
   sealed trait DerivedDefault[A] extends Default[A]
@@ -18437,8 +18442,15 @@ Much as we could draw an analogy between `Equal` and `Decidable`, we can see the
 relationship to `Alt` in `.point` (`hnil`), `.apply2` (`.hcons`) and `.altly2`
 (`.ccons`).
 
+Seperti analogi yang dapat kita tarik antara `Equal` dan `Decidable`, kita dapat
+melihat hubungan antara `Alt` pada `.point` (`hnil`), `.apply2` (`.hcons`),
+dan `.altly2` (`.ccons`).
+
 There is little to be learned from an example like `Semigroup`, so we will skip
 to encoders and decoders.
+
+Tidak banyak yang bisa dipelajari dari contoh seperti `Semigroup`, jadi kita
+akan melewati penyandian dan pembacaan sandi.
 
 
 ### Example: `JsEncoder`
