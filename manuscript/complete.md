@@ -18457,19 +18457,37 @@ akan melewati penyandian dan pembacaan sandi.
 
 To be able to reproduce our Magnolia JSON encoder, we must be able to access:
 
+Agar dapat mereproduksi penyandi JSON Magnolia kita, kita harus mampu mengakses
+
 1.  field names and class names
 2.  annotations for user preferences
 3.  default values on a `case class`
 
+1.  nama bidang dan nama kelas
+2.  anotasi untuk prarasa pengguna
+3.  nilai default pada sebuah `case class`
+
 We will begin by creating an encoder that handles only the sensible defaults.
+
+Kita akan memulai dengan membuat sebuah penyandi yang hanya menangani pengaturan
+yang masuk akal.
 
 To get field names, we use `LabelledGeneric` instead of `Generic`, and when
 defining the type of the head element, use `FieldType[K, H]` instead of just
 `H`. A `Witness.Aux[K]` provides the value of the field name at runtime.
 
+Untuk mendapatkan nama bidang, kita menggunakan `LabelledGeneric`, bukan `Generic`,
+dan pada saat mendefiniskan tipe dari elemen awal, kita menggunakan `FieldType[K, H]`,
+bukan hanya `H`. Sebuah `Witness.Aux[K]` menyediakan nilai dari nama bidang pada
+saat waktu-jalan.
+
 All of our methods are going to return `JsObject`, so rather than returning a
 `JsValue` we can specialise and create `DerivedJsEncoder` that has a different
 type signature to `JsEncoder`.
+
+Semua metooda kita akan mengembalikan `JsObject`, bukan `JsValue`, agar kita
+dapat mengkhususkan dan membuat `DerivedJsEncoder` yang mempunyai penanda tipe
+berbeda dengan `JsEncoder`.
 
 {lang="text"}
 ~~~~~~~~
@@ -18539,6 +18557,9 @@ type signature to `JsEncoder`.
 
 A> A pattern has emerged in many Shapeless derivation libraries that introduce
 A> "hints" with a default `implicit`
+A>
+A> Sebuah pola yang muncul pada banya pustaka derivasi Shapeless yang memperkenalkan
+A> "petunjuk" dengan `implicit` default
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -18559,6 +18580,13 @@ A> companions or package objects. This is a **terrible idea** that relies on fra
 A> implicit ordering and is a source of typeclass decoherence: if we derive a
 A> `JsEncoder[Foo]`, we will get a different result depending on which
 A> `ProductHint[Foo]` is in scope. It is best avoided.
+A>
+A> Pengguna dimaksudkan untuk menyediakan sebuah instans khusus dari `ProductHint`
+A> sendiri pada objek pendamping atau objek paket mereka sendiri. Hal semacam ini
+A> sangat buruk karena bergantung pada pengurutan implisit yang rapuh dan merupakan
+A> sumber dekoherensi kelas tipe: bila kita menderivasi sebuah `JsEncoder[Foo]`,
+A> kita akan mendapatkan hasil yang berbeda yang tergantung pada cakupan mana
+A> `ProductHint[Foo]` berada. Sangat dianjurkan untuk menghindari hal semacam ini.
 
 Shapeless selects codepaths at compiletime based on the presence of annotations,
 which can lead to more optimised code, at the expense of code repetition. This
@@ -18566,6 +18594,13 @@ means that the number of annotations we are dealing with, and their subtypes,
 must be manageable or we can find ourselves writing 10x the amount of code. We
 change our three annotations into one containing all the customisation
 parameters:
+
+Shapeless menentukan jalur kode pada saat kompilasi berdasarkan pada ada atau tidaknya
+anotasi yang dapat memberikan potensi kode teroptimasi, walaupun dengan beban
+repetisi kode. Hal semacam ini juga berarti bahwa jumlah anotasi yang kita urus,
+termasuk sub-tipenya, harus bisa diatur atau bisa saja kita menulis 10 kali jumlah
+kode. Kita dapat mengganti tiga anotasi kita menjadi satu anotasi yang berisi
+semua parameter kustomasi:
 
 {lang="text"}
 ~~~~~~~~
@@ -18579,6 +18614,10 @@ parameters:
 All users of the annotation must provide all three values since default values
 and convenience methods are not available to annotation constructors. We can
 write custom extractors so we don't have to change our Magnolia code
+
+Semua pengguna anotasi harus menyediakan tiga nilai default dan metoda pembantu
+tidak tersedia untuk konstruktor anotasi. Kita dapat menulis pengekstrak kustom
+sehingga kita tidak harus mengganti kode Magnolia kita.
 
 {lang="text"}
 ~~~~~~~~
@@ -18595,17 +18634,37 @@ write custom extractors so we don't have to change our Magnolia code
   }
 ~~~~~~~~
 
-We can request `Annotation[json, A]` for a `case class` or `sealed trait` to get access to the annotation, but we must write an `hcons` and a `ccons` dealing with both cases because the evidence will not be generated if the annotation is not present. We therefore have to introduce a lower priority implicit scope and put the "no annotation" evidence there.
+We can request `Annotation[json, A]` for a `case class` or `sealed trait` to get
+access to the annotation, but we must write an `hcons` and a `ccons` dealing
+with both cases because the evidence will not be generated if the annotation
+is not present. We therefore have to introduce a lower priority implicit scope
+and put the "no annotation" evidence there.
+
+Kita dapat meminta `Annotation[json, A]` untuk `case class` atau `sealed trait`
+agar mendapatkan akses ke anotasi. Namun, kita harus menulis `hcons` dan `ccons`
+untuk menangani kedua kasus tersebut karena bukti tidak akan dibuat bila anotasi
+tidak ada. Maka dari itu, kita memperkenalkan cakupan implisit dengan prioritas
+yang lebih rendah dan meletakkan bukti "tanpa anotasi" disana.
 
 We can also request `Annotations.Aux[json, A, J]` evidence to obtain an `HList`
 of the `json` annotation for type `A`. Again, we must provide `hcons` and
 `ccons` dealing with the case where there is and is not an annotation.
 
+Kita juga dapat meminta bukti `Annotations.Aux[json, A, J]` untuk mendapatkan
+`HList` dari anotasi `json` untuk tipe `A`. Hal yang sama, kita harus menyediakan
+`hcons` dan `ccoons` untuk menangani kejadian ada-atau-tidaknya sebuah anotasi.
+
 To support this one annotation, we must write four times as much code as before!
+
+Untuk mendukung anotasi satu ini, kita harus menulis kode empat kali lebih banyak.
 
 Lets start by rewriting the `JsEncoder`, only handling user code that doesn't
 have any annotations. Now any code that uses the `@json` will fail to compile,
 which is a good safety net.
+
+Dimulai dengan menulis ulang `JsEncoder` yang hanya menangani kode pengguna yang
+tidak mempunyai anotasi apapun. Sekarang, setiap kode yang menggunakan `@json`
+akan gagal dikompilasi. Hal ini merupakan jaring pengaman yang cukup baik.
 
 We must add an `A` and `J` type to the `DerivedJsEncoder` and thread through the
 annotations on its `.toJsObject` method. Our `.hcons` and `.ccons` evidence now
@@ -18613,8 +18672,18 @@ provides instances for `DerivedJsEncoder` with a `None.type` annotation and we
 move them to a lower priority so that we can deal with `Annotation[json, A]` in
 the higher priority.
 
+Kita harus menambah sebuah tipe `A` dan `J` ke `DerivedJsEncoder` dan melangkahi
+anotasi pada metoda `.toJsObject`-nya. Bukti `.hcons` dan `.ccons` sudah menyediakan
+instans untuk `DerivedJsEncoder` dengan anotasi `None.type` dan kita akan memindahkan
+mereka ke prioritas yang lebih rendah sehingga kita dapat menangani `Annotation[json, A]`
+di prioritas yang lebih tinggi.
+
 Note that the evidence for `J` is listed before `R`. This is important, since
 the compiler must first fix the type of `J` before it can solve for `R`.
+
+Harap perhatikan bahwa bukti untuk `J` sudah diberikan sebelum `R`. Hal ini
+sangat penting karena kompiler harus menyelesaikan `J` sebelum dapat menyelesaikan
+`R`.
 
 {lang="text"}
 ~~~~~~~~
@@ -18687,9 +18756,18 @@ possibilities of where the annotation can be. Note that we only support **one**
 annotation in each position. If the user provides multiple annotations, anything
 after the first will be silently ignored.
 
+Sekarang kita dapat menambah penanda tipe untuk enam metoda baru tersebut, dan
+memenuhi semua kemungkinan dimana anotasi mungkin berada. Harap juga perhatikan
+bahwa kita hanya mendukung satu anotasi pada setiap posis. Bila pengguna menyediakan
+beberapa anotasi, semua anotasi lain setelah anotasi pertama akan diabaikan.
+
 We're now running out of names for things, so we will arbitrarily call it
 `Annotated` when there is an annotation on the `A`, and `Custom` when there is
 an annotation on a field:
+
+Saat ini, kita sudah kehabisan nama untuk banyak hal. Maka dari itu, kita akan
+menyebutnya, secara arbiter, sebagai `Annotated` bila `A` sudah memiliki anotasi
+dan `Custom` bila ada sebuah anotasi pada sebuah bidang:
 
 {lang="text"}
 ~~~~~~~~
@@ -18750,7 +18828,14 @@ anything, since an annotation on a `case class` does not mean anything to the
 encoding of that product, it is only used in `.cconsAnnotated*`. We can therefore
 delete two methods.
 
+Kita tidak benar-benar butuh `.hconsAnnotated` atau `.hconsAnnotatedCustom`, karena
+anotasi pada sebuah `case class` tidak berarti apapun pada penyandian produk tersebut.
+kedua metoda tersebut hanya dipakai pada `.cconsAnnotated*`. Maka dari itu, kita
+dapat menghapus kedua metoda tersebut.
+
 `.cconsAnnotated` and `.cconsAnnotatedCustom` can be defined as
+
+`.cconsAnnotated` dan `.cconsAnnotatedCustom` dapat didefinisikan sebagai
 
 {lang="text"}
 ~~~~~~~~
@@ -18768,6 +18853,8 @@ delete two methods.
 ~~~~~~~~
 
 and
+
+dan
 
 {lang="text"}
 ~~~~~~~~
@@ -18792,7 +18879,12 @@ and
 The use of `.head` and `.get` may be concerned but recall that the types here
 are `::` and `Some` meaning that these methods are total and safe to use.
 
+Guna `.head` dan `.get` mungkin meragukan, namun harap diingat bahwa tipe disini
+berupa `::` dan `Some` yang berarti metoda ini total dan aman digunakan.
+
 `.hconsCustom` and `.cconsCustom` are written
+
+`.hconsCustom` dan `.cconsCustom` ditulis
 
 {lang="text"}
 ~~~~~~~~
@@ -18812,6 +18904,8 @@ are `::` and `Some` meaning that these methods are total and safe to use.
 ~~~~~~~~
 
 and
+
+dan
 
 {lang="text"}
 ~~~~~~~~
@@ -18836,6 +18930,11 @@ Obviously, there is a lot of boilerplate, but looking closely one can see that
 each method is implemented as efficiently as possible with the information it
 has available: codepaths are selected at compiletime rather than runtime.
 
+Terang saja, ada sangat banyak plat cetak, namun bila diperhatikan lebih seksama,
+kita dapat melihat bahwa tiap metoda diimplementasika se-efisien mungkin dengan
+informasi yang tersedia: alur kode dipilih saaat waktu kompilasi, bukan pada
+saat waktu jalan.
+
 The performance obsessed may be able to refactor this code so all annotation
 information is available in advance, rather than injected via the `.toJsFields`
 method, with another layer of indirection. For absolute performance, we could
@@ -18845,10 +18944,25 @@ time on downstream users. Such optimisations are beyond the scope of this book,
 but they are possible and people do them: the ability to shift work from runtime
 to compiletime is one of the most appealing things about generic programming.
 
+Bagi para pengguna yang sangat menginginkan performa bisa saja melakukan faktorisasi
+ulang pada kode ini, sehingga informasi anotasi tersedia lebih awal, bukan disisipkan
+pada metoda `.toJsFields` dengan lapisan lain. Untuk performa puncak, kita
+dapat memperlakukan tiap kustomasi sebagai anotasi terpisah, namun hal tersebut
+menambah lagi jumlah kode yang kita tulis, dengan tambahan beban waktu kompilasi
+pada pengguna hilir. Optimasi semacam itu berapa diluar cakupan buku ini, namun
+hal tersebut bisa saja dilakukan dan praktik di lapangan memang demikian adanya:
+pemindahan beban kerja dari waktu-jalan ke waktu-kompilasi merupakan hal yang
+paling menarik dari pemrograman generik.
+
 One more caveat that we need to be aware of: [`LabelledGeneric` is not compatible
 with `scalaz.@@`](https://github.com/milessabin/shapeless/issues/309), but there is a workaround. Say we want to effectively ignore
 tags so we add the following derivation rules to the companions of our encoder
 and decoder
+
+Satu lagi kekurangan yang harus kita sadari: [`LabelledGeneric` tidak kompatibel dengan `scalaz.@@`](https://github.com/milessabin/shapeless/issue/309),
+namun, tentu saja ada penyiasatannya. Misalkan kita ingin mengabaikan label, kita
+dapat menambah aturan derivasi berikut pada objek pendamping dari penyandi dan
+pembaca sandi
 
 {lang="text"}
 ~~~~~~~~
@@ -18867,6 +18981,9 @@ and decoder
 We would then expect to be able to derive a `JsDecoder` for something like our
 `TradeTemplate` from Chapter 5
 
+Lalu kita dapat men-derivasi sebuah `JsDecoder` untuk `TradeTemplate` kita dari
+bab 5
+
 {lang="text"}
 ~~~~~~~~
   final case class TradeTemplate(
@@ -18879,6 +18996,8 @@ We would then expect to be able to derive a `JsDecoder` for something like our
 
 But we instead get a compiler error
 
+Namun, kita malah mendapat sebuah galat kompiler
+
 {lang="text"}
 ~~~~~~~~
   [error] could not find implicit value for parameter G: LabelledGeneric.Aux[A,R]
@@ -18887,6 +19006,10 @@ But we instead get a compiler error
 ~~~~~~~~
 
 The error message is as helpful as always. The workaround is to introduce evidence for `H @@ Z` on the lower priority implicit scope, and then just call the code that the compiler should have found in the first place:
+
+Penyiasatan masalah ini adalah dengan memperkenalkan bukti untuk `H @@ Z` pada
+cakupan impliist yang lebih rendah dan memanggil kode tersebut, sehingga kompiler
+dapat menemukannya:
 
 {lang="text"}
 ~~~~~~~~
@@ -18914,6 +19037,9 @@ The error message is as helpful as always. The workaround is to introduce eviden
 ~~~~~~~~
 
 Thankfully, we only need to consider products, since coproducts cannot be tagged.
+
+Dan untungnya, kita hanya perlu memikirkan tentang produk, karena koproduk tidak
+dapat dilabeli.
 
 
 ### `JsDecoder`
