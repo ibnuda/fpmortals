@@ -20564,7 +20564,12 @@ Hore!
 We implement the HTTP client and server with the third party library `http4s`.
 The interpreters for their client and server algebras are called *Blaze*.
 
+Kita mengimplementasikan klien dan peladen HTTP dengan pustaka pihak ketiga `http4s`.
+*Interpreter* untuk aljabar klien dan peladen disebut *Blaze*.
+
 We need the following dependencies
+
+Kita butuh ketergantungan sebagai berikut
 
 {lang="text"}
 ~~~~~~~~
