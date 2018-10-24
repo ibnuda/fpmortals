@@ -20586,6 +20586,8 @@ Kita butuh ketergantungan sebagai berikut
 
 We will need some imports
 
+Sekarang kita butuh beberapa impor
+
 {lang="text"}
 ~~~~~~~~
   import org.http4s
@@ -20596,6 +20598,8 @@ We will need some imports
 ~~~~~~~~
 
 The `Client` module can be summarised as
+
+Modul `Client` dapat diringkas menjadi
 
 {lang="text"}
 ~~~~~~~~
@@ -20608,6 +20612,8 @@ The `Client` module can be summarised as
 ~~~~~~~~
 
 where `Request` and `Response` are data types:
+
+dimana `Request` dan `Response` merupakan tipe data:
 
 {lang="text"}
 ~~~~~~~~
@@ -20630,6 +20636,8 @@ where `Request` and `Response` are data types:
 ~~~~~~~~
 
 made of
+
+yang terdiri dari
 
 {lang="text"}
 ~~~~~~~~
@@ -20659,8 +20667,19 @@ type, and has an efficient internal representation for batching the data. For
 example, although we are using `Stream[F, Byte]`, it is actually wrapping the
 raw `Array[Byte]` that arrives over the network.
 
+Tipe `EntityBody` merupakan alias untuk `Stream` dari pustaka [`fs2`](https://github.com/functional-streams-for-scala/fs2).
+Tipe data `Stream` dapat dianggap sebagai aliran data dengan efek yang ditarik secara
+luntung. Tipe data ini diimplementasikan sebagai monad `Free` dengan penangkapan
+pengecualian dan interupsi. `Stream` menerima dua parameter tipe: sebuah tipe
+dengan efek dan sebuah tipe konten, dan memiliki representasi efisien internal
+untuk mengelompokkan data. Sebagai contooh, walaupun kita menggunakan `Stream[F, Byte]`
+sebenarnya monad ini membungkus `Array[Byte]` yang tiba melalu jaringan.
+
 We need to convert our header and URL representations into the versions required
 by http4s:
+
+Kita dapat mengkonversi *header* (lol, help) dan representasi URL kita menjadi
+versi yang dibutuhkan oleh http4s:
 
 {lang="text"}
 ~~~~~~~~
@@ -20678,6 +20697,9 @@ by http4s:
 Both our `.get` and `.post` methods require a conversion from the http4s
 `Response` type into an `A`. We can factor this out into a single function,
 `.handler`
+
+Metoda `.get` dan `.post` keduanya membutuhkan sebuah konversi dari tipe `Response`
+http4s menjadi `A`. Kita dapat memisahkannya menjadi sebuah fungsi,
 
 {lang="text"}
 ~~~~~~~~
@@ -20708,10 +20730,20 @@ The `.through(fs2.text.utf8Decode)` is to convert a `Stream[Task, Byte]` into a
 `Task` and combining all the parts using the `Monoid[String]`, giving us a
 `Task[String]`.
 
+`.through(fs2.text.utf8Decode)` digunakan untuk mengkonversi `Stream[Task, Byte]`
+menjadi `Stream[Task, String]` dengan `.compile.foldMonoid` menginterpretasinya
+dengan `Task`, dan pada akhirnya, menggabungkan semua bagian menggunakan `Monoid[String]`.
+Hasilnya adalah `Task[String]`.
+
 We then parse the string as JSON and use the `JsDecoder[A]` to create the
 required output.
 
+Lalu kita mengurai *string* tersebut sebagai JSON dan menggunakan `JsDecoder[A]`
+untuk membuat keluaran yang dibutuhkan.
+
 This is our implementation of `.get`
+
+Berikut implementasi kita dari `.get`
 
 {lang="text"}
 ~~~~~~~~
@@ -20736,8 +20768,18 @@ then call `.fetch` on the `Client` with our `handler`. This gives us back a
 `MonadIO.liftIO` to create a `F[Error \/ A]` and then `.emap` to push the error
 into the `F`.
 
+`.get` hanyalah berupa saluran (lol, help): kita mengkonversi tipe masukan
+menjadi `http4s.Request` lalu memanggil `.fetch` pada `Client` dengan `handler`
+kita. `handler` mengembalikan sebuah `Task[Error \/ A]`, namun kita membutuhkan
+sebuah `F[A]`. Maka dari itu, kita menggunakan `MonadIO.liftIO` untuk membuat
+`F[Error \/ A]` dan melakukan pemetaan menggunakan `.emap` untuk mendorong
+galat ke `F`.
+
 Unfortunately, if we try to compile this code it will fail. The error will look
 something like
+
+Sayangnya, bila kita mencoba mengkompilasi kode ini, akan terjadi kegagalan.
+Galat akan terlihat seperti
 
 {lang="text"}
 ~~~~~~~~
@@ -20747,10 +20789,17 @@ something like
 
 Basically, something about a missing cat.
 
+Pada dasarnya, ada kucing yang hilang.
+
 The reason for this failure is that http4s is using a different core FP library,
 not Scalaz. Thankfully, `scalaz-ioeffect` provides a compatibility layer and the
 [shims](https://github.com/djspiewak/shims) project provides seamless (until it isn't) implicit conversions. We can
 get our code to compile with these dependencies:
+
+Alasan kegagalan ini adalah http4s menggunakan pustaka PF utama lain, bukan Scalaz.
+Untungnya, `scalaz-ioeffect` menyediakan lapisan kompatibilitas dan [*shims*](https://github.com/djspiewak/shims) (lol, help)
+yang menyediakan konversi implisit tanpa batas. Kita dapat mengkompilasi kode kita
+dengan ketergantungan sebagai berikut:
 
 {lang="text"}
 ~~~~~~~~
@@ -20762,6 +20811,8 @@ get our code to compile with these dependencies:
 
 and these imports
 
+dan mengimpor
+
 {lang="text"}
 ~~~~~~~~
   import shims._
@@ -20770,6 +20821,9 @@ and these imports
 
 The implementation of `.post` is similar but we must also provide an instance of
 
+Implementasi `.post` kurang lebih sama. Namun, kita juga harus menyediakan
+instans dari
+
 {lang="text"}
 ~~~~~~~~
   EntityEncoder[Task, String Refined UrlEncoded]
@@ -20777,6 +20831,9 @@ The implementation of `.post` is similar but we must also provide an instance of
 
 Thankfully, the `EntityEncoder` typeclass provides conveniences to let us derive
 one from the existing `String` encoder
+
+Untungnya, kelas tipe `EntityEncoder` menyediakan metoda bantuan agar dapat
+memperkenankan kita untuk menderivasi dari penyandi `String` yang sudah ada
 
 {lang="text"}
 ~~~~~~~~
@@ -20790,6 +20847,8 @@ one from the existing `String` encoder
 
 The only difference between `.get` and `.post` is the way we construct our `http4s.Request`
 
+Satu-satunya pembeda antara `.get` dan `.post` adalah cara kita membangun `http4s.Request`
+
 {lang="text"}
 ~~~~~~~~
   http4s.Request[Task](
@@ -20802,6 +20861,9 @@ The only difference between `.get` and `.post` is the way we construct our `http
 
 and the final piece is the constructor, which is a case of calling `Http1Client`
 with a configuration object
+
+dan bagian utama adalah pembangun, yang hanya berupa pemanggilan `Http1Client`
+dengan objek konfigurasi
 
 {lang="text"}
 ~~~~~~~~
