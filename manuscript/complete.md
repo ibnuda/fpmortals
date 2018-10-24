@@ -19048,6 +19048,10 @@ The decoding side is much as we can expect based on previous examples. We can
 construct an instance of a `FieldType[K, H]` with the helper `field[K](h: H)`.
 Supporting only the sensible defaults means we write:
 
+Bagian pembacaan sandi kurang lebih sama dengan contoh sebelumnya. Kita dapat
+menyusun sebuah instans dari `Field[K, H]` dengan metoda bantuan `field[K](h: D]`.
+Kita hanya menulis default yang masuk akal saja:
+
 {lang="text"}
 ~~~~~~~~
   sealed trait DerivedJsDecoder[A] {
@@ -19115,14 +19119,27 @@ Supporting only the sensible defaults means we write:
 Adding user preferences via annotations follows the same route as
 `DerivedJsEncoder` and is mechanical, so left as an exercise to the reader.
 
+Menambahkan prarasa pengguna dengan cara anotasi, sama halnya dengan `DerivedJsonEncoder`
+dan terasa kaku. Jadi, kita akan memperlakukannya sebagai latihan bagi pembaca.
+
 One final thing is missing: `case class` default values. We can request evidence
 but a big problem is that we can no longer use the same derivation mechanism for
 products and coproducts: the evidence is never created for coproducts.
+
+Satu hal penting yang tertinggal: nilai default `case class`. Kita dapat meminta
+bukti namun yang menjadi masalah adalah kita tidak dapat lagi menggunakan mekanisme
+derivasi yang sama untuk produk dan koproduk: bukti tidak akan pernah dibuat untuk
+koproduk.
 
 The solution is quite drastic. We must split our `DerivedJsDecoder` into
 `DerivedCoproductJsDecoder` and `DerivedProductJsDecoder`. We will focus our
 attention on the `DerivedProductJsDecoder`, and while we are at it we will
 use a `Map` for faster field lookup:
+
+Soolusi yang dipakai cukup drastis, kita harus memisah `DerivedJsDecoder` menjadi
+`DerivedCoproductJsDecoder` dan `DerivedProductJsDecder`. Kita akan memfokuskan
+perhatian kita pada `DerivedProductJsDecoder` dan menggunakan `Map` untuk pencarian
+bidang yang lebih singkat:
 
 {lang="text"}
 ~~~~~~~~
@@ -19139,6 +19156,11 @@ We can request evidence of default values with `Default.Aux[A, D]` and duplicate
 all the methods to deal with the case where we do and do not have a default
 value. However, Shapeless is merciful (for once) and provides
 `Default.AsOptions.Aux[A, D]` letting us handle defaults at runtime.
+
+Kita dapat meminta bukti nilai default dengan `Default.Aux[A, D]` dan menduplikasi
+semua metooda agar menangani kasus yang tergantung dari ketersediaan nilai default.
+Namun, Shapeless berbaik-hati (untuk kali ini) dan menyediakan `Default.AsOoptions.Aux[A, D]`
+yang memperkenankan kita untuk menangani nilai default pada saat waktu-jalan.
 
 {lang="text"}
 ~~~~~~~~
@@ -19161,6 +19183,9 @@ value. However, Shapeless is merciful (for once) and provides
 
 We must move the `.hcons` and `.hnil` methods onto the companion of the new
 sealed typeclass, which can handle default values
+
+Kita harus memindahkan metoda `.hcons` dan `.hnil` ke objek pasangan dari kelas
+tipe tertutup, yang dapat menangani nilai default
 
 {lang="text"}
 ~~~~~~~~
@@ -19204,7 +19229,12 @@ sealed typeclass, which can handle default values
 We can no longer use `@deriving` for products and coproducts: there can only be
 one entry in the `deriving.conf` file.
 
+Kita tidak dapat lagi menggunakan `@deriving` untuk produk dan koproduk: hanya
+boleh ada satu *entry* pada berkas `deriving.conf`.
+
 Oh, and don't forget to add `@@` support
+
+Dan jangan lupa untuk menambahkan dukungan `@@`
 
 {lang="text"}
 ~~~~~~~~
