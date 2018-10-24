@@ -19796,6 +19796,9 @@ A> yang luar biasa.
 When deciding on a technology to use for typeclass derivation, this feature
 chart may help:
 
+Saat menentukan teknologi yang akan digunakan untuk menderivasi kelas tipe,
+bagan fitur ini mungkin membantu:
+
 | Feature        | Scalaz | Magnolia | Shapeless    | Manual       |
 |-------------- |------ |-------- |------------ |------------ |
 | `@deriving`    | yes    | yes      | yes          |              |
@@ -19807,13 +19810,32 @@ chart may help:
 | Complicated    |        |          | painfully so |              |
 | Performance    |        |          |              | hold my beer |
 
+| Fitur           | Scalaz | Magnolia | Shapeless    | Manual         |
+|--------------  |------ |-------- |------------ |------------ |
+| `@deriving`     | ya     | ya       | ya            |               |
+| Hukum           | ya     |          |               |               |
+| Kompilasi copat | ya     | ya       |               | yes           |
+| Nama bidang     |        | ya       | ya            |               |
+| Anotasi         |        | ya       | sebagian      |               |
+| Nilai default   |        | ya       | dengan kurang |               |
+| Rumit           |        |          | memedihkan    |               |
+| Performa        |        |          |               | masuk pak eko |
+
 Prefer `scalaz-deriving` if possible, using Magnolia for encoders / decoders or
 if performance is a larger concern, escalating to Shapeless for complicated
 derivations only if compilation times are not a concern.
 
+Pilih `scalaz-deriving` bila memungkinkan, gunakan Magnolia untuk penyandian /
+pembacaan sandi atau bila performa agak penting, dan gunakan Shapeless untuk
+derivasi yang rumit bila waktu kompilasi tidak menjadi masalah.
+
 Manual instances are always an escape hatch for special cases and to achieve the
 ultimate performance. Avoid introducing typo bugs with manual instances by using
 a code generation tool.
+
+Instans manual selalu menjadi pelampung untuk kasus khusus dan untuk mencapai
+performa paling akhir. Hindari kutu karena salah ketik pada instans manual
+dengan menggunakan alat penghasil kode.
 
 
 # Wiring up the Application
