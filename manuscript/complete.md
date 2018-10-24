@@ -19506,6 +19506,10 @@ akan menyebabkan benci. Dan, benci akan menyebabkan penderitaan.
 There is no silver bullet when it comes to typeclass derivation. An axis to
 consider is performance: both at compiletime and runtime.
 
+Tidak ada sesuatu yang namanya Busur Gandiwa bila kita berbicara mengenai derivasi
+kelas tipe. Salah satu hal yang harus dipertimbangkan adalah performa: baik pada
+saat kompilasi maupun waktu-jalan.
+
 
 #### Compile Times
 
@@ -19513,6 +19517,12 @@ When it comes to compilation times, Shapeless is the outlier. It is not uncommon
 to see a small project expand from a one second compile to a one minute compile.
 To investigate compilation issues, we can profile our applications with the
 `scalac-profiling` plugin
+
+Bila kita berbicara mengenai waktu kompilasi, Shapeless merupakan pencilan. Bukan
+hal yang luar biasa bila kita mendapati sebuah proyek kecil menderita penggelembungan
+waktu kompilasi dari satu detik menjadi satu menit. Untuk mengusut masalah kompilasi,
+kita dapat melakukan *profiling* (lol, help) terhadap aplikasi kita dengan menggunakan
+plugin `scalac-profiling`
 
 {lang="text"}
 ~~~~~~~~
@@ -19522,7 +19532,12 @@ To investigate compilation issues, we can profile our applications with the
 
 It produces output that can generate a *flame graph*.
 
+Potongan diatas akan menghasilkan keluaran yang dapat menghasilkan sebuah graf
+api.
+
 For a typical Shapeless derivation, we get a lively chart
+
+Untuk derivasi Shapeless yang jamak digunakan, kita akan mendapat grafik yang menarik
 
 {width=90%}
 ![](images/implicit-flamegraph-jsonformat-jmh.png)
@@ -19531,8 +19546,16 @@ almost the entire compile time is spent in implicit resolution. Note that this
 also includes compiling the `scalaz-deriving`, Magnolia and manual instances,
 but the Shapeless computations dominate.
 
+hampir semua waktu kompilasi dihabiskan untuk resolusi `implicit`. Harap diperhatikan,
+grafik ini juga mengikutsertakan kompilasi `scalaz-deriving`, Magnolia, dan instans
+manual. Namun, komputasi dari Shapeless mendominasi grafik tersebut.
+
 And this is when it works. If there is a problem with a shapeless derivation,
 the compiler can get stuck in an infinite loop and must be killed.
+
+Dan, ini bila kita berhasil melakukan *profiling*. Bila ada masalah dengan
+derivasi shapeless, kompiler dapat tersangkut pada sebuah ikalan tak hingga dan
+harus dibunuh.
 
 
 #### Runtime Performance
