@@ -19843,13 +19843,26 @@ dengan menggunakan alat penghasil kode.
 To finish, we will apply what we have learnt to wire up the example application,
 and implement an HTTP client and server using the [http4s](https://http4s.org/) pure FP library.
 
+Untuk menutup buku ini, kita akan menerapkan apa yang telah kita pelajari dengan
+menulis contoh aplikasi dan mengimplementasikan sebuah klien dan peladen HTTP
+menggunakan pustaka pemrogaram fungsional murni (lol, help) [http4s](https://http4s.org/).
+
 The source code to the `drone-dynamic-agents` application is available along
 with the book's source code at `https://github.com/fommil/fpmortals` under the
 `examples` folder. It is not necessary to be at a computer to read this chapter,
 but many readers may prefer to explore the codebase in addition to this text.
 
+Kode sumber dari aplikasi `drone-dynamic-agents` tersedia bersama dengan sumber
+kode buku pada `https://github.com/fommil/fpmortals` pada direktori `example`.
+Untuk membaca bab ini, tidak perlu berada di depan komputer, namun kebanyakan
+pembaca mungkin memilih untuk melihat-lihat basis-kode sebagai tambahan tulisan
+ini.
+
 Some parts of the application have been left unimplemented, as an exercise to
 the reader. See the `README` for further instructions.
+
+Beberapa bagian dari aplikasi sengaja belum diimplementasikan dan digunakan
+sebagai latihan bagi pembaca. Silakan lihat `README` untuk instruksi lebih lanjut.
 
 
 ## Overview
