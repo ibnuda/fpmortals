@@ -19347,6 +19347,11 @@ benefit from a typeclass derivation of the `UrlQueryWriter` typeclass, which is
 built out of `UrlEncodedWriter` instances for each field entry. It does not
 support coproducts:
 
+Sama halnya dengan `xmlformat`, aplikasi `drone-dynamic-agents` dapat diuntungkan
+dari derivasi kelas tipe dari kelas tipe `UrqQueryWriter` yang dibangun dengan
+instans `UrlEncodedWriter` untuk tiap *entry* bidang. Kelas tipe ini tidak mendukung
+koproduk:
+
 {lang="text"}
 ~~~~~~~~
   @typeclass trait UrlQueryWriter[A] {
@@ -19383,7 +19388,13 @@ It is reasonable to ask if these 30 lines are actually an improvement over the 8
 lines for the 2 manual instances our application needs: a decision to be taken
 on a case by case basis.
 
+Cukup masuk akal bila kita bertanya apakan 30 baris kode ini memang peningkatan
+dari 8 baris untuk 2 instans manual yang dibutuhkan oleh aplikasi kita: pilihan
+yang ditentukan kasus-per-kasus.
+
 For completeness, the `UrlEncodedWriter` derivation can be written with Magnolia
+
+Agar lebih lengkap, derivasi `UrlEncodedWriter` dapat ditulis dengan Magnolia
 
 {lang="text"}
 ~~~~~~~~
