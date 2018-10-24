@@ -19423,11 +19423,23 @@ mentioned for Magnolia, Shapeless is **much** worse. Not only is fully automatic
 Shapeless derivation [the most common cause of slow compiles](https://www.scala-lang.org/blog/2018/06/04/scalac-profiling.html), it is also a
 painful source of typeclass coherence bugs.
 
+Selain semua peringatan mengenai derivasi otomatis yang telah ditulis untuk
+Magnolia, Shapeless jauh lebih mengkuatirkan. Tak hanya derivasi otomatis
+Shapeless [sering kali penyebab lambannya kompilasi](https://www.scala-lang.org/blog/2018/06/04/scalac-profiling.html),
+Shapeless juga merupakan sumber dari kutu koherensi kelas tipe.
+
 Fully automatic derivation is when the `def gen` are `implicit` such that a call
 will recurse for all entries in the ADT. Because of the way that implicit scopes
 work, an imported `implicit def` will have a higher priority than custom
 instances on companions, creating a source of typeclass decoherence. For
 example, consider this code if our `.gen` were implicit
+
+Derivasi otomatis adalah ketika `def gen` bersifat `implicit` yang mana sebuah
+panggilan akan melakukan rekursi untuk semua *entry* pada TDA. Karena cara kerja
+cakupan implisit, sebuah `implicit def` akan memiliki prioritas lebih tinggi
+dibandingkan dengan instans kustom pada objek pendamping dan menjadi sumber
+dekoherensi kelas tipe. Sebagai contoh, perhatikan kode berikut bila `.gen` kita
+`implicit`
 
 {lang="text"}
 ~~~~~~~~
@@ -19440,6 +19452,9 @@ example, consider this code if our `.gen` were implicit
 
 We might expect the full-auto encoded form of `Bar("hello")` to look like
 
+Kita mungkin berharap bentuk tersandi otomatis dari `Bar("hello")` terlihat
+seperti
+
 {lang="text"}
 ~~~~~~~~
   {
@@ -19448,6 +19463,9 @@ We might expect the full-auto encoded form of `Bar("hello")` to look like
 ~~~~~~~~
 
 because we have used `xderiving` for `Foo`. But it can instead be
+
+karena kita menggunakan `xderiving` untuk `Foo`. Namun, hasil yang diberikan
+adalah sebagai berikut
 
 {lang="text"}
 ~~~~~~~~
@@ -19462,14 +19480,26 @@ Worse yet is when implicit methods are added to the companion of the typeclass,
 meaning that the typeclass is always derived at the point of use and users are
 unable opt out.
 
+Yang lebih parah adalah saat metoda implisit ditambahkan pada objek pendamping
+dari kelas tipe. Hal ini berarti kelas tipe selalu diderivasi pada saat penggunaan
+dan pengguna tidak dapat memilih untuk tidak menggunakannya.
+
 Fundamentally, when writing generic programs, implicits can be ignored by the
 compiler depending on scope, meaning that we lose the compiletime safety that
 was our motivation for programming at the type level in the first place!
+
+Secara mendasar, saat menulis program generik, `implicit` dapat diabaikan oleh
+kompiler, bergantung pada cakupan. Hal ini berarti kita kehilangan keamanan pada
+waktu-kompilasi yang menjadi motivasi utama atas pemrograman pada tingkat tipe.
 
 Everything is much simpler in the light side, where `implicit` is only used for
 coherent, globally unique, typeclasses. Fear of boilerplate is the path to the
 dark side. Fear leads to anger. Anger leads to hate. Hate leads to suffering.
 
+Semua akan menjadi lebih mudah pada sisi baik, dimana `implicit` hanya digunakan
+untuk kelas tipe yang koheren dan unik secara global. Ketakutan atas plat cetak
+merupakan pemicu ke sisi gelap. Ketakutan akan berubah menjadi amarah. Amarah
+akan menyebabkan benci. Dan, benci akan menyebabkan penderitaan.
 
 ## Performance
 
