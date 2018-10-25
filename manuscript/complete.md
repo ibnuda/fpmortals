@@ -21035,12 +21035,21 @@ pengenalan plat cetak baru sehingga fokus kita kembali terpecah.
 
 And that is it! Congratulations on reaching the end.
 
+Demikian! Kami ucapkan selamat kepada pembaca yang selesai membaca sampai akhir.
+
 If you learnt something from this book, then please tell your friends. This book
 does not have a marketing department, so word of mouth is the only way that
 readers find out about it.
+
+Bila pembaca budiman mempelajari sesuatu dari buku ini, mohon untuk memberi tahu
+handai-taulan dan kawan-kawan mengenai buku ini. Buku ini tidak memiliki Bagian
+Pemasaran, sehingga promosi dari-mulut-ke-mulut sajalah pembaca lain dapat tahu.
 
 Get involved with Scalaz by joining the [gitter chat room](https://gitter.im/scalaz/scalaz). From there you can ask
 for advice, help newcomers (you're an expert now), and contribute to the next
 release.
 
-
+Pembaca budiman juga dapat ikut serta atas pengembangan Scalaz dengan bergabung
+pada [ruang obrolan gitter](https://gitter.im/scalaz/scalaz). Dari sini, pembaca
+dapat meminta saran, membantu pengguna baru (karena pembaca budiman sudah ahli),
+dan berkontribusi untuk rilis selanjutnya.
