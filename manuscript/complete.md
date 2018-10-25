@@ -20883,6 +20883,9 @@ dengan objek konfigurasi
 We need to spin up an HTTP server, which is a lot easier than it sounds. First,
 the imports
 
+Kita harus menyalakan sebuah peladen HTTP, yang sebenarnya jauh lebih mudah bila
+dibandingkan yang terdengar. Pertama, kita mengimpor
+
 {lang="text"}
 ~~~~~~~~
   import org.http4s._
@@ -20892,6 +20895,9 @@ the imports
 ~~~~~~~~
 
 We need to create a `dsl` for our effect type, which we then import
+
+Kita harus membuat sebuah `dsl` untuk tipe efek kita, yang nantinya akan kita
+impor
 
 {lang="text"}
 ~~~~~~~~
@@ -20903,6 +20909,11 @@ Now we can use the [http4s dsl](https://http4s.org/v0.18/dsl/) to create HTTP en
 everything that can be done, we will simply implement the endpoint which is
 similar to any of other HTTP DSLs
 
+Sekarang, kita dapat menggunakan [dsl http4s](https://http4s.org/v0.18/dsl) untuk
+membuat titik akhir HTTP. Kita tidak akan mendeskripsikan apa yang kita lakukan,
+kita hanya perlu mengimplementasikannya. Titik akhir ini mirip dengan *DSL* HTTP
+lain
+
 {lang="text"}
 ~~~~~~~~
   private object Code extends QueryParamDecoderMatcher[String]("code")
@@ -20913,6 +20924,10 @@ similar to any of other HTTP DSLs
 
 The return type of each pattern match is a `Task[Response[Task]]`. In our
 implementation we want to take the `code` and put it into the `ptoken` promise:
+
+Tipe kembalian untuk tiap pencocokan pola adalah sebuah `Task[Response[Task]]`.
+Pada implementasi kita, kita menginginkan untuk menerima `code` dan menempatkannya
+pada *promise* `ptoken`:
 
 {lang="text"}
 ~~~~~~~~
@@ -20934,6 +20949,9 @@ implementation we want to take the `code` and put it into the `ptoken` promise:
 but the definition of our services routes is not enough, we need to launch a
 server, which we do with `BlazeBuilder`
 
+namun, definisi dari rute layanan kita masih belum cukup. Kita harus menjalankan
+sebuah peladen, yang dapat kita lakukan dengan `BlazeBuilder`
+
 {lang="text"}
 ~~~~~~~~
   private val launch: Task[Server[Task]] =
@@ -20944,7 +20962,13 @@ Binding to port `0` makes the operating system assign an ephemeral port. We can
 discover which port it is actually running on by querying the `server.address`
 field.
 
+Dengan mengikat layanan ke *port* `0`, kita meminta kepada sistem operasi untuk
+menetapkan port manapun. Kita dapat menemukan port mana yang sebenarnya berjalan
+dengan melakukan kueri pada bidang `server.address`.
+
 Our implementation of the `.start` and `.stop` methods is now straightforward
+
+Implementasi kita atas metoda `.start` dan `.stop` pun tidak banyak basa-basi
 
 {lang="text"}
 ~~~~~~~~
@@ -20975,8 +20999,15 @@ The `1.second` sleep is necessary to avoid shutting down the server before the
 response is sent back to the browser. IO doesn't mess around when it comes to
 concurrency performance!
 
+`1.second` *sleep* penting untuk menghindari matinya peladen sebelum respons
+dikirimkan balik ke peramban. IO tidak pernah main-main bila kita berbicara
+mengenai performa konkurensi.
+
 Finally, to create a `BlazeUserInteraction`, we just need the two uninitialised
 promises
+
+Dan pada akhirnya, untuk membuat sebuah `BlazeUserInteraction`, kita hanya perlu
+dua *promise* yang belum dimulai
 
 {lang="text"}
 ~~~~~~~~
@@ -20993,6 +21024,11 @@ promises
 We could use `IO[Void, ?]` instead, but since the rest of our application is
 using `Task` (i.e. `IO[Throwable, ?]`), we `.widenError` to avoid introducing
 any boilerplate that would distract us.
+
+Kita bisa saja menggunakan `IO[Void, ?]`, namun karena bagian-bagian aplikasi
+kita lainnya menggunakan `Task` (mis, `IO[Throwable, ?]`), kita dapat memperluas
+cakupan galat dengan menggunakan `.widenError` agar kita dapat menghindari
+pengenalan plat cetak baru sehingga fokus kita kembali terpecah.
 
 
 ## Thank You
