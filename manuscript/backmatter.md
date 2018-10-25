@@ -1,9 +1,9 @@
 {backmatter}
 
 
-# Typeclass Cheatsheet
+# Contekan Kelas Tipe
 
-| Typeclass          | Method          | From            | Given                  | To             |
+| Kelas Tipe         | Metoda          | Asal            | Diberikan              | Tujuan         |
 |------------------ |--------------- |--------------- |---------------------- |-------------- |
 | `InvariantFunctor` | `xmap`          | `F[A]`          | `A => B, B => A`       | `F[B]`         |
 | `Contravariant`    | `contramap`     | `F[A]`          | `B => A`               | `F[B]`         |
@@ -43,15 +43,14 @@
 |                    | `bisequence`    | `F[G[A], G[B]]` |                        | `G[F[A, B]]`   |
 
 
-# Third Party Licenses
+# Lisensi Pihak Ketiga
 
-Some of the source code in this book has been copied from free / libre
-software projects. The license of those projects require that the
-following texts are distributed with the source that is presented in
-this book.
+Beberapa sumber kode pada buku ini disalin dari proyek perangkat lunak
+bebas. Lisensi proyek tersebut meminta teks berikut didistribusikan
+bersama sumber yang diditunjukkan pada buku ini.
 
 
-## Scala License
+## Lisensi Scala
 
 {lang="text"}
 ~~~~~~~~
@@ -86,7 +85,7 @@ this book.
 ~~~~~~~~
 
 
-## Scalaz License
+## Lisensi Scalaz
 
 {lang="text"}
 ~~~~~~~~
