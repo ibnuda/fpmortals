@@ -11,74 +11,79 @@
 > ― Bertrand Russell
 
 
-# About This Book
+# Mengenai Buku Ini
 
-This book is for the typical Scala developer, probably with a Java background,
-who is both sceptical and curious about the **Functional Programming** (FP)
-paradigm. This book justifies every concept with practical examples, including
-writing a web application.
+Buku ini ditujukan untuk tipikal pengembang yang menggunakan bahasa pemrograman
+Scala, yang mungkin memiliki latar belakang Java, yang skeptis dan penasaran mengenai
+paradigma Pemrograman Fungsional (PF). Buku ini menyuguhkan setiap konsep dengan
+contoh praktikan, termasuk dengan penulisan aplikasi web.
 
-This book uses [Scalaz 7.2](https://github.com/scalaz/scalaz), the most popular, stable, principled and
-comprehensive Functional Programming framework for Scala.
+Buku ini menggunakan [Scalaz 7.2](https://github.com/scalaz/scalaz) yang merupakan
+kerangka kerja Pemrograman Fungsional untuk Scala yang paling populer, stabil,
+berprinspip, dan komprehensif.
 
-This book is designed to be read from cover to cover, in the order presented,
-with a rest between chapters. Earlier chapters encourage coding styles that we
-will later discredit: similar to how we learn Newton's theory of gravity as
-children, and progress to Riemann / Einstein / Maxwell if we become students of
-physics.
+Buku ini dirancang agar dibaca dari awal sampai akhir secara berurutan, dengan
+rehat sejenak antar bab. Pada bab awal, pembaca budiman didorong untuk menggunakan
+gaya penulisan kode yang pada bab selanjutnya akan kita tinggalkan: mirip saat
+kita mempelajari teori gravitasi Newton saat masih kanak-kanak, dan berlanjut
+ke Riemann / Einstein / Maxwell bila kita menjadi mahasiswa Fisika.
 
-A computer is not necessary to follow along, but studying the Scalaz source code
-is encouraged. Some of the more complex code snippets are available with [the
-book's source code](https://github.com/fommil/fpmortals/) and those who want practical exercises are encouraged to
-(re-)implement Scalaz (and the example application) using the partial
-descriptions presented in this book.
+Untuk mengikuti buku ini, sebuah komputer tidak diharuskan, namun didorong untuk
+mempelajari kode sumber Scalaz. Beberapa potongan kode yang agak kompleks tersedia
+bersama dengan [kode sumber buku ini](https://github.com/fommil/fpmortals/) dan
+bagi pembaca budiman yang menginginkan latihan praktik, sangat dianjurkan untuk
+mengimplementasi ulang Scalaz (dan contoh aplikasi) menggunakan deskripsi parsial
+yang ditunjukkan di buku ini.
+(dan contoh aplikasi)
 
-We also recommend [The Red Book](https://www.manning.com/books/functional-programming-in-scala) as further reading. It teaches how to write an FP
-library in Scala from first principles.
-
-
-# Copyleft Notice
-
-This book is **Libre** and follows the philosophy of [Free Software](https://www.gnu.org/philosophy/free-sw.en.html): you can use
-this book as you like, the [source is available](https://github.com/fommil/fpmortals/) you can redistribute this book
-and you can distribute your own version. That means you can print it, photocopy
-it, e-mail it, upload it to websites, change it, translate it, charge for it,
-remix it, delete bits, and draw all over it.
-
-This book is **Copyleft**: if you change the book and distribute your own version,
-you must also pass these freedoms to its recipients.
-
-This book uses the [Creative Commons Attribution ShareAlike 4.0 International](https://creativecommons.org/licenses/by-sa/4.0/legalcode) (CC
-BY-SA 4.0) license.
-
-All original code snippets in this book are separately [CC0](https://wiki.creativecommons.org/wiki/CC0) licensed, you may use
-them without restriction. Excerpts from Scalaz and related libraries maintain
-their license, reproduced in full in the appendix.
-
-The example application `drone-dynamic-agents` is distributed under the terms of
-the [GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html): only the snippets in this book are available without restriction.
+Kita juga merekomendasikan [Buku Merah](https://www.manning.com/books/functional-programming-in-scala)
+sebagai bacaan lainnya. Buku tersebut membimbing pembaca mengenai bagaimana cara
+membangun pustaka PF pada Scala dari prinsip awal.
 
 
-# Thanks
+# Pemberitahuan *Copyleft*
 
-Diego Esteban Alonso Blas, Raúl Raja Martínez and Peter Neyens of 47
-degrees, Rúnar Bjarnason, Tony Morris, John de Goes and Edward Kmett
-for their help explaining the principles of FP. Kenji Yoshida and
-Jason Zaugg for being the main authors of Scalaz, and Paul Chuisano /
-Miles Sabin for fixing a critical bug in the Scala compiler ([SI-2712](https://issues.scala-lang.org/browse/SI-2712)).
+Buku ini **Libre** dan mengikuti filosofi [Perangkat Lunak Bebas](https://www.gnu.org/philosophy/free-sw.id.html):
+Pembaca dapat menggunakan buku ini sebagaimana yang pembaca suka, [sumber buku](https://github.com/fommil/fpmortals/)
+dapat pembaca distribusikan ulang, mengirimkannya melalui surel, mengunggahnya
+pada situs web, mengubahnya, menerjemahkannya, meminta bayaran atasnya, menggabungkannya
+dengan bahan lain, menghapus bagian-bagiannya, dan bahkan menggambarinya.
 
-Thanks to the readers who gave feedback on early drafts of this text.
+Buku ini bersifat **Copyleft**: bila pembaca budiman mengubah buku ini dan mendistribusikannya,
+pembaca juga harus memberikan kebabasan ini kepada pembacanya.
 
-Some material was particularly helpful for my own understanding of the concepts
-that are in this book. Thanks to Juan Manuel Serrano for [All Roads Lead to
-Lambda](https://skillsmatter.com/skillscasts/9904-london-scala-march-meetup#video), Pere Villega for [On Free Monads](http://perevillega.com/understanding-free-monads), Dick Wall and Josh Suereth for [For:
-What is it Good For?](https://www.youtube.com/watch?v=WDaw2yXAa50), Erik Bakker for [Options in Futures, how to unsuck them](https://www.youtube.com/watch?v=hGMndafDcc8),
-Noel Markham for [ADTs for the Win!](https://www.47deg.com/presentations/2017/06/01/ADT-for-the-win/), Sukant Hajra for [Classy Monad Transformers](https://www.youtube.com/watch?v=QtZJATIPB0k),
-Luka Jacobowitz for [Optimizing Tagless Final](https://lukajcb.github.io/blog/functional/2018/01/03/optimizing-tagless-final.html), Vincent Marquez for [Index your
-State](https://www.youtube.com/watch?v=JPVagd9W4Lo), Gabriel Gonzalez for [The Continuation Monad](http://www.haskellforall.com/2012/12/the-continuation-monad.html), and Yi Lin Wei / Zainab Ali
-for their tutorials at Hack The Tower meetups.
+Buku ini menggunakan lisensi [Atribusi-BerbagiSerupa 4.0 Internasional](https://creativecommons.org/licenses/by-sa/4.0/legalcode.id)
+(CC BY-SA 4.0).
 
-The helpul souls who patiently explained things to me: Merlin Göttlinger, Edmund
+Semua potongan kode pada buku ini dilisensikan terpisah menggunakan [CC0](https://wiki.creativecommons.org/wiki/CC0),
+pembaca dapat menggunakannya tanpa batas. Kutipan dari Scalaz dan pustaka terkait
+tetap menggunakan lisensinya, dan dicantumkan pada lampiran.
+
+Contoh aplikasi `drone-dynamic-agents` didistribusikan menggunakan [GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html):
+hanya yang tercantum pada buku ini tersedia tanpa batasan.
+
+
+# Ucapan Terima Kasih
+
+Diego Esteban Alonso Blas, Raúl Raja Martínez dan Peter Neyens dari 47
+degrees, Rúnar Bjarnason, Tony Morris, John de Goes dan Edward Kmett
+atas bantuannya dalam menjelaskan prinsip PF. Kenji SHinoda dan Jason
+Zaugg sebagai penulis utama Scalaz, dan Paul Chiusano / Miles Sabin
+untuk pembenahan kutu ganas ([SI-2712](https://issues.scala-lang.org/browse/SI-2712)) pada kompiler Scala.
+
+Terima kasih kepada pembaca yang memberikan umpan balik pada draf awal
+buku ini.
+
+Beberapa materi yang berguna bagi pemahaman penulis atas konsep-konsep pada
+buku ini. Terima kasih kepada Juan Manuel Serrano untuk [All Roads Lead to
+Lambda](https://skillsmatter.com/skillscasts/9904-london-scala-march-meetup#video), Pere Villega untuk [On Free Monads](http://perevillega.com/understanding-free-monads), Dick Wall dan Josh Suereth untuk [For:
+What is it Good For?](https://www.youtube.com/watch?v=WDaw2yXAa50), Erik Bakker untuk [Options in Futures, how to unsuck them](https://www.youtube.com/watch?v=hGMndafDcc8),
+Noel Markham untuk [ADTs for the Win!](https://www.47deg.com/presentations/2017/06/01/ADT-for-the-win/), Sukant Hajra untuk [Classy Monad Transformers](https://www.youtube.com/watch?v=QtZJATIPB0k),
+Luka Jacobowitz untuk [Optimizing Tagless Final](https://lukajcb.github.io/blog/functional/2018/01/03/optimizing-tagless-final.html), Vincent Marquez untuk [Index your
+State](https://www.youtube.com/watch?v=JPVagd9W4Lo), Gabriel Gonzalez untuk [The Continuation Monad](http://www.haskellforall.com/2012/12/the-continuation-monad.html), dan Yi Lin Wei / Zainab Ali
+atas tutorial pada pertemuan di Hack The Tower.
+
+Jiwa-jiwa penolong yang menjelaskan dengan sabar kepada penulis: Merlin Göttlinger, Edmund
 Noble, Fabio Labella, Adelbert Chang, Michael Pilquist, Paul Snively, Daniel
 Spiewak, Stephen Compall, Brian McKenna, Ryan Delucchi, Pedro Rodriguez, Emily
 Pillmore, Aaron Vargo, Tomas Mikula, Jean-Baptiste Giraudeau, Itamar Ravid, Ross
@@ -86,10 +91,12 @@ A. Baker, Alexander Konovalov, Harrison Houghton, Alexandre Archambault,
 Christopher Davenport, Jose Cardona.
 
 
-# Practicalities
 
-To set up a project that uses the libraries presented in this book, use a recent
-version of Scala with FP-specific features enabled (e.g. in `build.sbt`):
+# Praktikalitas
+
+Untuk memulai sebuah projek yang menggunakan pustaka-pustaka yang ditunjukkan
+pada buku ini, gunakan versi baru dari Scala dengan fitur spesifik PF diizinkan
+(mis., pada `build.sbt`):
 
 {lang="text"}
 ~~~~~~~~
@@ -109,9 +116,9 @@ version of Scala with FP-specific features enabled (e.g. in `build.sbt`):
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full)
 ~~~~~~~~
 
-In order to keep our snippets short, we will omit the `import`
-section. Unless told otherwise, assume that all snippets have the
-following imports:
+Agar potongan kode kita tetap pendek, kita tidak akan mengikutsertakan bagian
+`import`. Kecuali bila ditentukan selainnya, anggap semua potongan memiliki
+impor berikut:
 
 {lang="text"}
 ~~~~~~~~
