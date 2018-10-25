@@ -92,7 +92,7 @@ Christopher Davenport, Jose Cardona.
 
 
 
-# Praktikalitas
+# Kepraktisan
 
 Untuk memulai sebuah projek yang menggunakan pustaka-pustaka yang ditunjukkan
 pada buku ini, gunakan versi baru dari Scala dengan fitur spesifik PF diizinkan

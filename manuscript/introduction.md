@@ -1,16 +1,18 @@
 
-# Introduction
+# Pengantar
 
-It is human instinct to be sceptical of a new paradigm. To put some
-perspective on how far we have come, and the shifts we have already
-accepted on the JVM, let's start with a quick recap of the last 20
-years.
+Sudah menjadi naluri manusia untuk ragu dan curiga pada paradigma baru.
+Sebagai perspektif mengenai betapa berubahnya kita, dan pergeseran
+yang sudah kita terima pada JVM, mari kita rekap cepat apa yang terjadi
+pada 20 tahun belakangan ini.
 
-Java 1.2 introduced the Collections API, allowing us to write methods
-that abstracted over mutable collections. It was useful for writing
-general purpose algorithms and was the bedrock of our codebases.
+Java 1.2 memperkenalkan APA Koleksi, yang memperkenankan kita untuk
+menulis metoda yang mengabstraksi koleksi tak tetap. Antarmuka ini
+sangat berguna untuk penulisan algoritma umum dan merupakan pondasi
+dari basis kode kita.
 
-But there was a problem, we had to perform runtime casting:
+Namun ada sebuah masalah, kita harus melakukan konversi tipe
+pada saat waktu-jalan:
 
 {lang="text"}
 ~~~~~~~~
@@ -19,40 +21,42 @@ But there was a problem, we had to perform runtime casting:
   }
 ~~~~~~~~
 
-In response, developers defined domain objects in their business logic
-that were effectively `CollectionOfThings`, and the Collection API
-became implementation detail.
+Menyikapi hal itu, pengembang mendefinisikan objek domain pada logika bisnis
+mereka dan disebut sebagai `CollectionOfThings`. Setelah itu, APA Koleksi
+menjadi detail implementasi.
 
-In 2005, Java 5 introduced *generics*, allowing us to define
-`Collection<Thing>`, abstracting over the container **and** its
-elements. Generics changed how we wrote Java.
+Pada tahun 2005, Java 5 memperkenalkan *generik*, yang memperkenankan kita
+untuk mendefinisikan `Collection<Thing>`, mengabstrakkan kontainer **dan**
+elemennya. Generik mengubah cara kita menulis Java.
 
-The author of the Java generics compiler, Martin Odersky, then created
-Scala with a stronger type system, immutable data and multiple
-inheritance. This brought about a fusion of object oriented (OOP) and
-functional programming (FP).
+Penulis dari kompiler generik Java, Martin Odersky, lalu menciptakan
+Scala dengan sistem tipe yang lebih kuat, data tak-ubah, dan pewarisan
+jamak. Bahasa ini membawa penggabungan antara pemrograman berorientasi
+objek dan pemrograman fungsional.
 
-For most developers, FP means using immutable data as much as
-possible, but mutable state is still a necessary evil that must be
-isolated and managed, e.g. with Akka actors or `synchronized` classes.
-This style of FP results in simpler programs that are easier to
-parallelise and distribute, an improvement over Java. But it is only
-scratching the surface of the benefits of FP, as we will discover in
-this book.
+Bagi kebanyakan pengembang, PF mempunyai makna penggunaan data tak-ubah
+sebanyak mungkin. Namun, keadaan tak-tetak masih menjadi kebatilan yang
+harus ada dan juga harus diisolasi dan dikekang. Misal, dengan aktor
+Akka atau kelas `synchronized`. Gaya PF semacam ini menghasilkan program
+yang lebih sederhana dan dapat dengan mudah diparalelisasi dan distribusi.
+Dengan kata lain, peningkatan atas Java. Namun, Gaya semacam ini hanya
+berkutat pada permukaan dari keuntungan PF, yang akan kita temukan pada
+buku ini.
 
-Scala also brings `Future`, making it easy to write asynchronous
-applications. But when a `Future` makes it into a return type,
-*everything* needs to be rewritten to accomodate it, including the
-tests, which are now subject to arbitrary timeouts.
+Scala juga memiliki `Future`, yang mempermudah penulisan aplikasi
+asinkronus. Namun, ketika `Future` menjadi tipe kembalian, *semua*
+harus ditulis ulang agar mengakomodasinya. Termasuk tes yang harus
+tunduk pada tenggat waktu arbiter.
 
-We have a problem similar to Java 1.0: there is no way of abstracting
-over execution, much as we had no way of abstracting over collections.
+Sekarang, kita memiliki masalah yang sama dengan Java 1.0: tidak ada
+cara untuk mengabstraksi eksekusi, sebagaimana kita tidak punya cara
+untuk mengabstraksi koleksi.
 
+## Abstraksi atas Eksekusi
 
-## Abstracting over Execution
-
-Say we want to interact with the user over the command line interface. We can
-`read` what the user types and we can `write` a message to them.
+Misalkan kita ingin berinteraksi dengan pengguna melalui antarmuka baris perinta.
+Kita dapat membaca (menggunakan metoda `read`) apa yang pengguna tulis dan kita
+juga dapat menulis (menggunakan metoda `write`) pesan kepada mereka.
 
 {lang="text"}
 ~~~~~~~~
@@ -67,21 +71,23 @@ Say we want to interact with the user over the command line interface. We can
   }
 ~~~~~~~~
 
-How do we write generic code that does something as simple as echo the user's
-input synchronously or asynchronously depending on our runtime implementation?
+Bagaimana kita  menulis kode generik yang dapat menggemakan masukan pengguna
+secara sinkronus maupun asinkronus tergantung pada implementasi waktu-jalan kita?
 
-We could write a synchronous version and wrap it with `Future` but now
-we have to worry about which thread pool we should be using for the
-work, or we could `Await.result` on the `Future` and introduce thread
-blocking. In either case, it is a lot of boilerplate and we are
-fundamentally dealing with different APIs that are not unified.
+Kita dapat menulis versi sinkronus dan melapisinya dengan `Future`. Namun,
+kita harus memikirkan kumpulan utas mana yang harus  kita gunakan untuk
+tugas ini, atau kita dapat menggunakan `Await.result` untuk menanti yang
+terjadi pada `Future` dan memperkenalkan penghalangan utas. Yang manapun juga,
+akan sangat banyak plat cetak yang digunakan dan kita berurusan dengan APA
+yang berbeda secara mendasar dan juga tidak selaras.
 
-We can solve the problem, like Java 1.2, with a common parent using the *higher
-kinded types* (HKT) Scala language feature.
+Kita juga dapat menyelesaikan masalah, sebagaimana Java 1.2, menggunakan induk
+yang sama dengan memakai fitur bahasa milik Scala, *tipe lebih tinggi* (TLT).
 
-A> **Higher Kinded Types** allow us to use a *type constructor* in our type
-A> parameters, which looks like `C[_]`. This is a way of saying that
-A> whatever `C` is, it must take a type parameter. For example:
+A> **Tipe Lebih Tinggi** memperkenankan kita untuk menggunakan *konstruktor tipe*
+A> pada parameter tipe kita, yang terlihat seperti `C[_]`. Beginilah cara untuk
+A> menyampaikan bahwa apapun `C`, `C` harus menerima sebuah parameter tipe.
+A> Sebagai contoh:
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -92,6 +98,10 @@ A> ~~~~~~~~
 A> 
 A> `List` is a type constructor because it takes a type (e.g. `Int`) and constructs
 A> a type (`List[Int]`). We can implement `Foo` using `List`:
+A>
+A> `List` merupakan konstruktor tipe karena `List` menerima sebuah tipe dan membangun
+A> sebuah tipe (`List[Int]`). Kita dapat mengimplementasikan `Foo` menggunakan
+A> `List`:
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -103,18 +113,22 @@ A>
 A> We can implement `Foo` for anything with a type parameter hole, e.g.
 A> `Either[String, _]`. Unfortunately it is a bit clunky and we have to
 A> create a type alias to trick the compiler into accepting it:
+A>
+A> Kita dapat mengimplementasikan `Foo` dengan semua yang memiliki rongga parameter
+A> tipe. Mis, `Either[String, _]`. Sayangnya, implementasi semacam ini sedikit
+A> kikuk dan kita harus membuat alias tipe agar kompiler mau menerimanya:
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
 A>   type EitherString[T] = Either[String, T]
 A> ~~~~~~~~
-A> 
-A> Type aliases don't define new types, they just use substitution and
-A> don't provide extra type safety. The compiler substitutes
-A> `EitherString[T]` with `Either[String, T]` everywhere. This technique
-A> can be used to trick the compiler into accepting types with one hole
-A> when it would otherwise think there are two, like when we implement
-A> `Foo` with `EitherString`:
+A>
+A> Alias tipe tidak mendefinisikan tipe baru, alias tipe hanya menggunakan
+A> substitusi tanpa menyediakan tambahan keamanan tipe. Kompiler melakukan
+A> substitusi `EitherString[T]` dengan `Either[String, T]` di seluruh basis
+A> kode. Teknik ini dapat digunakan agar kompiler menerima tipe dengan satu
+A> rongga walaupun pada kenyataannya ada dua, seperti saat kita mengimplementasikan
+A> `Foo` dengan `EitherString`:
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -123,8 +137,9 @@ A>     def create(i: Int): Either[String, Int] = Right(i)
 A>   }
 A> ~~~~~~~~
 A> 
-A> Alternatively, the [kind projector](https://github.com/non/kind-projector/) plugin allows us to avoid the `type`
-A> alias and use `?` syntax to tell the compiler where the type hole is:
+A> Cara lainnya, plugin [kind projector](https://github.com/non/kind-projector/)
+A> memperkenankan kita untuk menghindari alias `type` dan menggunakan sintaks
+A> `?` untuk memberitahu kompiler dimana rongga tipe berada:
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -133,17 +148,17 @@ A>     def create(i: Int): Either[String, Int] = Right(i)
 A>   }
 A> ~~~~~~~~
 A> 
-A> Finally, there is this one weird trick we can use when we want to ignore the
-A> type constructor. Define a type alias to be equal to its parameter:
+A> Dan yang terakhir, ada satu trik janggal yang bisa kita gunakan untuk mengabaikan
+A> konstruktor tipe. Definisikan sebuah alias tipe agar setara dengan parameternya:
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
 A>   type Id[T] = T
 A> ~~~~~~~~
 A> 
-A> Before proceeding, understand that `Id[Int]` is the same thing as `Int`, by
-A> substituting `Int` into `T`. Because `Id` is a valid type constructor we can use
-A> `Id` in an implementation of `Foo`
+A> Sebelum melanjutkan, harap dipahami bahwa `Id[Int]` adalah sama dengan `Int`,
+A> dengan men-subtitusi `Int` ke `T`. Karena `Id` merupakan konstruktor tipe yang
+A> valid, kita dapat menggunakan `Id` pada implementasi `Foo`
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -152,10 +167,9 @@ A>     def create(i: Int): Int = i
 A>   }
 A> ~~~~~~~~
 
-We want to define `Terminal` for a type constructor `C[_]`. By
-defining `Now` to construct to its type parameter (like `Id`), we can
-implement a common interface for synchronous and asynchronous
-terminals:
+Kita ingin mendefinisikan `Terminal` untuk konstruktor tipe `C[_]`. Dengan
+mendefinisikan `Now` untuk mengkonstruk parameter tipenya (seperti `Id`), kita
+dapat menngimplementasika antarmuka umum untuk terminal sinkronus dan asinkronus:
 
 {lang="text"}
 ~~~~~~~~
@@ -180,11 +194,18 @@ terminals:
 We can think of `C` as a *Context* because we say "in the context of
 executing `Now`" or "in the `Future`".
 
-But we know nothing about `C` and we cannot do anything with a
-`C[String]`. What we need is a kind of execution environment that lets
-us call a method returning `C[T]` and then be able to do something
-with the `T`, including calling another method on `Terminal`. We also
-need a way of wrapping a value as a `C[_]`. This signature works well:
+Kita dapat menganggap `C` sebagai *konteks* karena kita menggunakannya
+pada saat berbicara sebagai "pada konteks eksekusi saat ini (`Now`)" atau
+"di masa depan (`Future`)".
+
+Namun, kita tidak tahu apapun mengenai `C` dan kita tidak dapat melakukan
+apapun dengan `C[String]`. Apa yang kita butuhkan adalah semacam lingkungan
+eksekusi yang memperkenankan kita untuk memanggil metoda yang mengembalikan
+sebuah `C[T]` dan pada akhirnya dapat melakukan sesuatu pada `T`, termasuk
+memanggil metoda lain pada `Terminal`. Kita juga membutuhkan sebuah cara untuk
+membungkus sebuah nilai menjadi sebuah `C[_]`. Penanda seperti ini bisa
+dibilang bekerja dengan baik, sebagaimana apa yang kita butuhkan pada kalimat
+sebelumnya:
 
 {lang="text"}
 ~~~~~~~~
@@ -194,7 +215,7 @@ need a way of wrapping a value as a `C[_]`. This signature works well:
   }
 ~~~~~~~~
 
-letting us write:
+yang memperkenankan kita untuk menulis:
 
 {lang="text"}
 ~~~~~~~~
@@ -206,20 +227,20 @@ letting us write:
     }
 ~~~~~~~~
 
-We can now share the `echo` implementation between synchronous and
-asynchronous codepaths. We can write a mock implementation of
-`Terminal[Now]` and use it in our tests without any timeouts.
+Sekarang kita dapat berbagi implementasi `echo` antara alur kode sinkronus
+dan asinkronus. Kita juga dapat menulis implementasi tiruan untuk `Terminal[Now]`
+dan menggunakannya pada tes kita tanpa batas waktu.
 
-Implementations of `Execution[Now]` and `Execution[Future]` are
-reusable by generic methods like `echo`.
+Implementasi dari `Execution[Now]` dan `Execution[Future]` dapat digunakan
+oleh metoda generik seperti `echo`.
 
-But the code for `echo` is horrible!
+Namun, kode untuk `echo` sendiri cukup mengerikan.
 
-The `implicit class` Scala language feature gives `C` some methods.
-We will call these methods `flatMap` and `map` for reasons that will
-become clearer in a moment. Each method takes an `implicit
-Execution[C]`, but this is nothing more than the `flatMap` and `map`
-that we're used to on `Seq`, `Option` and `Future`
+Fitur bahasa Scala `implicit class` memberikan `C` beberapa metoda.
+Kita akan memanggil metoda ini `flatMap` dan `map` untuk alasan yang
+akan jelas sebentar lagi. Setiap metoda menerima sebuah `implicit Execution[C]`,
+namun hal ini tidak lebih daripada `flatMap` dan `map` yang kita gunakan pada
+`Seq`, `Option`, dan `Future`
 
 {lang="text"}
 ~~~~~~~~
@@ -240,9 +261,9 @@ that we're used to on `Seq`, `Option` and `Future`
     }
 ~~~~~~~~
 
-We can now reveal why we used `flatMap` as the method name: it lets us
-use a *for comprehension*, which is just syntax sugar over nested
-`flatMap` and `map`.
+Sekarang kita tahu mengapa kita menggunakan `flatMap` sebagai nama metoda:
+metoda ini memperkenankan kita untuk menggunakan komprehensi *for* yang
+hanya merupakan pemanis sintaks atas `flatMap` dan `map` berlapis.
 
 {lang="text"}
 ~~~~~~~~
@@ -253,67 +274,70 @@ use a *for comprehension*, which is just syntax sugar over nested
     } yield in
 ~~~~~~~~
 
-Our `Execution` has the same signature as a trait in Scalaz called `Monad`,
-except `chain` is `bind` and `create` is `pure`. We say that `C` is *monadic*
-when there is an implicit `Monad[C]` available. In addition, Scalaz has the `Id`
-type alias.
+`Execution` kita mempunyai penanda yang sama sebagaimana dengan trait pada
+Scalaz yang disebut `Monad`. Namun, `chain` adalah `bind` dan `create` adalah
+`pure`. Kita menganggap `C` bersifat *monad* bila ada `Monad[C]` implisit
+tersedia. Sebagai tambahan Scalaz mempunyai alias tipe `Id`.
 
-The takeaway is: if we write methods that operate on monadic types,
-then we can write sequential code that abstracts over its execution
-context. Here, we have shown an abstraction over synchronous and
-asynchronous execution but it can also be for the purpose of more
-rigorous error handling (where `C[_]` is `Either[Error, _]`), managing
-access to volatile state, performing I/O, or auditing of the session.
+Yang bisa diambil adalah: bila kita menulis metoda yang beroperasi pada
+tipe monadik, maka kita dapat menulis kode sekuensial yang mengabstraksi
+konteks eksekusinya. Disini, kita telah menunjukkan sebuah abstraksi atas
+eksekusi sinkronus dan asinkronus. Namun, hal yang sama juga bisa digunakan
+untuk penanganan galat yang lebih teliti (dimana `C[_]` berupa `Either[Error, _]`),
+manajemen akses pada keadaan volatil, melakukan I/O, atau mengaudit sesi.
 
 
-## Pure Functional Programming
+## Pemrograman Fungsional Murni
 
-Functional Programming is the act of writing programs with *pure functions*.
-Pure functions have three properties:
+Pemrograman fungsional adalah perilaku penulisan kode dengan *fungsi murni*.
+Fungsi murni memiliki tiga properti:
 
--   **Total**: return a value for every possible input
--   **Deterministic**: return the same value for the same input
--   **Inculpable**: no (direct) interaction with the world or program state.
+-   **Total**: mengembalikan sebuah nilai untuk setiap masukan yang mungkin
+-   **Deterministik**: mengembalikan nilai yang sama untuk masukan yang sama
+-   **Rabak**: tak ada interaksi (langsung) dengan dunia luar atau keadaan program
 
-Together, these properties give us an unprecedented ability to reason about our
-code. For example, input validation is easier to isolate with totality, caching
-is possible when functions are deterministic, and interacting with the world is
-easier to control, and test, when functions are inculpable.
+Ketiga properti ini memberikan kita kemampuan yang belum pernah kita miliki untuk
+menalar kode kita. Sebagai contoh, validasi masukan akan lebih mudah bila kita
+mengisolasi dengan totalitas, penyimpanan ke tembolok mungkin bila fungsi adalah
+fungsi deterministik, dan interaksi dengan dunia luar lebih mudah diatur dan dites
+bila fungsi tak berhubungan langsung dunia luar.
 
-The kinds of things that break these properties are *side effects*: directly
-accessing or changing mutable state (e.g. maintaining a `var` in a class or
-using a legacy API that is impure), communicating with external resources (e.g.
-files or network lookup), or throwing and catching exceptions.
+Sesuatu yang merusak properti ini disebut *efek samping*: akses langsung atau
+pengubahan keadaan tak tetap (mis., memelihara sebuah `var` pada kelas atau
+menggunakan APA peninggalan yang tidak murni), berkomunikasi dengan sumber daya
+eksternal (mis. pencarian berkas atau jaringan), dan pelemparan dan penangkapan
+eksepsi.
 
-We write pure functions by avoiding exceptions, and interacting with the world
-only through a safe `F[_]` execution context.
+Kita menulis fungsi murni dengan menghindari eksepsi dan berinteraksi dengan dunia
+luar hanya melalui sebuah konteks eksekusi `F[_]` yang aman.
 
-In the previous section, we abstracted over execution and defined `echo[Id]` and
-`echo[Future]`. We might reasonably expect that calling any `echo` will not
-perform any side effects, because it is pure. However, if we use `Future` or
-`Id` as the execution context, our application will start listening to stdin:
+Pada bagian sebelumnya, kita mengabstrakkan eksekusi dan mendefinisikan `echo[Id]`
+dan `echo[Future]`. Kita mungkin berharap bahwa pemanggila `echo` tidak akan
+menyebabkan efek samping apapun, karena fungsi ini murni. Namun, bila kita
+menggunakan `Future` atau `Id` sebagai konteks eksekusi, aplikasi kita akan
+mulai mendengarkan stdin:
 
 {lang="text"}
 ~~~~~~~~
   val futureEcho: Future[String] = echo[Future]
 ~~~~~~~~
 
-We have broken purity and are no longer writing FP code: `futureEcho` is the
-result of running `echo` once. `Future` conflates the definition of a program
-with *interpreting* it (running it). As a result, applications built with
-`Future` are difficult to reason about.
+Kita telah merusak kemurnian eksekusi dan tidak lagi menulis kode PF: `futureEcho`
+merupakan hasil dari penjalanan `echo` sekali. `Future` mengurung definisi program
+dengan *menafsirkannya* (menjalankannya). Dan hasilnya, aplikasi yang dibangun
+dengan `Future` akan menyulitkan penalaran.
 
-A> An expression is *referentially transparent* if it can be replaced with its
-A> corresponding value without changing the program's behaviour.
+A> Sebuah ekspresi dikatakan *transparan secara rujukan* bila ekspresi ini dapat
+A> digantikan dengan nilai yang berhubungan tanpa mengubah perilaku program.
 A> 
-A> Pure functions are referentially transparent, allowing for a great deal of code
-A> reuse, performance optimisation, understanding, and control of a program.
-A> 
-A> Impure functions are not referentially transparent. We cannot replace
-A> `echo[Future]` with a value, such as `val futureEcho`, since the pesky user can
-A> type something different the second time.
+A> Fungsi murni transparan secara rujukan dan memperkenankan penggunaan ulang
+A> kode sangat tinggi, optimasi performa, pemahaman, dan kontrol dari sebuah program.
+A>
+A> Fungsi tak-muri, tentu, tidak transparan secara rujukan. Kita tidak dapat
+A> mengganti `echo[Future]` dengan sebuah nilai, seperti `val futureEcho`, karena
+A> pengguna dapat menulis hal yang berbeda di lain waktu.
 
-We can define a simple safe `F[_]` execution context
+Kita dapat mendefinisikan sebuah konteks eksekusi yang aman, `F[_]`
 
 {lang="text"}
 ~~~~~~~~
@@ -326,9 +350,9 @@ We can define a simple safe `F[_]` execution context
   }
 ~~~~~~~~
 
-which lazily evaluates a thunk. `IO` is just a data structure that references
-(potentially) impure code, it isn't actually running anything. We can implement
-`Terminal[IO]`
+yang dievaluasi secara luntung. `IO` hanyalah sebuah struktur data yang merujuk
+pada kode (yang mungkin) tak-murni, dan sebenarnya tidak menjalankan apapun.
+Kita dapat mengimplementasikan `Terminal[IO]`
 
 {lang="text"}
 ~~~~~~~~
@@ -338,31 +362,32 @@ which lazily evaluates a thunk. `IO` is just a data structure that references
   }
 ~~~~~~~~
 
-and call `echo[IO]` to get back a value
-
+dan memanggil `echo[IO]` agar dapat mendapatkan kembali sebuah nilai
 {lang="text"}
 ~~~~~~~~
   val delayed: IO[String] = echo[IO]
 ~~~~~~~~
 
-This `val delayed` can be reused, it is just the definition of the work to be
-done. We can map the `String` and compose additional programs, much as we would
-map over a `Future`. `IO` keeps us honest that we are depending on some
-interaction with the world, but does not prevent us from accessing the output of
-that interaction.
+`val delayed` dapat digunakan ulang karena ini hanya merupaka definisi dari
+tugas yang harus diselesaikan. Kita dapat memetakan `String` dan menyusun
+program tambahan, sebagaimana kita dapat memetakan sebuah `Future`. `IO`
+memaksa kita untuk tetap jujur bahwa kita bergantung pada interaksi dengan
+dunia luar, namun tidak mencegah kita untuk mengakses keluaran dari interaksi
+tersebut.
 
-The impure code inside the `IO` is only evaluated when we `.interpret()` the
-value, which is an impure action
+Kode tak-murni didalam `IO` hanya akan dievaluasi bila kita menafsirkan nilainya
+dengan memanggil `.interpret()`, yang merupakan tindakan tak-murni
 
 {lang="text"}
 ~~~~~~~~
   delayed.interpret()
 ~~~~~~~~
 
-An application composed of `IO` programs is only interpreted once, in the `main`
-method, which is also called *the end of the world*.
+Sebuah aplikasi yang tersusun dari program `IO` hanya ditafsirkan satu kali,
+pada metoda `main` yang juga disebut sebagai *ujung dunia*.
 
-In this book, we expand on the concepts introduced in this chapter and show how
-to write maintainable, pure functions, that achieve our business's objectives.
+Pada buku ini, kita memperluas konsep yang diperkenalkan pada bab ini dan
+menunjukkan bagaimana cara menulis fungsi murni dan dapat dipelihara yang
+mampun mencapai tujuan bisnis kita.
 
 
