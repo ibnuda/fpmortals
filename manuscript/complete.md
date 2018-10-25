@@ -256,8 +256,8 @@ galat, generator akan *menyaring* operasi tersebut sehingga akan terhindar dari 
 A> The compiler plugin [`better-monadic-for`](https://github.com/oleg-py/better-monadic-for) produces alternative, **better**,
 A> desugarings than the Scala compiler. This example is interpreted as:
 A> 
-A> Tambahan kompiler [`better-monadic-for`](https://github.com/oleg-py/better-monadic-for)
-A> melakukan pembersihan pemanis sintaksis yang lebih rapi dibandingkan kompiler Scala.
+A> Tambahan kompilator [`better-monadic-for`](https://github.com/oleg-py/better-monadic-for)
+A> melakukan pembersihan pemanis sintaksis yang lebih rapi dibandingkan kompilator Scala.
 A> Sebagai contoh:
 A>
 A> {lang="text"}
@@ -279,7 +279,7 @@ A> saat waktu jalan.
 Finally, if there is no `yield`, the compiler will use `foreach`
 instead of `flatMap`, which is only useful for side-effects.
 
-Bila tidak ditemukan `yield`, kompiler akan menggunakan `foreach`
+Bila tidak ditemukan `yield`, kompilator akan menggunakan `foreach`
 daripada `flatMap`.
 
 {lang="text"}
@@ -717,7 +717,7 @@ But when we have nested contexts the intention is usually obvious yet
 the compiler still doesn't accept our code.
 
 Bahkan, ketika kita kode yang ada di depan kita memiliki konteks berlapis,
-kompiler acap kali tidak paham intensi kode tersebut.
+kompilator acap kali tidak paham intensi kode tersebut.
 Walau maksud dari kode tersebut sejelas rembulan di malam tanpa bintang. (lol)
 
 {lang="text"}
@@ -739,7 +739,7 @@ for `Option` and `Either` named `OptionT` and `EitherT` respectively.
 
 Di atas, kita bermaksud agar `for` mengurus mengenai konteks yang
 melapisi `Option` di dalam namun apa yang terjadi? Sesuai yang diduga
-kompiler gagal menerka maksud kita.
+kompilator gagal menerka maksud kita.
 Yang kita lakukan diatas, menghiraukan konteks bagian luar, biasa
 dicapai dengan menggunakan *monad transformer* yang oleh Scalaz
 disediakan implementasi untuk `Option` dan `Either` dengan nama
@@ -862,12 +862,12 @@ A> `.into`.
 A>
 A> penjelasan ini mungkin relevan bila diterjemahkan ke bahasa Indonesia.
 
-This approach also works for `EitherT` (and others) as the inner
+This approach also works for `Either` (and others) as the inner
 context, but their lifting methods are more complex and require
 parameters. Scalaz provides monad transformers for a lot of its own
 types, so it is worth checking if one is available.
 
-Pendekatan ini juga bisa digunakan untuk `EitherT` dan transformer lainnya
+Pendekatan ini juga bisa digunakan untuk `Either` dan transformer lainnya
 sebagai konteks yang dilapisi. Namun, metoda pengubahan (lifting, lol dyel)
 lebih kompleks dan membutuhkan parameter tambahan.
 Scalaz menyediakan monad transformer bagi kebanyakan tipe yang dimiliki-nya.
@@ -1654,12 +1654,12 @@ yang bisa juga dituliskan menggunakan notasi sisipan:
 
 If each of the parallel operations returns a value in the same monadic
 context, we can apply a function to the results when they all return.
-Rewriting `update` to take advantage of this:
+Rewriting `initial` to take advantage of this:
 
 Bila setiap operasi paralel mengembalikan sebuah nilai pada konteks
 monadik yang sama, kita dapat menerapkan sebuah fungsi ke hasil-hasilya
 saat mereka kembali (lol, pokoknya return bareng.)
-Metoda `update` bisa ditulis ulang sebagai berikut.
+Metoda `initial` bisa ditulis ulang sebagai berikut.
 
 {lang="text"}
 ~~~~~~~~
@@ -1928,8 +1928,8 @@ dan tidak hanya `abstract class`, saat kita mendefinisikan sebuah tipe
 data.
 Dengan menyegel (`seal`) sebuah `class`, kita juga memastikan bahwa
 semua sub-tipe-nya harus didefinisikan di berkas yang sama.
-Hal ini memberikan kesempatan agar kompiler bisa mengetahui hubungan
-mereka, sehingga kompiler bisa memeriksa keluwesan "pattern match"
+Hal ini memberikan kesempatan agar kompilator bisa mengetahui hubungan
+mereka, sehingga kompilator bisa memeriksa keluwesan "pattern match"
 dan juga pada makro yang menghilangkan "boilerplate" (lol, boilerplate).
 Sebagai contoh,
 
@@ -1955,12 +1955,12 @@ this is just a warning.
 Cuplikan diatas menunjukkan kepada pengembang apa yang telah mereka
 rhemukkan (lol) ketika menambah sebuah produk baru ke basis kode.
 Hal ini terjadi karena kita menggunakan ekstensi `-Xfatal-warnings`
-sehingga semua peringatan dari kompiler menjadi galat.
+sehingga semua peringatan dari kompilator menjadi galat.
 
 However, the compiler will not perform exhaustivity checking if the
 `class` is not sealed or if there are guards, e.g.
 
-Namun, kompiler juga tidak akan memeriksa keluwesan bila kelas tidak
+Namun, kompilator juga tidak akan memeriksa keluwesan bila kelas tidak
 tersegel ataupun ada pengaman lain. Misal
 
 {lang="text"}
@@ -2064,7 +2064,7 @@ coproducts.
 
 "Pattern match" pada bentuk bentuk ko-produk ini bisa jadi sangat boyak.
 Hal ini juga yang melatar belakangi eksplorasi [Tipe Gabungan](https://contributors.scala-lang.org/t/733)
-pada kompiler baru Scala, Dotty.
+pada kompilator baru Scala, Dotty.
 Makro seperti [totalitarian](https://github.com/propensive/totalitarian) dan [iotaz](https://github.com/frees-io/iota)
 hadir sebagai alternatif untuk menyandikan ko-produk anonim.
 
@@ -2908,7 +2908,7 @@ sugar, which is why we define `unary_-` as an extension method. We can
 now write the much cleaner:
 
 Harap diperhatikan bahwa `-x` akan dijabarkan menjadi `x.unary_-` oleh
-pemanis sintaksis kompiler. Oleh karena itu, kita mendefinisikan `unary_-`
+pemanis sintaksis kompilator. Oleh karena itu, kita mendefinisikan `unary_-`
 sebagai sebuah metode perpanjangan. Sekarang, kita dapat menulis `signOfTheTimes`
 dengan lebih rapi:
 
@@ -2995,7 +2995,7 @@ primitives and converts these method calls into raw `dadd`, `dmul`,
 Walaupun kita menggunakan operator `+`, `*`, `unary_-`, `<`, dan `>`,
 metoda-metoda tersebut sebenarnya sudah ada pada `Double`. Metoda kelas
 biasanya lebih disukai daripada metoda perpanjangan. Dan faktanya,
-kompiler Scala melakukan penanganan khusus untuk primitif dan mengubah
+kompilator Scala melakukan penanganan khusus untuk primitif dan mengubah
 metoda ini menjadi instruksi bytecode asli seperti `dadd`, `dmul`, `dcmpl`,
 dan `dcmpg`.
 
@@ -3114,10 +3114,10 @@ conversions to other types, then search for methods on those types.
 
 *Konversi implisit* adalah ketika sebuah `implicit def` ada. Salah
 satu penggunaan konversi implisit adalah untuk pembuatan perpanjangan
-metodologi. Ketika kompiler menyelesaikan pemanggilan sebuah metoda,
-kompiler pertama tama akan memeriksa apakah metoda tersebut ada pada
+metodologi. Ketika kompilator menyelesaikan pemanggilan sebuah metoda,
+kompilator pertama tama akan memeriksa apakah metoda tersebut ada pada
 tipe, yang dilanjutkan kepada bapaknya (aturan yang mirip dengan Java).
-Bila gagal menemukan yang cocok, kompiler akan mencari *cakupan implisit*
+Bila gagal menemukan yang cocok, kompilator akan mencari *cakupan implisit*
 untuk konversi ke tipe lain. Baru dilanjutkan dengan pencarian
 untuk tipe-tipe tersebut.
 
@@ -3203,7 +3203,7 @@ typing. It is a [quirk of implicit resolution](https://github.com/scala/bug/issu
 companion objects are not treated the same as `implicit val`.
 
 Spesifikasi Bahasa Scala cenderung kabur untuk kasus kasus yang kurang umum
-dan implementasi kompiler-lah yang menjadi standar de-fakto. Ada beberapa
+dan implementasi kompilator-lah yang menjadi standar de-fakto. Ada beberapa
 patokan yang akan kita gunakan sepanjang buku ini. Misalkan, kita akan
 memilih `implicit val` dibandingkan `implicit object` meskipun akan ada
 godaan untuk menulis lebih pendek. Ada sebuah [quirk (lol) atas resolusi implisit](https://github.com/scala/bug/issues/10411)
@@ -3217,7 +3217,7 @@ Implicit resolution falls short when there is a hierarchy of typeclasses, like
 Resolusi implisit gagal saat ada hierarki kelas tipe seperti `Ordering` dan `Numeric`.
 Bila kita menulis fungsi yang mengambil sebuah `Ordering` implicit, dan kita memanggilnya
 untuk sebuah tipe primitif yang punya instans `Numeric` yang terdefinisi pada pasangan `Numeric`,
-kompiler akan gagal mencarinya.
+kompilator akan gagal mencarinya.
 
 Implicit resolution is particularly hit-or-miss [if type aliases are used](https://github.com/scala/bug/issues/10582) where
 the *shape* of the implicit parameters are changed. For example an implicit
@@ -3684,8 +3684,8 @@ A> When the Scala compiler expects a class (which has a single abstract
 A> method) but receives a lambda, it fills in the boilerplate
 A> automatically.
 A>
-A> Ketika kompiler Scala berharap sebuah kelas (yang memiliki sebuah metoda abstrak)
-A> namun menerima sebuah lambda, kompiler akan mengisi boilerplate (lol) secara otomatis
+A> Ketika kompilator Scala berharap sebuah kelas (yang memiliki sebuah metoda abstrak)
+A> namun menerima sebuah lambda, kompilator akan mengisi boilerplate (lol) secara otomatis
 A> 
 A> Prior to SAM types, a common pattern was to define a method named
 A> `instance` on the typeclass companion
@@ -3724,7 +3724,7 @@ A> strange compiler crashes.
 A>
 A> Harap dicatat, ada banyak kutu yang berhubungan dengan tipe SAM, karena mereka
 A> tidak berhubungan langsung dengan fitur bahasa. Silakan gunakan varian non-SAM
-A> bila terjadi kerhemukan pada kompiler.
+A> bila terjadi kerhemukan pada kompilator.
 
 In a dedicated chapter on *Typeclass Derivation* we will calculate instances of
 `UrlQueryWriter` automatically, as well as clean up what
@@ -7290,7 +7290,7 @@ unhelpfully inferred the *Least Upper Bound* (LUB) to be `Any`.
 Compare to `IList`, which requires explicit `.widen[Any]` to permit
 the heinous crime:
 
-Harap perhatikan bahwa list kedua merupakan `List[Char]` dan kompiler
+Harap perhatikan bahwa list kedua merupakan `List[Char]` dan kompilator
 menyimpulkan, walaupun ngaco, bahwa *Batas Atas Terendah* (BAT) sebagai
 `Any`. Bila dibandingkan dengan `IList`, yang mengharuskan `.widen[Any]`
 secara eksplisit untuk memberikan celah untuk kecerobohan semacam ini:
@@ -7312,7 +7312,7 @@ Similarly, when the compiler infers a type `with Product with
 Serializable` it is a strong indicator that accidental widening has
 occurred due to covariance.
 
-Hal yang sama juga terjadi ketika kompiler menyimpulkan bahwa
+Hal yang sama juga terjadi ketika kompilator menyimpulkan bahwa
 sebuah tipe `with Product with Serializable` (yang berupa *Product*
 dan *Serializable*), hal semacam ini merupakan indikator yang kuat
 bahwa pelebaran tanpa sengaja (lol, aku bego) telah terjadi
@@ -7364,7 +7364,7 @@ Phillips' (ex-`scalac` team) demonstration of what he calls
 
 Agak berbeda dengan kovarian, parameter tipe *kontravarian*, seperti
 `trait Thing[-A]`, bisa menimbulkan masalah tak terduga sebagaimana
-yang ditunjukkan pada [kutu di kompiler](https://issues.scala-lang.org/browse/SI-2509).
+yang ditunjukkan pada [kutu di kompilator](https://issues.scala-lang.org/browse/SI-2509).
 Paul Phillips (bekas anggota tim `scalac`) juga telah mendemonstrasikan
 apa yang dia sebut sebagai *kontrari-varian*.
 
@@ -7386,9 +7386,9 @@ As expected, the compiler is finding the most specific argument in
 each call to `f`. However, implicit resolution gives unexpected
 results:
 
-Sebagaimana yang telah pembaca yang budiman terka, kompiler berhasil
+Sebagaimana yang telah pembaca yang budiman terka, kompilator berhasil
 menentukan argumen paling spesifik untuk setiap pemanggilan `f`.
-Namun, resolusi implisit dari kompiler memberikan hasil yang tak terduga:
+Namun, resolusi implisit dari kompilator memberikan hasil yang tak terduga:
 
 {lang="text"}
 ~~~~~~~~
@@ -7409,7 +7409,7 @@ Implicit resolution flips its definition of "most specific" for contravariant
 types, rendering them useless for typeclasses or anything that requires
 polymorphic functionality. The behaviour is fixed in Dotty.
 
-Resolusi implisit membalik definisi kompiler atas "argumen paling spesifik"
+Resolusi implisit membalik definisi kompilator atas "argumen paling spesifik"
 untuk tipe kontravarian sehingga argumen tersebut menjadi percuma bila digunakan
 dengan kelas tipe maupun semua yang menggunakan fungsionalitas polimorfis.
 Perilaku semacam ini sudah dibenahi pada Dotty.
@@ -7871,7 +7871,7 @@ is how we trick the compiler into allowing us to define an infix type `A @@ T`
 that is erased to `A` at runtime:
 
 Pendefinisian metoda `Tag` memang agak rancu. Namun, sintaks yang  digunakan
-sangat jelas. Beginilah cara kita untuk mengelabuhi kompiler agar kita bisa mendefinisikan
+sangat jelas. Beginilah cara kita untuk mengelabuhi kompilator agar kita bisa mendefinisikan
 tipe infiks `A && T` yang menghapus penanda tipe menjadi `A` pada saat waktu jalan:
 
 {lang="text"}
@@ -8080,7 +8080,7 @@ typically happens when we use third party code that is the same as something we
 already have.
 
 Seringkali kita mendapati dua tipe yang benar-benar sama dan mengakibatkan
-masalah kompatibilitas yang dikarenakan kompiler tidak mengetauhi asumsi-
+masalah kompatibilitas yang dikarenakan kompilator tidak mengetauhi asumsi-
 asumsi yang kita ketahui. Hal ini biasanya terjadi bila kita menggunakan
 kode dari pihak ketiga yang sama dengan kode kita yang sudah ada.
 
@@ -8348,7 +8348,7 @@ A>     prominent example, turning everything into a concatenated `String`.
 A>
 A> -   penyunting teks gagal menemukan metoda ekstensi, walaupun saat ini
 A>     IntelliJ, ENSIME, dan ScalaIDE mendukung penuh.
-A> -   ada beberapa kasus sudut (lol) dimana kompiler gagal menerka
+A> -   ada beberapa kasus sudut (lol) dimana kompilator gagal menerka
 A>     tipe dan tidak mampu menemunkan metoda ekstensi.
 A> -   pustaka standar mendefinisikan beberapa instans dari `implicit class`
 A>     yang menambah metoda ke semua nilai, termasuk dengan metoda dengan
@@ -12833,7 +12833,7 @@ A> Another approach would be to stop the compiler from inferring `Nothing`. Scal
 A> provides implicit evidence to assert that a type is not inferred as `Nothing`
 A> and we can use it instead:
 A>
-A> Pendekatan lain yang mungkin dilakukan adalah dengan memaksa kompiler untuk
+A> Pendekatan lain yang mungkin dilakukan adalah dengan memaksa kompilator untuk
 A> tidak menebak `Nothing`. Scalaz menyediakan bukti tersirat untuk memeriksa
 A> apakah sebuah tipe ditebak sebagai `Nothing` atau tidak. Kita akan menggunakan
 A> bukti ini:
@@ -13243,9 +13243,9 @@ would be able to perform some action based on the inferred type of an
 expression, computed at a later stage in the compile. Similarly, continuations
 would be a good API for an extensible build tool or text editor.
 
-Sebagai contoh, bila kompiler Scala ditulis menggunakan *CPS*, kompiler tersebut
+Sebagai contoh, bila kompilator Scala ditulis menggunakan *CPS*, kompilator tersebut
 akan memperkenankan pendekatan yang jelas dalam komunikasi antar fase kompilasi.
-Sebuah plugin kompiler akan mampu melakukan beberapa hal berdasarkan hasil
+Sebuah plugin kompilator akan mampu melakukan beberapa hal berdasarkan hasil
 penebakan dari tipe sebuah ekspresi yang dikomputasi pada tahap selanjutnya
 di proses kompilasi. Hal yang sama, kontinyuasi bisa jadi *API* yang baik untuk
 penyunting teks ataupun alat bangun yang luwes.
@@ -13355,7 +13355,7 @@ monad dan kelas tipe `Monad` pasangannya:
     `EitherT` can cause memory allocation problems for high throughput
     applications.
 
-1.  Beberapa parameter `Monad` implisit mengakibatkan kompiler tidak dapat
+1.  Beberapa parameter `Monad` implisit mengakibatkan kompilator tidak dapat
     menentukan sintaks yang tepat untuk konteks tersebut.
 2.  Secara umum, monad tidak dapat digabungkan. Hal ini berarti bahwa urutan
     pelapisan transformator sangat penting.
@@ -13717,7 +13717,7 @@ A> A compiler plugin that automatically produces `.liftM`, `.liftIO`, and
 A> additional boilerplate that arises in this chapter, would be a great
 A> contribution to the ecosystem!
 A>
-A> Sebuah tambahan kompiler yang secara otomatis membuat `.liftM`, `liftIO`,
+A> Sebuah tambahan kompilator yang secara otomatis membuat `.liftM`, `liftIO`,
 A> dan tambahan lain yang diperkenalkan pada bab ini akan sangat membantu
 A> ekosistem Scala dan Scalaz!
 
@@ -14083,7 +14083,7 @@ A> would be a great contribution to the ecosystem! Not only is it painful to wri
 A> the boilerplate, but there is the potential for a typo to ruin our day: if two
 A> members of the algebra have the same type signature, we might not notice.
 A>
-A> Sebuah plugin kompiler yang secara otomatis memproduksi plat cetak `scalaz.Free`
+A> Sebuah plugin kompilator yang secara otomatis memproduksi plat cetak `scalaz.Free`
 A> akan sangat membantu ekosistem Scalaz! Tidak hanya menyusahkan bila kita harus
 A> menulis plat cetak secara manual, namun juga ada kemungkinan sebuah salah ketik
 A> merusak hari kita: bila ada dua anggota dari aljabar yang mempunyai dua penanda
@@ -14519,7 +14519,7 @@ untuk mengurangi panggilan melalui jaringan untuk mengoptimasi sebuah aplikasi:
 | Perujukan tembolok L2             | 7 detik             | Satu kali menguap panjang      |
 | Buka / tutup mutex                | 25 detik            | Buat satu cangkir teh          |
 | Perujukan memori utama            | 100 detik           | Gosok gigi                     |
-| Kompresi 1Kb dengan Zippy         | 50 menit            | Satu putaran CI kompiler scala |
+| Kompresi 1Kb dengan Zippy         | 50 menit            | Satu putaran CI kompilator scala |
 | Kirim 2Kb melalu jaringan 1Gbps   | 5.5 jam             | Kereta London ke Edinburg      |
 | Baca acak SSD                     | 1.7 hari            | Akhir pekan                    |
 | Baca 1MB berurutan dari memori    | 2.9 hari            | Akhir pekan panjang            |
@@ -14889,7 +14889,7 @@ A> {lang="text"}
 A> ~~~~~~~~
 A>   object MonadError {
 A>     sealed abstract class Ast[F[_], E, A]
-A>     final case class RaiseError[E, A](e: E) extends Ast[E, A]
+A>     final case class RaiseError[F[_], E, A](e: E) extends Ast[F, E, A]
 A>     final case class HandleError[F[_], E, A](fa: F[A], f: E => F[A]) extends Ast[E, A]
 A>   
 A>     def liftF[F[_], E](implicit I: Ast[F, E, ?] :<: F): MonadError[F, E] = ...
@@ -15209,7 +15209,7 @@ untuk `IO` sederhana kita dapat menggunakan `Future`:
 and due to [a bug in the Scala compiler](https://github.com/scala/bug/issues/10954) that treats all `@@` instances as
 orphans, we must explicitly import the implicit:
 
-dan karena sebuah [kutu](https://github.com/scala/bug/issues/10954) pada kompiler
+dan karena sebuah [kutu](https://github.com/scala/bug/issues/10954) pada kompilator
 Scala yang memperlakukan semua instans `@@` sebagai objek yatim, kita harus
 secara tersurat mengimpor yang tersirat:
 
@@ -15400,7 +15400,7 @@ A> causing confusing error messages, whereas `Void` will fail fast during
 A> compilation.
 A>
 A> `Void` merupakan tipe yang tidak mempunyai nilai, seperti `scala.Nothing`.
-A> Namun, karena kompiler Scala akan menebak `Nothing` walaupun gagal menebak
+A> Namun, karena kompilator Scala akan menebak `Nothing` walaupun gagal menebak
 A> parameter tipe, hal ini menyebabkan pesan galat yang membingungkan. Di sisi
 A> lain, `Void` akan menggagalkan diri pada saat kompilasi sehingga tidak ada
 A> menyebabkan pesan yang membingungkan.
@@ -15789,7 +15789,7 @@ Ada empat pendekatan atas derivasi kelas tipe:
 3.  Makro. Namun, penulisan makro untuk tiap kelas tipe harus dilakukan oleh
     pengembang yang sangat berpengalaman. Untungnya, pustaka [Magnolia](https://github.com/propensive/magnolia)
     yang ditulis oleh Jon Pretty, mengabstraksi makro dengan APA yang sederhana
-    dan memusatkan interaksi kompleks kepada kompiler.
+    dan memusatkan interaksi kompleks kepada kompilator.
 
 4.  Menulis program generik dengan menggunakan pustaka [Shapeless](https://github.com/milessabin/shapeless).
     Mekanisme `implicit` merupakan sub-bahasa pada bahasa Scala dan dapat digunakan
@@ -15871,7 +15871,7 @@ A> plat cetak yang **jauh lebih banyak**. Maka dari itu, kita akan memilih
 A> untuk membatasi pembelajaran ini pada penyandi dan pembaca sandi yang koheren.
 A> Sebagaimana yang akan kita lihat selanjutnya pada bab ini, derivasi otomatis
 A> dari Magnolia dan Shapeless, digabungkan dengan batasan pencarian `implicit`
-A> dari kompiler Scala, biasanya berakhir pada dekoherensi kelas tipe.
+A> dari kompilator Scala, biasanya berakhir pada dekoherensi kelas tipe.
 
 
 ## `scalaz-deriving`
@@ -16131,7 +16131,7 @@ Recall from Chapter 4.1 that `refineV` returns an `Either`, as the compiler has
 reminded us.
 
 Mohon diingat bahwa pada bab 4.1, `refineV` mengembalikan sebuah `Either`,
-sesuai dengan apa yang telah kompiler peringatkan.
+sesuai dengan apa yang telah kompilator peringatkan.
 
 As the typeclass author of `Default`, we can do better than `Functor` and
 provide a `MonadError[Default, String]`:
@@ -16196,7 +16196,7 @@ A>
 A> However, due to [limitations of the Scala compiler](https://github.com/scala/bug/issues/10753) it rarely works in practice
 A> and we must write `implicit def refined` derivations for each typeclass.
 A>
-A> Namun, karena [batasan dari kompiler Scala](https://github.com/scala/bug/issues/10753), hal ini jarang
+A> Namun, karena [batasan dari kompilator Scala](https://github.com/scala/bug/issues/10753), hal ini jarang
 A> berfungsi di praktik pada lapangan dan kita harus menulis derivasi
 A> tiap kelas tipe `implicit def refined`.
 
@@ -16366,7 +16366,7 @@ A> When implementing `Divisible` the compiler will require us to provide
 A> `.contramap`, which we can do directly with an optimised implementation or with
 A> this derived combinator:
 A>
-A> Saat mengimplementasikan `Divisible`, kompiler akan meminta kita untuk
+A> Saat mengimplementasikan `Divisible`, kompilator akan meminta kita untuk
 A> menyediakan `.contramap`, yang dapat kita penuhi dengan sebuah implmentasi
 A> teroptimasi atau dengan kombinator terderivasi berikut:
 A> 
@@ -17132,7 +17132,7 @@ with the `kind-projector` plugin.
 
 Sayangnya, APA `iotaz` untuk `.traverse` (dan analognya, `.coptraverse`) meminta
 kita untuk mendefinisikan transformasi natural, yang mempunyai sintaks kikuk,
-bahkan dengan tambahan kompiler `kind-projector`.
+bahkan dengan tambahan kompilator `kind-projector`.
 
 {lang="text"}
 ~~~~~~~~
@@ -17772,7 +17772,7 @@ karena Magnolia menderivasikan penyandi `Option` untuk kita.
 This is confusing, we would rather have the compiler tell us if we forgot
 something. Full auto is therefore not recommended.
 
-Hal semacam ini sangat membingungkan. Kita lebih memilih agar kompiler memberi-tahu
+Hal semacam ini sangat membingungkan. Kita lebih memilih agar kompilator memberi-tahu
 kita bila kita lupa sesuatu. Maka dari itu, penderivasian otomatis tidak
 direkomendasikan.
 
@@ -17796,7 +17796,7 @@ Leibniz relationship (`<~<` and `===`), and to `Inject` a free algebra into a
 `scalaz.Coproduct` of algebras.
 
 Hal semacam ini tidak sepenuhnya asing: pada Scalaz, kita membatasi penggunaan
-fitur bahasa `implicit` hanya pada kelas tipe. Namun, kadang kita meminta kompiler
+fitur bahasa `implicit` hanya pada kelas tipe. Namun, kadang kita meminta kompilator
 menyediakan kita *bukti* yang behubungan dengan tipe. Sebagai contoh, hubungan
 Liskov atau Leibniz (`<~<` dan `===`) dan saat melakukan `Inject` ke sebuah
 aljabar `scalaz.Coproduct` dengan sebuah aljabar *free*.
@@ -17969,7 +17969,7 @@ that the compiler can search without requiring complex imports
 
 Pola yang umum digunakan adalah mengeksten kelas tipe yang ingin kita derivasi
 dan menempatkan kode Shapeless pada objek pendampingnya. Pola ini memberikan
-kita cakupan implisit yang dapat dicari oleh kompiler tanpa harus melakukan
+kita cakupan implisit yang dapat dicari oleh kompilator tanpa harus melakukan
 impor yang rumit.
 
 {lang="text"}
@@ -18155,7 +18155,7 @@ unable to work out what `R` is, and gets caught thinking it is something else.
 We need to provide the explicit type parameters when calling `gen`, e.g.
 
 Masalah ini, yang sama sekali tidak jelas terlihat dari pesan galat, terjadi
-karena kompiler tidak dapat menentukan `R` dan mengira `R` sebagai tipe lainnya.
+karena kompilator tidak dapat menentukan `R` dan mengira `R` sebagai tipe lainnya.
 Kita harus menyediakan parameter tipe eksplisit saat memanggil `gen`, mis.
 
 {lang="text"}
@@ -18165,7 +18165,7 @@ Kita harus menyediakan parameter tipe eksplisit saat memanggil `gen`, mis.
 
 or we can use the `Generic` macro to help us and let the compiler infer the generic representation
 
-atau kita dapat menggunakan makro `Generic` agar kompiler dapat menebak representasi
+atau kita dapat menggunakan makro `Generic` agar kompilator dapat menebak representasi
 generiknya
 
 {lang="text"}
@@ -18180,7 +18180,7 @@ generiknya
 A> At this point, ignore any red squigglies and only trust the compiler. This is
 A> the point where Shapeless departs from IDE support.
 A>
-A> Sampai disini, abaikan semua coretan merah dan hanya percaya pada kompiler.
+A> Sampai disini, abaikan semua coretan merah dan hanya percaya pada kompilator.
 A> Disinilah dimana Shapeless tidak didukung oleh IDE.
 
 The reason why this fixes the problem is because the type signature
@@ -18205,7 +18205,7 @@ The Scala compiler solves type constraints left to right, so it finds many
 different solutions to `DerivedEqual[R]` before constraining it with the
 `Generic.Aux[A, R]`. Another way to solve this is to not use context bounds.
 
-Kompiler Scala menyelesaikan batasan tipe dari kiri ke kanan. Jadi kompiler
+Kompiler Scala menyelesaikan batasan tipe dari kiri ke kanan. Jadi kompilator
 akan mencari banyak solusi untuk `DerivedEqual[R]` sebelum membatasinya menjadi
 `Generic.Aux[A, R]`. Cara lain untuk menyelesaikan masalah ini adalah dengan
 tidak menggunakan batasan konteks.
@@ -18255,7 +18255,7 @@ of `N` fields or coproduct of `N` products, whereas `scalaz-deriving` and
 Magnolia do not.
 
 Namun, mengganti versi `scalaz-deriving` juga berarti waktu kompilasi akan semakin
-panjang. Hal ini disebabkan karena kompiler menyelesaikan pencarian implisit `N`
+panjang. Hal ini disebabkan karena kompilator menyelesaikan pencarian implisit `N`
 untuk tiap produk bidang `N` atau koproduk dari produk `N`. Hal semacam ini
 tidak terjadi pada `scalaz-deriving` dan Magnolia.
 
@@ -18312,7 +18312,7 @@ inference behaviour allowing us to achieve the laziness we require. The pattern
 to follow is to use `Cached[Strict[_]]` on the entry point and `Lazy[_]` around
 the `H` instances.
 
-Tipe makro `Cached`, `Strict`, dan `Lazy` mengubah perilaku inferensi kompiler
+Tipe makro `Cached`, `Strict`, dan `Lazy` mengubah perilaku inferensi kompilator
 dan memperkenankan kita untuk mendapatkan kelantungan yang kita butuhkan. Pola
 yang harus diikut adalah dengan menggunakan `Cached[Strict[_]]` pada titik masuk
 dan `Lazy[_]` pada instans `H`.
@@ -18682,7 +18682,7 @@ Note that the evidence for `J` is listed before `R`. This is important, since
 the compiler must first fix the type of `J` before it can solve for `R`.
 
 Harap perhatikan bahwa bukti untuk `J` sudah diberikan sebelum `R`. Hal ini
-sangat penting karena kompiler harus menyelesaikan `J` sebelum dapat menyelesaikan
+sangat penting karena kompilator harus menyelesaikan `J` sebelum dapat menyelesaikan
 `R`.
 
 {lang="text"}
@@ -18996,7 +18996,7 @@ bab 5
 
 But we instead get a compiler error
 
-Namun, kita malah mendapat sebuah galat kompiler
+Namun, kita malah mendapat sebuah galat kompilator
 
 {lang="text"}
 ~~~~~~~~
@@ -19008,7 +19008,7 @@ Namun, kita malah mendapat sebuah galat kompiler
 The error message is as helpful as always. The workaround is to introduce evidence for `H @@ Z` on the lower priority implicit scope, and then just call the code that the compiler should have found in the first place:
 
 Penyiasatan masalah ini adalah dengan memperkenalkan bukti untuk `H @@ Z` pada
-cakupan impliist yang lebih rendah dan memanggil kode tersebut, sehingga kompiler
+cakupan impliist yang lebih rendah dan memanggil kode tersebut, sehingga kompilator
 dapat menemukannya:
 
 {lang="text"}
@@ -19489,7 +19489,7 @@ compiler depending on scope, meaning that we lose the compiletime safety that
 was our motivation for programming at the type level in the first place!
 
 Secara mendasar, saat menulis program generik, `implicit` dapat diabaikan oleh
-kompiler, bergantung pada cakupan. Hal ini berarti kita kehilangan keamanan pada
+kompilator, bergantung pada cakupan. Hal ini berarti kita kehilangan keamanan pada
 waktu-kompilasi yang menjadi motivasi utama atas pemrograman pada tingkat tipe.
 
 Everything is much simpler in the light side, where `implicit` is only used for
@@ -19554,7 +19554,7 @@ And this is when it works. If there is a problem with a shapeless derivation,
 the compiler can get stuck in an infinite loop and must be killed.
 
 Dan, ini bila kita berhasil melakukan *profiling*. Bila ada masalah dengan
-derivasi shapeless, kompiler dapat tersangkut pada sebuah ikalan tak hingga dan
+derivasi shapeless, kompilator dapat tersangkut pada sebuah ikalan tak hingga dan
 harus dibunuh.
 
 
@@ -20355,7 +20355,7 @@ Sayangnya, hal ini juga berarti kita harus mengangkat semua yang mengembalikan
 `Task` dengan `.liftM`. Hal semacam ini menambah plat cetak cukup banyak.
 Sayangnya, metoda `.liftM` tidak menerima tipe dengan bentuk `H[_]`. `.liftM`
 menerima tipe dengan bentuk `H[_[_], _]` sehingga kita harus membuat sebuah
-alias tipe untuk membantu kompiler:
+alias tipe untuk membantu kompilator:
 
 {lang="text"}
 ~~~~~~~~
