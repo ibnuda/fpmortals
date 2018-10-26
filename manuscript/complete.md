@@ -657,27 +657,16 @@ lebih kompleks dan membutuhkan parameter tambahan.
 Scalaz menyediakan monad transformator bagi kebanyakan tipe yang dimilikinya.
 Silakan periksa bila ada.
 
-# Application Design
-
-In this chapter we will write the business logic and tests for a purely
-functional server application. The source code for this application is included
-under the `example` directory along with the book's source, however it is
-recommended not to read the source code until the final chapter as there will be
-significant refactors as we learn more about FP.
+# Desain Aplikasi
 
 Pada bab ini, kita akan menulis logika bisnis dan tes tes untuk aplikasi
-server yang purely functional (lol). Kode sumber untuk aplikasi ini
-bisa dilihat pada direktori `example` yang ada pada kode sumber buku ini.
-Namun, sangat disarankan untuk tidak membacanya sampai bab akhir dikarenakan
-akan ada refactor selama kita mempelajari tentang FP.
+server fungsional murni. Kode sumber untuk aplikasi ini
+bisa dilihat pada direktori `example` bersama kode sumber buku ini.
+Namun, sangat disarankan untuk tidak membacanya sampai kita sampai di bab akhir
+dikarenakan akan ada refaktorisasi sepanjang pembelajaran kita tentang PF.
 
 
-## Specification
-
-Our application will manage a just-in-time build farm on a shoestring
-budget. It will listen to a [Drone](https://github.com/drone/drone) Continuous Integration server, and
-spawn worker agents using [Google Container Engine](https://cloud.google.com/container-engine/) (GKE) to meet the
-demand of the work queue.
+## Spesifikasi
 
 Aplikasi kita akan mengurus kompilasi-tepat-waktu "build farm" dengan
 pendanaan yang sangat mepet. Aplikasi ini akan memperhatikan ke sebuah
@@ -688,58 +677,29 @@ dan akan menelurkan "worker agent" menggunakan [Google Container Engine](https:/
 {width=60%}
 ![](images/architecture.png)
 
-Drone receives work when a contributor submits a github pull request
-to a managed project. Drone assigns the work to its agents, each
-processing one job at a time.
-
 Drone menerima kerja ketika kontributor membuat sebuah permintaan tarik
 pada github ke proyek yang dimanage. Drone menetapkan beban kerja ke agen-agennya,
 dan pada akhirnya, tiap agen akan memproses satu tugas pada satu waktu.
 
-The goal of our app is to ensure that there are enough agents to
-complete the work, with a cap on the number of agents, whilst
-minimising the total cost. Our app needs to know the number of items
-in the *backlog* and the number of available *agents*.
-
 Tujuan dari aplikasi kita adalah memastikan bahwa agen-agen akan selalu
 cukup untuk menyelesaikan tugas, dengan batasan-batasan pada jumlah agen
 dan pada saat yang bersamaan, menekan biaya keseluruhan. Aplikasi ini
-harus tahu jumlah barang yang ada pada *backlog* dan jumlah agen yang tersedia. (lol)
+harus tahu jumlah barang yang ada pada *backlog* dan jumlah agen yang tersedia.
 
-Google can spawn *nodes*, each can host multiple drone agents. When an
-agent starts up, it registers itself with drone and drone takes care
-of the lifecycle (including keep-alive calls to detect removed
-agents).
-
-Google dapat menelurkan banyak *node* yang masing masing mampu hosting (lol)
+Google dapat menelurkan banyak *simpul* yang masing masing mampu mempunyai
 beberapa agen drone. Ketika sebuah agen mulai nyala, agen tersebut akan
-memberitahu kepada drone yang pada akhirnya mengambil alih siklus hidup (lol, siklus hidup)
-(termasuk panggilan "keep-alive" untuk menentukan agen yang ditewaskan)
-
-GKE charges a fee per minute of uptime, rounded up to the nearest hour
-for each node. One does not simply spawn a new node for each job in
-the work queue, we must re-use nodes and retain them until their 58th
-minute to get the most value for money.
+memberitahu kepada drone yang pada akhirnya mengambil alih siklus hidup
+(termasuk panggilan "keep-alive" untuk mendeteksi agen yang telah mati)
 
 GKE menarik biaya berdasarkan uptime dalam hitungan menit, dibulatkan keatas
-ke jam terdekat untuk tiap node.
-Maka dari itu, kita tidak bisa secara sembarangan untuk menyalakan node baru
-untuk tiap tugas di antrian kerja.
+ke jam terdekat untuk tiap node. Maka dari itu, kita tidak bisa secara
+sembarangan untuk menyalakan node baru untuk tiap tugas di antrian kerja.
 Kita harus menggunakan ulang node dan memaksa mereka untuk bekerja sampai
 sampai ke menit 58 agar tetap ekonomis.
 
-Our app needs to be able to start and stop nodes, as well as check
-their status (e.g. uptimes, list of inactive nodes) and to know what
-time GKE believes it to be.
-
-Aplikasi kita harus bisa memulai dan mematikan node dan juga memeriksa
-status mereka, seperti uptime dan daftar node yang tidak aktif, dan
-memastikan waktu saat ini (lol, susah nulis endonesanya)
-
-In addition, there is no API to talk directly to an *agent* so we do
-not know if any individual agent is performing any work for the drone
-server. If we accidentally stop an agent whilst it is performing work,
-it is inconvenient and requires a human to restart the job.
+Aplikasi kita harus bisa memulai dan mematikan simpul dan juga memeriksa
+status mereka, seperti waktu nyala dan daftar node yang tidak aktif, dan
+memastikan waktu saat ini menurut GKE.
 
 Sebagai tambahan, tidak ada API yang secara langsung berkomunikasi ke
 sebuah *agen* yang mengakibatkan kita tidak dapat secara tahu secara
@@ -749,35 +709,21 @@ agen tersebut sedang menganggur, bisa jadi si agen tadi mati di tengah
 medan. Tentu sungguh menyesakkan bila harus memulai ulang agen tersebut
 secara manual.
 
-Contributors can manually add agents to the farm, so counting agents
-and nodes is not equivalent. We don't need to supply any nodes if
-there are agents available.
-
 Kontributor juga bisa menambahkan agen ke farm secara manual, sehingga
 menghitung agen tidak selalu sama dengan node. Kita tidak perlu menambah
 node bila ada agen yang tersedia.
 
-The failure mode should always be to take the least costly option.
-
 Mode gagal harus selalu diambil sebagai opsi paling murah.
-
-Both Drone and GKE have a JSON over REST API with OAuth 2.0
-authentication.
 
 Drone dan GKE keduanya mempunya antarmuka JSON yang menggunakan antarmuka
 REST dengan otentikasi OAuth 2.0.
 
 
-## Interfaces / Algebras
+## Antarmuka / Aljabar
 
-We will now codify the architecture diagram from the previous section. Firstly,
-we need to define a simple data type to capture a millisecond timestamp because
-such a simple thing does not exist in either the Java or Scala standard
-libraries:
-
-Pada bab ini, kita akan menerjemahkan diagram arsitektur pada bagian sebelumnya.
+Pada bab ini, kita akan mengkodifikasi diagram arsitektur pada bagian sebelumnya.
 Pertama, karena pada pustaka standar Java maupun Scala tidak memiliki tipe data
-timestamp (lol) kita akan membuat sebuah tipe data sederhana untuk keperluan ini.
+timestamp kita akan membuat sebuah tipe data sederhana untuk keperluan ini.
 
 {lang="text"}
 ~~~~~~~~
@@ -789,20 +735,14 @@ timestamp (lol) kita akan membuat sebuah tipe data sederhana untuk keperluan ini
   }
 ~~~~~~~~
 
-In FP, an *algebra* takes the place of an `interface` in Java, or the
-set of valid messages for an `Actor` in Akka. This is the layer where
-we define all side-effecting interactions of our system.
-
-Pada FP, sebuah *aljabar* mempunyai kedudukan yang sama dengan `interface`
+Pada PF, sebuah *aljabar* mempunyai kedudukan yang sama dengan `interface`
 di Java yang kurang lebih juga sama dengan pesan-pesan yang dianggap valid
 oleh `Actor` Akka. Aljabar ini pula-lah dimana kita mendefinisikan semua
 interaksi yang mempunyai efek samping pada sistem kita.
 
-There is tight iteration between writing the business logic and the
-algebra: it is a good level of abstraction to design a system.
-
-Pada proses desain sistem, kita akan sering melakukan iterasi saat
-menulis logika bisnis dan aljabarnya. (lol, susah)
+Pada proses desain sistem, kita akan sering melakukan iterasi yang padat saat
+menulis logika bisnis dan aljabarnya: hal semacam ini merupakan tingkat abstraksi
+yang bagus untuk mendesain sebuah sistem.
 
 {lang="text"}
 ~~~~~~~~
@@ -821,68 +761,40 @@ menulis logika bisnis dan aljabarnya. (lol, susah)
   }
 ~~~~~~~~
 
-We've used `NonEmptyList`, easily created by calling `.toNel` on the
-stdlib's `List` (returning an `Option[NonEmptyList]`), otherwise
-everything should be familiar.
-
 Di sini, kita menggunakan `NonEmptyList` yang dibuat dengan memanggil `.toNel`
 pada tipe data `List` yang ada pada pustaka standar.
 Walaupun nilai yang dikembalikan adalah `Option[NonEmptyList]` (karena `List`
 bisa saja kosong), hal hal lain tidak berubah.
 
-A> It is good practice in FP to encode constraints in parameters **and** return types
-A> --- it means we never need to handle situations that are impossible. However,
-A> this often conflicts with *Postel's law* "be liberal in what you accept from
-A> others".
-A>
 A> Sesungguhnya, adalah praktik yang ideal untuk menyandikan batasan batasan pada
 A> tipe data paramater **dan** nilai kembalian, yang berarti kita tidak akan
-A> mengurus kejadian luar biasa. Walaupun sering kali hal ini tidak sesuai dengan
-A> *Humuk Postel* yang menyatakan bahwa, "bila dikasi terima aja." (lol, susah)
+A> mengurus kejadian tak mungkin. Walaupun sering kali hal ini tidak sesuai dengan
+A> *Hukum Postel* yang menyatakan bahwa, "bila dikasih terima aja."
 A> 
-A> Although we agree that parameters should be as general as possible, we do not
-A> agree that a function should take `Seq` unless it can handle empty `Seq`,
-A> otherwise the only course of action would be to exception, breaking totality and
-A> causing a side effect.
-A>
-A> Walaupun sudah disepakati bahwa parameter harus se-umum mungkin, adalah sebuah
+A> Walaupun sudah disepakati bahwa parameter harus seumum mungkin, adalah sebuah
 A> kenyataan bahwa kita menolak sebuah fungsi harus bisa menerima `Seq` tanpa bisa
 A> menerima `Seq` kosong. Bilamana hal tersebut terjadi, tentu yang terjadi adalah
-A> sebuah pengecualian yang menghancurkan kesemestaan dan menyebabkan efek samping
+A> sebuah pengecualian yang menghancurkan totalitas dan menyebabkan efek samping
 A> yang berlanjut.
 A> 
-A> We prefer `NonEmptyList`, not because it is a `List`, but because of its
-A> non-empty property. When we learn about Scalaz's typeclass hierarchy, we will
-A> see a better way to request non-emptyness.
-A>
 A> Adalah lebih disukai untuk menggunakan `NonEmptyList`, bukan karena ini adalah
 A> `List`, tetapi karena propertinya yang tidak boleh kosong.
-A> Saat kita mempelajari hierarki kelas tipe (lol) dari Scalaz, kita akan
+A> Saat kita mempelajari hierarki kelas tipe dari Scalaz, kita akan
 A> tahu cara yang lebih disukai untuk meminta "yang isi".
 
-## Business Logic
-
-Now we write the business logic that defines the application's
-behaviour, considering only the happy path.
+## Logika Bisnis
 
 Sekarang, kita akan menulis logika bisnis yang menentukan perilaku
 dari aplikasi ini, yang saat ini tidak mengindahkan sumber sumber
 penderitaan.
 
-We need a `WorldView` class to hold a snapshot of our knowledge of the
-world. If we were designing this application in Akka, `WorldView`
-would probably be a `var` in a stateful `Actor`.
-
 Untuk membungkus apa yang kita tahu mengenai situasi saat ini, kita akan
 membuat sebuah kelas dengan nama `WorldView` yang apabila kita mendesain
 aplikasi ini di Akka, `WorldView` bisa jadi merupakan sebuah `var` pada
-sebuah `Actor` yang *penuh adanya*. (lol)
-
-`WorldView` aggregates the return values of all the methods in the
-algebras, and adds a *pending* field to track unfulfilled requests.
+sebuah `Actor` yang *dapat berubah-ubah*.
 
 `WorldView` menyatukan semua nilai kembalian dari semua metoda pada
-aljabar-aljabar dan menambah sebuah bidang *field* yang ditujukan
+aljabar-aljabar dan menambah sebuah bidang *tertunda* yang ditujukan
 untuk menelusuri request mana saja yang belum terpenuhi.
 
 {lang="text"}
@@ -897,13 +809,8 @@ untuk menelusuri request mana saja yang belum terpenuhi.
   )
 ~~~~~~~~
 
-Now we are ready to write our business logic, but we need to indicate
-that we depend on `Drone` and `Machines`.
-
 Walaupun kita sudah siap menulis logika bisnis kita, kita harus menunjukkan
 secara eksplisit bahwa kita bergantung pada `Drone` dan `Machines`.
-
-We can write the interface for the business logic
 
 Kita bisa menulis antarmuka untuk logika bisnis
 
@@ -916,17 +823,12 @@ Kita bisa menulis antarmuka untuk logika bisnis
   }
 ~~~~~~~~
 
-and implement it with a *module*. A module depends only on other modules,
-algebras and pure functions, and can be abstracted over `F`. If an
-implementation of an algebraic interface is tied to a specific type, e.g. `IO`,
-it is called an *interpreter*.
-
 dan mengimplementasikannya dengan sebuah *modul*.
 Sebuah modul yang hanya bergantung ke modul-modul lain, aljabar dan fungsi
-murni (lol), dan dapat diabstraksikan melalui `F`.
-Jika sebuah implementasi dari sebuah antarmuka aljabaris terikat spesifik
+murni, dan dapat diabstraksikan melalui `F`.  Jika sebuah implementasi dari
+sebuah antarmuka aljabaris terikat spesifik
 pada sebuah tipe, misalkan `IO`, implementasi tersebut disebut sebagai
-sebuah *interpreter* (lol, penerjemah bisa?).
+sebuah penerjemah
 
 {lang="text"}
 ~~~~~~~~
@@ -934,23 +836,14 @@ sebuah *interpreter* (lol, penerjemah bisa?).
     extends DynAgents[F] {
 ~~~~~~~~
 
-The `Monad` context bound means that `F` is *monadic*, allowing us to use `map`,
-`pure` and, of course, `flatMap` via `for` comprehensions.
-
-Pembatasan konteks `Monad` menunjukkan bahwa `F` bersifat monad, yang objeknya
-bisa digunakan oleh `map`, `pure`, dan `flatMap` melalui `for` comprehension. (lol)
-
-We have access to the algebra of `Drone` and `Machines` as `D` and `M`,
-respectively. Using a single capital letter name is a common naming convention
-for monad and algebra implementations.
+Pembatasan konteks `Monad` menunjukkan bahwa `F` bersifat monad, memperkenankan
+kita menggunakan `map`, `pure`, dan `flatMap` melalui komprehensi `for`.
 
 Kita punya akses ke aljabar yang dimiliki oleh `Drone` dan `Machines` dengan
-simbol `D` dan `M`. Penggunaan simbol satu huruf kapital merupakan ijma
+simbol `D` dan `M`. Penggunaan simbol satu huruf kapital merupakan ijtima
 untuk implementasi monad dan aljabar.
 
-Our business logic will run in an infinite loop (pseudocode)
-
-Logika bisnis kita akan berjalan pada sebuah "infinite loop".
+Logika bisnis kita akan berjalan pada sebuah ikalan tak-hingga
 
 {lang="text"}
 ~~~~~~~~
@@ -962,9 +855,6 @@ Logika bisnis kita akan berjalan pada sebuah "infinite loop".
 
 
 ### initial
-
-In `initial` we call all external services and aggregate their results
-into a `WorldView`. We default the `pending` field to an empty `Map`.
 
 Pada `initial`, kita memanggil semua layanan eksternal dan mengagregasi
 semua hasilnya menjadi sebuah `WorldView`.
@@ -981,39 +871,24 @@ Untuk nilai bawaan `pending`, kita akan mengisinya dengan sebuah `Map` kosong.
   } yield WorldView(db, da, mm, ma, Map.empty, mt)
 ~~~~~~~~
 
-Recall from Chapter 1 that `flatMap` (i.e. when we use the `<-`
-generator) allows us to operate on a value that is computed at
-runtime. When we return an `F[_]` we are returning another program to
-be interpreted at runtime, that we can then `flatMap`. This is how we
-safely chain together sequential side-effecting code, whilst being
-able to provide a pure implementation for tests. FP could be described
-as Extreme Mocking.
-
-Sebagaimana yang sudah dibahas pada bab 1, `flatMap` memberikan kita
-jalan untuk melakukan operasi pada nilai yang dihasilkan pada waktu jalan.
+Sebagaimana yang sudah dibahas pada bab 1, `flatMap` memperkenankan kita
+melakukan operasi pada nilai yang dihasilkan pada waktu jalan.
 Saat kita mengembalikan sebuah `F[_]`, kita mengembalikan sebuah program
 lain yang akan diterjemahkan saat waktu secara berurutan dan pada akhirnya,
 kita bisa melakukan `flatMap` padanya.
 Beginilah cara kita menyambung beberapa kode yang berefek samping yang berurutan
-secara aman. Saat itu pula, kita juga bisa menyediakan implementasi murni (lol)
+secara aman. Saat itu pula, kita juga bisa menyediakan implementasi murni
 untuk tes.
 
 ### update
 
-`update` should call `initial` to refresh our world view, preserving
-known `pending` actions.
-
 `update` harus memanggil `initial` untuk memperbarui `worldview` kita
 sembari mempertahankan tindakan tindakan yang masih `pending`.
 
-If a node has changed state, we remove it from `pending` and if a
-pending action is taking longer than 10 minutes to do anything, we
-assume that it failed and forget that we asked to do it.
-
-Ketika sebuah node mengalami perubahan kondisi (lol, state), kita akan
+Ketika sebuah node mengalami perubahan keadaan, kita akan
 menghapusnya dari `pending`. Dan bila sebuah tindakan yang masih tertunda (pending)
 masih belum mengerjakan apapun setelah menunggu 10 menit, maka kita
-akan menganggapnya sebagai sebuah kegagalan dan kita ngambek (lol.)
+akan menganggapnya sebagai sebuah kegagalan.
 
 {lang="text"}
 ~~~~~~~~
@@ -1030,49 +905,29 @@ akan menganggapnya sebagai sebuah kegagalan dan kita ngambek (lol.)
     (a union b) -- (a intersect b)
 ~~~~~~~~
 
-Concrete functions like `.symdiff` don't need test interpreters, they have
-explicit inputs and outputs, so we could move all pure code into standalone
-methods on a stateless `object`, testable in isolation. We're happy testing only
-the public methods, preferring that our business logic is easy to read.
-
 Fungsi konkret semacam `.symdiff` tidak memerlukan test dikarenakan mereka
 mempunyai masukan dan keluaran yang eksplisit. Sehingga, kita dapat memindahkan
-semua kode murni (lol) ke metoda metoda mandiri pada `object` "stateless" (lol).
+semua kode murni ke metoda metoda mandiri pada `object` independen.
 Testing metoda publik akan dengan senang hati kita lakukan.
 
 ### act
-
-The `act` method is slightly more complex, so we will split it into two
-parts for clarity: detection of when an action needs to be taken,
-followed by taking action. This simplification means that we can only
-perform one action per invocation, but that is reasonable because we
-can control the invocations and may choose to re-run `act` until no
-further action is taken.
 
 Metoda `act` sedikit lebih kompleks dibandingkan dengan metoda sebelumnya.
 Untuk memperjelas maksud dan memudahkan pemahaman, kita akan membaginya
 menjadi dua bagian. Pertama, mendeteksi kapankah sebuah aksi harus diambil.
 Dan kedua, melakukan aksi yang sudah ditentukan.
 Penyederhanaan ini juga berarti bahwa kita hanya bisa melakukan satu aksi
-dalam sebuah selawat (lol, invocation). Namun, hal tersebut cukup masuk
-akal dikarenakan kita dapat mengontrol selawat (lol) dan bisa juga menjalankan
+dalam sekali penyelawatan. Namun, hal tersebut cukup masuk
+akal dikarenakan kita dapat mengontrol penyelawatan dan bisa juga menjalankan
 ulang `act` sampai tidak ada lagi yang perlu dilakukan.
-
-We write the scenario detectors as extractors for `WorldView`, which
-is nothing more than an expressive way of writing `if` / `else`
-conditions.
 
 Sebagai pengekstrak untuk `WorldView`, kita akan menulis pendeteksi skenario
 yang tidak lain dan tidak bukan hanyalah penulisan percabangan `if` dan `else`
 yang jauh lebih ekspresif dibandingkan yang biasa!
 
-We need to add agents to the farm if there is a backlog of work, we
-have no agents, we have no nodes alive, and there are no pending
-actions. We return a candidate node that we would like to start:
-
-Adalah sebuah keharusan untuk menambah agen ke "farm" (lol) bila ada
+Adalah sebuah keharusan untuk menambah agen ke peternakan bila ada
 timbunan pekerjaan, atau saat kita tidak punya agen, atau ketika tak ada
-node yang menyala, juga tidak ada aksi aksi yang sedang dihentikan (pending, lol).
+node yang menyala, juga tidak ada aksi aksi yang sedang ditunda
 Caranya? Tentu dengan mengembalikan kandidat node yang ingin kita jalankan:
 
 {lang="text"}
@@ -1087,19 +942,11 @@ Caranya? Tentu dengan mengembalikan kandidat node yang ingin kita jalankan:
   }
 ~~~~~~~~
 
-If there is no backlog, we should stop all nodes that have become stale (they
-are not doing any work). However, since Google charge per hour we only shut down
-machines in their 58th minute to get the most out of our money. We return the
-non-empty list of nodes to stop.
-
 Bila tidak ada timbunan pekerjaan, kita harus menghentikan semua node yang
 sudah basi (pengangguran / tidak punya pekerjaan). Akan tetapi, jangan lupa
 bahwa Google menarik bayaran berdasarkan waktu penggunaan (dalam hitungan jam),
 maka kita akan mematikan mesin tersebut pada menit ke 58 agar kita IRIT!
 Disini, kita akan mengembalikan daftar non-kosong dari node untuk dihentikan.
-
-As a financial safety net, all nodes should have a maximum lifetime of
-5 hours.
 
 Agar IRIT, semua node harus mati sebelum 5 jam.
 
@@ -1117,10 +964,6 @@ Agar IRIT, semua node harus mati sebelum 5 jam.
     }
   }
 ~~~~~~~~
-
-Now that we have detected the scenarios that can occur, we can write
-the `act` method. When we schedule a node to be started or stopped, we
-add it to `pending` noting the time that we scheduled the action.
 
 Setelah kita berhasil mendeteksi skenario-skenario yang mungkin terjadi,
 kita bisa melanjutkan dengan menulis metoda `act`.
@@ -1149,20 +992,11 @@ penjadwalan aksi tadi.
   }
 ~~~~~~~~
 
-Because `NeedsAgent` and `Stale` do not cover all possible situations,
-we need a catch-all `case _` to do nothing. Recall from Chapter 2 that
-`.pure` creates the `for`'s (monadic) context from a value.
-
 Karena `NeedsAgent` dan `Stale` tidak menutup semua kemungkinan yang bisa
 terjadi, maka kita butuh jaring pengaman `cace _` yang sebenarnya tidak
 melakukan apapun.
 Saudara bisa mengingat kembali bab 2 dimana `.pure` menciptakan konteks monadik
 dari sebah nilai (`for`).
-
-`foldLeftM` is like `foldLeft`, but each iteration of the fold may return a
-monadic value. In our case, each iteration of the fold returns `F[WorldView]`.
-The `M` is for Monadic. We will find more of these *lifted* methods that behave
-as one would expect, taking monadic values in place of values.
 
 `foldLeftM` sendiri sebenarnya mirip dengan `foldLeft`. Namun, tiap iterasi
 dari penekukan ("fold") bisa saja menghasilkan sebuah nilai monadik.
@@ -1170,37 +1004,23 @@ Pada kasus ini, tiap iterasi dari tiap tekukan mengembalikan `F[WorldView]`.
 Simbol `M` pada `M.stop(n)`, misal, melambangkan bahwa ekspresi tersebut
 bersifat monadik. Kita akan banyak menemukan banyak metoda "lifted"
 seperti ini yang hanya mau menerima nilai nilai monadik, bukan nilai biasa.
-(lol)
 
 
-## Unit Tests
-
-The FP approach to writing applications is a designer's dream: delegate writing
-the implementations of algebras to team members while focusing on making
-business logic meet the requirements.
+## Tes Unit
 
 Pendekatan seperti ini, yang digunakan pada pemrograman fungsional,
 adalah hal yang diimpikan oleh seorang arsitek dimana detail implementasi
 atas aljabar-aljabar diserahkan kepada anggota tim dan sang arsitek
 fokus dalam menentukan logika bisnis untuk memenuhi tuntutan bisnis.
 
-Our application is highly dependent on timing and third party webservices. If
-this was a traditional OOP application, we'd create mocks for all the method
-calls, or test actors for the outgoing mailboxes. FP mocking is equivalent to
-providing an alternative implementation of dependency algebras. The algebras
-already isolate the parts of the system that need to be *mocked*, i.e.
-interpreted differently in the unit tests.
-
 Aplikasi kita ini sangat bergantung pada tempo dan layanan web pihak ketiga.
 Bila kita sedang menulis aplikasi ini dengan metodologi OOP tradisionil,
 kita akan membuat tiruan untuk semua metoda yang digunakan untuk memanggil
-layanan tersebut ataupun aktor aktor untuk pesan pesan keluar (lol).
+layanan tersebut ataupun aktor aktor untuk pesan pesan keluar.
 Peniruan yang digunakan pada pemrograman fungsional dilakukan dengan cara
 membuat implementasi alternatif dari aljabar yang digunakan.
 Tiap aljabar tiruan tadi, mengisolasi bagian bagian dari sistem yang harus
-ditiru (lol).
-
-We will start with some test data
+ditiru.
 
 Kita bisa memulainya dengan data data yang dikhususkan untuk testing.
 
@@ -1221,9 +1041,6 @@ Kita bisa memulainya dengan data data yang dikhususkan untuk testing.
   import Data._
 ~~~~~~~~
 
-A> The `epoch` string interpolator is written with Jon Pretty's [contextual](https://github.com/propensive/contextual) library,
-A> giving us compiletime safety around string constructors of a type:
-A> 
 A> Penambah string `.epoch`, yang ditulis menggunakan pustaka [contextual](https://github.com/propensive/contextual)
 A> milik Jon Pretty, memastikan keamanan saat kompilasi atas pembuatan
 A> string dari sebuah tipe.
@@ -1241,20 +1058,13 @@ A>     val epoch = Prefix(EpochInterpolator, sc)
 A>   }
 A> ~~~~~~~~
 
-We implement algebras by extending `Drone` and `Machines` with a specific
-monadic context, `Id` being the simplest.
-
 Kita bisa mengimplementasikan aljabar-aljabar yang akan ditiru dengan
-meng-eksten (lol) `Drone` dan `Machines` dengan konteks monadik spesifik,
+mengekstensi `Drone` dan `Machines` dengan konteks monadik spesifik,
 seperti `Id` sebagai contoh konteks yang paling sederhana.
 
-Our "mock" implementations simply play back a fixed `WorldView`. We've
-isolated the state of our system, so we can use `var` to store the
-state:
-
 Implementasi tiruan kita hanya memutar ulang sebuah `WorldView` yang tetap.
-Kita mengisolasi kondisi sistem kita sehingga kita dapat menggunakan
-`var` untuk menyimpan kondisi tersebut.
+Kita mengisolasi keadaan sistem kita sehingga kita dapat menggunakan
+`var` untuk menyimpan keadaan tersebut.
 
 {lang="text"}
 ~~~~~~~~
@@ -1278,27 +1088,15 @@ Kita mengisolasi kondisi sistem kita sehingga kita dapat menggunakan
   }
 ~~~~~~~~
 
-A> We will return to this code later on and replace `var` with something safer.
-A>
 A> Kita nanti akan kembali ke kode ini dan mengganti `var` dengan sesuatu
 A> yang lebih aman.
 
-When we write a unit test (here using `FlatSpec` from Scalatest), we create an
-instance of `Mutable` and then import all of its members.
-
 Ketika kita menulis sebuah unit tes, kita akan membuat sebuan instans `Mutable`
-dan mengimpor semua membernya.
-
-Our implicit `drone` and `machines` both use the `Id` execution
-context and therefore interpreting this program with them returns an
-`Id[WorldView]` that we can assert on.
+dan mengimpor semua anggotanya.
 
 Baik `drone` maupun `machines` kita, menggunakan konteks eksekusi
 `Id`. Sehingga, program ini akan mengembalikan sebuah `Id[WorldView]` 
-yang bisa kita tegaskan (lol).
-
-In this trivial case we just check that the `initial` method returns
-the same value that we use in the static implementations:
+yang bisa kita tegaskan.
 
 Sebenarnya, pada kasus remeh seperti ini, kita tinggal memeriksa
 apakah metoda `initial` memang betul mengembalikan nilai yang sama
@@ -1314,12 +1112,9 @@ dengan yang kita gunakan dalam implementasi statik.
   }
 ~~~~~~~~
 
-We can create more advanced tests of the `update` and `act` methods,
-helping us flush out bugs and refine the requirements:
-
 Kita juga bisa membuat tes yang lebih rumit untuk metoda `update`
 dan `act` untuk membantu kita menghilangkan kutu-kutu dan memperhalus
-persyaratan (lol, refining the requirements).
+persyaratan.
 
 {lang="text"}
 ~~~~~~~~
@@ -1349,21 +1144,10 @@ persyaratan (lol, refining the requirements).
   }
 ~~~~~~~~
 
-It would be boring to go through the full test suite. The following tests are
-easy to implement using the same approach:
-
 Akan menjadi sebuah kebosanan yang nyata bila kita harus berbincang secara
 panjang dan lebar mengenai semua rangkaian tes.
 Tes-tes berikut sebenarnya bisa dengan mudah diimplementasikan dengan menggunakan
 pendekatan yang sama.
-
--   not request agents when pending
--   don't shut down agents if nodes are too young
--   shut down agents when there is no backlog and nodes will shortly incur new costs
--   not shut down agents if there are pending actions
--   shut down agents when there is no backlog if they are too old
--   shut down agents, even if they are potentially doing work, if they are too old
--   ignore unresponsive pending actions during update
 
 -   jangan meminta agen saat pending.
 -   jangan mematikan agen bila node masih muda.
@@ -1373,21 +1157,11 @@ pendekatan yang sama.
 -   matikan agen bila sudah tua, termasuk yang sedang mengerjakan sesuatu.
 -   abaikan tindakan-tindakan yang tidak responsif saat pemutakhiran.
 
-All of these tests are synchronous and isolated to the test runner's
-thread (which could be running tests in parallel). If we'd designed
-our test suite in Akka, our tests would be subject to arbitrary
-timeouts and failures would be hidden in logfiles.
-
 Semua tes di atas dijalankan secara berurutan dan terisolasi terhadap
-ulir test-runner (lol, penjalan test?) (yang bisa jadi dijalankan secara
+ulir penjalan test (yang bisa jadi dijalankan secara
 paralel). Bilamana kita mendesain rangkaian tes kita di Akka, tes-tes kita
 bisa jadi menjadi korban atas kesewenangan habisnya waktu. Belum lagi
 dengan disembunyikannya galat-galat pada berkas log. 
-
-The productivity boost of simple tests for business logic cannot be
-overstated. Consider that 90% of an application developer's time
-interacting with the customer is in refining, updating and fixing
-these business rules. Everything else is implementation detail.
 
 Bukan melebih-lebihkan, namun kenyataan bahwa testing untuk logika
 bisnis pada aplikasi kita memang meningkat drastis.
@@ -1396,11 +1170,7 @@ bersama dengan pelanggan dihabiskan untuk memperhalus, memperbarui,
 dan memperbaiki aturan aturan bisnis ini, tentu yang lainnya merupakan
 detail saja.
 
-## Parallel
-
-The application that we have designed runs each of its algebraic
-methods sequentially. But there are some obvious places where work can
-be performed in parallel.
+## Paralel
 
 Saat ini, aplikasi yang sudah kita desain menjalankan metoda-metoda
 aljabar secara berurutan. Namun, ada beberapa bagian-bagian yang bisa
@@ -1409,15 +1179,9 @@ dijalankan secara paralel.
 
 ### initial
 
-In our definition of `initial` we could ask for all the information we
-need at the same time instead of one query at a time.
-
 Pada definisi kita atas `initial`, kita dapat meminta semua informasi
 yang kita butuhkan pada saat yang sama. Sehingga, kita tidak perlu
 melakukan satu kueri dalam satu waktu.
-
-As opposed to `flatMap` for sequential operations, Scalaz uses
-`Apply` syntax for parallel operations:
 
 Berbeda halnya dengan `flatMap` untuk operasi berurutan, Scalaz menggunakan
 sintaksis `Apply` untuk operasi paralel:
@@ -1427,22 +1191,16 @@ sintaksis `Apply` untuk operasi paralel:
   ^^^^(D.getBacklog, D.getAgents, M.getManaged, M.getAlive, M.getTime)
 ~~~~~~~~
 
-which can also use infix notation:
-
-yang bisa juga dituliskan menggunakan notasi sisipan:
+yang bisa juga dituliskan menggunakan notasi infiks:
 
 {lang="text"}
 ~~~~~~~~
   (D.getBacklog |@| D.getAgents |@| M.getManaged |@| M.getAlive |@| M.getTime)
 ~~~~~~~~
 
-If each of the parallel operations returns a value in the same monadic
-context, we can apply a function to the results when they all return.
-Rewriting `initial` to take advantage of this:
-
 Bila setiap operasi paralel mengembalikan sebuah nilai pada konteks
 monadik yang sama, kita dapat menerapkan sebuah fungsi ke hasil-hasilya
-saat mereka kembali (lol, pokoknya return bareng.)
+saat mereka kembali.
 Metoda `initial` bisa ditulis ulang sebagai berikut.
 
 {lang="text"}
@@ -1456,34 +1214,18 @@ Metoda `initial` bisa ditulis ulang sebagai berikut.
 
 ### act
 
-In the current logic for `act`, we are stopping each node
-sequentially, waiting for the result, and then proceeding. But we
-could stop all the nodes in parallel and then update our view of the
-world.
-
 Pada logika yang saat ini digunakan untuk `act`, kita menghentikan
 setiap node secara berurutan sembari menunggu hasil proses penghentian
 tersebut, baru melanjutkan penghentian node lainnya.
 Padahal, kita dapat menghentikan semua node bersamaan dan dilanjutkan
 dengan memutakhirkan `worldview` kita.
 
-A disadvantage of doing it this way is that any failures will cause us
-to short-circuit before updating the `pending` field. But that is a
-reasonable tradeoff since our `update` will gracefully handle the case
-where a `node` is shut down unexpectedly.
-
 Salah satu kekurangan dari cara ini adalah ketika sebuah operasi gagal
 dilakukan, maka proses akan berhenti lebih awal sebelum kita memutakhirkan
 bidang `pending`.
 Sebenarnya kompromi semacam ini masih masuk akal karena metoda `update`
-kita akan dengan anggun (lol, anggun) menangani kondisi dimana sebuah
-`nod` mati mendadak.
-
-We need a method that operates on `NonEmptyList` that allows us to
-`map` each element into an `F[MachineNode]`, returning an
-`F[NonEmptyList[MachineNode]]`. The method is called `traverse`, and
-when we `flatMap` over it we get a `NonEmptyList[MachineNode]` that we
-can deal with in a simple way:
+kita akan dengan anggun menangani kondisi dimana sebuah
+`node` mati mendadak.
 
 Untuk tipe data `NonEmptyList`, kita butuh sebuah metoda yang mampu
 melakukan pemetaan (`map`ping) atas semua elemennya ke sebuah
@@ -1501,25 +1243,17 @@ yang bisa kita tangani dengan cara yang sederhana.
   } yield update
 ~~~~~~~~
 
-Arguably, this is easier to understand than the sequential version.
-
 Saya kira, cuplikan diatas lebih mudah dipahami bila dibandingkan
 dengan versi yang berurutan.
 
 
-## Summary
-
-1.  *algebras* define the interface between systems.
-2.  *modules* are implementations of an algebra in terms of other algebras.
-3.  *interpreters* are concrete implementations of an algebra for a fixed `F[_]`.
-4.  Test interpreters can replace the side-effecting parts of the system,
-    giving a high amount of test coverage.
+## Kesimpulan
 
 1.  *aljabar* mendefinisikan antarmuka antar sistem.
 2.  *modul* merupakan implementasi dari sebuah aljabar dalam bentuk aljabar lain.
 3.  *interpreter* merupakan implementasi konkret dari sebuah aljabar untuk sebuah `F[_]` tetap.
 4.  Interpreter tes dapat mengganti bagian bagian yang mempunyai efek samping pada sistem
-    dan memberikan cakuan tes yang lebih tinggi.
+    dan memberikan cakupan tes yang lebih tinggi.
 
 
 # Data and Functionality
