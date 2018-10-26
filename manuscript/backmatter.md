@@ -798,26 +798,29 @@ A> bita mentah dan primitif `Text` memiliki versi default evaluasi tegas, dengan
 A> varian landung (`Lazy`).
 
 
-## Next Steps
+## Langkah Selanjutnya
 
-Haskell is a faster, safer and simpler language than Scala and has proven itself
-in industry. Consider taking the [data61 course on functional programming](https://github.com/data61/fp-course), and
-ask questions in the `#qfpl` chat room on `freenode.net`.
+Haskell merupakan bahasa yang lebih cepat, aman, dan sederhana bila dibandingkan
+dengan Scala. Selain itu, Haskell sudah terbukti di industri. Pertimbangkan untuk
+mengambil [kursus pemrograman fungsional data61](https://github.com/data61/fp-course)
+dan bertanya pada ruang obrolan `#qfpl` di `freenode.net`.
 
-Some additional learning materials are:
+Beberapa materi pelajaran tambahan adalah:
 
--   [Haskell Book](http://haskellbook.com/) a very comprehensive introduction, or [Programming in Haskell](http://www.cs.nott.ac.uk/~pszgmh/pih.html) for
+-   [Haskell Book](http://haskellbook.com/) merupakan materi pengenalan yang sangat
+    komprehensif, atau [Programming in Haskell](http://www.cs.nott.ac.uk/~pszgmh/pih.html)
+    untuk pengantar yang lebih singkat.
     a faster ride.
--   [Parallel and Concurrent Programming in Haskell](http://shop.oreilly.com/product/0636920026365.do) and [What I Wish I Knew When
-    Learning Haskell](http://dev.stephendiehl.com/hask/#data-kinds) for intermediate wisdom.
--   [Glasgow Haskell Compiler User Guide](https://downloads.haskell.org/~ghc/latest/docs/html/users_guide/) and [HaskellWiki](https://wiki.haskell.org) for the cold hard facts.
--   [Eta](https://eta-lang.org/), i.e. Haskell for the JVM.
+-   [Parallel and Concurrent Programming in Haskell](http://shop.oreilly.com/product/0636920026365.do) dan [What I Wish I Knew When
+    Learning Haskell](http://dev.stephendiehl.com/hask/#data-kinds) untuk petuah bijak.
+-   [Glasgow Haskell Compiler User Guide](https://downloads.haskell.org/~ghc/latest/docs/html/users_guide/) dan [HaskellWiki](https://wiki.haskell.org) untuk dokumentasi mendetail.
+-   [Eta](https://eta-lang.org/), Haskell untuk JVM.
 
-If you enjoy using Haskell and understand the value that it would bring to your
-business, then tell your managers! That way, the small percentage of managers
-who commission Haskell projects will be able to attract functional programming
-talent from the many teams who do not, and everybody will be happy.
-
+Bila pembaca budiman menggunakan Haskell dan memahami nilai yang ditawarkan pada
+bisnis pembaca, maka silakan sampaikan kepada manajer. Dengan demikian, beberapa
+manajer yang membawahi proyek Haskell akan menarik bakat-bakat pemrograman fungisonal
+dari banyak tim yang tidak. Dan pada akhirnya, bapak senang, ibu senang, di sini
+senang, di mana senang, semua senang!
 
 
 # Lisensi Pihak Ketiga
