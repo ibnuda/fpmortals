@@ -7847,46 +7847,26 @@ fungsional dari literatur semacam itu merupakan kontrubusi yang sangat diterima
 untuk ekosistem Scalaz.
 
 
-# Advanced Monads
-
-You have to know things like Advanced Monads in order to be an advanced
-functional programmer.
+# Monad Lanjutan
 
 Untuk menjadi pemrogram dengan aliran fungsional, pembaca budiman harus
 menguasai beberapa hal, seperti Monad Lanjutan.
-
-However, we are developers yearning for a simple life, and our idea of
-"advanced" is modest. To put it into context: `scala.concurrent.Future` is more
-complicated and nuanced than any `Monad` in this chapter.
 
 Namun, karena kita merupakan pengembang yang mendambakan hal yang sederhana,
 juga tidak melupakan bahwa apa yang kita sebut sebagai "lanjutan" juga tetap
 sederhana. Sebagai konteks: `scala.concurrent.Future` lebih rumit dan penuh
 dengan nuansa bila dibandingkan dengan semua `Monad` yang ada pada bab ini. 
 
-In this chapter we will study some of the most important implementations of
+Pada bab ini, kita akan mempelajari beberapa penerapan paling penting atas
 `Monad`.
 
-Pada bab ini, kita akan mempelajari beberapa penerapan paling penting atas
-`Monad`. 
 
-
-## Always in motion is the `Future`
-
-The biggest problem with `Future` is that it eagerly schedules work during
-construction. As we discovered in the introduction, `Future` conflates the
-definition of a program with *interpreting* it (i.e. running it).
+## Masa Depan yang Kabur
 
 Masalah paling besar dengan `Future` adalah struktur ini segera menjadwalkan
 tugas pada saat konstruktsi. Sebagaimana yang telah kita bicarakan pada
 perkenalan, `Future` menggabungkan antara definisi program dengan
-*mengintrepretasikannya*.
-
-`Future` is also bad from a performance perspective: every time `.flatMap` is
-called, a closure is submitted to an `Executor`, resulting in unnecessary thread
-scheduling and context switching. It is not unusual to see 50% of our CPU power
-dealing with thread scheduling, instead of doing the work. So much so that
-parallelising work with `Future` can often make it *slower*.
+*menerjemahkannya*.
 
 Dan bila dilihat dari sudut pandang performa, `Future` tidak begitu menarik:
 setiap kali `.flatMap` dipanggil, sebuah *closure* diserahkan kepada sebuah
@@ -7896,38 +7876,18 @@ dengan penjadwalan utas, bukan saat melakukan komputasi program. Bahkan, bukan
 hal yang tidak mungkin untuk mendapatkan hasil komputasi paralel yang lebih lambat
 saat menggunakan `Future`.
 
-Combined, eager evaluation and executor submission means that it is impossible
-to know when a job started, when it finished, or the sub-tasks that were spawned
-to calculate the final result. It should not surprise us that performance
-monitoring "solutions" for `Future` based frameworks are a solid earner for the
-modern day snake oil merchant.
-
 Bila evaluasi tegas dan penyerahan eksekutor digunakan secara bersamaan, pengguna
 tidak akan tahu kapan tugas akan dimulai, selesai, atau sub-tugas yang dibuat
 untuk menghitung hasil akhir. Seharusnya, bukan hal yang mengejutkan bila
 *solusi* untuk melakukan pengawasan atas *framework* yang dibuat berdasarkan
 `Future` memang pantas disebut sebagai tukang tipe.
 
-Furthermore, `Future.flatMap` requires an `ExecutionContext` to be in implicit
-scope: users are forced to think about business logic and execution semantics at
-the same time.
-
 Terlebih lagi, `Future.flatMap` mengharuskan sebuah `ExecutionContext` berada
 pada cakupan implisit: pengguna dipaksa untuk memikirkan logika bisnis dan
 semantik dari eksekusi pada saat yang bersamaan. 
 
-A> If `Future` was a Star Wars character, it would be Anakin Skywalker: the fallen
-A> chosen one, rushing in and breaking things without thinking.
 
-
-## Effects and Side Effects
-
-If we cannot call side-effecting methods in our business logic, or in `Future`
-(or `Id`, or `Either`, or `Const`, etc), **when can** we write them? The answer
-is: in a `Monad` that delays execution until it is interpreted at the
-application's entrypoint. We can now refer to I/O and mutation as an *effect* on
-the world, captured by the type system, as opposed to having a hidden
-*side-effect*.
+## Efek dan Efek Samping
 
 Bila kita tidak boleh memanggil metoda dengan efek samping pada logika bisnis
 kita, atau pada `Future` (atau pada `Id`, `Either`, ataupun `Const`, dll),
@@ -7935,9 +7895,6 @@ kita, atau pada `Future` (atau pada `Id`, `Either`, ataupun `Const`, dll),
 sampai pada waktunya `Monad` ini diinterpretasi pada titik awal aplikasi.
 Mulai dari sini, kita akan merujuk I/O dan mutasi sebagai *efek* pada dunia luar
 yang ditangkap oleh sistem tipe, bukan sistem dengan *efek samping* tersembunyi.
-
-The simplest implementation of such a `Monad` is `IO`, formalising the version
-we wrote in the introduction:
 
 Implementasi paling sederhana dari sebuah `Monad` adalah `IO`, yang memformalkan
 apa yang telah kita tulis pada bagian perkenalan sebagai:
@@ -7955,9 +7912,6 @@ apa yang telah kita tulis pada bagian perkenalan sebagai:
   }
 ~~~~~~~~
 
-The `.interpret` method is only called once, in the entrypoint of an
-application:
-
 Metoda `.interpret` hanya dipanggil sekali pada titik awal sebuah aplikasi:
 
 {lang="text"}
@@ -7965,21 +7919,10 @@ Metoda `.interpret` hanya dipanggil sekali pada titik awal sebuah aplikasi:
   def main(args: Array[String]): Unit = program.interpret()
 ~~~~~~~~
 
-However, there are two big problems with this simple `IO`:
-
 Namun, ada dua masalah utama pada `IO` sederhana semacam ini:
-
-1.  it can stack overflow
-2.  it doesn't support parallel computations
 
 1.  dapat menyebabkan *stack overflow*
 2.  tidak mendukung komputasi paralel.
-
-Both of these problems will be overcome in this chapter. However, no matter how
-complicated the internal implementation of a `Monad`, the principles described
-here remain true: we're modularising the definition of a program and its
-execution, such that we can capture effects in type signatures, allowing us to
-reason about them, and reuse more code.
 
 Kedua masalah ini akan diselesaikan pada bab ini. Namun, serumit apapun
 implmentasi internal dari sebuah `Monad`, prinsip yang dijabarkan disini tidak
@@ -7988,10 +7931,6 @@ sehingga kita dapat menangkap efek yang muncul pada penanda tipe, dan pada akhir
 memperkenankan kita untuk menalar hasil modularisasi program tersebut dan
 menghasilkan penggunaan ulang kode yang lebih banyak.
 
-A> The Scala compiler will happily allow us to call side-effecting methods from
-A> unsafe code blocks. The [Scalafix](https://scalacenter.github.io/scalafix/) linting tool can ban side-effecting methods at
-A> compiletime, unless called from inside a deferred `Monad` like `IO`.
-A>
 A> Kompiler Scala memperkenankan kita untuk memanggil metoda dengan efek samping
 A> pada blok kode tak aman. [Scalafix](https://scalacenter.github.io/scalafix)
 A> yang merupakan alat bantu untuk pelarangan metoda dengan efek samping pada
@@ -7999,14 +7938,7 @@ A> saat kompilasi dapat digunakan untuk memastikan bahwa semua metoda dengan
 A> efek samping dipanggil didalam sebuah `Monad` seperti `IO`.
 
 
-## Stack Safety
-
-On the JVM, every method call adds an entry to the call stack of the `Thread`,
-like adding to the front of a `List`. When the method completes, the method at
-the `head` is thrown away. The maximum length of the call stack is determined by
-the `-Xss` flag when starting up `java`. Tail recursive methods are detected by
-the Scala compiler and do not add an entry. If we hit the limit, by calling too
-many chained methods, we get a `StackOverflowError`.
+## Keamanan *Stack*
 
 Pada JVM, setiap pemanggilan metoda menambah sebuah catatan pada *stack* panggilan
 pada `Thread`, mirip dengan penambahan sebuah elemen pada bagian depan `List`.
@@ -8016,11 +7948,6 @@ memulai `java`. Pemanggilan metoda *tail recursive* dideteksi oleh komplire
 Scala dan catatan panggilan tidak akan ditambahkan. Bila kita mencapai batas,
 misal dengan pemanggilan rantai metoda yang sangat banyak, kita akan mendapatkan
 sebuah `StackOverflowError`.
-
-Unfortunately, every nested call to our `IO`'s `.flatMap` adds another method
-call to the stack. The easiest way to see this is to repeat an action forever,
-and see if it survives for longer than a few seconds. We can use `.forever`,
-from `Apply` (a parent of `Monad`):
 
 Sayangnya, tiap panggilan berlapis pada `.flatMap` milik `IO`, sebuah metoda
 akan ditambahkan ke *stack*. Cara paling mudah untuk menebak apakah metoda ini
@@ -8045,9 +7972,6 @@ akan dijalankan selamanya atau hanya beberapa saat saja, kita bisa menggunakan
       at ...
 ~~~~~~~~
 
-Scalaz has a typeclass that `Monad` instances can implement if they are stack
-safe: `BindRec` requires a constant stack space for recursive `bind`:
-
 Scalaz mempunyai sebuah kelas tipe yang dapat diimplementasikan oleh struktur
 data yang memiliki instans `Monad` bila struktur data tersebut aman dari segi
 penggunaan *stack*: `BindRec` yang mumbutuhkan ruang *stack* konstan untuk
@@ -8062,14 +7986,8 @@ penggunaan *stack*: `BindRec` yang mumbutuhkan ruang *stack* konstan untuk
   }
 ~~~~~~~~
 
-We don't need `BindRec` for all programs, but it is essential for a general
-purpose `Monad` implementation.
-
 Kita tidak perlu menggunakan `BindRec` untk semua program. Namun, kelas tipe ini
 penting untuk implementasi umum dari `Monad`.
-
-The way to achieve stack safety is to convert method calls into references to an
-ADT, the `Free` monad:
 
 Cara yang digunakan untuk mendapatkan keamanan *stack* adalah dengan mengkonversi
 pemanggilan metoda menjadi rujukan ke sebuah ADT, atau yang dikenal dengan
@@ -8089,33 +8007,17 @@ monad `Free`:
   }
 ~~~~~~~~
 
-A> `SUSPEND`, `RETURN` and `GOSUB` are a tip of the hat to the `BASIC` commands of
-A> the same name: pausing, completing, and continuing a subroutine, respectively.
-A> 
 A> `SUSPEND`, `RETURN`, dan `GOSUB` merupakan penghormatan untuk perintah pada
 A> bahasa pemrograman `BASIC` untuk mejeda, menyelesaikan, dan melanjutkan
 A> sub-rutin.
 
-The `Free` ADT is a natural data type representation of the `Monad` interface:
-
-ADT `Free` merupakan representasi tipe data natural untuk antarmuka `Monad`:
-
-1.  `Return` represents `.point`
-2.  `Gosub` represents `.bind` / `.flatMap`
+TDA `Free` merupakan representasi tipe data natural untuk antarmuka `Monad`:
 
 1.  `Return` merepresentasikan `.point`
 2.  `Gosub` merepresentasikan `.bind` / `.flatMap`
 
-When an ADT mirrors the arguments of related functions, it is called a *Church
-encoding*.
-
-Ketika sebuah ADT mencerminkan argumen yang berhubungan dengan fungsi yang berhubungan,
+Ketika sebuah TDA mencerminkan argumen yang berhubungan dengan fungsi yang berhubungan,
 pencerminan ini disebut dengan penyandian Church (dari nama Alonzo Church).
-
-`Free` is named because it can be *generated for free* for any `S[_]`. For
-example, we could set `S` to be the `Drone` or `Machines` algebras from Chapter
-3 and generate a data structure representation of our program. We will return to
-why this is useful at the end of this chapter.
 
 `Free` mendapat nama seperti itu karena dapat didapatkan secara cuma-cuma (sebagaimana
 dengan "Free Beer") untuk setiap `S[_]`. Sebagai contoh, kita dapat menganggap
@@ -8125,10 +8027,6 @@ hal ini berguna pada akhir bab ini.
 
 
 ### `Trampoline`
-
-`Free` is more general than we need for now. Setting the algebra `S[_]` to `()
-=> ?`, a deferred calculation or *thunk*, we get `Trampoline` and can implement
-a stack safe `Monad`
 
 Untuk sementara ini, `Free` lebih umum daripada yang kita butuhkan. Dengan
 mengatur aljabar `S[_]` menjadi `() => ?`, atau komputasi yang ditangguhkan,
@@ -8155,27 +8053,13 @@ kita mendapatkan struktur `Trampoline` dan pada akhirnya dapat menerapkan
   }
 ~~~~~~~~
 
-The `BindRec` implementation, `.tailrecM`, runs `.bind` until we get a `B`.
-Although this is not technically a `@tailrec` implementation, it uses constant
-stack space because each call returns a heap object, with delayed recursion.
-
 Implementasi `BindRec`, `.tailrecM`, menjalankan `.bind` sampai kita mendapat
 sebuah `B`. Walau secara teknis hal ini bukan merupakan implmentasi `@tailrec`,
 implementasi ini menggunakan ruang *stack* secara konstan karena tiap panggilan
 mengembalikan sebuah objek heap dengan rekursi yang dijeda.
 
-A> Called `Trampoline` because every time we `.bind` on the stack, we *bounce* back
-A> to the heap.
-A> 
-A> The only Star Wars reference involving bouncing is Yoda's duel with Dooku. We
-A> shall not speak of this again.
-A>
 A> Disebut sebagai `Trampoline` karena tiap kali kita memanggil `.bind` pada stack,
 A> kita akan terpantul kembali ke *heap*.
-
-Convenient functions are provided to create a `Trampoline` eagerly (`.done`) or
-by-name (`.delay`). We can also create a `Trampoline` from a by-name
-`Trampoline` (`.suspend`):
 
 Fungsi pembantu yang disediakan untuk membuat sebuah `Trampoline` secara
 sigap adalah dengan `.done` atau bisa juga dibuat dengan sebuah jeda menggunakan
@@ -8193,25 +8077,14 @@ metoda `.delay`. Kita juga bisa membuat sebuah `Trampoline` dengan menggunakan
   }
 ~~~~~~~~
 
-When we see `Trampoline[A]` in a codebase we can always mentally substitute it
-with `A`, because it is simply adding stack safety to the pure computation. We
-get the `A` by interpreting `Free`, provided by `.run`.
-
 Saat kita melihat `Trampoline[A]` pada basis kode, kita bisa menggantinya pada
 visualisasi mental kita dengan sebuah `A`. Hal ini disebabkan oleh penambahan
 keamanan *stack* demi kemurnian komputasi. Kita mendapatkan `A` dengan menginterpretasikan
 `Free` dengan metoda `.run` yang telah disediakan.
 
-A> It is instructive, although not necessary, to understand how `Free.run` is
-A> implemented: `.resume` evaluates a single layer of the `Free`, and `go` runs it
-A> to completion.
-A> 
 A> Walaupun tidak perlu, untuk memahami bagaimana `Free.run` diimplementasikan,
 A> namun banyak hal yang dapat dipelajari. Sebagai contoh: `.resume` mengevaluasi
 A> satu lapis dari `Free` dan `go` menjalankan `Free` sampai selesai.
-A>
-A> In the following `Trampoline[A]` is used as a synonym for `Free[() => ?, A]` to
-A> make the code easier to read.
 A>
 A> Pada `Trampoline[A]` berikut, trampoline ini digunakan sebagai sinonim dari
 A> `Free[() => ?, A]` agar kode lebih mudah untuk dipahami.
@@ -8240,19 +8113,13 @@ A>     ...
 A>   }
 A> ~~~~~~~~
 A> 
-A> The case that is most likely to cause confusion is when we have nested `Gosub`:
-A> apply the inner function `g` then pass it to the outer one `f`, it is just
-A> function composition.
-A>
 A> Permasalahan yang biasanya menjadi penyebab kaburnya pemahaman adalah saat
 A> kita mempunyai `Gosub` berlapis: mengaplikasikan fungsi bagian dalam `g` lalu
 A> melewatkannya ke fungsi `f` di bagian luar. Padahal, hal ini cuma sekedar
 A> komposisi fungsi.
 
 
-### Example: Stack Safe `DList`
-
-In the previous chapter we described the data type `DList` as
+### Contoh: `DList` dengan Keamanan *Stack*
 
 Pada bab sebelumnya, kita mendeskripsikan tipe data `DList` dengan
 
@@ -8265,8 +8132,6 @@ Pada bab sebelumnya, kita mendeskripsikan tipe data `DList` dengan
   }
 ~~~~~~~~
 
-However, the actual implementation looks more like:
-
 Namun, implementasi yang sesungguhnya adalah seperti berikut:
 
 {lang="text"}
@@ -8278,11 +8143,6 @@ Namun, implementasi yang sesungguhnya adalah seperti berikut:
   }
 ~~~~~~~~
 
-Instead of applying nested calls to `f` we use a suspended `Trampoline`. We
-interpret the trampoline with `.run` only when needed, e.g. in `toIList`. The
-changes are minimal, but we now have a stack safe `DList` that can rearrange the
-concatenation of a large number lists without blowing the stack!
-
 Kita tidak menggunakan panggilan berlapis pada `f`, namun kita menggunakan
 `Trampoline` yang dibekukan. Interpretasi `.run` hanya dilakukan bila memang
 benar dibutuhkan, seperti pada `toIList`. Perubahan yang dilakukan sebenarnya
@@ -8290,9 +8150,7 @@ sedikit, namun kita berhasil mencapai keamanan *stack* atas `DList` yang dapat
 melakukan penggabungan `list` dalam jumlah besar tanpa harus memenuhi *stack*.
 
 
-### Stack Safe `IO`
-
-Similarly, our `IO` can be made stack safe thanks to `Trampoline`:
+### `IO` dengan Keamanan *Stack*
 
 Hal yang sama dapat dilakukan untuk mengamankan `IO` dengan menggunakan
 `Trampoline`:
@@ -8315,17 +8173,9 @@ Hal yang sama dapat dilakukan untuk mengamankan `IO` dengan menggunakan
   }
 ~~~~~~~~
 
-A> We heard you like `Monad`, so we made you a `Monad` out of a `Monad`, so you can
-A> monadically bind when you are monadically binding.
-
-The interpreter, `.unsafePerformIO()`, has an intentionally scary name to
-discourage using it except in the entrypoint of the application.
-
 Penerjemah di atas, `.unsafePerformIO()`, memang sengaja dinamai seperti itu
 untuk menakut-nakuti pengguna agar tidak menggunakannya selain di titik awal
 aplikasi.
-
-This time, we don't get a stack overflow error:
 
 Sekarang, kita tidak akan mendapat galat mengenai *stack overflow*:
 
@@ -8341,61 +8191,32 @@ Sekarang, kita tidak akan mendapat galat mengenai *stack overflow*:
   hello
 ~~~~~~~~
 
-Using a `Trampoline` typically introduces a performance regression vs a regular
-reference. It is `Free` in the sense of *freely generated*, not *free as in
-beer*.
-
 Penggunaan `Trampoline` biasanya menimbulkan penurunan performa bila dibandingkan
 dengan rujukan biasa. Hal ini dikarenakan `Free` disini adalah dibuat tanpa
 biaya, bukan digunakan tanpa biaya.
 
-A> Always benchmark instead of accepting sweeping statements about performance: it
-A> may well be the case that the garbage collector performs better for an
-A> application when using `Free` because of the reduced size of retained objects in
-A> the stack.
-A>
 A> Selalu ukur apapun mengenai performa: Bisa jadi pengumpul sampah bekerja lebih
 A> baik pada sebuah aplikasi yang menggunakan `Free` karena ukuran objek yang disimpan
 A> memang lebih kecil pada *stack*.
 
 
-## Monad Transformer Library
-
-Monad transformers are data structures that wrap an underlying value and provide
-a monadic *effect*.
+## Pustaka Transformator Monad
 
 Transformator monad merupakan struktur data yang membungkus nilai yang mendasari
 dan menyediakan efek monadik.
 
-For example, in Chapter 2 we used `OptionT` to let us use `F[Option[A]]` in a
-`for` comprehension as if it was just a `F[A]`. This gave our program the effect
-of an *optional* value. Alternatively, we can get the effect of optionality if
-we have a `MonadPlus`.
-
 Sebagai contoh, pada bab 2 kita menggunakan `OptionT` agar kita dapat menggunakan
-`F[Option[A]]` pada komprehensi `for` (lol, help) sebagaimana kita menggunakan
+`F[Option[A]]` pada komprehensi `for` sebagaimana kita menggunakan
 `F[A]`. Hal semacam ini menambahkan efek dari nilai opsional pada program kita.
 Atau bisa juga kita menggunakan `MonadPlus` untuk mendapatkan efek yang sama.
-
-This subset of data types and extensions to `Monad` are often referred to as the
-*Monad Transformer Library* (MTL), summarised below. In this section, we will
-explain each of the transformers, why they are useful, and how they work.
 
 Subset tipe data ini dan perpanjangan dari `Monad` biasa disebut sebagai
 Pustaka Transformator Monad atau Monad Transformer Library (MTL) yang dirangkum
 di bawah. Pada bagian ini, kita akan membahas tiap transformator, apa guna
 mereka, dan bagaimana cara mereka bekerja.
 
-| Effect               | Underlying            | Transformer | Typeclass     |
+| Efek               | Pendasaran            | Transformator | Kelas Tipe     |
 |-------------------- |--------------------- |----------- |------------- |
-| optionality          | `F[Maybe[A]]`         | `MaybeT`    | `MonadPlus`   |
-| errors               | `F[E \/ A]`           | `EitherT`   | `MonadError`  |
-| a runtime value      | `A => F[B]`           | `ReaderT`   | `MonadReader` |
-| journal / multitask  | `F[(W, A)]`           | `WriterT`   | `MonadTell`   |
-| evolving state       | `S => F[(S, A)]`      | `StateT`    | `MonadState`  |
-| keep calm & carry on | `F[E \&/ A]`          | `TheseT`    |               |
-| control flow         | `(A => F[B]) => F[B]` | `ContT`     |               |
-|                      |                       |             |               |
 | pilihan              | `F[Maybe[A]]`         | `MaybeT`    | `MonadPlus`   |
 | galat                | `F[E \/ A]`           | `EitherT`   | `MonadError`  |
 | nilai waktu jalan    | `A => F[B]`           | `ReaderT`   | `MonadReader` |
@@ -8406,9 +8227,6 @@ mereka, dan bagaimana cara mereka bekerja.
 
 
 ### `MonadTrans`
-
-Each transformer has the general shape `T[F[_], A]`, providing at least an
-instance of `Monad` and `Hoist` (and therefore `MonadTrans`):
 
 Tiap transformator mempunyai bentuk umum `T[F[_], A]`, dan menyediakan setidaknya
 satu instans `Monad` dan `Hoist` sehingga disebut `MonadTrans`:
@@ -8424,42 +8242,22 @@ satu instans `Monad` dan `Hoist` sehingga disebut `MonadTrans`:
   }
 ~~~~~~~~
 
-A> `T[_[_], _]` is another example of a higher kinded type. It says that `T` takes
-A> two type parameters: the first also takes a type parameter, written `_[_]`, and
-A> the second does not take any type parameters, written `_`.
-A>
 A> `T[_[_], _]` merupakan contoh lain dari jenis tipe tinggi (lol, kill me mate).
 A> Penanda tipe ini dibaca sebagai: `T` menerima dua parameter tipe, yang pertama
 A> juga menerima sebuah parameter tipe, yang ditulis sebagai `_[_]` dan yang kedua
 A> tidak menerima parameter tipe apapun yang ditulis dengan `_`.
 
-`.liftM` lets us create a monad transformer if we have an `F[A]`. For example,
-we can create an `OptionT[IO, String]` by calling `.liftM[OptionT]` on an
-`IO[String]`.
-
 `.liftM` memperkenankan kita untuk membuat sebuah transformator monad bila kita
 mempunyai sebuah `F[A]`. Sebagai contoh, kita dapat membuat sebuah `OptionT[IO, String]`
 dengan memanggil `.liftM[OptionT]` pada sebuah `IO[String].
 
-`.hoist` is the same idea, but for natural transformations.
-
 Mirip dengan `.liftM`, `.hoist` digunakan untuk transformasi natural.
 
-Generally, there are three ways to create a monad transformer:
-
 Secara umum, ada tiga cara untuk membuat sebuah transformator monad:
-
--   from the underlying, using the transformer's constructor
--   from a single value `A`, using `.pure` from the `Monad` syntax
--   from an `F[A]`, using `.liftM` from the `MonadTrans` syntax
 
 -   dengan menggunakan konstruktor transformator
 -   dari sebuah nilai `A` dengan menggunakan `.pure` dari sintaks `Monad`
 -   dari sebuah `F[A] dengan menggunakan `.liftM` dari sintaks `MonadTrans`
-
-Due to the way that type inference works in Scala, this often means that a
-complex type parameter must be explicitly written. As a workaround, transformers
-provide convenient constructors on their companion that are easier to use.
 
 Dikarenakan cara kerja dari penebak tipe pada Scala, sering kali parameter tipe
 yang kompleks harus tersurat. Untuk menyiasati hal ini, transformator biasanya
@@ -8468,10 +8266,6 @@ digunakan.
 
 
 ### `MaybeT`
-
-`OptionT`, `MaybeT` and `LazyOptionT` have similar implementations, providing
-optionality through `Option`, `Maybe` and `LazyOption`, respectively. We will
-focus on `MaybeT` to avoid repetition.
 
 `OptionT`, `MaybeT`, dan `LazyOptionT` mempunyai implementasi yang mirip.
 Mereka sama sama menyediakan opsionalitas melalui `Option`, `Maybe`, dan `LazyOption`.
@@ -8489,8 +8283,6 @@ Kita akan fokus pada `MaybeT` untuk menghindari pengulangan pembahasan.
   }
 ~~~~~~~~
 
-providing a `MonadPlus`
-
 menyediakan sebuah instans untuk `MonadPlus`
 
 {lang="text"}
@@ -8505,22 +8297,12 @@ menyediakan sebuah instans untuk `MonadPlus`
   }
 ~~~~~~~~
 
-This monad looks fiddly, but it is just delegating everything to the `Monad[F]`
-and then re-wrapping with a `MaybeT`. It is plumbing.
-
 Monad ini memang terlihat agak janggal. Namun, monad ini hanya mendelegasi
 semuanya ke `Monad[F]` dan pada akhirnya membungkus ulang dengan sebuah `MaybeT`.
 Hal ini yang disebut dengan pertukangan.
 
-With this monad we can write logic that handles optionality in the `F[_]`
-context, rather than carrying around `Option` or `Maybe`.
-
 Dengan monad ini, kita dapat menulis logika yang menangani opsionalitas pada
 konteks `F[]`, tidak dengan membawa-bawa `Option` maupun `Maybe`.
-
-For example, say we are interfacing with a social media website to count the
-number of stars a user has, and we start with a `String` that may or may not
-correspond to a user. We have this algebra:
 
 Sebagai contoh, misalkan kita menggunakan sebuah situs media sosial untuk menghitung
 jumlah bintang yang dimiliki oleh seorang pengguna. Situs tersebut memberikan sebuah
@@ -8536,9 +8318,6 @@ Selain itu, kita memilki aljabar berikut:
   def T[F[_]](implicit t: Twitter[F]): Twitter[F] = t
 ~~~~~~~~
 
-We need to call `getUser` followed by `getStars`. If we use `Monad` as our
-context, our function is difficult because we have to handle the `Empty` case:
-
 Kita harus memanggil `getUser` dan dilanjutkan dengan `getStars`. Bila kita
 menggunakan `Monad` sebagai konteks dari pemanggilan ini, kita akan kesulitan
 menulis fungsi untuk ini karena kita harus menangani kondisi `Empty`:
@@ -8551,9 +8330,6 @@ menulis fungsi untuk ini karena kita harus menangani kondisi `Empty`:
   } yield maybeStars
 ~~~~~~~~
 
-However, if we have a `MonadPlus` as our context, we can suck `Maybe` into the
-`F[_]` with `.orEmpty`, and forget about it:
-
 Namun, bila kita mempunyai sebuah `MonadPlus` sebagai konteks, kita dapat
 memasukkan `Maybe` ke dalam `F[]` dengan `.orEmpty` dan mengabaikan apa yang
 terjadi selanjutnya:
@@ -8565,11 +8341,6 @@ terjadi selanjutnya:
     stars <- T.getStars(user)
   } yield stars
 ~~~~~~~~
-
-However adding a `MonadPlus` requirement can cause problems downstream if the
-context does not have one. The solution is to either change the context of the
-program to `MaybeT[F, ?]` (lifting the `Monad[F]` into a `MonadPlus`), or to
-explicitly use `MaybeT` in the return type, at the cost of slightly more code:
 
 Namun, dengan menambahkan persyaratan `MonadPlus`, akan muncul permasalah
 bila konteks hilir tidak mempunyai instans monad tersebut. Solusi yang bisa
@@ -8585,10 +8356,6 @@ tipe kembalian, walaupun harus menulis kode sedikit lebih banyak:
   } yield stars
 ~~~~~~~~
 
-The decision to require a more powerful `Monad` vs returning a transformer is
-something that each team can decide for themselves based on the interpreters
-that they plan on using for their program.
-
 Keputusan untuk menggunakan `Monad` atau mengembalikan sebuah transformator
 pada akhirnya merupakan hal yang harus diputuskan oleh tim pembaca yang budiman
 berdasarkan pada interpreter yang digunakan pada program pembaca budiman.
@@ -8596,18 +8363,12 @@ berdasarkan pada interpreter yang digunakan pada program pembaca budiman.
 
 ### `EitherT`
 
-An optional value is a special case of a value that may be an error, but we
-don't know anything about the error. `EitherT` (and the lazy variant
-`LazyEitherT`) allows us to use any type we want as the error value, providing
-contextual information about what went wrong.
 
 Nilai opsional merupakan sebuah kasus khusus dimana sebuah nilai bisa saja
 berupa sebuah galat, namun kita tidak tahu apapun mengenai galat tersebut.
 `EitherT` (dan varian lundungnya, `LazyEitherT`) memperkenankan kita untuk
 menggunakan tipe apapun yang kita inginkan sebagai nilai galat beserta
 menyediakan informasi kontekstual mengenai apa yang salah. 
-
-`EitherT` is a wrapper around an `F[A \/ B]`
 
 `EitherT` merupakan pembungkus atas sebuah `F[A \/ B]`
 
@@ -8624,8 +8385,6 @@ menyediakan informasi kontekstual mengenai apa yang salah.
   }
 ~~~~~~~~
 
-The `Monad` is a `MonadError`
-
 `Monad` pada konteks berikut adalah sebuah `MonadError`
 
 {lang="text"}
@@ -8636,13 +8395,8 @@ The `Monad` is a `MonadError`
   }
 ~~~~~~~~
 
-`.raiseError` and `.handleError` are self-descriptive: the equivalent of `throw`
-and `catch` an exception, respectively.
-
 `.raiseError` dan `.handleError` cukup jelas: keduanya ekuivalen dengan metoda
 `throw` dan `catch` sebuah galat.
-
-`MonadError` has some addition syntax for dealing with common problems:
 
 `MonadError` mempunyai beberapa sintaks tambahan untuk menangani masalah-masalah
 umum:
@@ -8656,24 +8410,15 @@ umum:
   }
 ~~~~~~~~
 
-`.attempt` brings errors into the value, which is useful for exposing errors in
-subsystems as first class values.
-
 `.attempt` mengubah galat menjadi nilai, yang berguna untuk menampakkan galat
 pada subsistem sebagai nilai utama.
-
-`.recover` is for turning an error into a value for all cases, as opposed to
-`.handleError` which takes an `F[A]` and therefore allows partial recovery.
 
 `.recover` digunakan untuk mengubah sebuah galat menjadi nilai untuk semua
 kasus yang mungkin terjadi. Sebaliknya, `.handleError` menerima sebuah
 `F[A]` dan pada akhirnya memperkenankan pemulihan sebagian.
 
-`.emap`, *either* map, is to apply transformations that can fail.
 `.emap`, yang merupakan pemetaan atas *either*, mengaplikasikan transformasi
 yang bisa saja gagal.
-
-The `MonadError` for `EitherT` is:
 
 `MonadError` untuk `EitherT` adalah:
 
@@ -8696,9 +8441,6 @@ The `MonadError` for `EitherT` is:
   }
 ~~~~~~~~
 
-It should be of no surprise that we can rewrite the `MonadPlus` example with
-`MonadError`, inserting informative error messages:
-
 Seharusnya bukan hal yang mengejutkan bila kita dapat menulis ulang contoh
 dari `MonadPlus` dengan menggunakan `MonadError` dan menyisipkan pesan galat
 yang informatif:
@@ -8713,8 +8455,6 @@ yang informatif:
   } yield stars
 ~~~~~~~~
 
-where `.orError` is a convenience method on `Maybe`
-
 dimana `.orError` merupakan metoda bantuan pada `Maybe`
 
 {lang="text"}
@@ -8726,19 +8466,11 @@ dimana `.orError` merupakan metoda bantuan pada `Maybe`
   }
 ~~~~~~~~
 
-A> It is common to use `implicit` parameter blocks instead of context bounds when
-A> the signature of the typeclass has more than one parameter.
-A> 
 A> It is also common practice to name the implicit parameter after the primary
 A> type, in this case `F`.
 A>
-A> Adalah hal yang umum untuk menggunakan parameter blok `implicit` ketika
-A> penanda dari kelas tipe mempunyai parameter lebih dari satu.
-A>
 A> Juga hal yang umum untuk menggunakan parameter blok `implicit` setelah
 A> tipe utama yang pada hal ini adalah `F`. 
-
-The version using `EitherT` directly looks like
 
 Versi yang menggunakan `EitherT` terlihat sebagai berikut
 
@@ -8749,9 +8481,6 @@ Versi yang menggunakan `EitherT` terlihat sebagai berikut
     stars <- EitherT.rightT(T.getStars(user))
   } yield stars
 ~~~~~~~~
-
-The simplest instance of `MonadError` is for `\/`, perfect for testing business
-logic that requires a `MonadError`. For example,
 
 Instans paling sederhana dari `MonadError` adalah `\/` yang sangat cocok untuk
 testing logika bisnis yang membutuhkan sebuah `MonadError`. Sebagai contoh,
@@ -8770,8 +8499,6 @@ testing logika bisnis yang membutuhkan sebuah `MonadError`. Sebagai contoh,
   }
 ~~~~~~~~
 
-Our unit tests for `.stars` might cover these cases:
-
 Tes unit kita untuk `.stars` mungkin mencakup hal berikut:
 
 {lang="text"}
@@ -8789,13 +8516,8 @@ Tes unit kita untuk `.stars` mungkin mencakup hal berikut:
   -\/(stars have been replaced by hearts)
 ~~~~~~~~
 
-As we've now seen several times, we can focus on testing the pure business logic
-without distraction.
-
 Sebagaimana yang telah kita saksikan beberapa kali, kita dapat fokus pada testing
 untuk logika bisnis seutuhnya.
-
-Finally, if we return to our `JsonClient` algebra from Chapter 4.3
 
 Dan pada akhirnya, kita kembali ke aljabar `JsonClient` pada bab 4.3
 
@@ -8809,11 +8531,6 @@ Dan pada akhirnya, kita kembali ke aljabar `JsonClient` pada bab 4.3
     ...
   }
 ~~~~~~~~
-
-recall that we only coded the happy path into the API. If our interpreter for
-this algebra only works for an `F` having a `MonadError` we get to define the
-kinds of errors as a tangential concern. Indeed, we can have **two** layers of
-error if we define the interpreter for a `EitherT[IO, JsonClient.Error, ?]`
 
 harap diingat bahwa kita hanya menulis jalur lancar pada API. Bila interpreter
 kita untuk aljabar ini hanya bekerja pada `F` yang memiliki `MonadError`, kita
@@ -8830,25 +8547,14 @@ mendefinisikan interpreter untuk sebuah `EitherT[IO, JsonClient.Error, ?]`
   }
 ~~~~~~~~
 
-which cover I/O (network) problems, server status problems, and issues with our
-modelling of the server's JSON payloads.
-
 Yang mencakup masalah I/O, status peladen, dan masalah masalah pada pemodelan
 dari muatan JSON dari peladen.
 
 
-#### Choosing an error type
-
-The community is undecided on the best strategy for the error type `E` in
-`MonadError`.
+#### Memilih Tipe Galat
 
 Komunitas Scalaz masih belum dapat menyimpulkan mengenai strategi terbaik
 untuk tipe galat `E` di `MonadError`.
-
-One school of thought says that we should pick something general, like a
-`String`. The other school says that an application should have an ADT of
-errors, allowing different errors to be reported or handled differently. An
-unprincipled gang prefers using `Throwable` for maximum JVM compatibility.
 
 Salah satu mahzab berpendapat bahwa kita harus memilih yang umum, seperti `String`.
 Mahzab lain berpendapat bahwa sebuah aplikasi harus mempunyai ADT untuk galat
@@ -8856,38 +8562,21 @@ yang memperkenankan penanganan galat yang disesuaikan. Kaum air di daun talas
 sendiri lebih memilih untuk menggunakan `Throwable` demi kompatibilitas penuh
 atas `JVM`.
 
-There are two problems with an ADT of errors on the application level:
-
 Ada dua masalah yang muncul bila kita menggunakan ADT galat pada tingkat
 aplikasi:
 
--   it is very awkward to create a new error. One file becomes a monolithic
-    repository of errors, aggregating the ADTs of individual subsystems.
--   no matter how granular the errors are, the resolution is often the same: log
-    it and try it again, or give up. We don't need an ADT for this.
 -   sangat canggung bila kita membuat sebuah galat baru. Satu berkas menjadi
     lumbung galat utama, mengagregasi galat dari semua subsismet.
 -   tidak peduli betapa granular galat yang ada, resolusi yang dipakai cenderung sama:
     catat galat tersebut lalu coba lagi atau berhenti. Kita tidak perlu ADT untuk
     hal semacam ini.
 
-An error ADT is of value if every entry allows a different kind of recovery to
-be performed.
-
 Sebuah ADT galat menjadi berguna bila tiap catatan menerima penanganan pemulihan
 yang berbeda.
-
-A compromise between an error ADT and a `String` is an intermediary format. JSON
-is a good choice as it can be understood by most logging and monitoring
-frameworks.
 
 Sebuah kompromi antara galat ADT dan `String` adalah format pertengahan.
 JSON merupakan pilihan yang bagus karena format ini dipahami oleh kebanyakan
 *framework* pengawasan dan pencatatan log.
-
-A problem with not having a stacktrace is that it can be hard to localise which
-piece of code was the source of an error. With [`sourcecode` by Li Haoyi](https://github.com/lihaoyi/sourcecode/), we can
-include contextual information as metadata in our errors:
 
 Masalah yang muncul bila kita tidak memiliki *stacktrace* adalah sulitnya
 mencari kode yang menjadi sumber galat. Dengan [`sourcecode` oleh Li Haoyi](https://github.com/lihaoyi/sourcecode/),
@@ -8906,12 +8595,6 @@ kita dapat mengikutsertakan informasi kontekstual sebagai metadata pada galat ki
   final case class Err(msg: String)(implicit val meta: Meta)
 ~~~~~~~~
 
-Although `Err` is referentially transparent, the implicit construction of a
-`Meta` does **not** appear to be referentially transparent from a natural reading:
-two calls to `Meta.gen` (invoked implicitly when creating an `Err`) will produce
-different values because the location in the source code impacts the returned
-value:
-
 Walau `Err` dapat dirujuk secara transparan, konstruksi implisit dari sebuah
 `Meta` secara sekilas tidak terlihat bisa dirujuk secara transparan bila
 dibaca seperti biasa: dua panggilan ke `Meta.gen` (dipanggil secara implisit
@@ -8927,10 +8610,6 @@ dari kode sumber berhubungan dengan nilai yang dikembalikan:
   Meta(com.acme,<console>,11)
 ~~~~~~~~
 
-To understand this, we have to appreciate that `sourcecode.*` methods are macros
-that are generating source code for us. If we were to write the above explicitly
-it is clear what is happening:
-
 Untuk memahami hal ini, kita harus mengapresiais bahwa metoda `sourcecode.*`
 merupakan makro yang menggenerasi kode sumber untuk kita. Bila kita harus menulis
 kode di atas secara eksplisit, apa yang terjadi akan menjadi jelas:
@@ -8944,28 +8623,17 @@ kode di atas secara eksplisit, apa yang terjadi akan menjadi jelas:
   Meta(com.acme,<console>,11)
 ~~~~~~~~
 
-Yes, we've made a deal with the macro devil, but we could also write the `Meta`
-manually and have it go out of date quicker than our documentation.
-
 Betul, kita sudah bersekutu dengan iblis makro, namun kita dapat menulis `Meta`
 secara manual.
 
 
 ### `ReaderT`
 
-The reader monad wraps `A => F[B]` allowing a program `F[B]` to depend on a
-runtime value `A`. For those familiar with dependency injection, the reader
-monad is the FP equivalent of Spring or Guice's `@Inject`, without the XML and
-reflection.
-
 Monad pembaca membungkus `A => F[B]` sehingga memperkenankan program `F[B]` untuk
 bergantung kepada nilai waktu-jalan `A`. Bagi pembaca yang sudah akrab dengan
 penyuntikan dependensi (dependency injection), monad pembaca ekuivalen dengan
 anotasi `@Inject` milik Spring maupun Guice. Namun, tanpa disertai dengan refleksi
 maupun XML.
-
-`ReaderT` is just an alias to another more generally useful data type named
-after the mathematician *Heinrich Kleisli*.
 
 `ReaderT` hanya merupakan alias untuk tipe data yang lebih umum yang dinamai
 berdasarkan matematikawan *Heinrich Kleisli*.
@@ -8988,28 +8656,14 @@ berdasarkan matematikawan *Heinrich Kleisli*.
   }
 ~~~~~~~~
 
-A> Some people call `>=>` the *fish operator*. There's always a bigger fish, hence
-A> `>==>`. They are also called *Kleisli arrows*.
-A>
 A> Beberapa orang menyebut `>=>` sebagai operator ikan. Tentu selalu ada ikan
 A> yang lebih besar, seperti `>==>`. Operator itupun juga disebut sebagai
 A> panah Kleisli.
-
-An `implicit` conversion on the companion allows us to use a `Kleisli` in place
-of a function, so we can provide it as the parameter to a monad's `.bind`, or
-`>>=`.
 
 Konversi `implicit` pada objek pendamping memperkenankan kita untuk menggunakan
 sebuah `Kleisli` pada bagian yang seharusnya menjadi tempat untuk sebuah fungsi.
 Hal ini memperkenankan kita untuk menggunakan struktur data ini sebagai
 parameter pada `.bind` atau `>>=` dari sebuah monad.
-
-The most common use for `ReaderT` is to provide environment information to a
-program. In `drone-dynamic-agents` we need access to the user's Oauth 2.0
-Refresh Token to be able to contact Google. The obvious thing is to load the
-`RefreshTokens` from disk on startup, and make every method take a
-`RefreshToken` parameter. In fact, this is such a common requirement that Martin
-Odersky has proposed [implicit functions](https://www.scala-lang.org/blog/2016/12/07/implicit-function-types.html).
 
 Penggunaan paling jamak untuk `ReaderT` adalah sebagai penyedia informasi lingkungan
 jalan untuk sebuah progarm. Pada `drone-dynamic-agents`, kita membutuhkan akses
@@ -9018,9 +8672,6 @@ Tentu hal yang paling mudah dilakukan adalah memuat informasi tersebut dari disk
 dan membuat tiap metoda menerima sebuah parameter `RefreshToken`. Bahkan,
 hal semacam ini merupakan persyaratan umum yang diajukan oleh Martin Odersky
 pada proposal [implicit function](https://www.scala-lang.org/blog/2016/12/07/implicit-function-types.html).
-
-A better solution is for our program to have an algebra that provides the
-configuration when needed, e.g.
 
 Sebuah solusi yang lebih jitu untuk program kita adalah dengan membuat sebuah
 aljabar yang menyediakan konfigurasi saat dibutuhkan. Misalnya,
@@ -9031,9 +8682,6 @@ aljabar yang menyediakan konfigurasi saat dibutuhkan. Misalnya,
     def token: F[RefreshToken]
   }
 ~~~~~~~~
-
-We have reinvented `MonadReader`, the typeclass associated to `ReaderT`, where
-`.ask` is the same as our `.token`, and `S` is `RefreshToken`:
 
 Kita sudah membuat ulang `MonadReader`, kelas tipe yang berhubungan dekat dengan
 `ReaderT`, dimana `.ask` sama dengan `.token` pada potongan diatas, dan `S` sebagai
@@ -9047,8 +8695,6 @@ Kita sudah membuat ulang `MonadReader`, kelas tipe yang berhubungan dekat dengan
     def local[A](f: S => S)(fa: F[A]): F[A]
   }
 ~~~~~~~~
-
-with the implementation
 
 dengan implmentasi
 
@@ -9065,21 +8711,12 @@ dengan implmentasi
   }
 ~~~~~~~~
 
-A law of `MonadReader` is that the `S` cannot change between invocations, i.e.
-`ask >> ask === ask`. For our usecase, this is to say that the configuration is
-read once. If we decide later that we want to reload configuration every time we
-need it, e.g. allowing us to change the token without restarting the
-application, we can reintroduce `ConfigReader` which has no such law.
-
 Hukum dari `MonadReader` adalah `S` tidak boleh berubah diantara tiap pemanggilan.
 Sebagai contoh, `ask >> ask === ask`. Untuk penggunaan `MonadReader` pada program
 kita, kita hanya perlu membaca konfigurasi kita satu kali saja. Bila kita ingin
 memuat ulang konfigurasi tiap kali kita membutuhkannya, misalkan agar kita dapat
 mengubah token tanpa harus menjalankan ulang aplikasi, kita dapat memperkenalkan
 `ConfigReader` yang tidak mempunyai hukum semacam ini.
-
-In our OAuth 2.0 implementation we could first move the `Monad` evidence onto the
-methods:
 
 Pada implementasi OAuth 2.0 kita, kita dapat memindah `Monad` ke metoda:
 
@@ -9089,9 +8726,7 @@ Pada implementasi OAuth 2.0 kita, kita dapat memindah `Monad` ke metoda:
     for { ...
 ~~~~~~~~
 
-and then refactor the `refresh` parameter to be part of the `Monad`
-
-lalu dilanjutkan dengan me-refaktor (lol, help) parameter `refresh` agar
+lalu dilanjutkan dengan melakukan refaktorisasi parameter `refresh` agar
 menjadi bagian dari `Monad`
 
 {lang="text"}
@@ -9101,17 +8736,10 @@ menjadi bagian dari `Monad`
       refresh <- F.ask
 ~~~~~~~~
 
-Any parameter can be moved into the `MonadReader`. This is of most value to
-immediate callers when they simply want to thread through this information from
-above. With `ReaderT`, we can reserve `implicit` parameter blocks entirely for
-the use of typeclasses, reducing the mental burden of using Scala.
-
 Tiap parameter dapat dipindahkan ke `MonadReader`. Yang paling penting untuk pemanggil
 adalah saat pemanggil hanya perlu untuk menelisik infromsai ini dari hierarki
 pemanggilan paling atas. Dengan `ReaderT`, kita tidak perlu menggunakan blok
 parameter `implicit` sehingga mengurang beban mental saat menggunakan Scala.
-
-The other method in `MonadReader` is `.local`
 
 Metoda lain pada `MonadReader` adalah `.local`
 
@@ -9119,11 +8747,6 @@ Metoda lain pada `MonadReader` adalah `.local`
 ~~~~~~~~
   def local[A](f: S => S)(fa: F[A]): F[A]
 ~~~~~~~~
-
-We can change `S` and run a program `fa` within that local context, returning to
-the original `S`. A use case for `.local` is to generate a "stack trace" that
-makes sense to our domain. giving us nested logging! Leaning on the `Meta` data
-structure from the previous section, we define a function to checkpoint:
 
 Kita dapat mengubah `S` dan menjalankan sebuah program `fa` delam konteks lokal
 tersebut dan mengembalikan `S` asli. Contoh penggunaan `.local` adalah saat
@@ -9137,8 +8760,6 @@ sebuah fungsi pada titik pemeriksaan:
     F.local(Meta.gen :: _)(fa)
 ~~~~~~~~
 
-and we can use it to wrap functions that operate in this context.
-
 dan kita dapat menggunakannya untuk membungkus fungsi yang beroperasi pada
 konteks ini.
 
@@ -9147,33 +8768,17 @@ konteks ini.
   def foo: F[Foo] = traced(getBar) >>= barToFoo
 ~~~~~~~~
 
-automatically passing through anything that is not explicitly traced. A compiler
-plugin or macro could do the opposite, opting everything in by default.
-
 akan lolos secara otomatis untuk semua yang tidak ditentukan sebelumnya.
 Sebuah tambahan kompilasi atau sebuah makro dapat melakukan hal yang sebaliknya,
 memaksa untuk memilih semuanya.
-
-If we access `.ask` we can see the breadcrumb trail of exactly how we were
-called, without the distraction of bytecode implementation details. A
-referentially transparent stacktrace!
 
 Bila kita mengakses `.ask`, kita dapat melihat jejak langkah bagaimana kita
 dipanggil, tanpa harus dikaburkan oleh detail implementasi bytecode.
 Hal ini merupakan contoh dari *stack trace* yang dirujuk secara transparan.
 
-A defensive programmer may wish to truncate the `IList[Meta]` at a certain
-length to avoid the equivalent of a stack overflow. Indeed, a more appropriate
-data structure is `Dequeue`.
-
 Pengembang yang memilih untuk bermain aman mungkin berharap untuk memecah `IList[Meta]`
 pada ukuran tertentu untuk menghindari sesuatu yang mirip dengan *stack overflow*.
 Dan memang pada kenyataannya, struktu data yang cocok adalah `Dequeue`.
-
-`.local` can also be used to keep track of contextual information that is
-directly relevant to the task at hand, like the number of spaces that must
-indent a line when pretty printing a human readable file format, bumping it by
-two spaces when we enter a nested structure.
 
 `.local` juga dapat digunakan untuk mencatat informasi kontekstual yang relevan
 secara langsung pada tugas saat itu, seperti jumlah spasi yang harus digunakan
@@ -9181,18 +8786,10 @@ untuk melekuk sebuah baris saat mencetak format berkas yang dapat dibaca manusia
 dengan mudah. Misal, menambah dua spasi ketika kita memasuki sebuah struktur
 berlapis.
 
-A> Not four spaces. Not eight spaces. Not a TAB.
-A> 
-A> Two spaces. Exactly two spaces. This is a magic number we can hardcode, because
-A> every other number is **wrong**.
-A>
 A> Bukan empat spasi. Bukan delapan spasi. Bukan TAB.
 A>
 A> Dua spasi. Pas dua spasi. Ini satu-satunya angka yang bisa kita gunakan
 A> secara langsung karena angka lain adalah **sesat**!
-
-Finally, if we cannot request a `MonadReader` because our application does not
-provide one, we can always return a `ReaderT`
 
 Dan paling penting, bila kita tidak dapat meminta sebuah `MonadReader` karena
 aplikasi kita tidak menyediakannya, kita dapat mengembalikan sebuah `ReaderT`
@@ -9204,38 +8801,22 @@ aplikasi kita tidak menyediakannya, kita dapat mengembalikan sebuah `ReaderT`
     ...
 ~~~~~~~~
 
-If a caller receives a `ReaderT`, and they have the `token` parameter to hand,
-they can call `access.run(token)` and get back an `F[BearerToken]`.
-
 Bila sebuah pemanggil menerima `ReaderT` dan mereka mempunyai parameter `token`,
 mereka dapat memanggil `access.run(token)` dan mendapatkan sebuah `F[BearerToken]`.
 
-Admittedly, since we don't have many callers, we should just revert to a regular
-function parameter. `MonadReader` is of most use when:
-
 Terus terang, karena kita tidak mempunyai banyak pemanggil, kita hanya perlu mengubah
 sebuah parameter fungsi. `MonadReader` paling berguna saat:
-
-1.  we may wish to refactor the code later to reload config
-2.  the value is not needed by intermediate callers
-3.  or, we want to locally scope some variable
 
 1.  kita ingin melakukan refaktor (lol, help) kode suatu saat untuk memuat ulang
     konfigurasi
 2.  nilai tidak dibutuhkan oleh pemanggil perantara
 3.  atau kita ingin menentukan cakupan beberapa variabel secara lokal
 
-Dotty can keep its implicit functions... we already have `ReaderT` and
-`MonadReader`.
-
 Dotty boleh saja tetap menggunakan fungsi implisit, karena kita mempunyai `ReaderT`
 dan `MonadReader`.
 
 
 ### `WriterT`
-
-The opposite to reading is writing. The `WriterT` monad transformer is typically
-for writing to a journal.
 
 Yang menjadi kebalikan dari pembacaan adalah penulisan nilai. Transformator monad
 `WriterT` biasanya digunakan untuk menulis ke sebuah jurnal.
@@ -9250,11 +8831,7 @@ Yang menjadi kebalikan dari pembacaan adalah penulisan nilai. Transformator mona
   }
 ~~~~~~~~
 
-The wrapped type is `F[(W, A)]` with the journal accumulated in `W`.
-
 Tipe yang dibungkus adalah `F[(W, A)]` dengan jurnal yang terakumulasi pada `W`.
-
-There is not just one associated monad, but two! `MonadTell` and `MonadListen`
 
 Tidak hanya satu monad yang berhubungan dengan `WriterT`, namun ada 2.
 `MonadTell` dan `MonadListen`
@@ -9276,9 +8853,6 @@ Tidak hanya satu monad yang berhubungan dengan `WriterT`, namun ada 2.
   }
 ~~~~~~~~
 
-`MonadTell` is for writing to the journal and `MonadListen` is to recover it.
-The `WriterT` implementation is
-
 `MonadTell` digunakan untuk menulis pada jurnal sedangkan `MonadListen` digunakan
 untuk memperoleh nilai yang sudah ditulis. Implementasi dari `WriterT` adalah
 sebagai berikut
@@ -9296,10 +8870,6 @@ sebagai berikut
   }
 ~~~~~~~~
 
-The most obvious example is to use `MonadTell` for logging, or audit reporting.
-Reusing `Meta` from our error reporting we could imagine creating a log
-structure like
-
 Contoh paling jelas adalah dengan menggunakan `MonadTell` untuk pencatatan log
 ataupun pelaporan audit. Dengan menggunakan ulang `Meta` dari pelaporan galat,
 kita dapat membayangkan untuk membuat struktur log sebagai berikut
@@ -9312,9 +8882,6 @@ kita dapat membayangkan untuk membuat struktur log sebagai berikut
   final case class Info(msg: String)(implicit m: Meta)    extends Log
   final case class Warning(msg: String)(implicit m: Meta) extends Log
 ~~~~~~~~
-
-and use `Dequeue[Log]` as our journal type. We could change our OAuth2
-`authenticate` method to
 
 dan menggunakan `Dequeue[Log]` sebagai tipe jurnal kita. Kita dapat mengganti
 metoda `authenticate` OAuth2 kita menjadi
@@ -9333,39 +8900,21 @@ metoda `authenticate` OAuth2 kita menjadi
     } yield code
 ~~~~~~~~
 
-We could even combine this with the `ReaderT` traces and get structured logs.
-
 Kita juga bisa menggabungkannya dengan bekas jejak dari `ReaderT` untuk mendapatkan
 log terstruktur.
-
-The caller can recover the logs with `.written` and do something with them.
 
 Pemanggil dapat mengembalikan log dengan menggunakan `.written` dan bebas melakukan
 apapun dengannya.
 
-However, there is a strong argument that logging deserves its own algebra. The
-log level is often needed at the point of creation for performance reasons and
-writing out the logs is typically managed at the application level rather than
-something each component needs to be concerned about.
-
 Namun, ada sebuah argumen kuat yang menyatakan bahwa pencatatan log berhak mendapatkan
 aljabarnya sendiri. Pembagian tingkat log seringkali dibutuhkan dengan alasan performa.
 Dan sering kali, penulisan log dilakukan pada tingkat aplikasi, bukan pada komponen.
-
-The `W` in `WriterT` has a `Monoid`, allowing us to journal any kind of
-*monoidic* calculation as a secondary value along with our primary program. For
-example, counting the number of times we do something, building up an
-explanation of a calculation, or building up a `TradeTemplate` for a new trade
-while we price it.
 
 `W` pada `WriterT` mempunyai sebuah `Monoid` yang memperkenankan kita untuk
 mencatat semua jenis kalkulasi *monoidik* sebagai nilai sekunder bersamaan dengan
 program utama kita. Sebagai contoh, menghitung berapa kali kita melakukan sesuatu,
 membangun sebuah penjelasan dari sebuah kalkulasi, ataupun membangun sebuah
 `TradeTemplate` untuk *trade* (lol, help) baru saat kita menakar harganya.
-
-A popular specialisation of `WriterT` is when the monad is `Id`, meaning the
-underlying `run` value is just a simple tuple `(W, A)`.
 
 Spesialisasi yang populer dari `WriterT` adalah saat monad yang digunakan adalah
 `Id`, yang juga berarti bahwa nilai `run` yang melandasinya hanyalah merupakan
@@ -9385,13 +8934,8 @@ sebuah tuple sederhana `(W, A)`.
   }
 ~~~~~~~~
 
-which allows us to let any value carry around a secondary monoidal calculation,
-without needing a context `F[_]`.
-
 yang memperkenankan kita agar nilai apapun dapat membawa kalkulasi monoidal kedua
 tanpa harus membutuhkan konteks `F[_]`.
-
-In a nutshell, `WriterT` / `MonadTell` is how to multi-task in FP.
 
 Singkat kata, `WriterT` / `MonadTell` merupakan cara untuk melakukan tugas-ganda
 pada pemrograman fungsional.
@@ -9399,18 +8943,9 @@ pada pemrograman fungsional.
 
 ### `StateT`
 
-`StateT` lets us `.put`, `.get` and `.modify` a value that is handled by the
-monadic context. It is the FP replacement of `var`.
-
 `StateT` memperkenankan kita untuk melakukan `.put`, `.get`, dan `.modify` pada
 sebuah nilai yang sedang ditangani pada konteks monadik. Monad ini merupakan
 pengganti `var` pada pemrograman fungsional.
-
-If we were to write an impure method that has access to some mutable state, held
-in a `var`, it might have the signature `() => F[A]` and return a different
-value on every call, breaking referential transparency. With pure FP the
-function takes the state as input and returns the updated state as output, which
-is why the underlying type of `StateT` is `S => F[(S, A)]`.
 
 Bila kita harus menulis sebuah metoda tak murni (lol, help) yang mempunyai
 akses ke beberapa kondisi yang tidak tetap dan disimpan pada sebuah `var`, metoda
@@ -9420,8 +8955,6 @@ pemrograman fungsional murni (lol, help), fungsi tersebut menerima sebuah keadaa
 (*state*) sebagai masukan dan mengembalikan keadaan yang termutakhirkan sebagai
 keluaran. Ini-lah yang menjadi pendasaran mengapa tipe dasar dari `StateT` adalah
 `S => F[(S, A)]`.
-
-The associated monad is `MonadState`
 
 Monad yang terasosiasi dengan `StateT` adalah `MonadState`
 
@@ -9436,16 +8969,9 @@ Monad yang terasosiasi dengan `StateT` adalah `MonadState`
   }
 ~~~~~~~~
 
-A> `S` must be an immutable type: `.modify` is not an escape hatch to update a
-A> mutable data structure. Mutability is impure and is only allowed within an `IO`
-A> block.
-A>
 A> `S` harus berupa tipe tak berubah: `.modify` bukan pintu darurat untuk memutakhirkan
 A> sebuah struktur tak tetap. Ketidak-tetapan itu tidak murni dan hanya diperkenankan
 A> pada blok `IO`.
-
-`StateT` is implemented slightly differently than the monad transformers we have
-studied so far. Instead of being a `case class` it is an ADT with two members:
 
 `StateT` diimplementasikan sedikit berbeda dengan transformator monad yang sudah
 kita pelajari sampai saat ini. `StateT` bukan berupa `case class`, namun merupakan
@@ -9468,9 +8994,6 @@ sebuah ADT yang berisi dua anggota:
   }
 ~~~~~~~~
 
-which are a specialised form of `Trampoline`, giving us stack safety when we
-want to recover the underlying data structure, `.run`:
-
 yang merupakan bentuk khusus dari `Trampoline` dan memberikan kita keamanan
 *stack* bila kita ingin mengembalikan struktur data standar dengan `.run`:
 
@@ -9488,8 +9011,6 @@ yang merupakan bentuk khusus dari `Trampoline` dan memberikan kita keamanan
   }
 ~~~~~~~~
 
-`StateT` can straightforwardly implement `MonadState` with its ADT:
-
 `StateT` dapat dengan mudah mengimplementasikan `MonadState` dengan ADT-nya:
 
 {lang="text"}
@@ -9506,8 +9027,6 @@ yang merupakan bentuk khusus dari `Trampoline` dan memberikan kita keamanan
 
 With `.pure` mirrored on the companion as `.stateT`:
 
-Dengan `.pure` mencerminkan objek pasangan sebagai `.stateT`:
-
 {lang="text"}
 ~~~~~~~~
   object StateT {
@@ -9516,15 +9035,7 @@ Dengan `.pure` mencerminkan objek pasangan sebagai `.stateT`:
   }
 ~~~~~~~~
 
-and `MonadTrans.liftM` providing the `F[A] => StateT[F, S, A]` constructor as
-usual.
-
 dan `MonadTrans.liftM` menyediakan konstruktor `F[A] => StateT[F, S, A]`.
-
-A common variant of `StateT` is when `F = Id`, giving the underlying type
-signature `S => (S, A)`. Scalaz provides a type alias and convenience functions
-for interacting with the `State` monad transformer directly, and mirroring
-`MonadState`:
 
 Varian umum dari `StateT` adalah saat `F = Id` yang memberikan tipe dasar sebagai
 `S => (S, A)`. Scalaz menyediakan sebuah alias tipe dan fungsi pembantu untuk
@@ -9545,11 +9056,6 @@ berinteraksi dengan transformator monad `State` secara langsung, dan mencerminka
   }
 ~~~~~~~~
 
-For an example we can return to the business logic tests of
-`drone-dynamic-agents`. Recall from Chapter 3 that we created `Mutable` as test
-interpreters for our application and we stored the number of `started` and
-`stoped` nodes in `var`.
-
 Sebagai contoh, kita dapat kembali ke tes logika bisnis dari `drone-dynamic-agents`.
 Harap diingat kembali pada bab 3 kita telah membuat `Mutable` sebagai penerjemah
 tes untuk aplikasi kita dan menyimpan perhitungan `started` dan `stoped` pada sebuah
@@ -9565,10 +9071,6 @@ tes untuk aplikasi kita dan menyimpan perhitungan `started` dan `stoped` pada se
     val program = new DynAgentsModule[Id]
   }
 ~~~~~~~~
-
-We now know that we can write a much better test simulator with `State`. We will
-take the opportunity to upgrade the accuracy of the simulation at the same time.
-Recall that a core domain object is our application's view of the world:
 
 Sekarang kita tahu bahwa kita dapat membuat simulator tes yang jauh lebih baik
 dengan menggunakan `State`. Kita akan menggunakan kesempatan ini untuk meningkatkan
@@ -9587,9 +9089,6 @@ pandangan aplikasi kita terhadap dunia luar:
   )
 ~~~~~~~~
 
-Since we're writing a simulation of the world for our tests, we can create a
-data type that captures the ground truth of everything
-
 Karena kita menulis simulasi dari dunia luar untuk tes kita, kita dapat menulis
 sebuah tipe data yang membawa nilai-nilai kebenaran untuk aplikasi kita
 
@@ -9606,29 +9105,16 @@ sebuah tipe data yang membawa nilai-nilai kebenaran untuk aplikasi kita
   )
 ~~~~~~~~
 
-A> We have not yet rewritten the application to fully make use Scalaz data types
-A> and typeclasses, and we are still relying on stdlib collections. There is no
-A> urgency to update as this is straightforward and these types can be used in a
-A> pure FP manner.
-A>
 A> Kita belum menulis ulang aplikasi kita untuk menggunakan tipe data dan kelas
 A> tipe Scalaz sepenuhnya. Saat ini, kita masih bergantung pada pustaka koleksi
 A> dari pustaka standar. Selain itu, tidak ada urgensi untuk menggantinya karena
 A> masih sederhana dan tipe-tipe ini bisa digunakan dengan gaya pemrograman
 A> fungsional murni. (lol, help. hard sentence.)
 
-The key difference being that the `started` and `stopped` nodes can be separated
-out. Our interpreter can be implemented in terms of `State[World, a]` and we can
-write our tests to assert on what both the `World` and `WorldView` looks like
-after the business logic has run.
-
-Yang menjadi pembeda utama adalah simpul `started` dan `stopped` dapat dipisahkan.
+Pembeda utama adalah simpul `started` dan `stopped` dapat dipisahkan.
 Penerjemah kita dapat diimplementasikan menggunakan `State[World, a]` dan kita
 dapat menulis tes kita untuk memeriksa bagaimanakah bentuk dari `World` dan
 `WorldView` setelah logika bisnis berjalan.
-
-The interpreters, which are mocking out contacting external Drone and Google
-services, may be implemented like this:
 
 Penerjemah, yang meniru penghubungan layanan eksternal Drone dan Google, dapat
 diimplementasikan seperti berikut:
@@ -9659,22 +9145,13 @@ diimplementasikan seperti berikut:
   }
 ~~~~~~~~
 
-and we can rewrite our tests to follow a convention where:
-
 dan kita dapat menulis ulang tes kita agar mengikuti konvensi dimana:
-
--   `world1` is the state of the world before running the program
--   `view1` is the application's belief about the world
--   `world2` is the state of the world after running the program
--   `view2` is the application's belief after running the program
 
 -   `world1` merupakan keadaan dunia luar sebelum program berjalan
 -   `view1` merupakan apa yang aplikasi kita ketahui tentang dunia luar
 -   `world2` merupakan keadaan dunia luar setelah program berjalan
 -   `view2` merupakan apa yang aplikasi kita ketahui tentang dunia luar setelah
     program berjalan
-
-For example,
 
 Sebagai contoh,
 
@@ -9692,8 +9169,6 @@ Sebagai contoh,
   }
 ~~~~~~~~
 
-We would be forgiven for looking back to our business logic loop
-
 Mungkin akan dimaafkan bila kita melihat kembali ikalan logika bisnis kita
 
 {lang="text"}
@@ -9703,12 +9178,6 @@ Mungkin akan dimaafkan bila kita melihat kembali ikalan logika bisnis kita
     state = update(state)
     state = act(state)
 ~~~~~~~~
-
-and use `StateT` to manage the `state`. However, our `DynAgents` business logic
-requires only `Applicative` and we would be violating the *Rule of Least Power*
-to require the more powerful `MonadState`. It is therefore entirely reasonable
-to handle the state manually by passing it in to `update` and `act`, and let
-whoever calls us use a `StateT` if they wish.
 
 dan menggunakan `StateT` untuk mengatur `state`. Namun, logika bisnis `DynAgents`
 kita hanya membutuhkan `Applicative` dan kita akan melanggar *Rule of Least Power*
@@ -9720,9 +9189,6 @@ dan `act`, dan membiarkan siapapun yang ingin memanggil kita dengan menggunakan
 
 ### `IndexedStateT`
 
-The code that we have studied thus far is not how Scalaz implements `StateT`.
-Instead, a type alias points to `IndexedStateT`
-
 Kode yang telah kita pelajari selama ini masih belum menunjukkan bagaimana
 Scalaz mengimplementasikan `StateT`. Dan pada kenyataannya, `StateT` hanya
 berupa alias tipe untuk `IndexedStateT`
@@ -9731,9 +9197,6 @@ berupa alias tipe untuk `IndexedStateT`
 ~~~~~~~~
   type StateT[F[_], S, A] = IndexedStateT[F, S, S, A]
 ~~~~~~~~
-
-The implementation of `IndexedStateT` is much as we have studied, with an extra
-type parameter allowing the input state `S1` and output state `S2` to differ:
 
 Implementasi dari `IndexedStateT` kurang lebih sama dengan dengan apa yang telah
 kita pelajari sampai pada bab ini, dengan beberapa tambahan parameter tipe
@@ -9761,16 +9224,8 @@ yang memperbolehkan agar masukan `S1` dan keluaran `S2` berbeda:
   }
 ~~~~~~~~
 
-`IndexedStateT` does not have a `MonadState` when `S1 != S2`, although it has a
-`Monad`.
-
 `IndexedStateT` tidak mempunyai instans `MonadState` bila `S1 != S2`, walaupun
 mempunyai `Monad`.
-
-The following example is adapted from [Index your State](https://www.youtube.com/watch?v=JPVagd9W4Lo) by Vincent Marquez.
-Consider the scenario where we must design an algebraic interface for an `Int`
-to `String` lookup. This may have a networked implementation and the order of
-calls is essential. Our first attempt at the API may look something like:
 
 Contoh berikut diadaptasi dari presentasi [Index Your State](https://www.youtube.com/watch?v=JPVagd9W4Lo)
 oleh Vincent Marquez. Bayangkan sebuah skenario dimana kita harus mendesain antarmuka
@@ -9790,16 +9245,9 @@ seperti berikut:
   }
 ~~~~~~~~
 
-with runtime errors if `.update` or `.commit` is called without a `.lock`. A
-more complex design may involve multiple traits and a custom DSL that nobody
-remembers how to use.
-
 dengan galat waktu-jalan bila `.update` atau `.commit` dipanggil tanpa sebuah
 `.lock`. Desain yang lebih kompleks mungkin menggunakan beberapa *trait* dan
 DSL khusus yang tidak ada yan mengingat tentangnya.
-
-Instead, we can use `IndexedStateT` to require that the caller is in the correct
-state. First we define our possible states as an ADT
 
 Atau, kita bisa menggunakan `IndexedStateT` yang memaksa pemanggil memang pada
 tempat yang tepat. Pertama, kita mendefinisikan keadaan yang mungkin sebagai
@@ -9812,8 +9260,6 @@ sebuah ADT
   final case class Locked(on: ISet[Int])            extends Status
   final case class Updated(values: Int ==>> String) extends Status
 ~~~~~~~~
-
-and then revisit our algebra
 
 dan memeriksa kembali aljabar kita
 
@@ -9832,8 +9278,6 @@ dan memeriksa kembali aljabar kita
   }
 ~~~~~~~~
 
-which will give a compiletime error if we try to `.update` without a `.lock`
-
 yang akan memberikan galat waktu-kompilasi bila kita mencoba untuk melakukan
 `.update` tanpa `.lock`
 
@@ -9851,9 +9295,6 @@ yang akan memberikan galat waktu-kompilasi bila kita mencoba untuk melakukan
   [error]          ^
 ~~~~~~~~
 
-but allowing us to construct functions that can be composed by explicitly
-including their state:
-
 namun memperkenankan kita untuk membuat fungsi yang dapat dikomposisi dengan
 mengikutsertakannya secara tersurat:
 
@@ -9869,9 +9310,6 @@ mengikutsertakannya secara tersurat:
     } yield a2
 ~~~~~~~~
 
-A> We introduced code duplication in our API when we defined multiple `.read`
-A> operations
-A>
 A> Kita memperkenalkan duplikasi kode pada API kita saat kita mendefinisikan
 A> beberapa operasi `.read`
 A> 
@@ -9881,8 +9319,6 @@ A>   def read(k: Int): F[Ready, Ready, Maybe[String]]
 A>   def readLocked(k: Int): F[Locked, Locked, Maybe[String]]
 A>   def readUncommitted(k: Int): F[Updated, Updated, Maybe[String]]
 A> ~~~~~~~~
-A> 
-A> Instead of
 A>
 A> Bukan
 A> 
@@ -9890,9 +9326,6 @@ A> {lang="text"}
 A> ~~~~~~~~
 A>   def read[S <: Status](k: Int): F[S, S, Maybe[String]]
 A> ~~~~~~~~
-A> 
-A> The reason we didn't do this is, *because subtyping*. This (broken) code would
-A> compile with the inferred type signature `F[Nothing, Ready, Maybe[String]]`
 A>
 A> Alasan kita tidak mempergunakan kode tersebut adalah karena *subtyping*.
 A> Kode ini bisa dikompilasi setelah menebak penanda tipe `F[Nothing, Ready, Maybe[String]]`
@@ -9905,19 +9338,11 @@ A>     _  <- C.update(13, "wibble")
 A>     _  <- C.commit
 A>   } yield a1
 A> ~~~~~~~~
-A> 
-A> Scala has a `Nothing` type which is the subtype of all other types. Thankfully,
-A> this code can not make it to runtime, as it would be impossible to call it, but
-A> it is a bad API since users need to remember to add type ascriptions.
 A>
 A> Scala mempunyai tipe `Nothing` yang merupakan subtipe dari semua tipe lainnya.
 A> Untungnya, kode ini bisa digunakan pada waktu-jalan, karena tidak mungkin memanggilnya.
 A> Selain itu, API ini merupakan API yang buruk karena pengguna harus mengingat
 A> untuk menambah tipe tambahan.
-A> 
-A> Another approach would be to stop the compiler from inferring `Nothing`. Scalaz
-A> provides implicit evidence to assert that a type is not inferred as `Nothing`
-A> and we can use it instead:
 A>
 A> Pendekatan lain yang mungkin dilakukan adalah dengan memaksa kompilator untuk
 A> tidak menebak `Nothing`. Scalaz menyediakan bukti tersirat untuk memeriksa
@@ -9928,20 +9353,12 @@ A> {lang="text"}
 A> ~~~~~~~~
 A>   def read[S <: Status](k: Int)(implicit NN: NotNothing[S]): F[S, S, Maybe[String]]
 A> ~~~~~~~~
-A> 
-A> The choice of which of the three alternative APIs to prefer is left to the
-A> personal taste of the API designer.
 A>
 A> Mana yang dipilih dari tiga alternatif API ini diserahkan kepada selera
 A> perancang API sendiri. Dan ingat, Pria Punya Selera!
 
 
 ### `IndexedReaderWriterStateT`
-
-Those wanting to have a combination of `ReaderT`, `WriterT` and `IndexedStateT`
-will not be disappointed. The transformer `IndexedReaderWriterStateT` wraps `(R,
-S1) => F[(W, A, S2)]` with `R` having `Reader` semantics, `W` for monoidic
-writes, and the `S` parameters for indexed state updates.
 
 Bagi pembaca yang menginginkan untuk menggabungkan `ReaderT`, `WriterT`, dan
 `IndexedStateT` dapat menggunakan `IndexedReaderWriterStateT` yang mempunyai
@@ -9964,9 +9381,6 @@ penanda tipe `(R, S1) => F[(W, A, S2)]` dengan `R` yang memiliki semantik `Reade
   }
 ~~~~~~~~
 
-Abbreviations are provided because otherwise, let's be honest, these types are
-so long they look like they are part of a J2EE API:
-
 Singkatan disediakan karena bila tidak, tidak ada yang mau menulis kata sepanjang itu:
 
 {lang="text"}
@@ -9977,9 +9391,6 @@ Singkatan disediakan karena bila tidak, tidak ada yang mau menulis kata sepanjan
   val RWST = ReaderWriterStateT
 ~~~~~~~~
 
-`IRWST` is a more efficient implementation than a manually created transformer
-*stack* of `ReaderT[WriterT[IndexedStateT[F, ...], ...], ...]`.
-
 `IRWST` merupakan implementasi yang lebih efisien bila dibandingkan dengan
 membuat transformator *stack* dari `ReaderT[WriterT[IndexedStateT[F, ...], ...], ...]`
 secara manual.
@@ -9987,17 +9398,11 @@ secara manual.
 
 ### `TheseT`
 
-`TheseT` allows errors to either abort the calculation or to be accumulated if
-there is some partial success. Hence *keep calm and carry on*.
-
 `TheseT` memperkenankan agar galat dapat diakumulasi bila ada beberapa komputasi
 berhasil diselesaikan atau untuk membatalkan komputasi secara keseluruhan.
 
 The underlying data type is `F[A \&/ B]` with `A` being the error type,
 requiring a `Semigroup` to enable the accumulation of errors.
-
-Tipe data yang melandasi `TheseT` adalah `F[A \&/ B]` dengan `A` sebagai tipe
-galat yang menyaratkan instans `Semigroup` agar bisa diakumulasi.
 
 {lang="text"}
 ~~~~~~~~
@@ -10025,22 +9430,11 @@ galat yang menyaratkan instans `Semigroup` agar bisa diakumulasi.
   }
 ~~~~~~~~
 
-There is no special monad associated with `TheseT`, it is just a regular
-`Monad`. If we wish to abort a calculation we can return a `This` value, but we
-accumulate errors when we return a `Both` which also contains a successful part
-of the calculation.
-
 Tidak ada monad khusus yang diasosiasikan dengan `TheseT` karena `TheseT` hanya
 merupakan `Monad` biasa. Bila kita ingin membatalkan sebuah kalkulasi, kita dapat
 mengembalikan nilai `This`. Namun, bila kita ingin mengakumulasi galat, kita harus
 mengembalikan sebuah `Both` yang juga berisi bagian komputasi yang berhasil
 diselesaikan.
-
-`TheseT` can also be thought of from a different angle: `A` does not need to be
-an *error*. Similarly to `WriterT`, the `A` may be a secondary calculation that
-we are computing along with the primary calculation `B`. `TheseT` allows early
-exit when something special about `A` demands it, like when Charlie Bucket found
-the last golden ticket (`A`) he threw away his chocolate bar (`B`).
 
 `TheseT` juga bisa dilihat dari sudut pandang lain: `A` tidak harus berupa sebuah
 galat. Hal yang sama dengan `Writer`, `A` bisa saja berupa hasil kalkulasi kedua
@@ -10051,11 +9445,6 @@ batang coklatnya (`B`).
 
 
 ### `ContT`
-
-*Continuation Passing Style* (CPS) is a style of programming where functions
-never return, instead *continuing* to the next computation. CPS is popular in
-Javascript and Lisp as they allow non-blocking I/O via callbacks when data is
-available. A direct translation of the pattern into impure Scala looks like
 
 *Continuation Passing Style* merupakan gaya pemrograman dimana fungsi tidak
 pernah mengembalikan nilai, namun *melanjutkan* komputasi selanjutnya. CPS
@@ -10069,8 +9458,6 @@ seperti ini:
   def foo[I, A](input: I)(next: A => Unit): Unit = next(doSomeStuff(input))
 ~~~~~~~~
 
-We can make this pure by introducing an `F[_]` context
-
 Kita dapat membuatnya menjadi murni (lol, help) dengan memperkenalkan konteks
 `F[_]`
 
@@ -10079,8 +9466,6 @@ Kita dapat membuatnya menjadi murni (lol, help) dengan memperkenalkan konteks
   def foo[F[_], I, A](input: I)(next: A => F[Unit]): F[Unit]
 ~~~~~~~~
 
-and refactor to return a function for the provided input
-
 dan melakukan refaktor (lol, help) agar mengembalikan sebuah fungsi yang
 menerima masukan yang disediakan
 
@@ -10088,8 +9473,6 @@ menerima masukan yang disediakan
 ~~~~~~~~
   def foo[F[_], I, A](input: I): (A => F[Unit]) => F[Unit]
 ~~~~~~~~
-
-`ContT` is just a container for this signature, with a `Monad` instance
 
 `ContT` sebenarnya hanya berupa kontainer untuk penanda ini, dengan sebuah instans
 `Monad`
@@ -10108,8 +9491,6 @@ menerima masukan yang disediakan
   }
 ~~~~~~~~
 
-and convenient syntax to create a `ContT` from a monadic value:
-
 dan sintaks pembantu untuk membuat sebuah `ContT` dari sebuah nilai monadik:
 
 {lang="text"}
@@ -10119,12 +9500,6 @@ dan sintaks pembantu untuk membuat sebuah `ContT` dari sebuah nilai monadik:
   }
 ~~~~~~~~
 
-However, the simple callback use of continuations brings nothing to pure
-functional programming because we already know how to sequence non-blocking,
-potentially distributed, computations: that is what `Monad` is for and we can do
-this with `.bind` or a `Kleisli` arrow. To see why continuations are useful we
-need to consider a more complex example under a rigid design constraint.
-
 Namun, penggunaan panggilan ulang sederhana untuk *continuation* (lol, help)
 tidak memberikan apapun untuk pemrograman fungsional murni (lol, help) karena
 kita sudah mengetahui bagaimana mengurutkan komputasi asinkoronus yang memungkinkan
@@ -10133,10 +9508,7 @@ Agar kita dapat melihat mengapa *continuation* berguna, kita harus memperhitungk
 contoh yang lebih kompleks pada batasan desain yang lebih kaku.
 
 
-#### Control Flow
-
-Say we have modularised our application into components that can perform I/O,
-with each component owned by a different development team:
+#### Kontrol Alur
 
 Misalkan, bila kita telah memodularkan aplikasi kita menjadi beberapa komponen
 yang dapat melakukan operasi I/O, dan tiap komponen dimiliki oleh tim pengembang
@@ -10156,11 +9528,7 @@ lain:
   def bar4(a3: A3): IO[A4] = ...
 ~~~~~~~~
 
-Our goal is to produce an `A0` given an `A1`. Whereas Javascript and Lisp would
-reach for continuations to solve this problem (because the I/O could block) we
-can just chain the functions
-
-Tukuan kita adalah menghasilkan sebuah `A0` bila kita memiliki sebuah `A1`.
+Tujuan kita adalah menghasilkan sebuah `A0` bila kita memiliki sebuah `A1`.
 Bila Javascript dan Lisp akan memilih untuk menggunakan kontinyuasi untuk
 menyelesaikan masalah ini (karena operasi I/O dapat mencegah operasi lainnya
 dijalankan), kita cukup merangkai fungsi-fungsi di atas
@@ -10169,9 +9537,6 @@ dijalankan), kita cukup merangkai fungsi-fungsi di atas
 ~~~~~~~~
   def simple(a: A1): IO[A0] = bar2(a) >>= bar3 >>= bar4 >>= bar0
 ~~~~~~~~
-
-We can lift `.simple` into its continuation form by using the convenient `.cps`
-syntax and a little bit of extra boilerplate for each step:
 
 Kita dapat mengangkat `.simple` menjadi bentuk kontinyuasi dengan menggunakan
 sintaks pembantu, `.cps`, dan sedikit *boilerplate* (lol, help) untuk tiap
@@ -10186,18 +9551,11 @@ langkah:
   def flow(a: A1): IO[A0]  = (foo1(a) >>= foo2 >>= foo3).run(bar0)
 ~~~~~~~~
 
-So what does this buy us? Firstly, it is worth noting that the control flow of
-this application is left to right
-
 Jadi, apa yang kita dapatkan dari perubahan diatas? Pertama, alur eksekusi aplikasi
 ini berjalan dari kiri ke kanan
 
 {width=60%}
 ![](images/contt-simple.png)
-
-What if we are the authors of `foo2` and we want to post-process the `a0` that
-we receive from the right (downstream), i.e. we want to split our `foo2` into
-`foo2a` and `foo2b`
 
 Bila kita merupakan penulis untuk `foo2` dan ingin melakukan pemrosesan lebih
 lanjut terhadap `a0` yang kita terima dari bagian kanan, misal kita ingin memecah
@@ -10206,16 +9564,9 @@ menjadi `foo2a` dan `foo2b`
 {width=75%}
 ![](images/contt-process1.png)
 
-Add the constraint that we cannot change the definition of `flow` or `bar0`.
-Perhaps it is not our code and is defined by the framework we are using.
-
 Juga jangan lupa untuk menambah batasan bahwa kita tidak dapat mengubah definisi
 dari `flow` atau `bar0`. Bisa jadi karena keduanya bukan kode kita maupun sudah
 ditentukan oleh *framework* yang kita gunakan.
-
-It is not possible to process the output of `a0` by modifying any of the
-remaining `barX` methods. However, with `ContT` we can modify `foo2` to process
-the result of the `next` continuation:
 
 Kita juga tidak bisa memproses keluaran dari `a0` dengan mengubah metoda `barX`
 lainnya. Namun, dengan `ContT` kita dapat mengubah `foo2`agar memproses hasil
@@ -10223,8 +9574,6 @@ dari kontinyuasi selanjutnya (`next`):
 
 {width=45%}
 ![](images/contt-process2.png)
-
-Which can be defined with
 
 Yang bisa kita definisikan sebagai
 
@@ -10237,9 +9586,6 @@ Yang bisa kita definisikan sebagai
     } yield process(a0)
   }
 ~~~~~~~~
-
-We are not limited to `.map` over the return value, we can `.bind` into another
-control flow turning the linear flow into a graph!
 
 Kita tidak hanya bisa untuk menggunakan `.map` pada nilai kembalian, namun juga
 bisa melakukan menempelkan `.bind` pada kontrol alur lain. Sehingga mengubah alur
@@ -10261,8 +9607,6 @@ linier menjadi sebuah graf.
   }
 ~~~~~~~~
 
-Or we can stay within the original flow and retry everything downstream
-
 Atau kita tetap menggunakan alur eksekusi yang lama dan mengulangi
 semua eksekusi hilir
 
@@ -10281,15 +9625,9 @@ semua eksekusi hilir
   }
 ~~~~~~~~
 
-This is just one retry, not an infinite loop. For example, we might want
-downstream to reconfirm a potentially dangerous action.
-
 Potongan diatas hanya melakukan perulangan sekali saja, tidak tak hingga.
 Sebagai contoh, kita mungkin meminta operasi hilir untuk mengkonfirmasi ulang
 sebuah operasi yang mungkin berbahya.
-
-Finally, we can perform actions that are specific to the context of the `ContT`,
-in this case `IO` which lets us do error handling and resource cleanup:
 
 Pada akhirnya, kita dapat melakukan operasi yang khusus untuk konteks dari
 `ContT`, dalam kasus ini `IO`, yang memperkenankan kita untuk menangani galat
@@ -10301,12 +9639,7 @@ dan membersihkan sumber daya komputasi:
 ~~~~~~~~
 
 
-#### When to Order Spaghetti
-
-It is not an accident that these diagrams look like spaghetti, that is just what
-happens when we start messing with control flow. All the mechanisms we've
-discussed in this section are simple to implement directly if we can edit the
-definition of `flow`, therefore we do not typically need to use `ContT`.
+#### Saat Nemu Benang Kusut
 
 Bukanlah sebuah kebetulan bila diagram-diagram diatas terlihat seperti benang kusut.
 Hal semacam ini memang terjadi bila kita main-main dengan kontrol alur. Semua
@@ -10314,20 +9647,10 @@ mekanisme yang telah kita diskusikan pada bagian ini memang mudah diterapkan
 bila kita dapat menyunting definisi dari `flow`, sehingga kita tidak perlu
 menggunakan `ContT`.
 
-However, if we are designing a framework, we should consider exposing the plugin
-system as `ContT` callbacks to allow our users more power over their control
-flow. Sometimes the customer just really wants the spaghetti.
-
 Namun, bila kita merancang sebuah *framework*, kita harus mempertimbangkan
 penyingkapan sistem plugin karena panggilan balik `ContT` memperkenankan
 pengguna untuk lebih leluasa mengkontrol alur program mereka. Dan memang
 kenyataanya, kadang kala pengguna memang ingin main benang kusut.
-
-For example, if the Scala compiler was written using CPS, it would allow for a
-principled approach to communication between compiler phases. A compiler plugin
-would be able to perform some action based on the inferred type of an
-expression, computed at a later stage in the compile. Similarly, continuations
-would be a good API for an extensible build tool or text editor.
 
 Sebagai contoh, bila kompilator Scala ditulis menggunakan *CPS*, kompilator tersebut
 akan memperkenankan pendekatan yang jelas dalam komunikasi antar fase kompilasi.
@@ -10336,28 +9659,16 @@ penebakan dari tipe sebuah ekspresi yang dikomputasi pada tahap selanjutnya
 di proses kompilasi. Hal yang sama, kontinyuasi bisa jadi *API* yang baik untuk
 penyunting teks ataupun alat bangun yang luwes.
 
-A caveat with `ContT` is that it is not stack safe, so cannot be used for
-programs that run forever.
-
 Kekurangan `ContT` adalah tidak terjaminnya keamanan *stack*. Hal ini menyebabkan
 `ContT` tidak dapat digunakan untuk program yang berjalan selamanya.
 
 
-#### Great, kid. Don't get `ContT`.
-
-A more complex variant of `ContT` called `IndexedContT` wraps `(A => F[B]) =>
-F[C]`. The new type parameter `C` allows the return type of the entire
-computation to be different to the return type between each component. But if
-`B` is not equal to `C` then there is no `Monad`.
+#### Keren, Tong. Jangan Pegang `ContT`.
 
 Varian yang lebih kompleks dari `ContT` adalah `IndexedContT` yang membungkus
 `(A => F[B]) => F[C]`. Parameter tipe baru `C` memperkenankan untuk tipe
 pengembalian dari komputasi berbeda pada tiap komponennya. Namun, bila `B` tidak
 setara dengan `C` maka `Monad` tidak ada.
-
-Not missing an opportunity to generalise as much as possible, `IndexedContT` is
-actually implemented in terms of an even more general structure (note the extra
-`s` before the `T`)
 
 Tanpa melewatkan kesempatan untuk menggeneralisasi sebanyak mungkin, `IndexedContT`
 sebenarnya diimplmentasikan dalam struktur yang bahkan lebih general. Harap
@@ -10373,33 +9684,18 @@ diperhatikan bahwa ada huruf `s` sebagai penanda jamak sebelum huruf `T`
   type Cont[b, a]                  = IndexedContsT[Id, Id, b, b, a]
 ~~~~~~~~
 
-where `W[_]` has a `Comonad`, and `ContT` is actually implemented as a type
-alias. Companion objects exist for these type aliases with convenient
-constructors.
-
 dimana `W[_]` mempunyai sebuah `Comonad` dan `ContT` diimplementasikan sebagai
 sebuah alias tipe. Objek pendamping tersedia untuk alias tipe ini sebagai
 konstruktor pembantu.
-
-Admittedly, five type parameters is perhaps a generalisation too far. But then
-again, over-generalisation is consistent with the sensibilities of
-continuations.
 
 Memang, lima parameter tipe agak berlebihan dalam penggeneralisasian. Namun,
 penggeneralisasian yang berlebihan konsisten dengan kontinyuasi.
 
 
-### Transformer Stacks and Ambiguous Implicits
-
-This concludes our tour of the monad transformers in Scalaz.
+### Susunan Transformer dan Implisit Ambigu
 
 Sub-sub-bab ini menututup perbincangan kita mengenai transformator monad
 pada Scalaz.
-
-When multiple transformers are combined, we call this a *transformer stack* and
-although it is verbose, it is possible to read off the features by reading the
-transformers. For example if we construct an `F[_]` context which is a set of
-composed transformers, such as
 
 Saat beberapa transformator digabungkan, kita memanggil hasil penggabungan ini
 sebagai *susunan transformator*. Walaupun lantung, sangat memungkinkan untuk
@@ -10412,34 +9708,11 @@ yang digabungkan, seperti
   type Ctx[A] = StateT[EitherT[IO, E, ?], S, A]
 ~~~~~~~~
 
-we know that we are adding error handling with error type `E` (there is a
-`MonadError[Ctx, E]`) and we are managing state `A` (there is a `MonadState[Ctx,
-S]`).
-
 kita tahu bahwa kita menambah penanganan galat dengan tipe galat `E` (ada monad
 `MonadError[Ctx, E]` dan kita mengatur keadaan `A` (ada `MonadState[Ctx, S]`).
 
-But there are unfortunately practical drawbacks to using monad transformers and
-their companion `Monad` typeclasses:
-
 Namun, ada beberapa kekurangan dari sisi praktik bila menggunakan transformator
 monad dan kelas tipe `Monad` pasangannya:
-
-1.  Multiple implicit `Monad` parameters mean that the compiler cannot find the
-    correct syntax to use for the context.
-
-2.  Monads do not compose in the general case, which means that the order of
-    nesting of the transformers is important.
-
-3.  All the interpreters must be lifted into the common context. For example, we
-    might have an implementation of some algebra that uses for `IO` and now we
-    need to wrap it with `StateT` and `EitherT` even though they are unused
-    inside the interpreter.
-
-4.  There is a performance cost associated to each layer. And some monad
-    transformers are worse than others. `StateT` is particularly bad but even
-    `EitherT` can cause memory allocation problems for high throughput
-    applications.
 
 1.  Beberapa parameter `Monad` implisit mengakibatkan kompilator tidak dapat
     menentukan sintaks yang tepat untuk konteks tersebut.
@@ -10454,14 +9727,10 @@ monad dan kelas tipe `Monad` pasangannya:
     terutama `StateT`. Bahkan, `EitherT` dapat menyebabkan masalah alokasi
     memori untuk aplikasi dengan keluaran tinggi.
 
-We need to talk about workarounds.
-
 Maka dari itu, kita harus membahas penyiasatannya
 
 
-#### No Syntax
-
-Say we have an algebra
+#### Tanpa Sintaks
 
 Misal kita punya sebuah aljabar
 
@@ -10472,8 +9741,6 @@ Misal kita punya sebuah aljabar
   }
 ~~~~~~~~
 
-and some data types
-
 dan beberapa tipe data
 
 {lang="text"}
@@ -10481,8 +9748,6 @@ dan beberapa tipe data
   final case class Problem(bad: Int)
   final case class Table(last: Int)
 ~~~~~~~~
-
-that we want to use in our business logic
 
 yang akan kita gunakan pada logika bisnis kita
 
@@ -10500,8 +9765,6 @@ yang akan kita gunakan pada logika bisnis kita
   } yield i
 ~~~~~~~~
 
-The first problem we encounter is that this fails to compile
-
 Masalah pertama yang kita temui adalah potongan kode ini gagal dikompilasi
 
 {lang="text"}
@@ -10510,9 +9773,6 @@ Masalah pertama yang kita temui adalah potongan kode ini gagal dikompilasi
   [error]     old <- S.get
   [error]              ^
 ~~~~~~~~
-
-There are some tactical solutions to this problem. The most obvious is to make
-all the parameters explicit
 
 Ada beberapa solusi untuk masalah ini. Yang paling jelas adalah membuat semua
 parameter menjadi eksplisit
@@ -10526,20 +9786,10 @@ parameter menjadi eksplisit
   ): F[Int] = ...
 ~~~~~~~~
 
-and require only `Monad` to be passed implicitly via context bounds. However,
-this means that we must manually wire up the `MonadError` and `MonadState` when
-calling `foo1` and when calling out to another method that requires an
-`implicit`.
-
 dan mengharuskan hanya `Monad` yang bisa dilewatkan secara implisit melalui
 batasan konteks. Namun, hal ini berarti kita harus menyambungkan `MonadError`
 dan `MonadState` secara manual ketika memanggil `foo1` dan saat memanggil metoda
 lain yang meminta sebuah `implicit`
-
-A second solution is to leave the parameters `implicit` and use name shadowing
-to make all but one of the parameters explicit. This allows upstream to use
-implicit resolution when calling us but we still need to pass parameters
-explicitly if we call out.
 
 Solusi kedua adalah menghilangkan parameter `implicit` dan menggunakan pembayangan
 nama agar semua parameter menjadi eksplisit dengan satu pengecualian. Hal ini
@@ -10558,9 +9808,6 @@ bila aljabar ini dipanggil.
   ): F[Int] = shadow(E, S) { (E, S) => ...
 ~~~~~~~~
 
-or we could shadow just one `Monad`, leaving the other one to provide our syntax
-and to be available for when we call out to other methods
-
 bila kita dapat melakukan pembayangan hanya satu monad saja, atau dengan kata
 lain menyerahkan sintaks pada monad lain, dan baru menghapus pembayangan tersebut
 saat aljabar ini dipanggil oleh metoda lain
@@ -10577,10 +9824,6 @@ saat aljabar ini dipanggil oleh metoda lain
   ): F[Int] = shadow(E) { E => ...
 ~~~~~~~~
 
-A third option, with a higher up-front cost, is to create a custom `Monad`
-typeclass that holds `implicit` references to the two `Monad` classes that we
-care about
-
 Pilihan ketiga, walaupun lebih berat di awal, adalah dengan membuat kelas tipe
 `Monad` khusus yang membawa rujukan `implicit` ke dua kelas `Monad` yang kita
 pilih 
@@ -10592,8 +9835,6 @@ pilih
     implicit def S: MonadState[F, S]
   }
 ~~~~~~~~
-
-and a derivation of the typeclass given a `MonadError` and `MonadState`
 
 dan sebuah derivasi dari kelas tipe berdasarkan sebuah `MonadError` dan
 `MonadState`
@@ -10612,8 +9853,6 @@ dan sebuah derivasi dari kelas tipe berdasarkan sebuah `MonadError` dan
   }
 ~~~~~~~~
 
-Now if we want access to `S` or `E` we get them via `F.S` or `F.E`
-
 Sekarang, bila kita ingin mengakses `S` atau `E`, kita bisa mendapatkannya
 dengan `F.S` maupun `F.E`
 
@@ -10630,9 +9869,6 @@ dengan `F.S` maupun `F.E`
     } yield i
 ~~~~~~~~
 
-Like the second solution, we can choose one of the `Monad` instances to be
-`implicit` within the block, achieved by importing it
-
 Sebagaimana halnya dengan solusi kedua, kita bisa memilih salah satu dari
 instans `Monad` dan menjadikannya sebagai konteks `implicit` dalam blok,
 kita dapat melakukannya mengimpornya
@@ -10648,35 +9884,22 @@ kita dapat melakukannya mengimpornya
 ~~~~~~~~
 
 
-#### Composing Transformers
-
-An `EitherT[StateT[...], ...]` has a `MonadError` but does not have a
-`MonadState`, whereas `StateT[EitherT[...], ...]` can provide both.
+#### Menyusun Transformator
 
 `EitherT[StateT[...], ...]` memiliki sebuah instans `MonadError` namun tidak
 mempunyai `MonadState`. Sedangkan `StateT[EitherT[...], ..]` mampu menyediakan
 keduanya.
 
-The workaround is to study the implicit derivations on the companion of the
-transformers and to make sure that the outer most transformer provides
-everything we need.
-
 Untuk menyiasati hal tersebut, kita dapat mempelajari derivasi implisit pada
 objek pendamping dari transformator tersebut dan memastikan bahwa transformator
 paling luar menyediakan semua yang kita butuhkan.
-
-A rule of thumb is that more complex transformers go on the outside, with this
-chapter presenting transformers in increasing order of complex.
 
 Patokan yang dipakai adalah semakin kompleks sebuah transformator, semakin luar
 tempat transformator tersebut berada pada susunan. Bab ini akan menyajikan
 transformator yang semakin tinggi tingkat kompleksitasnya.
 
 
-#### Lifting Interpreters
-
-Continuing the same example, let's say our `Lookup` algebra has an `IO`
-interpreter
+#### Mengangkat Penerjemah
 
 Melanjutkan contoh yang sama, misalkan aljabar `Lookup` kita memiliki interpreter
 `IO`
@@ -10688,8 +9911,6 @@ Melanjutkan contoh yang sama, misalkan aljabar `Lookup` kita memiliki interprete
   }
 ~~~~~~~~
 
-but we want our context to be
-
 namun kita menginginkan agar konteks kita seperti
 
 {lang="text"}
@@ -10697,20 +9918,11 @@ namun kita menginginkan agar konteks kita seperti
   type Ctx[A] = StateT[EitherT[IO, Problem, ?], Table, A]
 ~~~~~~~~
 
-to give us a `MonadError` and a `MonadState`. This means we need to wrap
-`LookupRandom` to operate over `Ctx`.
-
 agar dapat memberi kita sebuah `MonadError` dan `MonadState`. Hal ini berarti
 kita harus membungkus `LookupRandom` agar dapat beroperasi pada `Ctx`.
 
-A> The odds of getting the types correct on the first attempt are approximately
-A> 3,720 to one.
-A>
 A> Kemungkinan mendapatkan tipe yang benar pada percobaan pertama kurang lebih
 A> 1/3720.
-
-Firstly, we want to make use of the `.liftM` syntax on `Monad`, which uses
-`MonadTrans` to lift from our starting `F[A]` into `G[F, A]`
 
 Pertama, kita akan menggunakan sintaks `.liftM` pada `Monad` yang memberikan
 `MonadTrans` sehingga dapat mengangkat `F[A]` menjadi `G[F, A]`
@@ -10723,10 +9935,6 @@ Pertama, kita akan menggunakan sintaks `.liftM` pada `Monad` yang memberikan
   }
 ~~~~~~~~
 
-It is important to realise that the type parameters to `.liftM` have two type
-holes, one of shape `_[_]` and another of shape `_`. If we create type aliases
-of this shape
-
 Yang penting untuk diperhatikan adalah parameter tipe untuk `.liftM` mempunyai
 dua celah tipe dengan bentuk `_[_]` dan `_`. Bila kita membuat alias tipe dengan
 bentuk seperti
@@ -10737,9 +9945,6 @@ bentuk seperti
   type Ctx1[F[_], A] = EitherT[F, Problem, A]
   type Ctx2[F[_], A] = StateT[F, Table, A]
 ~~~~~~~~
-
-We can abstract over `MonadTrans` to lift a `Lookup[F]` to any `Lookup[G[F, ?]]`
-where `G` is a Monad Transformer:
 
 Kita dapat mengabstraksi `MonadTrans` agar mengangkat `Lookup[F]` menjadi
 `Lookup[G[F, ?]]` dimana G merupakan Transformator Monad:
@@ -10752,8 +9957,6 @@ Kita dapat mengabstraksi `MonadTrans` agar mengangkat `Lookup[F]` menjadi
     }
 ~~~~~~~~
 
-Allowing us to wrap once for `EitherT`, and then again for `StateT`
-
 Memperkenankan kita untuk membungkus `EitherT` satu kali, dan kemudian
 membungkus `StateT`
 
@@ -10762,9 +9965,6 @@ membungkus `StateT`
   val wrap1 = Lookup.liftM[IO, Ctx1](LookupRandom)
   val wrap2: Lookup[Ctx] = Lookup.liftM[EitherT[IO, Problem, ?], Ctx2](wrap1)
 ~~~~~~~~
-
-Another way to achieve this, in a single step, is to use `MonadIO` which enables
-lifting an `IO` into a transformer stack:
 
 Cara lain untuk mencapai ini dalam satu langkah adalah dengan menggunakan
 `MoonadIO` yang mampu mengangkat sebuah `IO` menjadi sebuah susunan transformator:
@@ -10776,16 +9976,9 @@ Cara lain untuk mencapai ini dalam satu langkah adalah dengan menggunakan
   }
 ~~~~~~~~
 
-with `MonadIO` instances for all the common combinations of transformers.
-
 dengan instans `MonadIO` untuk semua kombinasi umum dari transformator.
 
-The boilerplate overhead to lift an `IO` interpreter to anything with a
-`MonadIO` instance is therefore two lines of code (for the interpreter
-definition), plus one line per element of the algebra, and a final line to call
-it:
-
-Tambahan berlebih untuk mengangkat sebuah interpreter `IO` menjadi semua monad
+Plat cetak berlebih untuk mengangkat sebuah interpreter `IO` menjadi semua monad
 apapun yang mempunyai instans `MonadIO` hanya dua baris kode untuk definisi
 interpreter, ditambah satu baris untuk tiap elemen dari aljabar, dan satu baris
 terakhir untuk memanggilnya.
@@ -10799,22 +9992,12 @@ terakhir untuk memanggilnya.
   val L: Lookup[Ctx] = Lookup.liftIO(LookupRandom)
 ~~~~~~~~
 
-A> A compiler plugin that automatically produces `.liftM`, `.liftIO`, and
-A> additional boilerplate that arises in this chapter, would be a great
-A> contribution to the ecosystem!
-A>
 A> Sebuah tambahan kompilator yang secara otomatis membuat `.liftM`, `liftIO`,
 A> dan tambahan lain yang diperkenalkan pada bab ini akan sangat membantu
 A> ekosistem Scala dan Scalaz!
 
 
-#### Performance
-
-The biggest problem with Monad Transformers is their performance overhead.
-`EitherT` has a reasonably low overhead, with every `.flatMap` call generating a
-handful of objects, but this can impact high throughput applications where every
-object allocation matters. Other transformers, such as `StateT`, effectively add
-a trampoline, and `ContT` keeps the entire call-chain retained in memory.
+#### Performa
 
 Masalah paling besar pada Transformator Monad adalah tambahan beban sehingga
 performa menurun. Walaupun `EitherT` memiliki tambahan beban yang kecil, tiap
@@ -10824,19 +10007,9 @@ objek turut andil dalam gambaran besar. Transformator lain, seperti `StateT`,
 akan menambah trampolin yang juga tak kecil bebannya. Terlebih lagi untuk
 transformator `ContT` yang menahan semua rantai panggilan pada memori.
 
-A> Some applications do not care about allocations if they are bounded by network
-A> or I/O. Always measure.
-A>
 A> Beberapa aplikasi tidak begitu mempedulikan mengenai alokasi memori bila
 A> aplikasi tersebut bergantung pada jaringan ataupun I/O. Sangat disarankan
 A> untuk selalu mengukur performa aplikasi secara mendetail.
-
-If performance becomes a problem, the solution is to not use Monad Transformers.
-At least not the transformer data structures. A big advantage of the `Monad`
-typeclasses, like `MonadState` is that we can create an optimised `F[_]` for our
-application that provides the typeclasses naturally. We will learn how to create
-an optimal `F[_]` over the next two chapters, when we deep dive into two
-structures which we have already seen: `Free` and `IO`.
 
 Bila performa menjadi masalah, maka solusi satu-satunya adalah dengan tidak
 menggunakan Transformator Monad. Atau setidaknya struktur data transformator.
@@ -10848,20 +10021,11 @@ kita membahas mengenai dua struktur data yang sudah kita lihat sebelumnya:
 `Free` dan `IO`.
 
 
-## A Free Lunch
-
-Our industry craves safe high-level languages, trading developer efficiency and
-reliability for reduced runtime performance.
+## Makan Gratis
 
 Industri perangkat lunak sangat menginginkan bahasa pemrograman tingkat tinggi
 yang memberikan jaminan keamanan sedangkan pengembang *trading* menginginkan
 efisiensi dan keandalan dengan performa waktu-jalan yang tinggi.
-
-The Just In Time (JIT) compiler on the JVM performs so well that simple
-functions can have comparable performance to their C or C++ equivalents,
-ignoring the cost of garbage collection. However, the JIT only performs *low
-level optimisations*: branch prediction, inlining methods, unrolling loops, and
-so on.
 
 Kompiler tepat waktu (KTM) pada JVM bekerja dengan sangat baik sampai pada tahap
 fungsi-fungsi sederhana dapat mempunyai performa yang setara dengan ekuivalen
@@ -10870,24 +10034,11 @@ pengumpulan sampah. Namun, KTM hanya bekerja pada *optimisasi tingkat rendah*
 seperti: prediksi cabang operasi, *inline* fungsi (lol, help!), membuka ikalan,
 dan sejenisnya. 
 
-The JIT does not perform optimisations of our business logic, for example
-batching network calls or parallelising independent tasks. The developer is
-responsible for writing the business logic and optimisations at the same time,
-reducing readability and making it harder to maintain. It would be good if
-optimisation was a tangential concern.
-
 KTM tidak melakukan optimasi pada logika bisnis kita, sebagai contoh, pengelompokan
 panggilan jaringan atau paralelisasi tugas tugas independen. Pengembang bertanggung
 jawab untuk menulis logika bisnis dan optimasi pada saat yang bersamaan sehingga
 menyebabkan penurunan keterbacaan dan mempersulit pemeliharaan. Akan sangat bagus
 bila optimasi menjadi perhatian tangensial.
-
-If instead, we have a data structure that describes our business logic in terms
-of high level concepts, not machine instructions, we can perform *high level
-optimisation*. Data structures of this nature are typically called *Free*
-structures and can be generated for free for the members of the algebraic
-interfaces of our program. For example, a *Free Applicative* can be generated
-that allows us to batch or de-duplicate expensive network I/O.
 
 Bila kita memiliki struktur data yang mendeskripsikan logika bisnis kita pada
 konsep tingkat tinggi, bukan instruksi mesin, kita dapat melakukan *optimasi
@@ -10897,40 +10048,23 @@ dari program kita. Sebagai contoh, sebuah *Free Applicative* dapat dibuat
 sehingga kita dapat mengelompokkan atau penghapusan duplikasi atas I/O jaringan
 intensif.
 
-In this section we will learn how to create free structures, and how they can be
-used.
-
 Pada bagian ini, kita akan mempelajari cara untuk membuat struktur data *free*
 (gratis) dan cara penggunaannya.
 
 
 ### `Free` (`Monad`)
 
-Fundamentally, a monad describes a sequential program where every step depends
-on the previous one. We are therefore limited to modifications that only know
-about things that we've already run and the next thing we are going to run.
-
 Pada dasarnya, sebuah monad mendeskripsikan program berurutan dimana setiap
 tahap bergantung pada tahap sebelumnya. Maka dari itu, kita tidak bisa serta-merta
 mengubah sesuatu yang hanya tahu apa yang telah dijalankan dan apa yang akan
 dijalankan.
 
-A> It was trendy, circa 2015, to write FP programs in terms of `Free` so this is as
-A> much an exercise in how to understand `Free` code as it is to be able to write
-A> or use it.
-A> 
-A> There is a lot of boilerplate to create a free structure. We shall use this
-A> study of `Free` to learn how to generate the boilerplate.
-A>
 A> Sekitar tahun 2015, sangat trendi untuk menggunakan struktur *free* saat
 A> menulis program dengan bahasa pemrograman fungsional. Jadi, dengan mempelajari
 A> `Free` kita dapat memahami cara penggunaan dan penulisannya.
 A>
 A> Selain itu, ada banyak plat cetak yang digunakan untuk membuat struktur *free*.
 A> Kita akan menggunakannya untuk mempelajari bagaimana cara membuat plat cetak. 
-
-As a refresher, `Free` is the data structure representation of a `Monad` and is
-defined by three members
 
 Sebagai pengingat, `Free` merupakan representasi struktur data dari sebuah `Monad`
 dan didefinisikan dengan tiga anggota
@@ -10957,16 +10091,9 @@ dan didefinisikan dengan tiga anggota
   }
 ~~~~~~~~
 
--   `Suspend` represents a program that has not yet been interpreted
--   `Return` is `.pure`
--   `Gosub` is `.bind`
-
 -   `Suspend` merepresentasikan sebuah program yang belum diinterpretasi
 -   `Return` sama dengan `.pure`
 -   `Gosub` sama dengan `.bind`
-
-A `Free[S, A]` can be *freely generated* for any algebra `S`. To make this
-explicit, consider our application's `Machines` algebra
 
 Sebuah `Free[S, A]` dapat digenerasi secara cuma-cuma untuk semua aljabar `S`.
 Agar lebih jelas, anggap aljabar `Machines` pada aplikasi kita
@@ -10981,11 +10108,6 @@ Agar lebih jelas, anggap aljabar `Machines` pada aplikasi kita
     def stop(node: MachineNode): F[Unit]
   }
 ~~~~~~~~
-
-We define a freely generated `Free` for `Machines` by creating a GADT with a
-data type for each element of the algebra. Each data type has the same input
-parameters as its corresponding element, is parameterised over the return type,
-and has the same name:
 
 Kita mendefinisikan `Free` yang dibuat secara cuma cuma untuk `Machine` dengan
 membuat GADT dengan tipe data untuk tiap elemen dari aljabar. Tiap tipe data
@@ -11004,22 +10126,12 @@ atas nilai kembalian dengan nama yang sama:
     ...
 ~~~~~~~~
 
-The GADT defines an Abstract Syntax Tree (AST) because each member is
-representing a computation in a program.
-
 GADT yang mendefinisikan Pohon Sintaks Abstrak (PSA) karena tiap anggota
 merepresentasikan sebuah komputasi pada sebuah program.
 
-W> The freely generated `Free` for `Machines` is `Free[Machines.Ast, ?]`, i.e. for
-W> the AST, not `Free[Machines, ?]`. It is easy to make a mistake, since the latter
-W> will compile, but is meaningless.
-W>
 W> `Free` yang digenerasi secara cuma-cuma untuk `Machine` mempunyai bentuk
 W> `Free[Machines.Ast, ?], atau untuk PSA, bukan `Free[Machines, ?]`. Sangat mudah
 W> terkecoh karena yang akhir juga dapat dikompilasi, namun tidak ada gunanya.
-
-We then define `.liftF`, an implementation of `Machines`, with `Free[Ast, ?]` as
-the context. Every method simply delegates to `Free.liftT` to create a `Suspend`
 
 Lalu kita akan mendefinisikan `.liftF`, sebuah implementasi dari `Machines` dengan
 `Free[AST, ?]` sebagai konteksnya. Setiap metoda cukup mendelegasi ke `Free.liftT`
@@ -11038,11 +10150,6 @@ untuk membuat sebuah `Suspend`
   }
 ~~~~~~~~
 
-When we construct our program, parameterised over a `Free`, we run it by
-providing an *interpreter* (a natural transformation `Ast ~> M`) to the
-`.foldMap` method. For example, if we could provide an interpreter that maps to
-`IO` we can construct an `IO[Unit]` program via the free AST
-
 Saat kita membangun program kita yang terparametrisasi atas sebuah `Free`, kita
 menjalankannya dengan menyediakan sebuah *interpreter* (transformasi natural
 `Ast ~> M`) ke metoda `.foldMap`. Sebagai contoh, bila kita dapat menyediakan
@@ -11059,11 +10166,6 @@ sebuah interpreter yang memetakan ke `IO`, kita dapat membangun sebuah program
                         .foldMap(interpreter)
 ~~~~~~~~
 
-For completeness, an interpreter that delegates to a direct implementation is
-easy to write. This might be useful if the rest of the application is using
-`Free` as the context and we already have an `IO` implementation that we want to
-use:
-
 Agar lebih lengkap, sebuah interpreter yang mendelegasikan kepada sebuah implementasi
 langsung biasanya mudah dalam penulisan. Hal ini mungkin berguna bila bagian aplikasi
 yang lain menggunakan `Free` sebagai konteks dan kita juga sudah mempunyai
@@ -11079,9 +10181,6 @@ implementasi `IO` yang ingin kita gunakan:
     case Stop(node)   => f.stop(node)
   }
 ~~~~~~~~
-
-But our business logic needs more than just `Machines`, we also need access to
-the `Drone` algebra, recall defined as
 
 Namun, logika bisnis kita butuh lebih dari `Machines`, kita juga butuh akses ke
 aljabar `Drone` seperti ini
@@ -11100,9 +10199,6 @@ aljabar `Drone` seperti ini
   }
 ~~~~~~~~
 
-What we want is for our AST to be a combination of the `Machines` and `Drone`
-ASTs. We studied `Coproduct` in Chapter 6, a higher kinded disjunction:
-
 Yang kita inginkan adalah PSA kita menjadi sebuah kombinasi dari PSA `Machines`
 dan `Drone`. Kita telah mempelajari `Coproduct` pada bab 6 yang merupakan
 sebuah disjungsi jenis tinggi (lol, help):
@@ -11112,18 +10208,11 @@ sebuah disjungsi jenis tinggi (lol, help):
   final case class Coproduct[F[_], G[_], A](run: F[A] \/ G[A])
 ~~~~~~~~
 
-We can use the context `Free[Coproduct[Machines.Ast, Drone.Ast, ?], ?]`.
-
 Kita dapat menggunakan konteks `Free[Coproduct[Machines.Ast, Drone.Ast, ?], ?]`.
-
-We could manually create the coproduct but we would be swimming in boilerplate,
-and we'd have to do it all again if we wanted to add a third algebra.
 
 Kita juga bisa saja membuat ko-produk secara manual, namun kita akan mempunyai
 plat cetak yang terlalu banyak. Selain itu, kita harus melakukannya berulang kali
 bila kita ingin menambah aljabar ketiga.
-
-The `scalaz.Inject` typeclass helps:
 
 Kelas tipe `scalaz.Inject` membantu:
 
@@ -11140,9 +10229,6 @@ Kelas tipe `scalaz.Inject` membantu:
   }
 ~~~~~~~~
 
-The `implicit` derivations generate `Inject` instances when we need them,
-letting us rewrite our `liftF` to work for any combination of ASTs:
-
 Derivasi `implicit` menghasilkan instans `Inject` saat kita membutuhkannya.
 Hal ini memperkenankan kita untuk menulis ulang `liftF` agar dapat beroperasi
 pada semua kombinasi dari PSA:
@@ -11158,24 +10244,14 @@ pada semua kombinasi dari PSA:
   }
 ~~~~~~~~
 
-It is nice that `F :<: G` reads as if our `Ast` is a member of the complete `F`
-instruction set: this syntax is intentional.
-
 Sungguh apik bila `F :<: G` dibaca sebagaimana bila `Ast` sebagai salah satu anggota
 dari set instruksi lengkap dari `F`.
 
-A> A compiler plugin that automatically produces the `scalaz.Free` boilerplate
-A> would be a great contribution to the ecosystem! Not only is it painful to write
-A> the boilerplate, but there is the potential for a typo to ruin our day: if two
-A> members of the algebra have the same type signature, we might not notice.
-A>
 A> Sebuah plugin kompilator yang secara otomatis memproduksi plat cetak `scalaz.Free`
 A> akan sangat membantu ekosistem Scalaz! Tidak hanya menyusahkan bila kita harus
 A> menulis plat cetak secara manual, namun juga ada kemungkinan sebuah salah ketik
 A> merusak hari kita: bila ada dua anggota dari aljabar yang mempunyai dua penanda
 A> tipe yang sama, bisa saja kita tidak memperhatikannya.
-
-Putting it all together, lets say we have a program that we wrote abstracting over `Monad`
 
 Dan menggabungkan semuanya, misalkan kita mempunyai sebuah program yang kita tulis
 untuk mengabstraksi `Monad`
@@ -11184,9 +10260,6 @@ untuk mengabstraksi `Monad`
 ~~~~~~~~
   def program[F[_]: Monad](M: Machines[F], D: Drone[F]): F[Unit] = ...
 ~~~~~~~~
-
-and we have some existing implementations of `Machines` and `Drone`, we can
-create interpreters from them:
 
 dan kita mempunyai implementasi dari `Machines` dan `Drone` yang sudah ada,
 kita dapat membuat interpreter dari implementasi tersebut:
@@ -11199,9 +10272,6 @@ kita dapat membuat interpreter dari implementasi tersebut:
   val M: Machines.Ast ~> IO = Machines.interpreter(MachinesIO)
   val D: Drone.Ast ~> IO    = Drone.interpreter(DroneIO)
 ~~~~~~~~
-
-and combine them into the larger instruction set using a convenience method from
-the `NaturalTransformation` companion
 
 dan menggabungkannya menjadi sebuah set instruksi dengan menggunakan metoda bantuan
 dari pasangan `NaturalTransformation`
@@ -11218,8 +10288,6 @@ dari pasangan `NaturalTransformation`
   val interpreter: Ast ~> IO = NaturalTransformation.or(M, D)
 ~~~~~~~~
 
-Then use it to produce an `IO`
-
 Lalu menggunakannya untuk menghasilkan `IO`
 
 {lang="text"}
@@ -11228,21 +10296,12 @@ Lalu menggunakannya untuk menghasilkan `IO`
                         .foldMap(interpreter)
 ~~~~~~~~
 
-But we've gone in circles! We could have used `IO` as the context for our
-program in the first place and avoided `Free`. So why did we put ourselves
-through all this pain? Here are some examples of where `Free` might be useful.
-
 Nah, kita jadi berputar-putar! Kita bisa saja menggunakan `IO` sebagai konteks
 program kita dan menghindari `Free`. Lalu, kenapa kita harus seperti ini?
 Berikut merupakan beberapa contoh dimana `Free` bisa jadi berguna.
 
 
-#### Testing: Mocks and Stubs
-
-It might sound hypocritical to propose that `Free` can be used to reduce
-boilerplate, given how much code we have written. However, there is a tipping
-point where the `Ast` pays for itself when we have many tests that require stub
-implementations.
+#### Testing: Tiruan dan Potongan
 
 Mungkin terlihat tidak masuk akal bila kita mengusulkan untuk menggunakan `Free`
 agar kita dapat mengurangi plat cetak namun, di sisi lain, kita telah menulis
@@ -11250,9 +10309,6 @@ kode yang sangat banyak yang berkaitan dengan `Free` sendiri. Akan tetapi,
 ada titik kritis dimana `Ast` melunasi semua biaya yang telah kita tulis
 saat kita mempunyai banyak tes yang membutuhkan banyak potongan implementasi
 kode.
-
-If the `.Ast` and `.liftF` is defined for an algebra, we can create *partial
-interpreters*
 
 Bila `.Ast` dan `.liftF` didefinisikan untuk sebuah aljabar, kita dapat membuat
 *interpreter parsial*
@@ -11267,8 +10323,6 @@ Bila `.Ast` dan `.liftF` didefinisikan untuk sebuah aljabar, kita dapat membuat
   }
 ~~~~~~~~
 
-which can be used to test our `program`
-
 yang dapat digunakan untuk mengetes program kita
 
 {lang="text"}
@@ -11278,28 +10332,14 @@ yang dapat digunakan untuk mengetes program kita
     .shouldBe(1)
 ~~~~~~~~
 
-By using partial functions, and not total functions, we are exposing ourselves
-to runtime errors. Many teams are happy to accept this risk in their unit tests
-since the test would fail if there is a programmer error.
-
 Dengan menggunakan fungsi parsial, dan bukan fungsi total, kita memaparkan diri
 kita pada galat waktu-jalan. Banyak tim yang dengan ringan hati menerima risiko
 ini pada tes unit mereka karena tes akan gagal bila pemrogram melakukan kesalahan.
-
-Arguably we could also achieve the same thing with implementations of our
-algebras that implement every method with `???`, overriding what we need on a
-case by case basis.
 
 Walaupun kita juga bisa mencapai hal yang sama dengan menulis implementasi dari
 aljabar kita yang mengimplementasikan setiap metoda dengan `???` dan mengesampingkan
 apa yang kita butuhkan sesuai dengan per kasus.
 
-A> The library [smock](https://github.com/djspiewak/smock) is more powerful, but for the purposes of this short example
-A> we can define `stub` ourselves using a type inference trick that can be found
-A> all over the Scalaz source code. The reason for `Stub` being a separate class is
-A> so that we only need to provide the `A` type parameter, with `F` and `G`
-A> inferred from the left hand side of the expression:
-A>
 A> Pustaka [smock](https://github.com/djspiewak/smock) lebih luwes untuk keperluan
 A> testing. Namun, demi contoh pendek ini, kita akan mendefinisikan `stub` sendiri
 A> menggunakan trik inferensi tipe yang dapat ditemukan di banyak tempat pada
@@ -11322,36 +10362,20 @@ A> ~~~~~~~~
 
 #### Monitoring
 
-It is typical for server applications to be monitored by runtime agents that
-manipulate bytecode to insert profilers and extract various kinds of usage or
-performance information.
-
 Sudah pada umumnya ketika aplikasi peladen diawasi dengan agen waktu-jalan
 yang memanipulasi *bytecode* untuk menyisipkan profiler dan mengekstrak
 informasi penggunaan dan performa.
-
-If our application's context is `Free`, we do not need to resort to bytecode
-manipulation, we can instead implement a side-effecting monitor as an
-interpreter that we have complete control over.
 
 Bila konteks dari aplikasi kita adalah `Free`, kita tidak perlu menggunakan
 manipulasi *bytecode*. Kita dapat mengimplementasikan monitor dengan efek samping
 sebagai sebuah interpreter yang bisa kita atur sepenuhnya.
 
-A> Runtime introspection is one of the few cases that can justify use of a
-A> side-effect. If the monitoring is not visible to the program itself, referential
-A> transparency will still hold. This is also the argument used by teams that use
-A> side-effecting debug logging, and our argument for allowing mutation in the
-A> implementation of `Memo`.
-A>
 A> Introspeksi waktu-jalan merupakan salah satu dari sedikit kasus yang dapat
 A> membenarkan penggunaan efek samping. Bila pengawasan tidak terlihat dari
 A> program itu sendiri, transparansi rujukan masih tetap berlaku. Argumen ini
 A> digunakan oleh tim yang menggunakan pencatatan log debug dengan efek samping,
 A> dan juga kita gunakan sebagai argumen yang memperkenankan mutasi pada
 A> implementasi `Memo`.
-
-For example, consider using this `Ast ~> Ast` "agent"
 
 Sebagai contoh, misal penggunaan "agen" `Ast ~> Ast`
 
@@ -11368,16 +10392,10 @@ Sebagai contoh, misal penggunaan "agen" `Ast ~> Ast`
   )
 ~~~~~~~~
 
-which records method invocations: we would use a vendor-specific routine in real
-code. We could also watch for specific messages of interest and log them as a
-debugging aid.
-
 yang mencatat metoda penyelawatan: kita bisa menggunakan rutin dari vendor khusus
 pada kode yang nyata digunakan di produksi atau kita bisa melihat pesan khusus
 yang kita inginkan dan mencatatnya sebagai alat bantu debug.
 
-
-We can attach `Monitor` to our production `Free` application with
 
 Kita dapat menempelkan `Monitor` ke aplikasi `Free` kita yang sudah ada di
 tahap produksi dengan
@@ -11398,40 +10416,22 @@ sebaris
 ~~~~~~~~
 
 
-#### Monkey Patching
-
-As engineers, we are used to requests for bizarre workarounds to be added to the
-core logic of the application. We might want to codify such corner cases as
-*exceptions to the rule* and handle them tangentially to our core logic.
+#### Tambal Ban
 
 Sebagai tenaga ahli, kita terbiasa dengan permintaan penyiasatan aneh yang akan
 ditambahkan pada logika utama dari aplikasi. Mungkin juga kita ingin mengkodifikasi
 kasus di luar parameter normal sebagai sebuah *pengecualian* dan menanganinya
 sesuai dengan logika inti kita.
 
-For example, suppose we get a memo from accounting telling us
-
 Sebagai contoh, misalkan kita mendapat memo dari bagian keuangan yang berisi
 
-> *URGENT: Bob is using node `#c0ffee` to run the year end. DO NOT STOP THIS
-> MACHINE!1!*
->
 > *PENTING: Bob menggunakan simpul `#c0ffee` untuk menjalankan laporan keuangan
 > akhir tahun. JANGAN MATIKEUN MESINNYA BEGO!!SEBELAS111
-
-There is no possibility to discuss why Bob shouldn't be using our machines for
-his super-important accounts, so we have to hack our business logic and put out
-a release to production as soon as possible.
 
 Sangat tidak mungkin untuk mendiskusikan mengapa Bob tidak boleh menggunakan
 mesin kita untuk keperluan akuntansinya yang sangat penting. Jadi, kita harus
 membedah logika bisnis kita dan menelurkan sebuah rilis ke tahap produksi
 secepat mungkin.
-
-Our monkey patch can map into a `Free` structure, allowing us to return a
-pre-canned result (`Free.pure`) instead of scheduling the instruction. We
-special case the instruction in a custom natural transformation with its return
-value:
 
 Tambalan kita dapat dipetakan menjadi sebuah struktur `Free` yang memperkenankan
 kita untuk mengembalikan sebuah hasil yang sudah jadi (`Free.pure`), bukan
@@ -11446,15 +10446,9 @@ natural dengan nilai kembalian:
   }
 ~~~~~~~~
 
-eyeball that it works, push it to prod, and set an alarm for next week to remind
-us to remove it, and revoke Bob's access to our servers.
-
 pastikan sepasti-pastinya bahwa kode di atas memang benar berjalan sesuai keinginan,
 lalu gunakan di lingkungan produksi, atur alarm agar minggu depan untuk mengingatkan
 agar kita hapus kode ini, dan hapus akses Bob ke server kita.
-
-Our unit test could use `State` as the target context, so we can keep track of
-all the nodes we stopped:
 
 Tes unit kita dapat menggunakan `State` sebagai konteks target, sehingga kita
 dapat melacak semua simpul yang kita hentikan:
@@ -11475,17 +10469,7 @@ dapat melacak semua simpul yang kita hentikan:
     .shouldBe(Set.empty)
 ~~~~~~~~
 
-along with a test that "normal" nodes are not affected.
-
 juga dengan tes untuk simpul "normal" yang tidak kita hentikan.
-
-An advantage of using `Free` to avoid stopping the `#c0ffee` nodes is that we
-can be sure to catch all the usages instead of having to go through the business
-logic and look for all usages of `.stop`. If our application context is just an
-`IO` we could, of course, implement this logic in the `Machines[IO]`
-implementation but an advantage of using `Free` is that we don't need to touch
-the existing code and can instead isolate and test this (temporary) behaviour,
-without being tied to the `IO` implementations.
 
 Keuntungan menggunakan `Free` untuk menghindari penghentian simpul `#c0ffee`
 adalah kita dapat memastikan bahwa semua penggunaan tercatat, bukan harus mencari
@@ -11497,17 +10481,10 @@ perilaku (sementara) ini tanpa harus terikat pada implementasi `IO`.
 
 ### `FreeAp` (`Applicative`)
 
-Despite this chapter being called **Advanced Monads**, the takeaway is: *we
-shouldn't use monads unless we really **really** have to*. In this section, we
-will see why `FreeAp` (free applicative) is preferable to `Free` monads.
-
 Walaupun bab ini berjudul **Monad Lanjutan*, poin utama adalah: *kita tidak boleh
 menggunakan monad kecuali bila kita memang **benar benar** harus*. Pada bagian
 ini, kita akan tahu mengapa `FreeAp` (aplikatif *free*) lebih disukai dibandingkan
 monad `Free`.
-
-`FreeAp` is defined as the data structure representation of the `ap` and `pure`
-methods from the `Applicative` typeclass:
 
 `FreeAp` didefinisikan sebagai representasi struktur data dari metoda `ap` dan `pure`
 dari kelas tipe `Applicative`:
@@ -11536,22 +10513,13 @@ dari kelas tipe `Applicative`:
   }
 ~~~~~~~~
 
-The methods `.hoist` and `.foldMap` are like their `Free` analogues
-`.mapSuspension` and `.foldMap`.
-
 Metoda `.hoist` dan `.foldMap` seperti analog mereka dari `Free`, `.mapSuspension`
 dan `.foldMap`.
-
-As a convenience, we can generate a `Free[S, A]` from our `FreeAp[S, A]` with
-`.monadic`. This is especially useful to optimise smaller `Applicative`
-subsystems yet use them as part of a larger `Free` program.
 
 Agar lebih mudah, kita dapat membuat `Free[S, A]` dari `FreeAp[S, A]` yang sudah
 kita punyai dengan menggunakan metoda `.monadic`. Pembuatan ini sangat berguna
 terutama saat kita mengoptimasi subsistem `Applicative` yang belum digunakan
 sebagai bagian dari program `Free` yang lebih besar.
-
-Like `Free`, we must create a `FreeAp` for our ASTs, more boilerplate...
 
 Sebagaimana `Free`, kita harus membuat `FreeAp` untuk PSA kita. Hal ini juga
 berarti kita harus membuat plat cetak lagi...
@@ -11565,38 +10533,15 @@ berarti kita harus membuat plat cetak lagi...
 ~~~~~~~~
 
 
-#### Batching Network Calls
-
-We opened this chapter with grand claims about performance. Time to deliver.
+#### Pengelompokan Panggilan Jaringan
 
 Kita akan membuka bab ini dengan klaim luar biasa mengenai performa. Saatnya
 membuktikannya.
-
-[Philip Stark](https://gist.github.com/hellerbarde/2843375#file-latency_humanized-markdown)'s Humanised version of [Peter Norvig's Latency Numbers](http://norvig.com/21-days.html#answers) serve as
-motivation for why we should focus on reducing network calls to optimise an
-application:
 
 Versi [manusiawi](https://gist.github.com/hellerbarde/2843375#file-latency_humanized-markdown)
 dari [angka latensi](https://norvig.com/21-days.html#answers) dari Peter Norvig
 yang ditulis oleh Philip Stark akan menjadi motivasi mengapa kita harus fokus
 untuk mengurangi panggilan melalui jaringan untuk mengoptimasi sebuah aplikasi:
-
-| Computer                          | Human Timescale | Human Analogy                  |
-|--------------------------------- |--------------- |------------------------------ |
-| L1 cache reference                | 0.5 secs        | One heart beat                 |
-| Branch mispredict                 | 5 secs          | Yawn                           |
-| L2 cache reference                | 7 secs          | Long yawn                      |
-| Mutex lock/unlock                 | 25 secs         | Making a cup of tea            |
-| Main memory reference             | 100 secs        | Brushing your teeth            |
-| Compress 1K bytes with Zippy      | 50 min          | Scala compiler CI pipeline     |
-| Send 2K bytes over 1Gbps network  | 5.5 hr          | Train London to Edinburgh      |
-| SSD random read                   | 1.7 days        | Weekend                        |
-| Read 1MB sequentially from memory | 2.9 days        | Long weekend                   |
-| Round trip within same datacenter | 5.8 days        | Long US Vacation               |
-| Read 1MB sequentially from SSD    | 11.6 days       | Short EU Holiday               |
-| Disk seek                         | 16.5 weeks      | Term of university             |
-| Read 1MB sequentially from disk   | 7.8 months      | Fully paid maternity in Norway |
-| Send packet CA->Netherlands->CA   | 4.8 years       | Government's term              |
 
 | Komputer                          | Skala Waktu Manusia | Analogi Manusia                |
 |--------------------------------- |--------------- |------------------------------ |
@@ -11615,23 +10560,13 @@ untuk mengurangi panggilan melalui jaringan untuk mengoptimasi sebuah aplikasi:
 | Baca 1MB berurutan dari diska     | 7.8 bulan           | Cuti melahirkan di Norwegia    |
 | Kirim paket CA->Belanda->CA       | 4.8 tahun           | Satu periode pemerintahan      |
 
-Although `Free` and `FreeAp` incur a memory allocation overhead, the equivalent
-of 100 seconds in the humanised chart, every time we can turn two sequential
-network calls into one batch call, we save nearly 5 years.
-
 Walaupun `Free` dan `FreeAp` memberikan beban memori tambahan, ekuivalen dari
 100 detik untuk manusia, tiap kali kita memanggil dua panggilan berurutan di
 sebuah kelompok panggilan, kita bisa menghemat 5 tahun.
 
-When we are in a `Applicative` context, we can safely optimise our application
-without breaking any of the expectations of the original program, and without
-cluttering the business logic.
-
 Saat kita berada pada konteks `Applicative`, kita dapat mengoptimasi aplikasi
 kita dengan aman, tanpa harus menggagalkan ekspektasi apapun dari program asli.
 Terlebih lagi, bisa menghindari pengaburan logika bisnis.
-
-Luckily, our main business logic only requires an `Applicative`, recall
 
 Untungnya, logika bisnis utamakita hanya meminta sebuah `Applicative`. Harap
 diingat
@@ -11644,8 +10579,6 @@ diingat
     ...
   }
 ~~~~~~~~
-
-To begin, we create the `lift` boilerplate for a new `Batch` algebra
 
 Kita akan mengawali dengan membuat plat cetak `lift` untuk aljabar `Batch` baru
 
@@ -11664,8 +10597,6 @@ Kita akan mengawali dengan membuat plat cetak `lift` untuk aljabar `Batch` baru
   }
 ~~~~~~~~
 
-and then we will create an instance of `DynAgentsModule` with `FreeAp` as the context
-
 dan kita akan membuat sebuah instans `DynAgentsModule` dengan `FreeAp` sebagai
 konteks
 
@@ -11677,10 +10608,6 @@ konteks
   val program = new DynAgentsModule(Drone.liftA[Orig], Machines.liftA[Orig])
   val freeap  = program.act(world)
 ~~~~~~~~
-
-In Chapter 6, we studied the `Const` data type, which allows us to analyse a
-program. It should not be surprising that `FreeAp.analyze` is implemented in
-terms of `Const`:
 
 Pada bab 6, kita telah mempelajari tipe data `Const` yang memperkenankan kita
 untuk menganalisis sebuah program. Tidak mengherankan bahwa `FreeAp.analyze`
@@ -11695,9 +10622,6 @@ diimplementasikan menggunakan `Const`:
   }
 ~~~~~~~~
 
-We provide a natural transformation to record all node starts and `.analyze` our
-program to get all the nodes that need to be started:
-
 Kita menyediakan sebuah transformasi natural untuk mencatat semua pemulaian
 simpul dan meng-`.analyze`-is program kita untuk mendapatkan semua simpul
 yang harus dijalankan:
@@ -11710,10 +10634,6 @@ yang harus dijalankan:
   }
   val gathered: IList[MachineNode] = freeap.analyze(gather)
 ~~~~~~~~
-
-The next step is to extend the instruction set from `Orig` to `Extended`, which
-includes the `Batch.Ast` and write a `FreeAp` program that starts all our
-`gathered` nodes in a single network call
 
 Langkah selanjutnya adalah memperluas set instruksi dari `Orig` menjadi `Extended`
 yang juga mengikutsertakan `Batch.Ast` dan menulis sebuah program `FreeAp` yang
@@ -11730,8 +10650,6 @@ satu panggilan jaringan
     }
 ~~~~~~~~
 
-We also need to remove all the calls to `Machines.Start`, which we can do with a natural transformation
-
 Kita juga harus menghapus semua panggilan ke `Machise.Start` yang dapat kita
 lakukan dengan transformasi natural
 
@@ -11743,9 +10661,6 @@ lakukan dengan transformasi natural
   }
 ~~~~~~~~
 
-Now we have two programs, and need to combine them. Recall the `*>` syntax from
-`Apply`
-
 Saat ini, kita mempunyai dua program dan harus menggabungkan keduanya. Harap
 diingat bahwa sintaks `*>` dari `Apply`
 
@@ -11753,8 +10668,6 @@ diingat bahwa sintaks `*>` dari `Apply`
 ~~~~~~~~
   val patched = batch(gathered) *> freeap.foldMap(nostart)
 ~~~~~~~~
-
-Putting it all together under a single method:
 
 Dan menggabungkannya dalam sebuah metoda:
 
@@ -11764,17 +10677,11 @@ Dan menggabungkannya dalam sebuah metoda:
     (batch(orig.analyze(gather)) *> orig.foldMap(nostart))
 ~~~~~~~~
 
-That Is it! We `.optimise` every time we call `act` in our main loop, which is
-just a matter of plumbing.
-
 Demikian! Kita meng-`.optimise` tiap kali kita memanggil `act` pada ikalan utama
 kita yang hanya berupa pekerjaan pertukangan.
 
 
 ### `Coyoneda` (`Functor`)
-
-Named after mathematician Nobuo Yoneda, we can freely generate a `Functor` data
-structure for any algebra `S[_]`
 
 Dinamai menggunakan nama dari matematikawan Nobuo Yoneda, kita dapat membuat
 sebuah struktur data `Functor` untuk semua aljabar `S[_]`
@@ -11796,8 +10703,6 @@ sebuah struktur data `Functor` untuk semua aljabar `S[_]`
   }
 ~~~~~~~~
 
-and there is also a contravariant version
-
 dan juga ada versi kontravariannya
 
 {lang="text"}
@@ -11818,25 +10723,12 @@ dan juga ada versi kontravariannya
   }
 ~~~~~~~~
 
-A> The colloquial for `Coyoneda` is *coyo* and `ContravariantCoyoneda` is *cocoyo*.
-A> Just some Free Fun.
-A>
 A> Sebutan santai untuk `Coyoneda` adalah *koyo* dan `ContravariantCoyoneda`
 A> adalah *kokoyo*. Semakin lama semakin meresap.
-
-The API is somewhat simpler than `Free` and `FreeAp`, allowing a natural
-transformation with `.trans` and a `.run` (taking an actual `Functor` or
-`Contravariant`, respectively) to escape the free structure.
 
 API dari koyo cenderung lebih sederhana dari `Free` dan `FreeAp`, dan memperkenankan
 sebuah transformasi natural dengan `.trans` dan `.run` (yang menerima sebuah
 `Functor` atau `Contravariant`) untuk lepas dari struktur *free*.
-
-Coyo and cocoyo can be a useful utility if we want to `.map` or `.contramap`
-over a type, and we know that we can convert into a data type that has a Functor
-but we don't want to commit to the final data structure too early. For example,
-we create a `Coyoneda[ISet, ?]` (recall `ISet` does not have a `Functor`) to use
-methods that require a `Functor`, then convert into `IList` later on.
 
 Koyo dan kokoyo berguna bila kita ingin menggunakan `.map` atau `.contramap`
 kepada sebuah tipe dan kita tahu bahwa kita bisa mengkonversi menjadi sebuah
@@ -11845,9 +10737,6 @@ melakukannya terlalu dini. Sebagai contoh, kita membuat sebuah `Coyoneda[ISet, ?
 (harap diingat bahwa `ISet` tidak mempunyai instans `Functor`) untuk menggunakan
 metoda lain yang membutuhkan sebuah `Functor`, lalu mengkonversinya menjadi sebuah
 `List` di lain waktu.
-
-If we want to optimise a program with coyo or cocoyo we have to provide the
-expected boilerplate for each algebra:
 
 {lang="text"}
 ~~~~~~~~
@@ -11861,9 +10750,6 @@ expected boilerplate for each algebra:
   }
 ~~~~~~~~
 
-An optimisation we get by using `Coyoneda` is *map fusion* (and *contramap
-fusion*), which allows us to rewrite
-
 Sebuah optimasi yang kita dapatkan dengan menggunakan `Coyoneda` adalah
 *map fusion* (dan *contramap fusion*), yang memperkenankan kita untuk menulis
 ulang
@@ -11873,8 +10759,6 @@ ulang
   xs.map(a).map(b).map(c)
 ~~~~~~~~
 
-into
-
 menjadi
 
 {lang="text"}
@@ -11882,40 +10766,22 @@ menjadi
   xs.map(x => c(b(a(x))))
 ~~~~~~~~
 
-avoiding intermediate representations. For example, if `xs` is a `List` of a
-thousand elements, we save two thousand object allocations because we only map
-over the data structure once.
-
 sehingga menghindari representasi sementara. Sebagai contoh, bila `xs` merupakan
 sebuah `List` dengan seribu elemen, kita dapat menghemat dua ribu alokasi objek
 karena kita hanya memetakan struktur data satu kali.
-
-However it is arguably a lot easier to just make this kind of change in the
-original function by hand, or to wait for the [`scalaz-plugin`](https://github.com/scalaz/scalaz-plugin) project to be
-released and automatically perform these sorts of optimisations.
 
 Namun, bisa dibilang jauh lebih mudah bila kita membuat perubahan semacam ini
 pada fungsi awal secara manual atau menunggu proyek [`scalaz-plugin`](https://github.com/scalaz/scalaz-plugin)
 dirilis dan secara otomatis melakukan optimasi semacam ini.
 
 
-### Extensible Effects
-
-Programs are just data: free structures help to make this explicit and give us
-the ability to rearrange and optimise that data.
+### Efek Elastis
 
 Program sebenarnya hanya data saja: struktur bebas membantu memperjelas hal ini
 dan memberikan kita kemampuan untuk mengatur ulang dan mengoptimasi data tersebut.
 
-`Free` is more special than it appears: it can sequence arbitrary algebras and
-typeclasses.
-
 `Free` lebih istimewa daripada yang terlihat: struktur ini dapat mengurutkan
 aljabar dan kelas tipe secara arbiter.
-
-For example, a free structure for `MonadState` is available. The `Ast` and
-`.liftF` are more complicated than usual because we have to account for the `S`
-type parameter on `MonadState`, and the inheritance from `Monad`:
 
 Sebagai contoh, sebuah struktur `free` untuk `MonadState` tersedia. `Ast` dan
 `.liftF` lebih rumit daripada biasanya karena kita harus memperhitungkan 
@@ -11941,32 +10807,17 @@ parameter tipe `S` pada `MonadState` dan pewarisan dari `Monad`:
   }
 ~~~~~~~~
 
-This gives us the opportunity to use optimised interpreters. For example, we
-could store the `S` in an atomic field instead of building up a nested `StateT`
-trampoline.
-
 Hal ini merupakan kesempatan yang bisa digunakan untuk mengoptimasi interpreter.
 Sebagai contoh, kita dapat menyimpan `S` pada bidang atomik, bukan pada trampolin
 `StateT` berlapis.
-
-We can create an `Ast` and `.liftF` for almost any algebra or typeclass! The
-only restriction is that the `F[_]` does not appear as a parameter to any of the
-instructions, i.e. it must be possible for the algebra to have an instance of
-`Functor`. This unfortunately rules out `MonadError` and `Monoid`.
 
 Kita dapat membuat sebuah `Ast` dan `.liftF` untuk hampir semua aljabar ataupun
 kelas tipe. Satu-satunya batasan adalah `F[_]` tidak muncul sebagai parameter
 untuk instruksi apapun, misal, harus dimungkinkan agar aljabar mempunyai instans
 `Functor`. Sayangnya, hal ini menghapus kemungkinan `MonadError` dan `Monoid`.
 
-A> The reason why free encodings do not work for all algebras and typeclasses is
-A> quite subtle.
-A>
 A> Alasan mengapa penyandian *free* tidak berfungsi untuk semua aljabar dan kelas
 A> tipe cukup samar.
-A> 
-A> Consider what happens if we create an Ast for `MonadError`, with `F[_]` in
-A> contravariant position, i.e. as a parameter.
 A>
 A> Misalkan bila kita membuat sebuah Ast untuk `MonadError` dengan `F[_]` pada
 A> posisi kontravarian, mis. sebagai sebuah parameter.
@@ -11982,9 +10833,6 @@ A>     def liftF[F[_], E](implicit I: Ast[F, E, ?] :<: F): MonadError[F, E] = ..
 A>     ...
 A>   }
 A> ~~~~~~~~
-A> 
-A> When we come to interpret a program that uses `MonadError.Ast` we must construct
-A> the coproduct of instructions. Say we extend a `Drone` program:
 A>
 A> Saat kita menginterpretasi sebuah program yang menggunakan `MonadError.Ast`,
 A> kita harus membuat koproduk dari instruksi yang ada. Misal, kita memperluas
@@ -11994,31 +10842,16 @@ A> {lang="text"}
 A> ~~~~~~~~
 A>   type Ast[a] = Coproduct[MonadError.Ast[Ast, String, ?], Drone.Ast, a]
 A> ~~~~~~~~
-A> 
-A> This fails to compile because `Ast` refers to itself!
 A>
 A> Kode diatas akan gagal kompil karena `Ast` merujuk ke dirinya sendiri!
-A> 
-A> Algebras that are not entirely made of covariant functor signatures, i.e. `F[_]`
-A> in return position, are impossible to interpret because the resulting type of
-A> the program is self-referential. Indeed the name *algebra* that we have been
-A> using has its roots in [F-Algebras](https://en.wikipedia.org/wiki/F-algebra), where the F is for Functor.
 A>
 A> Aljabar yang tidak sepenuhnya terbuat dari penanda kovarian fungtor, mis. `F[_]`
 A> pada posisi kembalian, tidak mungkin diinterpretasi karena tipe hasil dari
 A> program berupa hasil swa-rujuk. Dan memang, nama *aljabar* yang kita gunakan
 A> sebagai akar pada [*F-Algebras*](https://en.wikipedia.org/wiki/F-algebra) dimana
 A> F merupakan fungtor.
-A> 
-A> *Thanks to Edmund Noble for initiating this discussion.*
 A>
 A> *Terima kasih untuk Edmund Noble yang mengawali diskusi ini.*
-
-As the AST of a free program grows, performance degrades because the interpreter
-must match over instruction sets with an `O(n)` cost. An alternative to
-`scalaz.Coproduct` is [iotaz](https://github.com/frees-io/iota)'s encoding, which uses an optimised data structure
-to perform `O(1)` dynamic dispatch (using integers that are assigned to each
-coproduct at compiletime).
 
 Sebagaimana dengan PSA dari sebuah program *free* berkembang, performa mengalami
 penurunan karena interpreter harus menyocokkan kepada set instruksi dengan biaya
@@ -12026,14 +10859,6 @@ penurunan karena interpreter harus menyocokkan kepada set instruksi dengan biaya
 yang menggunakan struktur data teroptimasi agar dapat bekerja pada `O(1)` dengan
 pelepasan dinamis yang menggunakan integer untuk tiap koproduk yang ditetapkan
 pada saat kompilasi.
-
-For historical reasons a free AST for an algebra or typeclass is called *Initial
-Encoding*, and a direct implementation (e.g. with `IO`) is called *Finally
-Tagless*. Although we have explored interesting ideas with `Free`, it is
-generally accepted that finally tagless is superior. But to use finally tagless
-style, we need a high performance effect type that provides all the monad
-typeclasses we've covered in this chapter. We also still need to be able to run
-our `Applicative` code in parallel. This is exactly what we will cover next.
 
 Untuk alasan sejarah, sebuah PSA *free* untuk sebuah aljabar atau kelas tipe
 disebut *Penyandian Awal*. Dan, implementasi langsung (misal, dengan `IO`) disebut
@@ -12047,15 +10872,7 @@ Persyaratan semacam ini akan kita bahas selanjutnya
 
 ## `Parallel`
 
-There are two effectful operations that we almost always want to run in
-parallel:
-
 Ada dua operasi dengan efek yang hampir selalu kita jalankan secara paralel:
-
-1.  `.map` over a collection of effects, returning a single effect. This is
-    achieved by `.traverse`, which delegates to the effect's `.apply2`.
-2.  running a fixed number of effects with the *scream operator* `|@|`, and
-    combining their output, again delegating to `.apply2`.
 
 1.  `.map` atas sebuah koleksi dengan efek, mengembalikan sebuah efek. Hal ini
     dapat dicapai dengan `.traverse` yang mendelegasikannya ke `.apply2` milik
@@ -12063,10 +10880,6 @@ Ada dua operasi dengan efek yang hampir selalu kita jalankan secara paralel:
 2.  menjalankan beberapa efek dengan jumlah tetap dengan *operator jerit* `|@|`,
     dan menggabungkan input efek-efek tadi, dan pada akhirnya mendelegasikan
     ke `.apply2`.
-
-However, in practice, neither of these operations execute in parallel by
-default. The reason is that if our `F[_]` is implemented by a `Monad`, then the
-derived combinator laws for `.apply2` must be satisfied, which say
 
 Namun, praktik di lapangan, kedua operasi tersebut tidak dijalankan secara paralel
 secara default. Alasannya adalah, bila `F[_]` diimplementasikan dengan sebuah
@@ -12082,15 +10895,7 @@ secara default. Alasannya adalah, bila `F[_]` diimplementasikan dengan sebuah
   }
 ~~~~~~~~
 
-In other words, **`Monad` is explicitly forbidden from running effects in
-parallel.**
-
 Dengan kata lain, **`Monad` dilarang menjalankan efek secara paralel.**
-
-However, if we have an `F[_]` that is **not** monadic, then it may implement
-`.apply2` in parallel. We can use the `@@` (tag) mechanism to create an instance
-of `Applicative` for `F[_] @@ Parallel`, which is conveniently assigned to the
-type alias `Applicative.Par`
 
 Namun, bila kita mempunyai sebuah `F[_]` yang tidak bersifat monadik, maka konteks
 ini bisa saja mengimplementasikan `.apply2` secara paralel. Kita bisa menggunakan
@@ -12105,16 +10910,12 @@ yang mempermudah menentukan instans ke alias tipe `Applicative.Par`
   }
 ~~~~~~~~
 
-Monadic programs can then request an implicit `Par` in addition to their `Monad`
-
 Program monadik dapat meminta `Par` implisit sebagai tambahan pada `Monad` mereka
 
 {lang="text"}
 ~~~~~~~~
   def foo[F[_]: Monad: Applicative.Par]: F[Unit] = ...
 ~~~~~~~~
-
-Scalaz's `Traverse` syntax supports parallelism:
 
 Sintaks `Traverse` dari Scalaz mendukung paralelisme:
 
@@ -12128,9 +10929,6 @@ Sintaks `Traverse` dari Scalaz mendukung paralelisme:
   }
 ~~~~~~~~
 
-If the implicit `Applicative.Par[IO]` is in scope, we can choose between
-sequential and parallel traversal:
-
 Bila `Applicative.Par[IO]` ada pada cakupan secara implisit, kita dapat memilih
 pelangkahan secara berurutan maupun paralel:
 
@@ -12142,8 +10940,6 @@ pelangkahan secara berurutan maupun paralel:
   input.traverse(network): IO[IList[Int]] // one at a time
   input.parTraverse(network): IO[IList[Int]] // all in parallel
 ~~~~~~~~
-
-Similarly, we can call `.parApply` or `.parTupled` after using scream operators
 
 Tidak berbeda jauh, kita dapat memanggil `.parApply` atau `.parTupled` setelah
 menggunakan operator jerit
@@ -12159,20 +10955,12 @@ menggunakan operator jerit
   (fa |@| fb |@| fc).parApply { case (a, b, c) => a + b + c }: IO[String]
 ~~~~~~~~
 
-It is worth nothing that when we have `Applicative` programs, such as
-
 Harap diperhatikan bahwa saat kita mempunyai program `Applicative`, seperti
 
 {lang="text"}
 ~~~~~~~~
   def foo[F[_]: Applicative]: F[Unit] = ...
 ~~~~~~~~
-
-we can use `F[A] @@ Parallel` as our program's context and get parallelism as
-the default on `.traverse` and `|@|`. Converting between the raw and `@@
-Parallel` versions of `F[_]` must be handled manually in the glue code, which
-can be painful. Therefore it is often easier to simply request both forms of
-`Applicative`
 
 kita dapat menggunakan `F[A] @@ Parallel` sebagai konteks dari program kita dan
 kita mendapatkan paralelisme sebagai perilaku bawaan untuk `.traverse` dan `|@|`.
@@ -12186,13 +10974,7 @@ langsung meminta bentuk `Applicative`
 ~~~~~~~~
 
 
-### Breaking the Law
-
-We can take a more daring approach to parallelism: opt-out of the law that
-`.apply2` must be sequential for `Monad`. This is highly controversial, but
-works well for the majority of real world applications. we must first audit our
-codebase (including third party dependencies) to ensure that nothing is making
-use of the `.apply2` implied law.
+### Melanggar Hukum
 
 Kita dapat mengambil pendekatan yang lebih berani terhadap paralelisme: dengan
 tidak menaati hukum yang menyatakan bahwa `.apply2` harus berurutan untuk `Monad`.
@@ -12201,17 +10983,12 @@ kebanyakan aplikasi di dunia nyata. Pertama, kita harus mengaudit basis kode
 kita (termasuk ketergantungan pihak ketiga) untuk memastikan bahwa tidak ada
 yang menggunakan hukum dari `.apply2`.
 
-We wrap `IO`
-
 Kita bungkus `IO`
 
 {lang="text"}
 ~~~~~~~~
   final class MyIO[A](val io: IO[A]) extends AnyVal
 ~~~~~~~~
-
-and provide our own implementation of `Monad` which runs `.apply2` in parallel
-by delegating to a `@@ Parallel` instance
 
 dan sediakan implementasi buatan kita sendiri untuk `Monad` yang menjalakan
 `.apply` secara paralel dengan mendelegasikan ke sebuah instans `@@ Parallel`
@@ -12227,31 +11004,16 @@ dan sediakan implementasi buatan kita sendiri untuk `Monad` yang menjalakan
   }
 ~~~~~~~~
 
-We can now use `MyIO` as our application's context instead of `IO`, and **get
-parallelism by default**.
-
 Sekarang kita bisa menggunakan `MyIO` sebagai konteks aplikasi kita sebagai
 pengganti `IO` dan **mendapatkan implementasi paralelisme secara default**.
 
-A> Wrapping an existing type and providing custom typeclass instances is known as
-A> *newtyping*.
-A>
 A> Pelapisan sebuah tipe yang sudah ada dan menyediakan instans kelas tipe buatan
 A> sendiri dikenal sebagai *newtyping*.
-A> 
-A> `@@` and newtyping are complementary: `@@` allows us to request specific
-A> typeclass variants on our domain model, whereas newtyping allow us to define the
-A> instances on the implementation. Same thing, different insertion points.
 A>
 A> `@@` dan *newtyping* bersifat komplementer: `@@` memperkenankan kita untuk
 A> meminta varian kelas tipe spesifik pada model domain kita, dimana *newtyping*
 A> memperkenankan kita untuk mendefinisikan instans pada implementasi. Keduanya
 A> merupakan hal yang sama, namun memiliki titip sisip yang berbeda.
-A> 
-A> The `@newtype` macro [by Cary Robbins](https://github.com/estatico/scala-newtype) has an optimised runtime representation
-A> (more efficient than `extends AnyVal`), that makes it easy to delegate
-A> typeclasses that we do not wish to customise. For example, we can customise
-A> `Monad` but delegate the `Plus`:
 A>
 A> Makro `@newtype` oleh [Carry Robbins](https://github.com/estatico/scala-newtype)
 A> mempunyai representasi waktu jalan yang teroptimasi (lebih efisien bila dibandingkan
@@ -12267,9 +11029,6 @@ A>     implicit val monad: Monad[MyIO] = ...
 A>     implicit val plus: Plus[MyIO] = derived
 A>   }
 A> ~~~~~~~~
-
-For completeness: a naive and inefficient implementation of `Applicative.Par`
-for our toy `IO` could use `Future`:
 
 Agar lebih lengkap: sebuah implementsai naif dan tidak efisien dari `Applicative.Par`
 untuk `IO` sederhana kita dapat menggunakan `Future`:
@@ -12292,9 +11051,6 @@ untuk `IO` sederhana kita dapat menggunakan `Future`:
   }
 ~~~~~~~~
 
-and due to [a bug in the Scala compiler](https://github.com/scala/bug/issues/10954) that treats all `@@` instances as
-orphans, we must explicitly import the implicit:
-
 dan karena sebuah [kutu](https://github.com/scala/bug/issues/10954) pada kompilator
 Scala yang memperlakukan semua instans `@@` sebagai objek yatim, kita harus
 secara tersurat mengimpor yang tersirat:
@@ -12304,18 +11060,11 @@ secara tersurat mengimpor yang tersirat:
   import IO.ParApplicative
 ~~~~~~~~
 
-In the final section of this chapter we will see how Scalaz's `IO` is actually
-implemented.
-
 Pada bagian akhir bab ini, kita akan melihat bagaimana `IO` Scalaz diimplementasikan
 sebenar-benarnya.
 
 
 ## `IO`
-
-Scalaz's `IO` is the fastest asynchronous programming construct in the Scala
-ecosystem: up to 50 times faster than `Future`. `IO` is a free data structure
-specialised for use as a general effect monad.
 
 `IO` Scalaz merupakan konstruk pemrograman asinkronus yang paling cepat pada
 ekosistem Scala: hampir 50 kali lebih cepat bila dibandingkan dengan `Future`.
@@ -12336,11 +11085,6 @@ umum.
   }
 ~~~~~~~~
 
-`IO` has **two** type parameters: it has a `Bifunctor` allowing the error type to
-be an application specific ADT. But because we are on the JVM, and must interact
-with legacy libraries, a convenient type alias is provided that uses exceptions
-for the error type:
-
 `IO` mempunyai **dua** parameter tipe: `IO` memiliki `Bifunctor` yang memperkenankan
 tipe galat agar menjadi ADT spesifik aplikasi. Namun, karena kita berada pada JVM,
 dan harus berinteraksi dengan pusaka warisan, sebuah tipe bantuan disediakan
@@ -12351,10 +11095,7 @@ agar dapat menggunakan tipe galat dari pengecualian:
   type Task[A] = IO[Throwable, A]
 ~~~~~~~~
 
-A> `scalaz.ioeffect.IO` is a high performance `IO` by John de Goes. It has a
-A> separate lifecycle to the core Scalaz library and must be manually added to our
-A> `build.sbt` with
-A>
+
 A> `scalaz.ioeffect.IO` merupakan `IO` dengan performa tinggi yang ditulis oleh
 A> John de Goes. `IO` ini mempunyai siklus hidup yang terpisah dari pustaka standar
 A> Scalaz dan harus ditambah secara manual ke `build.sbt` dengan
@@ -12363,21 +11104,14 @@ A> {lang="text"}
 A> ~~~~~~~~
 A>   libraryDependencies += "org.scalaz" %% "scalaz-ioeffect" % "2.10.1"
 A> ~~~~~~~~
-A> 
-A> Do not use the deprecated `scalaz-effect` and `scalaz-concurrency` packages.
 A>
 A> Jangan gunakan paket `scalaz-effect` dan `scalaz-concurrency` yang sudah
 A> tidak digunakan lagi.
-A> 
-A> Prefer the `scalaz.ioeffect` variants of all typeclasses and data types.
 A>
 A> Gunakan varian `scalaz.ioeffect` untuk semua kelas tipe dan tipe data.
 
 
-### Creating
-
-There are multiple ways to create an `IO` that cover a variety of eager, lazy,
-safe and unsafe code blocks:
+### Pembuatan
 
 Ada berapa cara untuk membuat `IO` yang meliputi varian blok kode lugas, lundung,
 aman, dan tidak aman:
@@ -12402,8 +11136,6 @@ aman, dan tidak aman:
   }
 ~~~~~~~~
 
-with convenient `Task` constructors:
-
 dengan konstruktor pembantu `Task`:
 
 {lang="text"}
@@ -12416,9 +11148,6 @@ dengan konstruktor pembantu `Task`:
   }
 ~~~~~~~~
 
-The most common constructors, by far, when dealing with legacy code are
-`Task.apply` and `Task.fromFuture`:
-
 Konstruktor yang paling jamak ditemui saat berurusan dengan kode warisan, sampai
 saat ini, adalah `Task.apply` dan `Task.fromFuture`:
 
@@ -12429,17 +11158,9 @@ saat ini, adalah `Task.apply` dan `Task.fromFuture`:
   Task.fromFuture(fa)(ExecutionContext.global): Task[String]
 ~~~~~~~~
 
-We cannot pass around raw `Future`, because it eagerly evaluates, so must always
-be constructed inside a safe block.
-
 Kita tidak dapat mengumpankan `Future` mentah dengan leluasa karena struktur data
 ini dievaluasi secara tegas. Sehingga, kita harus selalu dibuat dalam blok yang
 aman.
-
-Note that the `ExecutionContext` is **not** `implicit`, contrary to the
-convention. Recall that in Scalaz we reserve the `implicit` keyword for
-typeclass derivation, to simplify the language: `ExecutionContext` is
-configuration that must be provided explicitly.
 
 Harap diperhatikan bahwa `ExecutionContext` **tidak** `implicit`. Dan juga harap
 diingat bahwa kita mencadangkan kata kunci `implicit` untuk penurunan kelas tipe
@@ -12447,18 +11168,11 @@ untuk menyederhanakan bahasa: `ExecutionContext` merupakan konfigurasi yang haru
 disediakan secara tersurat.
 
 
-### Running
-
-The `IO` interpreter is called `RTS`, for *runtime system*. Its implementation
-is beyond the scope of this book. We will instead focus on the features that
-`IO` provides.
+### Menjalankan
 
 Interpreter `IO` disebut sebagai `RTS`, dari *runtime system* (sistem waktu-jalan).
 Imlementasi interpreter ini diluar cakupan buku ini, kita akan fokus pada
 fitur yang disediakan oleh `IO`.
-
-`IO` is just a data structure, and is interpreted *at the end of the world* by
-extending `SafeApp` and implementing `.run`
 
 `IO` hanya merupakan struktur data dan diinterpretasikan *pada akhir waktu*
 dengan mengeksten `SafeApp` dan menerapkan `.run`
@@ -12480,26 +11194,14 @@ dengan mengeksten `SafeApp` dan menerapkan `.run`
   }
 ~~~~~~~~
 
-A> `Void` is a type that has no values, like `scala.Nothing`. However, the Scala
-A> compiler infers `Nothing` when it fails to correctly infer a type parameter,
-A> causing confusing error messages, whereas `Void` will fail fast during
-A> compilation.
-A>
 A> `Void` merupakan tipe yang tidak mempunyai nilai, seperti `scala.Nothing`.
 A> Namun, karena kompilator Scala akan menebak `Nothing` walaupun gagal menebak
 A> parameter tipe, hal ini menyebabkan pesan galat yang membingungkan. Di sisi
 A> lain, `Void` akan menggagalkan diri pada saat kompilasi sehingga tidak ada
 A> menyebabkan pesan yang membingungkan.
-A> 
-A> A `Void` error type means that the effect **cannot fail**, which is to say that we
-A> have handled all errors by this point.
 A>
 A> Sebuah tipe galat `Void` berarti bahwa efek yang dibuat **tidak bisa gagal**
 A> yang berarti bahwa kita sudah menangani semua galat pada titik ini.
-
-If we are integrating with a legacy system and are not in control of the entry
-point of our application, we can extend the `RTS` and gain access to unsafe
-methods to evaluate the `IO` at the entry point to our principled FP code.
 
 Bila kita mengintegrasikan dengan sebuah sistem warisan dan tidak berkuasa
 atas titik awal aplikasi kita, kita dapat mengeksten `RTS` dan mendapatkan akses
@@ -12507,17 +11209,10 @@ pada metoda tak-aman untuk mengevaluasi `IO` pada titik awal agar dapat mengacu
 ke kode kita yang berprinsip pada pemrograman fungsional.
 
 
-### Features
-
-`IO` provides typeclass instances for `Bifunctor`, `MonadError[E, ?]`,
-`BindRec`, `Plus`, `MonadPlus` (if `E` forms a `Monoid`), and an
-`Applicative[IO.Par[E, ?]]`.
+### Fitur
 
 `IO` menyediakan instans kelas tipe untuk `Bifunctor`, `MonadError[E, ?]`, `BindRec`,
 `Plus`, `MonadPlus` (bila `E` membentuk sebuah `Monoid`), dan `Applicative[IO.Par[E, ?]]`.
-
-In addition to the functionality from the typeclasses, there are implementation
-specific methods:
 
 Sebagai tambahan atas fungsionalitas dari kelas tipe, ada beberapa implementasi
 metoda-metoda spesifik:
@@ -12549,10 +11244,6 @@ metoda-metoda spesifik:
     ...
 ~~~~~~~~
 
-It is possible for an `IO` to be in a *terminated* state, which represents work
-that is intended to be discarded (it is neither an error nor a success). The
-utilities related to termination are:
-
 Adalah hal yang memungkinkan bila sebuah `IO` berada pada kondisi *terminated*
 yang merepresentasikan tugas yang dimaksudkan untuk dibuang (bukan galat maupun
 sukses). Perkakas yang berhubungan dengan terminasi adalah:
@@ -12575,10 +11266,6 @@ sukses). Perkakas yang berhubungan dengan terminasi adalah:
 
 ### `Fiber`
 
-An `IO` may spawn *fibers*, a lightweight abstraction over a JVM `Thread`. We
-can `.fork` an `IO`, and `.supervise` any incomplete fibers to ensure that they
-are terminated when the `IO` action completes
-
 Sebuah `IO` bisa saja membuat fiber, abstraksi ringan atas `Thread` JVM.
 Kita dapat melakukan `.fork` kepada sebuah `IO` dan melakukan pengawasan
 (`.supervise`) terhadap semua fiber yang belum lengkap untuk memastikan bahwa
@@ -12592,9 +11279,6 @@ fiber tersebut akan di-terminasi saat tindakan atas `IO` selesai
   ...
 ~~~~~~~~
 
-When we have a `Fiber` we can `.join` back into the `IO`, or `interrupt` the
-underlying work.
-
 Saat kita mempunyai sebuah `Fiber`, kita dapat menggabungkannya kembali ke `IO`
 dengan `.join`, atau juga menghentikan dengan menggunakan `interrupt`.
 
@@ -12605,11 +11289,6 @@ dengan `.join`, atau juga menghentikan dengan menggunakan `interrupt`.
     def interrupt[E2](t: Throwable): IO[E2, Unit]
   }
 ~~~~~~~~
-
-We can use fibers to achieve a form of optimistic concurrency control. Consider
-the case where we have `data` that we need to analyse, but we also need to
-validate it. We can optimistically begin the analysis and cancel the work if the
-validation fails, which is performed in parallel.
 
 Kita dapat menggunakan fiber untuk mencapai bentuk kontrol konkuren optimistis.
 Anggap sebuah situasi dimana kita mempunyai `data` yang harus kita analis namun
@@ -12631,17 +11310,11 @@ paralel.
   } yield result
 ~~~~~~~~
 
-Another usecase for fibers is when we need to perform a *fire and forget*
-action. For example, low priority logging over a network.
-
 Contoh penggunaan fiber lain adalah saat kita harus melakukan aksi *tembak dan
 lupakan*. Sebagai conoth, pencatatan log prioritas rendah melalui jaringan.
 
 
 ### `Promise`
-
-A promise represents an asynchronous variable that can be set exactly once (with
-`complete` or `error`). An unbounded number of listeners can `get` the variable.
 
 Sebuah *promise* merepresentasikan variable asinkronus yang dapat diatur tepat
 satu kali (dengan `complete` atau `error`). Pendengar yang bisa mendapatkan nilai
@@ -12662,15 +11335,9 @@ variabel dengan `get` tidak dibatasi.
   }
 ~~~~~~~~
 
-`Promise` is not something that we typically use in application code. It is a
-building block for high level concurrency frameworks.
-
 Secara umum, kita jaran menggunakan `Promise` pada kode aplikasi. `Promise`
 merupakan blok bangun untuk *framework* konkurensi tingkat tinggi.
 
-A> When an operation is guaranteed to succeed, the error type `E` is left as a free
-A> type parameter so that the caller can specify their preference.
-A>
 A> Bila sebuah operasi terjamin kesuksesannya, tipe galat `E` dibiarkan sebagai
 A> sebuah parameter tipe bebas, sehingga pemanggil dapat menentukan pilihan
 A> mereka sendiri.
@@ -12678,11 +11345,7 @@ A> mereka sendiri.
 
 ### `IORef`
 
-`IORef` is the `IO` equivalent of an atomic mutable variable.
-
 `IORef` merupakan ekuivalen dari `IO` untuk variabel atomik tidak tetap.
-
-We can read the variable and we have a variety of ways to write or update it.
 
 Kita dapat membaca variabel tersebut dan memiliki beberapa car untuk menulis
 atau memutakhirkannya.
@@ -12709,9 +11372,6 @@ atau memutakhirkannya.
   }
 ~~~~~~~~
 
-`IORef` is another building block and can be used to provide a high performance
-`MonadState`. For example, create a newtype specialised to `Task`
-
 `IORef` merupakan blok bangun lain yang dapat digunakan untuk menyediakan `MonadState`
 dengan performa tinggi. Sebagai contoh, buat sebuah *newtype* terspesialisasi
 untuk `Task`
@@ -12732,9 +11392,6 @@ untuk `Task`
   }
 ~~~~~~~~
 
-We can make use of this optimised `StateMonad` implementation in a `SafeApp`,
-where our `.program` depends on optimised MTL typeclasses:
-
 Kita dapat menggunakan implementasi teroptimasi `StateMonad` ini pada sebuah
 `SafeApp` dimana `.program` kita bergantung pada kelas tipe Pustaka Transformator
 Monad:
@@ -12752,17 +11409,9 @@ Monad:
   }
 ~~~~~~~~
 
-A more realistic application would take a variety of algebras and typeclasses as
-input.
-
 Sebuah aplikasi yang realistis akan menerima beberapa aljabar dan kelas tipe sebagai
 masukan.
 
-A> This optimised `MonadState` is constructed in a way that breaks typeclass
-A> coherence. Two instances having the same types may be managing different state.
-A> It would be prudent to isolate the construction of all such instances to the
-A> application's entrypoint.
-A>
 A> `MonadState` teroptimasi ini dibangun sedemikian rupa sehingga mengaburkan
 A> koherensi kelas tipe. Dua instans yang memiliki tipe yangsama bisa saja
 A> mengatur keadaan yang berbeda. Adalah hal yang bijak untuk mengisolasi
@@ -12770,9 +11419,6 @@ A> konstruksi dari semua instans seperti itu pada titik-awal aplikasi.
 
 
 #### `MonadIO`
-
-The `MonadIO` that we previously studied was simplified to hide the `E`
-parameter. The actual typeclass is
 
 `MonadIO` yang kita pelajari sebelumnya telah disederhanakan untuk menyembunyikan
 parameter `E`. Kelas tipe yang sebenarnya adalah
@@ -12783,9 +11429,6 @@ parameter `E`. Kelas tipe yang sebenarnya adalah
     def liftIO[A](io: IO[E, A])(implicit M: Monad[M]): M[A]
   }
 ~~~~~~~~
-
-with a minor change to the boilerplate on the companion of our algebra,
-accounting for the extra `E`:
 
 dengan perubahan kecil di plat cetak pada pendamping aljabar kita, untuk
 mengikutsertakan tambahan `E`: 
@@ -12805,15 +11448,7 @@ mengikutsertakan tambahan `E`:
 ~~~~~~~~
 
 
-## Summary
-
-1.  The `Future` is broke, don't go there.
-2.  Manage stack safety with a `Trampoline`.
-3.  The Monad Transformer Library (MTL) abstracts over common effects with typeclasses.
-4.  Monad Transformers provide default implementations of the MTL.
-5.  `Free` data structures let us analyse, optimise and easily test our programs.
-6.  `IO` gives us the ability to implement algebras as effects on the world.
-7.  `IO` can perform effects in parallel and is a high performance backbone for any application.
+## Kesimpulan
 
 1.  `Future` cacat, jangan digunakan.
 2.  Mengatur keamanan susunan memori dengan `Trampoline`.
