@@ -587,23 +587,23 @@ sebuah tipe data aljabaris sangat mudah:
 ~~~~~~~~
 
 
-## Modules
+## Modul
 
-Haskell source code is arranged into hierarchical modules with the restriction
-that all contents of a `module` must live in a single file. The top of a file
-declares the `module` name
+Sumber kode Haskell diatur menjadi modul hierarkis dengan batasan bahwa semua
+konten dari sebuah `module` harus ada pada sebuah berkas. Pada bagian atas sebuah
+berkas, nama `module` dideklarasikan
 
 {lang="text"}
 ~~~~~~~~
   module Silly.Tree where
 ~~~~~~~~
 
-Directories are used on disk to organise the code, so this file would go into
-`Silly/Tree.hs`.
+Direktori digunakan pada diska untuk mengelompokkan kode, jadi berkas ini
+harus berada pada `Silly/Tree.hs`.
 
-By default all symbols in the file are exported but we can choose to export
-specific members, for example the `Tree` type and data constructors, and a
-`fringe` function, omitting `sapling`:
+Secara default, semua simbol pada berkas akan diekspor. Namun, kita dapat
+menentukan mana yang akan diekspor. Sebagai contoh, tipe `Tree` dan konstruktor
+data, fungsi `fringe`, dan melewatkan `sapling`:
 
 {lang="text"}
 ~~~~~~~~
@@ -619,63 +619,63 @@ specific members, for example the `Tree` type and data constructors, and a
   sapling = Leaf ""
 ~~~~~~~~
 
-Interestingly, we can export symbols that are imported into the module, allowing
-library authors to package up their entire API into a single module, regardless
-of how it is implemented.
+Yang menarik adalah, kita dapat mengekspor simbol yang juga diimpor ke modul
+tersebut. Hal ini memperkenankan penulis pustaka untuk mengemas seluruh APA
+mereka menjadi satu modul, terlepas bagaimana APA tersebut diimplementasikan.
 
-In a different file we can import all the exported members from `Silly.Tree`
+Pada berkas yang berbeda, kita dapat mengimpor semua anggota dari `Silly.Tree`
 
 {lang="text"}
 ~~~~~~~~
   import Silly.Tree
 ~~~~~~~~
 
-which is roughly equivalent to Scala's `import silly.tree._` syntax. If we want
-to restrict the symbols that we import we can provide an explicit list in
-parentheses after the import
+yang kurang lebih setara dengan sintaks `import silly.tree._` milik Scala. Bila
+kita ingin membatasi simbol yang kita impor, kita dapat menyediakan daftar eksplisit
+didalam tanda kurung setelah impor tersebut
 
 {lang="text"}
 ~~~~~~~~
   import Silly.Tree (Tree, fringe)
 ~~~~~~~~
 
-If we have a name collision on a symbol we can use a `qualified` import, with an
-optional list of symbols to import
+Bila kita mendapati nama yang bentrok pada sebuah simbol, kita dapat menggunakan
+impor `qualified` dengan daftar opsional dari simbol yang diimpor
 
 {lang="text"}
 ~~~~~~~~
   import qualified Silly.Tree (fringe)
 ~~~~~~~~
 
-and now to call the `fringe` function we have to type `Silly.Tree.fringe`
-instead of just `fringe`. We can also change the name of the module when
-importing it
+dan sekarang bila kita memanggil fungsi `fringe`, kita dapat menuliskan `Silly.Tree.fringe`
+sebagai ganti dari `fringe`. Kita juga dapat mengubah nama modul saat mengimpornya
+dengan
 
 {lang="text"}
 ~~~~~~~~
   import qualified Silly.Tree as T
 ~~~~~~~~
 
-The `fringe` function is now `T.fringe`.
+Fungsi `fringe` sekarang dapat dipanggil dengan `T.fringe`
 
-Alternatively, rather than select what we want to import, we can choose what to
-**not** import
+Bisa juga kita memilih untuk **tidak** mengimpor simbol tertentu
 
 {lang="text"}
 ~~~~~~~~
   import Silly.Tree hiding (fringe)
 ~~~~~~~~
 
-By default the `Prelude` module is implicitly imported but if we add an explicit
-import from the `Prelude` module, only our version is used. We can use this
-technique to hide unsafe legacy functions
+Secara default, module `Prelude` selalu diimpor secara implisit. Namun, bila kita
+secara eksplisit mengimpor module `Prelude`, maka versi kita yang akan dipakai.
+Kita bisa menggunakan teknik ini bila kita ingin menyembunyikan fungsi peninggalan
 
 {lang="text"}
 ~~~~~~~~
   import Prelude hiding ((!!), head)
 ~~~~~~~~
 
-or use a custom prelude and disable the default prelude with a language extension
+atau menggunakan mukadimah (`Prelude`) khusus dan menon-aktifkan mukadimah default
+dengan ekstensi bahasa
 
 {lang="text"}
 ~~~~~~~~
