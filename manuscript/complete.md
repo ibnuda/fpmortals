@@ -1,40 +1,24 @@
 
-# For Comprehensions
+# Komprehensi *For*
 
-Scala's `for` comprehension is the ideal FP abstraction for sequential
-programs that interact with the world. Since we will be using it a lot,
-we're going to relearn the principles of `for` and how Scalaz can help
-us to write cleaner code.
-
-`for` pada Scala merupakan abstraksi ideal FP untuk program-program yang
-berjalan secara berurutan serta berinteraksi dengan dunia luar.
+Komprehensi `for` pada Scala merupakan abstraksi ideal pada pemrograman fungsional
+untuk program-program yang berjalan secara berurutan serta berinteraksi dengan dunia luar.
 Lebih lanjut, dikarenakan kita akan menggunakan kata kunci ini secara
 intensif, kita akan mempelajari ulang prinsip `for` dan bagaimana
- Scalaz membantu kita untuk menulis kode yang lebih bersih.
+Scalaz membantu kita untuk menulis kode yang lebih bersih.
 
-This chapter doesn't try to write pure programs and the techniques are
-applicable to non-FP codebases.
+Bab ini tidak akan membahas bagaimana cara menulis program murni
+dan teknik teknik yang bisa diterapkan di basis kode non-PF
 
-Bab ini tidak akan membahas bagaimana cara menulis program murni (lol)
-dan teknik teknik yang bisa diterapkan di basis kode non-FP.
-
-## Syntax Sugar (Pemanis Sintaksis)
-
-Scala's `for` is just a simple rewrite rule, also called *syntax
-sugar*, that doesn't have any contextual information.
+## Pemanis Sintaksis
 
 Pada dasarnya, `for` pada Scala hanya merupakan aturan penulisan
-ulang sederhana, atau *pemanis sintaksis* (lol), yang tidak memiliki
+ulang sederhana, atau *pemanis sintaksis*, yang tidak memiliki
 informasi kontekstual.
 
-To see what a `for` comprehension is doing, we use the `show` and
-`reify` feature in the REPL to print out what code looks like after
-type inference.
-
 Untuk melihat apa yang terjadi pada `for`, kita akan menggunakan fitur
-`show` dan `reify` pada REPL untuk mencetak bentuk kode setelah inferensi
+`show` dan `reify` pada REPL untuk mencetak bentuk kode setelah pendugaan
 tipe.
-(btw, inferensi tipe itu semacam "ini apa ya? prok prok prok tolong dibantu.")
 
 {lang="text"}
 ~~~~~~~~
@@ -51,15 +35,9 @@ tipe.
         ((k) => i.$plus(j).$plus(k)))))))
 ~~~~~~~~
 
-There is a lot of noise due to additional sugarings (e.g. `+` is
-rewritten `$plus`, etc). We will skip the `show` and `reify` for brevity
-when the REPL line is `reify>`, and manually clean up the generated
-code so that it doesn't become a distraction.
-
 Sebagaimana yang terlihat pada potongan kode diatas, terdapat banyak
-derau (btw, derau = noise) yang disebabkan oleh pemanis sintaksis seperti `+`
-menjadi `$plus`.
-Selain itu, supaya ringkas dan terfokus, kita akan menghiraukan
+derau yang disebabkan oleh pemanis sintaksis seperti `+` menjadi `$plus`.
+Selain itu, supaya ringkas dan terfokus, kita akan mengabaikan
 `show` dan `reify` saat baris REPL berupa `reify>` dan juga akan
 merapikan hasil kode secara manual.
 
@@ -73,18 +51,11 @@ merapikan hasil kode secara manual.
         k => i + j + k }}}
 ~~~~~~~~
 
-The rule of thumb is that every `<-` (called a *generator*) is a
-nested `flatMap` call, with the final generator a `map` containing the
-`yield` body.
-
-Secara umum, setiap `<-`, biasa disebut *generator*, merupakan
+Yang menjadi patokan adalah, setiap `<-`, biasa disebut *generator*, merupakan
 eksekusi `flatMap` yang bisa jadi berisi `flatMap` lain, dengan
 generator akhir berupa `map` yang berisi konstruk `yield`.
 
-### Assignment
-
-We can assign values inline like `ij = i + j` (a `val` keyword is not
-needed).
+### Penetapan Nilai
 
 Pada `for`, kita bisa membuat atau menetapkan sebuah nilai tanpa harus
 secara spesifik menggunakan `val`.
@@ -106,19 +77,12 @@ pada potongan kode berikut.
         k => ij + k }}}
 ~~~~~~~~
 
-A `map` over the `b` introduces the `ij` which is flat-mapped along
-with the `j`, then the final `map` for the code in the `yield`.
-
 Pada hasil REPL di potongan diatas, selain munculnya `j`, hasil dari
-pemetaan `b`, juga muncul `ij` yang merupakan hasil dari operasi
-`i + j`. Kedua nilai diatas, `j` dan `ij`, akan dipetakan menggunakan
+pemetaan (dengan `.map`) `b`, juga muncul `ij` yang merupakan hasil dari
+operasi `i + j`. Kedua nilai diatas, `j` dan `ij`, akan dipetakan menggunakan
 kode pada `yield`.
 
-Unfortunately we cannot assign before any generators. It has been
-requested as a language feature but has not been implemented:
-<https://github.com/scala/bug/issues/907>
-
-Oh ya, kita tidak dapat melakukan penetapan nilai sebelum generator.
+Sayangnya, kita tidak dapat melakukan penetapan nilai sebelum generator.
 Walau belum diterapkan, hal ini sudah dibicarakan pada:
 <https://github.com/scala/bug/issues/907>
 
@@ -131,8 +95,6 @@ Walau belum diterapkan, hal ini sudah dibicarakan pada:
   <console>:1: error: '<-' expected but '=' found.
 ~~~~~~~~
 
-We can workaround the limitation by defining a `val` outside the `for`
-
 Untuk menyiasatinya kita bisa membuat `val` di luar `for`
 
 {lang="text"}
@@ -141,7 +103,6 @@ Untuk menyiasatinya kita bisa membuat `val` di luar `for`
   scala> for { i <- a } yield initial + i
 ~~~~~~~~
 
-or create an `Option` out of the initial assignment
 atau membuat `Option` sebagai assignment pertama.
 
 {lang="text"}
@@ -152,11 +113,8 @@ atau membuat `Option` sebagai assignment pertama.
          } yield initial + i
 ~~~~~~~~
 
-A> `val` doesn't have to assign to a single value, it can be anything
-A> that works as a `case` in a pattern match.
-A>
 A> `val` tidak harus berupa penetapan sebuah nilai. `val` bisa berupa
-A> apapun yang bisa digunakan pada `case` di pattern match.
+A> apapun yang bisa digunakan pada `case` di pencocokan pola.
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -170,8 +128,6 @@ A>   head: Int = 1
 A>   tail: List[Int] = List(2, 3)
 A> ~~~~~~~~
 A> 
-A> The same is true for assignment in `for` comprehensions
-A> 
 A> Hal yang sama juga berlaku untuk assignment pada `for`
 A> 
 A> {lang="text"}
@@ -184,11 +140,8 @@ A>          } yield first
 A>   res: Some(hello)
 A> ~~~~~~~~
 A> 
-A> But be careful not to miss any cases or there will be a runtime exception (a
-A> *totality* failure).
-A> 
-A> Harap dipikir betul supaya tidak ada luput agar tidak terjadi eksepsi
-A> pada saat eksekusi (galat *kesemestaan*). (lol, semesta.)
+A> Harap berhati-hati agar tidak ada yang terlewat agar tidak terjadi eksepsi
+A> pada saat eksekusi (galat *totalitas*).
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -199,11 +152,8 @@ A> ~~~~~~~~
 
 ### Filter
 
-It is possible to put `if` statements after a generator to filter
-values by a predicate
-
 Bisa juga bila kita menggunakan pernyataan `if` setelah generator
-untuk menyaring nilai nilai berdasarkan predikat tertentu.
+untuk menyaring nilai berdasarkan predikat tertentu.
 
 {lang="text"}
 ~~~~~~~~
@@ -221,17 +171,12 @@ untuk menyaring nilai nilai berdasarkan predikat tertentu.
           k => i + j + k }}}
 ~~~~~~~~
 
-Older versions of Scala used `filter`, but `Traversable.filter` creates new
-collections for every predicate, so `withFilter` was introduced as the more
-performant alternative. We can accidentally trigger a `withFilter` by providing
-type information, interpreted as a pattern match.
-
 Dahulu kala, Scala menggunakan `filter`. Namun, dikarenakan `Traversable.filter`
 selalu membuat koleksi objek baru untuk setiap predikat, dibuatlah `withFilter`
 sebagai alternatif.
 Patut diperhatikan, kita juga bisa secara tanpa sengaja menggunakan `withFilter`
 dengan menambahkan informasi mengenai tipe.
-Alasannya, informasi tersebut digunakan untuk case pattern match.
+Alasannya, informasi tersebut digunakan untuk case pencocokan pola.
 
 {lang="text"}
 ~~~~~~~~
@@ -243,22 +188,14 @@ Alasannya, informasi tersebut digunakan untuk case pattern match.
   }.map { case i: Int => i }
 ~~~~~~~~
 
-Like assignment, a generator can use a pattern match on the left hand side. But
-unlike assignment (which throws `MatchError` on failure), generators are
-*filtered* and will not fail at runtime. However, there is an inefficient double
-application of the pattern.
-
-Sebagaimana assignment, generator bisa menggunakan pattern match pada persamaan di
-sebelah kiri. Namun berbeda dengan assignment, yang melempar `MatchError` saat terjadi
+Sebagaimana penetapan nilai, generator bisa menggunakan pencocokan pola pada persamaan
+bagian kiri. Namun berbeda dengan assignment, yang melempar `MatchError` saat terjadi
 galat, generator akan *menyaring* operasi tersebut sehingga akan terhindar dari galat.
 
 
-A> The compiler plugin [`better-monadic-for`](https://github.com/oleg-py/better-monadic-for) produces alternative, **better**,
-A> desugarings than the Scala compiler. This example is interpreted as:
-A> 
-A> Tambahan kompilator [`better-monadic-for`](https://github.com/oleg-py/better-monadic-for)
-A> melakukan pembersihan pemanis sintaksis yang lebih rapi dibandingkan kompilator Scala.
-A> Sebagai contoh:
+A> Colok-masuk kompilator [`better-monadic-for`](https://github.com/oleg-py/better-monadic-for)
+A> penjabaran pemanis sintaks yang lebih rapi dibandingkan kompilator Scala.
+A> Contoh berikut akan diterjemahkan menjadi:
 A>
 A> {lang="text"}
 A> ~~~~~~~~
@@ -267,20 +204,14 @@ A>
 A>   a.map { (i: Int) => i}
 A> ~~~~~~~~
 A> 
-A> instead of inefficient double matching (in the best case) and silent filtering
-A> at runtime (in the worst case). Highly recommended.
-A> 
-A> yang lebih efisien dibandingkan pattern match ganda atau diam diam saring (lol)
+A> yang lebih efisien dibandingkan pencocokan pola ganda atau penyaringan terbungkam
 A> saat waktu jalan.
 
 
 ### For Each
 
-Finally, if there is no `yield`, the compiler will use `foreach`
-instead of `flatMap`, which is only useful for side-effects.
-
 Bila tidak ditemukan `yield`, kompilator akan menggunakan `foreach`
-daripada `flatMap`.
+sebagai pengganti `flatMap`.
 
 {lang="text"}
 ~~~~~~~~
@@ -290,15 +221,11 @@ daripada `flatMap`.
 ~~~~~~~~
 
 
-### Summary
-
-The full set of methods supported by `for` comprehensions do not share
-a common super type; each generated snippet is independently compiled.
-If there were a trait, it would roughly look like:
+### Rangkuman
 
 Tidak ada tipe super umum yang mempunyai metoda umum yang digunakan pada
-`for`; setiap potongan dikompil sendiri sendiri.
-Misalkan, ada `trait` umum, kurang lebih seperti ini.
+`for`; setiap potongan dikompilasi tersendiri.
+Misalkan, ada `trait` umum, kurang lebih akan terlihat sebagai berikut:
 
 {lang="text"}
 ~~~~~~~~
@@ -310,20 +237,12 @@ Misalkan, ada `trait` umum, kurang lebih seperti ini.
   }
 ~~~~~~~~
 
-If the context (`C[_]`) of a `for` comprehension doesn't provide its
-own `map` and `flatMap`, all is not lost. If an implicit
-`scalaz.Bind[T]` is available for `T`, it will provide `map` and
-`flatMap`.
-
 Adalah mu'bah bila konteks (`C[_]`) dari `for` tidak menyediakan `map`
-dan `flatMap` atau metoda lainnya. Jika `scalaz.Bind[T]` tersedia untuk `T`
+dan `flatMap` atau metoda lainnya. Jika `scalaz.Bind[T]` tersedia untuk `T`,
 `bind` tersebut akan menyediakan apa yang konteks tadi tidak miliki.
 
-A> It often surprises developers when inline `Future` calculations in a
-A> `for` comprehension do not run in parallel:
-A> 
 A> Acap kali pemrogram terkejut ketika komputasi `Future` di dalam baris
-A> `for` comprehension tidak berjalan secara paralel:
+A> komprehensi `for` tidak berjalan secara paralel:
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -335,11 +254,6 @@ A>     i <- Future { expensiveCalc() }
 A>     j <- Future { anotherExpensiveCalc() }
 A>   } yield (i + j)
 A> ~~~~~~~~
-A> 
-A> This is because the `flatMap` spawning `anotherExpensiveCalc` is
-A> strictly **after** `expensiveCalc`. To ensure that two `Future`
-A> calculations begin in parallel, start them outside the `for`
-A> comprehension.
 A> 
 A> Musabab dari hal diatas adalah `flatMap` menelurkan `anotherExpensiveCalc`
 A> pasti **setelah** `expensiveCalc`. Untuk memastikan bahwa dua komputasi
@@ -353,37 +267,24 @@ A>   val b = Future { anotherExpensiveCalc() }
 A>   for { i <- a ; j <- b } yield (i + j)
 A> ~~~~~~~~
 A> 
-A> `for` comprehensions are fundamentally for defining sequential
-A> programs. We will show a far superior way of defining parallel
-A> computations in a later chapter. Spoiler: don't use `Future`.
-A> 
-A> Pada dasarnya, `for` digunakan untuk menjabarkan program program
+A> Pada dasarnya, komprehensi `for` digunakan untuk mendefinisikan program
 A> secara berurutan. Kita akan menunjukkan cara yang jauh lebih unggul
-A> dan tepat guna untuk menjabarkan komputasi paralel di bab selanjutnya.
+A> dan tepat guna untuk mendefinisikan komputasi paralel di bab selanjutnya.
 A> Bisik-bisik: bukan `Future`.
 
 
-## Gymnastics
+## Senam
 
-Although it is easy to rewrite simple sequential code as a `for`
-comprehension, sometimes we will want to do something that appears to
-require mental summersaults. This section collects some practical
-examples and how to deal with them.
-
-Walaupun penulisan kode berurutan untuk `for` comprehension mudah,
+Walaupun penulisan kode berurutan untuk komprehensi `for` mudah,
 kadang terjadi hal hal yang menyebabkan kita berpikir keras. Bagian
-ini berisi contoh contoh mengenai hal tadi dan bagaimana cara kita
+ini berisi contoh-contoh mengenai hal semacam itu dan bagaimana cara kita
 menyiasatinya.
 
-### Fallback Logic
-
-Say we are calling out to a method that returns an `Option`. If it is not
-successful we want to fallback to another method (and so on and so on), like
-when we're using a cache:
+### Logika Cadangan
 
 Anggap kata kita memanggil sebuah metoda yang mengembalikan `Option`.
 Bila pemanggilan ini gagal, tentu kita ingin ada metoda lain yang menangani
-galat tersebut. (lol)
+galat tersebut. Seperti saat kita membaca tembolok
 
 {lang="text"}
 ~~~~~~~~
@@ -392,8 +293,6 @@ galat tersebut. (lol)
   
   getFromRedis(key) orElse getFromSql(key)
 ~~~~~~~~
-
-If we have to do this for an asynchronous version of the same API
 
 Bilamana kita harus munggunakan versi asinkronus dari antarmuka
 pemrograman aplikasi,
@@ -404,10 +303,7 @@ pemrograman aplikasi,
   def getFromSql(s: String): Future[Option[String]]
 ~~~~~~~~
 
-then we have to be careful not to do extra work because
-
-maka kita harus hati hati betul agar jangan sampai menambah pekerjaan
-dikarenakan
+maka kita harus hati hati betul agar jangan sampai menambah pekerjaan karena
 
 {lang="text"}
 ~~~~~~~~
@@ -420,8 +316,8 @@ dikarenakan
 will run both queries. We can pattern match on the first result but
 the type is wrong
 
-akan menjalankan kedua kueri secara bersamaan. Kita dapat pattern match
-hasil pertama tapi tapi tapi tipe salah (lol)
+akan menjalankan kedua kueri secara bersamaan. Kita dapat mencocokkan pola
+pada hasil pertama namun tipe hasil tersebut salah
 
 {lang="text"}
 ~~~~~~~~
@@ -434,9 +330,7 @@ hasil pertama tapi tapi tapi tipe salah (lol)
   } yield res
 ~~~~~~~~
 
-We need to create a `Future` from the `cache`
-
-Kita dapat membuat `Future` dari `cache`
+Kita harus membuat `Future` dari `cache`
 
 {lang="text"}
 ~~~~~~~~
@@ -449,22 +343,14 @@ Kita dapat membuat `Future` dari `cache`
   } yield res
 ~~~~~~~~
 
-`Future.successful` creates a new `Future`, much like an `Option` or
-`List` constructor.
-
 `Future.successful` membuat objek `Future` baru, sebagaimana konstruktor
 `Option` maupun `List`.
 
 
-### Early Exit
+### Pulang Duluan
 
-Say we have some condition that should exit early with a successful value.
-
-Misalkan kita punya sebuah kondisi dimana harus selesai di tengah tengah
-dan mengembalikan nilai yang diinginkan (lol).
-
-If we want to exit early with an error, it is standard practice in OOP to throw
-an exception
+Misalkan kita punya sebuah keadaan dimana harus selesai di tengah tengah
+dan mengembalikan nilai sukses.
 
 Standar praktik pada OOP ketika kita harus keluar dari komputasi lebih awal
 adalah dengan melempar eksepsi
@@ -477,8 +363,6 @@ adalah dengan melempar eksepsi
   require(a > 0, s"$a must be positive")
   a * 10
 ~~~~~~~~
-
-which can be rewritten async
 
 Yang dapat ditulas ulang secara asinkronus.
 
@@ -495,11 +379,8 @@ Yang dapat ditulas ulang secara asinkronus.
   } yield b * 10
 ~~~~~~~~
 
-But if we want to exit early with a successful return value, the simple
-synchronous code:
-
 Namun, bila kita ingin keluar lebih awal dari komputasi dengan nilai yang
-ok (lol), kode sinkronus yang sederhana semacam ini:
+ok, kode sinkronus yang sederhana semacam ini:
 
 {lang="text"}
 ~~~~~~~~
@@ -510,10 +391,7 @@ ok (lol), kode sinkronus yang sederhana semacam ini:
   else a * getB
 ~~~~~~~~
 
-translates into a nested `for` comprehension when our dependencies are
-asynchronous:
-
-ketika diterjemahkan menjadi `for` comprehension berlapis saat kode
+ketika diterjemahkan menjadi komprehensi `for` berlapis saat kode
 tersebut mempunyai ketergantungan asinkronus:
 
 {lang="text"}
@@ -527,21 +405,14 @@ tersebut mempunyai ketergantungan asinkronus:
   } yield c
 ~~~~~~~~
 
-A> If there is an implicit `Monad[T]` for `T[_]` (i.e. `T` is monadic) then Scalaz
-A> lets us create a `T[A]` from a value `a: A` by calling `a.pure[T]`.
-A> 
-A> Jika ada `Monad[T]` dalam konteks implisit untuk `T[_]` maka Scalaz akan
-A> menyediakan jalan saat kita membuat `T[A]` dari nilai `a: A` dengan memanggil
+A> Jika ada konteks `Monad[T]` implisit untuk `T[_]` maka Scalaz akan
+A> memperkenankan kita membuat `T[A]` dari nilai `a: A` dengan memanggil
 A> `a.Pure[T]`.
-A>
-A> Scalaz provides `Monad[Future]`, and `.pure[Future]` calls `Future.successful`.
-A> Besides `pure` being slightly shorter to type, it is a general concept that
-A> works beyond `Future`, and is therefore recommended.
 A>
 A> Scalaz juga menyediakan `Monad[Future]` dengan tambahan `.pure[Future]` yang
 A> memanggil `Future.successful`. Selain `pure` sedikit lebih pendek untuk ditulis
 A> `pure` juga mencakup konsep umum yang lebih luas dibandingkan `Future`.
-A> Maka dari itu, `pure` sangat direkomendasikan untuk digunakan.
+A> Maka dari itu, `pure` lebih direkomendasikan untuk digunakan.
 A> 
 A> {lang="text"}
 A> ~~~~~~~~
@@ -553,19 +424,12 @@ A>   } yield c
 A> ~~~~~~~~
 
 
-## Unhappy path
-
-So far we've only looked at the rewrite rules, not what is happening in `map`
-and `flatMap`. Consider what happens when the `for` context decides that it
-cannot proceed any further.
+## Jalan Penuh Derita
 
 Sampai saat ini, kita baru membahas ingat mengenai aturaan penulisan ulang
 dan belum membahas mengenai `map` dan `flatMap`.
 Kadang-kadang, ada kondisi dimana `for` harus berhenti di tengah-tengah. Apa
 yang terjadi?
-
-In the `Option` example, the `yield` is only called when `i,j,k` are
-all defined.
 
 Pada contoh `Option`, `yield` hanya dipanggil jika dan hanya jika `i, j, k`
 berhasil terdefinisi.
@@ -579,25 +443,17 @@ berhasil terdefinisi.
   } yield (i + j + k)
 ~~~~~~~~
 
-If any of `a,b,c` are `None`, the comprehension short-circuits with
-`None` but it doesn't tell us what went wrong.
-
-Misalkan salah satu dari `a, b, c` adalah `None`, akan terjadi hubungan
-pendek pada comprehension dan nilai `None` akan dikembalikan tanpa memberikan
+Misalkan salah satu dari `a, b, c` adalah `None`, akan terjadi hubungan pendek
+pada komprehensi tersebut dan nilai `None` akan dikembalikan tanpa memberikan
 konteks tentang nilai mana yang berupa `None`.
 
-A> There are many functions in the wild that take `Option` parameters but actually
-A> require all parameters to exist. An alternative to throwing a runtime exception
-A> is to use a `for` comprehension, giving us totality (a return value for every
-A> input):
-A> 
 A> Sering ditemui fungsi yang menerima parameter berupa `Option` walaupun pada
 A> kenyataannya, mereka berharap semua parameter mempunya nilai. Layaknya
 A> yang kita tahu saat sesuatu tidak berjalan sesuai ekspektasi, kebanyakan
 A> orang akan marah marah dan melempar barang; dalam konteks ini eksepsi.
-A> Solusi alternatif pada contoh diatas adalah menggunakan `for` comprehension 
+A> Solusi alternatif pada contoh diatas adalah menggunakan komprehensi `for`
 A> yang tidak saja menyediakan cara tanpa marah marah, juga memberikan kita
-A> *kesemestaan* (lol) yang berarti kita pasti mendapatkan nilai untuk semua
+A> *totalitas* yang berarti kita pasti mendapatkan nilai untuk semua
 A> parameter yang kita berikan kepada sebuah fungsi.
 A>
 A> {lang="text"}
@@ -611,11 +467,7 @@ A>     number <- someNumber
 A>   } yield s"$number ${name}s"
 A> ~~~~~~~~
 A> 
-A> but this is verbose, clunky and bad style. If a function requires
-A> every input then it should make its requirement explicit, pushing the
-A> responsibility of dealing with optional parameters to its caller.
-A>
-A> Sebagaimana yang terlihat pada potongan di atas, ada beberapa kekurangan.
+A> yang sebagaimana terlihat pada potongan di atas, ada beberapa kekurangan.
 A> Seperti bertele-tele, kaku, dan secara teknis, kurang bagus bila diteruskan.
 A> Jika sebuah fungsi berharap setiap masukan mempunyai nilai, maka fungsi
 A> tersebut harus secara langsung menyatakan apa yang ia minta dan menyerahkan
@@ -626,13 +478,9 @@ A> ~~~~~~~~
 A>   def namedThings(name: String, num: Int) = s"$num ${name}s"
 A> ~~~~~~~~
 
-If we use `Either`, then a `Left` will cause the `for` comprehension
-to short circuit with extra information, much better than `Option` for
-error reporting:
-
 Di sisi lain, bila kita menggunakan `Either`, seperti `None`, `Left` akan
 menyebabkan arus-pendek namun memberikan informasi tambahan. Dengan demikian,
-`Either` merupakan pilihan yang jauh lebih baik daripada `Option`. (missed the pun in bahasa)
+`Either` merupakan pilihan yang jauh lebih baik daripada `Option`.
 
 {lang="text"}
 ~~~~~~~~
@@ -643,8 +491,6 @@ menyebabkan arus-pendek namun memberikan informasi tambahan. Dengan demikian,
   
   Left(sorry, no c)
 ~~~~~~~~
-
-And lastly, let's see what happens with a `Future` that fails:
 
 Mari kita lihat apa yang terjadi bila `Future` gagal:
 
@@ -660,36 +506,23 @@ Mari kita lihat apa yang terjadi bila `Future` gagal:
   caught java.lang.Throwable
 ~~~~~~~~
 
-The `Future` that prints to the terminal is never called because, like
-`Option` and `Either`, the `for` comprehension short circuits.
-
 `Future` yang bertugas untuk mencetak ke terminal tidak akan pernah dipanggil
 sebagaimana `Option` dan `Either` dikarenakan `for` selesai lebih awal.
 
-Short circuiting for the unhappy path is a common and important theme.
-`for` comprehensions cannot express resource cleanup: there is no way
-to `try` / `finally`. This is good, in FP it puts a clear ownership of
-responsibility for unexpected error recovery and resource cleanup onto
-the context (which is usually a `Monad` as we will see later), not the
-business logic.
-
-Penggunaan fungsi-arus-pendek (lol) adalah hal yang jamak dilakukan, penting
+Penggunaan fungsi-arus-pendek adalah hal yang jamak dilakukan, penting
 malah, pada alur kejadian yang tidak menyenangkan.
-Hal yang juga patut diperhatikan adalah `for` comprehension tidak dapat
-melakukan cleanup (lol) sumber daya yang disebabkan tidak ada `try` maupun
+Hal yang juga patut diperhatikan adalah komprehensi `for` tidak dapat
+melakukan melepas sumber daya yang disebabkan tidak ada `try` maupun
 `finally`.
 Secara prinsip, pemrograman fungsional memancang dengan jelas siapa yang
 bertanggung jawab ketika terjadi galat yang tak terduga.
 Kewajiban tersebut jatuh kepada konteks eksekusi program, yang biasanya berupa
 `Monad`, bukan logika bisnis.
 
-## Incomprehensible
+## Ngelantur
 
-The context we're comprehending over must stay the same: we cannot mix
-contexts.
-
-Adalah haram untuk mencampur-adukkan konteks saat menggunakan `for`
-comprehension seperti pada cuplikan di bawah.
+Adalah haram untuk mencampur-adukkan konteks saat menggunakan komprehensi `for`
+seperti pada cuplikan di bawah.
 
 {lang="text"}
 ~~~~~~~~
@@ -706,19 +539,9 @@ comprehension seperti pada cuplikan di bawah.
                 ^
 ~~~~~~~~
 
-Nothing can help us mix arbitrary contexts in a `for` comprehension
-because the meaning is not well defined.
-
-Tak ada yang jalan keluar ketika kita ingin mencampur-adukkan konteks pada
-sebuah `for` comprehension. Laksana berucap dalam bahasa Inggris kepada
-orang pedalaman Amazon. Tak ada titik temu, hampa. (lol)
-
-But when we have nested contexts the intention is usually obvious yet
-the compiler still doesn't accept our code.
-
 Bahkan, ketika kita kode yang ada di depan kita memiliki konteks berlapis,
-kompilator acap kali tidak paham intensi kode tersebut.
-Walau maksud dari kode tersebut sejelas rembulan di malam tanpa bintang. (lol)
+kompilator acap kali tidak paham maksud kode tersebut.
+Walau maksud dari kode tersebut terlihat jelas bagi kita.
 
 {lang="text"}
 ~~~~~~~~
@@ -732,28 +555,17 @@ Walau maksud dari kode tersebut sejelas rembulan di malam tanpa bintang. (lol)
   <console>:30: error: value * is not a member of Option[Int]
 ~~~~~~~~
 
-Here we want `for` to take care of the outer context and let us write
-our code on the inner `Option`. Hiding the outer context is exactly
-what a *monad transformer* does, and Scalaz provides implementations
-for `Option` and `Either` named `OptionT` and `EitherT` respectively.
-
 Di atas, kita bermaksud agar `for` mengurus mengenai konteks yang
 melapisi `Option` di dalam namun apa yang terjadi? Sesuai yang diduga
 kompilator gagal menerka maksud kita.
 Yang kita lakukan diatas, menghiraukan konteks bagian luar, biasa
-dicapai dengan menggunakan *monad transformer* yang oleh Scalaz
+dicapai dengan menggunakan *transformator monad* yang oleh Scalaz
 disediakan implementasi untuk `Option` dan `Either` dengan nama
 `OptionT` dan `EitherT`.
 
-The outer context can be anything that normally works in a `for`
-comprehension, but it needs to stay the same throughout.
-
-Pada dasarnya, apapun yang bisa digunakan pada `for` comprehension
+Pada dasarnya, apapun yang bisa digunakan pada komprehensi `for`
 bisa digunakan sebagain konteks bagian luar, selama konsisten
-sepanjang comprehension.
-
-We create an `OptionT` from each method call. This changes the context
-of the `for` from `Future[Option[_]]` to `OptionT[Future, _]`.
+sepanjang komprehensi tersebut.
 
 Kita juga bisa menggunakan `OptionT` untuk mengubah konteks `for` dari
 `Future[Option[_]]` menjadi `OptionT[Future, _]` yang ditunjukkan
@@ -768,8 +580,6 @@ pada REPL di bawah.
   result: OptionT[Future, Int] = OptionT(Future(<not completed>))
 ~~~~~~~~
 
-`.run` returns us to the original context
-
 Dan dengan memanggil `.run`, konteks yang semula berubah akan kembali
 muncul.
 
@@ -779,13 +589,9 @@ muncul.
   res: Future[Option[Int]] = Future(<not completed>)
 ~~~~~~~~
 
-The monad transformer also allows us to mix `Future[Option[_]]` calls with
-methods that just return plain `Future` via `.liftM[OptionT]` (provided by
-scalaz):
-
-Selain itu, monad transformer juga membuat kita mampu mencampur penggunaan
+Selain itu, transformator moda juga memperkenankan kita untuk menggunakan
 `Future[Option[_]]` dengan metoda-metoda yang hanya mengembalikan nilai
-`Future` saja dengan `.liftM[OptionT]` yang disediakan oleh Scalaz.
+`Future` saja melalui `.liftM[OptionT]` yang disediakan oleh Scalaz.
 Untuk lebih jelasnya, silakan simak contoh di bawah:
 
 {lang="text"}
@@ -799,12 +605,9 @@ Untuk lebih jelasnya, silakan simak contoh di bawah:
   result: OptionT[Future, Int] = OptionT(Future(<not completed>))
 ~~~~~~~~
 
-and we can mix with methods that return plain `Option` by wrapping
-them in `Future.successful` (`.pure[Future]`) followed by `OptionT`
-
 terlebih lagi, kita dapat mencampur penggunaan metoda yang mengembalikan
 `Option` dengan melapisinya dengan `Future.successful` (`.pure[Future]`,
-bila menggunakan Scalaz) dan disambung dengan `OptionT`.
+bila menggunakan Scalaz) dan disambung dengan `OptionT`
 
 {lang="text"}
 ~~~~~~~~
@@ -817,10 +620,6 @@ bila menggunakan Scalaz) dan disambung dengan `OptionT`.
          } yield (a * b) / (c * d)
   result: OptionT[Future, Int] = OptionT(Future(<not completed>))
 ~~~~~~~~
-
-It is messy again, but it is better than writing nested `flatMap` and
-`map` by hand. We can clean it up with a DSL that handles all the
-required conversions into `OptionT[Future, _]`
 
 Sudah barang tentu dengan mencampur banyak konteks akan menghasilkan
 kode yang "berisik". Akan tetapi, hal ini jauh lebih baik bila dibandingkan
@@ -836,13 +635,9 @@ pengubahan-pengubahan yang dibutuhkan agar menjadi `OptionT[Future, _]`.
   def lift[A](a: A)               = liftOption(Option(a))
 ~~~~~~~~
 
-combined with the `|>` operator, which applies the function on the
-right to the value on the left, to visually separate the logic from
-the transformers
-
 Ditambah lagi, dengan menggunakan operator `|>` yang melewatkan nilai
 di sebelah kiri ke fungsi di sebelah kanan operator tersebut, pembatasan
-antara logika bisnis dengan monad transformer akan terlihat lebih jelas.
+antara logika bisnis dengan transformator monad akan terlihat lebih jelas.
 
 {lang="text"}
 ~~~~~~~~
@@ -856,21 +651,10 @@ antara logika bisnis dengan monad transformer akan terlihat lebih jelas.
   result: OptionT[Future, Int] = OptionT(Future(<not completed>))
 ~~~~~~~~
 
-A> `|>` is often called the *thrush operator* because of its uncanny resemblance to
-A> the cute bird. Those who do not like symbolic operators can use the alias
-A> `.into`.
-A>
-A> penjelasan ini mungkin relevan bila diterjemahkan ke bahasa Indonesia.
-
-This approach also works for `Either` (and others) as the inner
-context, but their lifting methods are more complex and require
-parameters. Scalaz provides monad transformers for a lot of its own
-types, so it is worth checking if one is available.
-
-Pendekatan ini juga bisa digunakan untuk `Either` dan transformer lainnya
-sebagai konteks yang dilapisi. Namun, metoda pengubahan (lifting, lol dyel)
+Pendekatan ini juga bisa digunakan untuk `Either` dan transformator lainnya
+sebagai konteks bagian dalam. Namun, metoda pengangkatan transformator
 lebih kompleks dan membutuhkan parameter tambahan.
-Scalaz menyediakan monad transformer bagi kebanyakan tipe yang dimiliki-nya.
+Scalaz menyediakan monad transformator bagi kebanyakan tipe yang dimilikinya.
 Silakan periksa bila ada.
 
 # Application Design
