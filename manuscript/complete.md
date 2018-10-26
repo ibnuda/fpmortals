@@ -14658,19 +14658,11 @@ performa paling akhir. Hindari kutu karena salah ketik pada instans manual
 dengan menggunakan alat penghasil kode.
 
 
-# Wiring up the Application
-
-To finish, we will apply what we have learnt to wire up the example application,
-and implement an HTTP client and server using the [http4s](https://http4s.org/) pure FP library.
+# Merangkai Aplikasi
 
 Untuk menutup buku ini, kita akan menerapkan apa yang telah kita pelajari dengan
 menulis contoh aplikasi dan mengimplementasikan sebuah klien dan peladen HTTP
 menggunakan pustaka pemrogaram fungsional murni (lol, help) [http4s](https://http4s.org/).
-
-The source code to the `drone-dynamic-agents` application is available along
-with the book's source code at `https://github.com/fommil/fpmortals` under the
-`examples` folder. It is not necessary to be at a computer to read this chapter,
-but many readers may prefer to explore the codebase in addition to this text.
 
 Kode sumber dari aplikasi `drone-dynamic-agents` tersedia bersama dengan sumber
 kode buku pada `https://github.com/fommil/fpmortals` pada direktori `example`.
@@ -14678,16 +14670,11 @@ Untuk membaca bab ini, tidak perlu berada di depan komputer, namun kebanyakan
 pembaca mungkin memilih untuk melihat-lihat basis-kode sebagai tambahan tulisan
 ini.
 
-Some parts of the application have been left unimplemented, as an exercise to
-the reader. See the `README` for further instructions.
-
 Beberapa bagian dari aplikasi sengaja belum diimplementasikan dan digunakan
 sebagai latihan bagi pembaca. Silakan lihat `README` untuk instruksi lebih lanjut.
 
 
-## Overview
-
-Our main application only requires an implementation of the `DynAgents` algebra.
+## Ikhtisar
 
 Aplikasi utama kita hanya membutuhkan sebuah implementasi untuk aljabar `DynAgents`.
 
@@ -14700,16 +14687,9 @@ Aplikasi utama kita hanya membutuhkan sebuah implementasi untuk aljabar `DynAgen
   }
 ~~~~~~~~
 
-We have an implementation already, `DynAgentsModule`, which requires
-implementations of the `Drone` and `Machines` algebras, which require a
-`JsonClient`, `LocalClock` and OAuth2 algebras, etc, etc, etc.
-
 Kita sudah memiliki sebuah implementasi, `DynAgentsModule`, yang membutuhkan
 implementasi dari aljabar `Drone` dan `Machines`, yang juga membutuhkan sebuah
 aljabar `JsonClient`, `LocalClock`, OAuth2, dan lain lain.
-
-It is helpful to get a complete picture of all the algebras, modules and
-interpreters of the application. This is the layout of the source code:
 
 Gambaran utuh dari semua aljabar, modul, dan interpreter sangat berguna. Berikut
 tata letak kode sumber:
@@ -14746,8 +14726,6 @@ tata letak kode sumber:
       ├── LocalClock.scala
       └── Sleep.scala
 ~~~~~~~~
-
-The signatures of all the algebras can be summarised as
 
 Penanda dari semua aljabar dapat diikhtisarkan sebagai
 
@@ -14807,14 +14785,9 @@ Penanda dari semua aljabar dapat diikhtisarkan sebagai
   }
 ~~~~~~~~
 
-Note that some signatures from previous chapters have been refactored to use
-Scalaz data types, now that we know why they are superior to the stdlib.
-
 Harap diperhatikan bahwa beberapa penanda dari bab sebelumnya sudah difaktorisasi
 ulang agar menggunakan tipe data Scalaz karena kita tahu bahwa tipe data tersebut
 lebih unggul bila dibandingkan dengan pustaka standar.
-
-The data types are:
 
 Tipe data tersebut adalah:
 
@@ -14845,8 +14818,6 @@ Tipe data tersebut adalah:
   final case class UrlQuery(params: IList[(String, String)]) extends AnyVal
 ~~~~~~~~
 
-and the typeclasses are
-
 dan kelas tipe yang digunakan adalah:
 
 {lang="text"}
@@ -14859,16 +14830,9 @@ dan kelas tipe yang digunakan adalah:
   }
 ~~~~~~~~
 
-We derive useful typeclasses using `scalaz-deriving` and Magnolia. The
-`ConfigReader` typeclass is from the `pureconfig` library and is used to read
-runtime configuration from HOCON property files.
-
 Kita menderivasi kelas tipe yang berguna menggunakan `scalaz-deriving` dan Magnolia.
 Kelas tipe `ConfigReader` berasal dari pustaka `pureconfig` dan digunakan untuk
 membaca konfigurasi waktu-jalan dari berkas properti HOCON.
-
-And without going into the detail of how to implement the algebras, we need to
-know the dependency graph of our `DynAgentsModule`.
 
 Dan tanpa membahas detail bagaimana mengimplementasikan aljabar, kita harus tahu
 graf ketergantungan dari `DynAgentsModule`.
@@ -14888,8 +14852,6 @@ graf ketergantungan dari `DynAgentsModule`.
     H: OAuth2JsonClient[F]
   ) extends Machines[F] { ... }
 ~~~~~~~~
-
-There are two modules implementing `OAuth2JsonClient`, one that will use the OAuth2 `Refresh` algebra (for Google) and another that reuses a non-expiring `BearerToken` (for Drone).
 
 Ada dua modul yang mengimplementasikan `OAuth2JsonClient`, satu yang digunakan untuk
 aljabar OAuth2 `Refresh` (untuk Google) dan satunya yang menggunakan ulang `BearerToken`
@@ -14914,15 +14876,9 @@ tanpa kadaluarsa (untuk Drone).
   ) extends OAuth2JsonClient[F] { ... }
 ~~~~~~~~
 
-So far we have seen requirements for `F` to have an `Applicative[F]`, `Monad[F]`
-and `MonadState[F, BearerToken]`. All of these requirements can be satisfied by
-using `StateT[Task, BearerToken, ?]` as our application's context.
-
 Sampai disini, kita sudah melihat persyaratan untuk `F` agar mempunyai `Applicative[F]`,
 `Monad[F]`, dan `MonadState[F, BearerToken]`. Semua persyaratan ini dapat dipenuhi
 dengan menggunakan `StateT[Task, BearerToken, ?]` sebagai konteks aplikasi kita.
-
-However, some of our algebras only have one interpreter, using `Task`
 
 Walaupun demikian, beberapa aljabar kita hanya mempunyai satu interpreter,
 menggunakan `Task`
@@ -14933,19 +14889,10 @@ menggunakan `Task`
   final class SleepTask extends Sleep[Task] { ... }
 ~~~~~~~~
 
-But recall that our algebras can provide a `liftM` on their companion, see
-Chapter 7.4 on the Monad Transformer Library, allowing us to lift a
-`LocalClock[Task]` into our desired `StateT[Task, BearerToken, ?]` context, and
-everything is consistent.
-
 Namun harap diingat bahwa aljabar kita dapat menyediakan sebuah `liftM` pada objek
 pendampingnya, lihat pada bab 7.4 pada bagian Pustaka Transformator Monad, dan
 memperkenankan kita untuk mengangkat `LocalClock[Task]` pada konteks `StateT[Task, BearerToken, ?]`
 dan pada akhirnya semuanya konsisten.
-
-Unfortunately, that is not the end of the story. Things get more complicated
-when we go to the next layer. Our `JsonClient` has an interpreter using a
-different context
 
 Sayangnya, cerita tidak berhenti disini. Beberapa hal menjadi semakin kompleks
 saat kita beralih pada lapisan selanjutya. `JsonClient` kita mempunyai sebuah
@@ -14967,19 +14914,11 @@ saat kita beralih pada lapisan selanjutya. `JsonClient` kita mempunyai sebuah
   }
 ~~~~~~~~
 
-Note that the `BlazeJsonClient` constructor returns a `Task[JsonClient[F]]`, not
-a `JsonClient[F]`. This is because the act of creating the client is effectful:
-mutable connection pools are created and managed internally by http4s.
-
 Harap perhatikan bahwa konstruktor `BlazeJsonClient` mengembalikan sebuah
 `Task[JsonClient[F]]` dan bukan `JsonClient[F]`. Hal ini disebabkan karena
 pembuatan klien tersebut memiliki efek: kumpulan koneksi tak tetap dibuat dan
 diatur secara internal oleh http4s.
 
-A> `OAuth2JsonClientModule` requires a `MonadState` and `BlazeJsonClient` requires
-A> `MonadError` and `MonadIO`. Our application's context will now likely be the
-A> combination of both:
-A>
 A> `OAuth2JsonClientModuel` membutuhkan sebuah `MonadState` dan `BlazeJsonClient`
 A> membutuhkan `MonadError` dan `MonadIO`. Konteks aplikasi kita kemungkinan besar
 A> merupkan kombinasi keduanya.
@@ -14988,25 +14927,12 @@ A> {lang="text"}
 A> ~~~~~~~~
 A>   StateT[EitherT[Task, JsonClient.Error, ?], BearerToken, ?]
 A> ~~~~~~~~
-A> 
-A> A monad stack. Monad stacks automatically provide appropriate instances of
-A> `MonadState` and `MonadError` when nested, so we don't need to think about it.
-A> If we had hard-coded the implementation in the interpreter, and returned an
-A> `EitherT[Task, Error, ?]` from `BlazeJsonClient`, it would make it a lot harder
-A> to instantiate.
 A>
 A> Susunan monad. Susunan monad secara otomatis menyediakan instans dari `MonadState`
 A> dan `MonadError` saat dilapiskan, jadi kita tidak perlu memikirkan tentang hal ini.
 A> Bila kita sudah mempermanenkan implementasi pada *interpreter*, dan mengembalikan
 A> sebuah `EitherT[Task, Error, ?]` dari `BlazeJsonClient`, maka instansiasi akan
 A> menjadi jauh lebih sulit.
-
-We must not forget that we need to provide a `RefreshToken` for
-`GoogleMachinesModule`. We could ask the user to do all the legwork, but we are
-nice and provide a separate one-shot application that uses the `Auth` and
-`Access` algebras. The `AuthModule` and `AccessModule` implementations bring in
-additional dependencies, but thankfully no change to the application's `F[_]`
-context.
 
 Kita juga tidak boleh lupa bahwa kita harus menyediakan sebuah `RefreshTokon` untuk
 `GoogleMachinesModule`. Kita dapat meminta pengguna untuk repot, namun karena kita
@@ -15038,24 +14964,10 @@ tambahan. Namun, tidak ada perubahan pada konteks aplikasi `F[_]`.
   }
 ~~~~~~~~
 
-The interpreter for `UserInteraction` is the most complex part of our codebase:
-it starts an HTTP server, sends the user to visit a webpage in their browser,
-captures a callback in the server, and then returns the result while safely
-shutting down the web server.
-
 *Interpreter* untuk `UserInteraction` merupakan bagian paling kompleks dari
 basis kode kita: bagian ini memulai peladen HTTP, mengirim pengguna untuk mengunjungi
 sebuah laman web pada peramban mereka, menangkap panggilan balik pada peladen, dan
 mengembalikan hasil sembari mematikan peladen web secara aman.
-
-Rather than using a `StateT` to manage this state, we use a `Promise` primitive
-(from `ioeffect`). We should always use `Promise` (or `IORef`) instead of a
-`StateT` when we are writing an `IO` interpreter since it allows us to contain
-the abstraction. If we were to use a `StateT`, not only would it have a
-performance impact on the entire application, but it would also leak internal
-state management to the main application, which would become responsible for
-providing the initial value. We also couldn't use `StateT` in this scenario
-because we need "wait for" semantics that are only provided by `Promise`.
 
 Kita tidak menggunakan `StateT` untuk mengatur keadaan ini, namun kita menggunakan
 primitif `Promise` (dari `ioeffect`). Kita harus selalu menggunakan `Promise`
@@ -15069,13 +14981,8 @@ oleh `Promise`.
 
 ## `Main`
 
-The ugliest part of FP is making sure that monads are all aligned and this tends
-to happen in the `Main` entrypoint.
-
 Bagian paling buruk dari PF adalah memastikan bahwa semua monad selaras dan hal
 semacam ini biasa terjadi pada titik mulai `Main`.
-
-Our main loop is
 
 Ikalan utama kita adalah
 
@@ -15086,8 +14993,6 @@ Ikalan utama kita adalah
     state = update(state)
     state = act(state)
 ~~~~~~~~
-
-and the good news is that the actual code will look like
 
 dan kabar baiknya, kode yang asli terlihat seperti
 
@@ -15102,24 +15007,14 @@ dan kabar baiknya, kode yang asli terlihat seperti
   } yield ()
 ~~~~~~~~
 
-where `F` holds the state of the world in a `MonadState[F, WorldView]`. We can
-put this into a method called `.step` and repeat it forever by calling
-`.step[F].forever[Unit]`.
-
 dimana `F` menyimpan keadaan keseluruhan pada sebuah `MonadState[F, WorldView]`.
 Kita dapat menempatkannya pada sebuah metoda dengan nama `.step` dan mengulang
 selamanya dengan memanggil `.step[F].forever[Unit]`.
-
-There are two approaches we can take, and we will explore both. The first, and
-simplest, is to construct one monad stack that all algebras are compatible with.
-Everything gets a `.liftM` added to it to lift it into the larger stack.
 
 Ada dua pendekatan yang dapat kita ambil, dan kita akan mempelajari keduanya.
 Yang pertama, dan paling sederhana, adalah membangun sebuah susunan monad yang
 sesuai dengan semua aljabar. Semua mendapatkan sebuah metoda `.liftM` agar dapat
 diangkat ke susunan yang lebih tinggi.
-
-The code we want to write for the one-shot authentication mode is
 
 Kode yang ingin kita tulis untuk mode otentikasi sekali pakai adalah
 
@@ -15140,19 +15035,9 @@ Kode yang ingin kita tulis untuk mode otentikasi sekali pakai adalah
   }.run
 ~~~~~~~~
 
-where `.readConfig` and `.putStrLn` are library calls. We can think of them as
-`Task` interpreters of algebras that read the application's runtime
-configuration and print a string to the screen.
-
 dimana `.readConfig` dan `.putStrLn` merupakan panggilan pustaka. Kita dapat
 menganggap mereka sebagai *interpreter* `Task` untuk aljabar yang membaca konfigurasi
 waktu-jalan dari aplikasi dan mencetak sebuah *string* ke layar.
-
-But this code does not compile, for two reasons. Firstly, we need to consider
-what our monad stack is going to be. The `BlazeJsonClient` constructor returns a
-`Task` but the `JsonClient` methods require a `MonadError[...,
-JsonClient.Error]`. This can be provided by `EitherT`. We can therefore
-construct the common monad stack for the entire `for` comprehension as
 
 Namun, kode ini tidak dapat dikompilasi karena dua alasan. Pertama, kita harus
 mempertimbangkan bagaimana bentuk susunan monad kita. Konstruktor `BlazeJsonClient`
@@ -15166,11 +15051,6 @@ mengembalikan `Task` namun metoda milik `JsonClient` membutuhkan sebuah
   type H[a] = EitherT[Task, JsonClient.Error, a]
 ~~~~~~~~
 
-Unfortunately this means we must `.liftM` everything that returns a `Task`,
-which adds quite a lot of boilerplate. Unfortunately, the `.liftM` method does
-not take a type of shape `H[_]`, it takes a type of shape `H[_[_], _]`, so we
-need to create a type alias to help out the compiler:
-
 Sayangnya, hal ini juga berarti kita harus mengangkat semua yang mengembalikan
 `Task` dengan `.liftM`. Hal semacam ini menambah plat cetak cukup banyak.
 Sayangnya, metoda `.liftM` tidak menerima tipe dengan bentuk `H[_]`. `.liftM`
@@ -15182,8 +15062,6 @@ alias tipe untuk membantu kompilator:
   type HT[f[_], a] = EitherT[f, JsonClient.Error, a]
   type H[a]        = HT[Task, a]
 ~~~~~~~~
-
-we can now call `.liftM[HT]` when we receive a `Task`
 
 sekarang kita dapat memanggil `.liftM[HT]` saat kita menerima sebuah `Task`
 
@@ -15202,8 +15080,6 @@ sekarang kita dapat memanggil `.liftM[HT]` saat kita menerima sebuah `Task`
   } yield ()
 ~~~~~~~~
 
-But this still doesn't compile, because `clock` is a `LocalClock[Task]` and `AccessModule` requires a `LocalClock[H]`. We simply add the necessary `.liftM` boilerplate to the companion of `LocalClock` and can then lift the entire algebra
-
 Namun, kode diatas masih belum dapat dikompilasi karena `clock` berupa `LocalClock[Task]`
 dan `AccessModule` membutuhkan sebuah `LocalClock[H]`. Kita tinggal menambahkan
 plat cetak `.liftM` yang dibutuhkan pada objek pendamping dari `LocalClock` dan
@@ -15214,38 +15090,21 @@ pada akhirnya dapat mengangkat semua aljabar
   clock     = LocalClock.liftM[Task, HT](new LocalClockTask)
 ~~~~~~~~
 
-and now everything compiles!
-
 dan semuanya berhasil dikompilasi.
-
-The second approach to wiring up an application is more complex, but necessary
-when there are conflicts in the monad stack, such as we need in our main loop.
-If we perform an analysis we find that the following are needed:
 
 Pendekatan kedua adalah dengan membuat sebuah aplikasi yang lebih kompleks,
 namun dibutuhkan bila terjadi konflik pada susunan monad, seperti yang kita
 butuhkan pada ikalan utama kita. Bila kita melakukan analisis, kita akan menemukan
 bahwa monad berikutlah yang kita butuhkan:
 
--   `MonadError[F, JsonClient.Error]` for uses of the `JsonClient`
--   `MonadState[F, BearerToken]` for uses of the `OAuth2JsonClient`
--   `MonadState[F, WorldView]` for our main loop
-
 -   `MonadError[F, JsonClient.Error]` untuk penggunaan `JsonClient`
 -   `MonadState[F, BearerToken]` untuk penggunaan`OAuth2JsonClient`
 -   `MonadState[F, WorldView]` untuk ikalan utama kita
-
-Unfortunately, the two `MonadState` requirements are in conflict. We could
-construct a data type that captures all the state of the program, but that is a
-leaky abstraction. Instead, we nest our `for` comprehensions and provide state
-where it is needed.
 
 Sayangnya, persyaratan dua `MonadState` menyebabkan konflik. Kita dapat membuat
 sebuah tipe data yang menangkap semua keadaan program. Namun, hal tersebut merupakan
 abstraksi yang penuh kebocoran. Maka dari itu, kita akan melapiskan komprehensi
 *for* (lol, help) kita dan menyediakan keadaan saat dibutuhkan.
-
-We now need to think about three layers, which we will call `F`, `G`, `H`
 
 Sekarang kita harus berpikir mengenai tiga lapisan, yang kita sebut `F`, `G`, dan `H`
 
@@ -15259,11 +15118,6 @@ Sekarang kita harus berpikir mengenai tiga lapisan, yang kita sebut `F`, `G`, da
   type G[a]        = GT[H, a]
   type F[a]        = FT[G, a]
 ~~~~~~~~
-
-Now some bad news about `.liftM`... it only works for one layer at a time. If we
-have a `Task[A]` and we want an `F[A]`, we have to go through each step and type
-`ta.liftM[HT].liftM[GT].liftM[FT]`. Likewise, when lifting algebras we have to
-call `liftM` multiple times. To get a `Sleep[F]`, we have to type
 
 Dan sekarang saatnya berita buruk mengenai `.liftM`. Metoda ini hanya berlaku
 pada satu lapisan pada satu waktu. Bila kita mempunyai sebuah `Task[A]` dan kita
@@ -15280,8 +15134,6 @@ harus menulis
   }
 ~~~~~~~~
 
-and to get a `LocalClock[G]` we do two lifts
-
 dan untuk mendapatkan `LocalClock[G]` kita harus melakukan dua kali pengangkatan
 
 {lang="text"}
@@ -15291,8 +15143,6 @@ dan untuk mendapatkan `LocalClock[G]` kita harus melakukan dua kali pengangkatan
     liftM(liftM(new LocalClockTask))
   }
 ~~~~~~~~
-
-The main application then becomes
 
 Dan aplikasi utama menjadi
 
@@ -15323,21 +15173,12 @@ Dan aplikasi utama menjadi
   }
 ~~~~~~~~
 
-where the outer loop is using `Task`, the middle loop is using `G`, and the
-inner loop is using `F`.
-
 dimana ikalan bagian luar menggunakan `Task`, ikalan tengah menggunakan `G`,
 dan ikalan dalam menggunakan `F`.
-
-The calls to `.run(start)` and `.eval(bearer)` are where we provide the initial
-state for the `StateT` parts of our application. The `.run` is to reveal the
-`EitherT` error.
 
 Panggilan ke `.run(start)` dan `.eval(bearer)` adalah dimana kita menyediakan
 keadan awal untuk bagian `StateT` aplikasi kita. `.run` digunakan untuk menyingkap
 galat `EitherT`.
-
-We can call these two application entry points from our `SafeApp`
 
 Kita dapat memanggil dua titik awal aplikasi ini dari `SafeApp` kita
 
@@ -15353,8 +15194,6 @@ Kita dapat memanggil dua titik awal aplikasi ini dari `SafeApp` kita
     }
   }
 ~~~~~~~~
-
-and then run it!
 
 dan menjalankannya.
 
@@ -15374,20 +15213,13 @@ dan menjalankannya.
   [info] got token: "<elided>"
 ~~~~~~~~
 
-Yay!
-
 Hore!
 
 
 ## Blaze
 
-We implement the HTTP client and server with the third party library `http4s`.
-The interpreters for their client and server algebras are called *Blaze*.
-
 Kita mengimplementasikan klien dan peladen HTTP dengan pustaka pihak ketiga `http4s`.
 *Interpreter* untuk aljabar klien dan peladen disebut *Blaze*.
-
-We need the following dependencies
 
 Kita butuh ketergantungan sebagai berikut
 
@@ -15404,8 +15236,6 @@ Kita butuh ketergantungan sebagai berikut
 
 ### `BlazeJsonClient`
 
-We will need some imports
-
 Sekarang kita butuh beberapa impor
 
 {lang="text"}
@@ -15416,8 +15246,6 @@ Sekarang kita butuh beberapa impor
   import org.http4s.client.Client
   import org.http4s.client.blaze.{ BlazeClientConfig, Http1Client }
 ~~~~~~~~
-
-The `Client` module can be summarised as
 
 Modul `Client` dapat diringkas menjadi
 
@@ -15430,8 +15258,6 @@ Modul `Client` dapat diringkas menjadi
     ...
   }
 ~~~~~~~~
-
-where `Request` and `Response` are data types:
 
 dimana `Request` dan `Response` merupakan tipe data:
 
@@ -15455,8 +15281,6 @@ dimana `Request` dan `Response` merupakan tipe data:
   )
 ~~~~~~~~
 
-made of
-
 yang terdiri dari
 
 {lang="text"}
@@ -15479,14 +15303,6 @@ yang terdiri dari
   type EntityBody[F[_]] = fs2.Stream[F, Byte]
 ~~~~~~~~
 
-The `EntityBody` type is an alias to `Stream` from the [`fs2`](https://github.com/functional-streams-for-scala/fs2) library. The
-`Stream` data type can be thought of as an effectful, lazy, pull-based stream of
-data. It is implemented as a `Free` monad with exception catching and
-interruption. `Stream` takes two type parameters: an effect type and a content
-type, and has an efficient internal representation for batching the data. For
-example, although we are using `Stream[F, Byte]`, it is actually wrapping the
-raw `Array[Byte]` that arrives over the network.
-
 Tipe `EntityBody` merupakan alias untuk `Stream` dari pustaka [`fs2`](https://github.com/functional-streams-for-scala/fs2).
 Tipe data `Stream` dapat dianggap sebagai aliran data dengan efek yang ditarik secara
 luntung. Tipe data ini diimplementasikan sebagai monad `Free` dengan penangkapan
@@ -15494,9 +15310,6 @@ pengecualian dan interupsi. `Stream` menerima dua parameter tipe: sebuah tipe
 dengan efek dan sebuah tipe konten, dan memiliki representasi efisien internal
 untuk mengelompokkan data. Sebagai contooh, walaupun kita menggunakan `Stream[F, Byte]`
 sebenarnya monad ini membungkus `Array[Byte]` yang tiba melalu jaringan.
-
-We need to convert our header and URL representations into the versions required
-by http4s:
 
 Kita dapat mengkonversi *header* (lol, help) dan representasi URL kita menjadi
 versi yang dibutuhkan oleh http4s:
@@ -15513,10 +15326,6 @@ versi yang dibutuhkan oleh http4s:
   def convert(uri: String Refined Url): http4s.Uri =
     http4s.Uri.unsafeFromString(uri.value) // we already validated our String
 ~~~~~~~~
-
-Both our `.get` and `.post` methods require a conversion from the http4s
-`Response` type into an `A`. We can factor this out into a single function,
-`.handler`
 
 Metoda `.get` dan `.post` keduanya membutuhkan sebuah konversi dari tipe `Response`
 http4s menjadi `A`. Kita dapat memisahkannya menjadi sebuah fungsi,
@@ -15545,23 +15354,13 @@ http4s menjadi `A`. Kita dapat memisahkannya menjadi sebuah fungsi,
   }
 ~~~~~~~~
 
-The `.through(fs2.text.utf8Decode)` is to convert a `Stream[Task, Byte]` into a
-`Stream[Task, String]`, with `.compile.foldMonoid` interpreting it with our
-`Task` and combining all the parts using the `Monoid[String]`, giving us a
-`Task[String]`.
-
 `.through(fs2.text.utf8Decode)` digunakan untuk mengkonversi `Stream[Task, Byte]`
 menjadi `Stream[Task, String]` dengan `.compile.foldMonoid` menginterpretasinya
 dengan `Task`, dan pada akhirnya, menggabungkan semua bagian menggunakan `Monoid[String]`.
 Hasilnya adalah `Task[String]`.
 
-We then parse the string as JSON and use the `JsDecoder[A]` to create the
-required output.
-
 Lalu kita mengurai *string* tersebut sebagai JSON dan menggunakan `JsDecoder[A]`
 untuk membuat keluaran yang dibutuhkan.
-
-This is our implementation of `.get`
 
 Berikut implementasi kita dari `.get`
 
@@ -15582,21 +15381,12 @@ Berikut implementasi kita dari `.get`
       .emap(identity)
 ~~~~~~~~
 
-`.get` is all plumbing: we convert our input types into the `http4s.Request`,
-then call `.fetch` on the `Client` with our `handler`. This gives us back a
-`Task[Error \/ A]`, but we need to return a `F[A]`. Therefore we use the
-`MonadIO.liftIO` to create a `F[Error \/ A]` and then `.emap` to push the error
-into the `F`.
-
 `.get` hanyalah berupa saluran (lol, help): kita mengkonversi tipe masukan
 menjadi `http4s.Request` lalu memanggil `.fetch` pada `Client` dengan `handler`
 kita. `handler` mengembalikan sebuah `Task[Error \/ A]`, namun kita membutuhkan
 sebuah `F[A]`. Maka dari itu, kita menggunakan `MonadIO.liftIO` untuk membuat
 `F[Error \/ A]` dan melakukan pemetaan menggunakan `.emap` untuk mendorong
 galat ke `F`.
-
-Unfortunately, if we try to compile this code it will fail. The error will look
-something like
 
 Sayangnya, bila kita mencoba mengkompilasi kode ini, akan terjadi kegagalan.
 Galat akan terlihat seperti
@@ -15607,14 +15397,7 @@ Galat akan terlihat seperti
   [error]  F: cats.effect.Sync[scalaz.ioeffect.Task]
 ~~~~~~~~
 
-Basically, something about a missing cat.
-
 Pada dasarnya, ada kucing yang hilang.
-
-The reason for this failure is that http4s is using a different core FP library,
-not Scalaz. Thankfully, `scalaz-ioeffect` provides a compatibility layer and the
-[shims](https://github.com/djspiewak/shims) project provides seamless (until it isn't) implicit conversions. We can
-get our code to compile with these dependencies:
 
 Alasan kegagalan ini adalah http4s menggunakan pustaka PF utama lain, bukan Scalaz.
 Untungnya, `scalaz-ioeffect` menyediakan lapisan kompatibilitas dan [*shims*](https://github.com/djspiewak/shims) (lol, help)
@@ -15629,8 +15412,6 @@ dengan ketergantungan sebagai berikut:
   )
 ~~~~~~~~
 
-and these imports
-
 dan mengimpor
 
 {lang="text"}
@@ -15639,8 +15420,6 @@ dan mengimpor
   import scalaz.ioeffect.catz._
 ~~~~~~~~
 
-The implementation of `.post` is similar but we must also provide an instance of
-
 Implementasi `.post` kurang lebih sama. Namun, kita juga harus menyediakan
 instans dari
 
@@ -15648,9 +15427,6 @@ instans dari
 ~~~~~~~~
   EntityEncoder[Task, String Refined UrlEncoded]
 ~~~~~~~~
-
-Thankfully, the `EntityEncoder` typeclass provides conveniences to let us derive
-one from the existing `String` encoder
 
 Untungnya, kelas tipe `EntityEncoder` menyediakan metoda bantuan agar dapat
 memperkenankan kita untuk menderivasi dari penyandi `String` yang sudah ada
@@ -15665,8 +15441,6 @@ memperkenankan kita untuk menderivasi dari penyandi `String` yang sudah ada
       )
 ~~~~~~~~
 
-The only difference between `.get` and `.post` is the way we construct our `http4s.Request`
-
 Satu-satunya pembeda antara `.get` dan `.post` adalah cara kita membangun `http4s.Request`
 
 {lang="text"}
@@ -15678,9 +15452,6 @@ Satu-satunya pembeda antara `.get` dan `.post` adalah cara kita membangun `http4
   )
   .withBody(payload.toUrlEncoded)
 ~~~~~~~~
-
-and the final piece is the constructor, which is a case of calling `Http1Client`
-with a configuration object
 
 dan bagian utama adalah pembangun, yang hanya berupa pemanggilan `Http1Client`
 dengan objek konfigurasi
@@ -15700,9 +15471,6 @@ dengan objek konfigurasi
 
 ### `BlazeUserInteraction`
 
-We need to spin up an HTTP server, which is a lot easier than it sounds. First,
-the imports
-
 Kita harus menyalakan sebuah peladen HTTP, yang sebenarnya jauh lebih mudah bila
 dibandingkan yang terdengar. Pertama, kita mengimpor
 
@@ -15714,8 +15482,6 @@ dibandingkan yang terdengar. Pertama, kita mengimpor
   import org.http4s.server.blaze._
 ~~~~~~~~
 
-We need to create a `dsl` for our effect type, which we then import
-
 Kita harus membuat sebuah `dsl` untuk tipe efek kita, yang nantinya akan kita
 impor
 
@@ -15724,10 +15490,6 @@ impor
   private val dsl = new Http4sDsl[Task] {}
   import dsl._
 ~~~~~~~~
-
-Now we can use the [http4s dsl](https://http4s.org/v0.18/dsl/) to create HTTP endpoints. Rather than describe
-everything that can be done, we will simply implement the endpoint which is
-similar to any of other HTTP DSLs
 
 Sekarang, kita dapat menggunakan [dsl http4s](https://http4s.org/v0.18/dsl) untuk
 membuat titik akhir HTTP. Kita tidak akan mendeskripsikan apa yang kita lakukan,
@@ -15741,9 +15503,6 @@ lain
     case GET -> Root :? Code(code) => ...
   }
 ~~~~~~~~
-
-The return type of each pattern match is a `Task[Response[Task]]`. In our
-implementation we want to take the `code` and put it into the `ptoken` promise:
 
 Tipe kembalian untuk tiap pencocokan pola adalah sebuah `Task[Response[Task]]`.
 Pada implementasi kita, kita menginginkan untuk menerima `code` dan menempatkannya
@@ -15766,9 +15525,6 @@ pada *promise* `ptoken`:
   }
 ~~~~~~~~
 
-but the definition of our services routes is not enough, we need to launch a
-server, which we do with `BlazeBuilder`
-
 namun, definisi dari rute layanan kita masih belum cukup. Kita harus menjalankan
 sebuah peladen, yang dapat kita lakukan dengan `BlazeBuilder`
 
@@ -15778,15 +15534,9 @@ sebuah peladen, yang dapat kita lakukan dengan `BlazeBuilder`
     BlazeBuilder[Task].bindHttp(0, "localhost").mountService(service, "/").start
 ~~~~~~~~
 
-Binding to port `0` makes the operating system assign an ephemeral port. We can
-discover which port it is actually running on by querying the `server.address`
-field.
-
 Dengan mengikat layanan ke *port* `0`, kita meminta kepada sistem operasi untuk
 menetapkan port manapun. Kita dapat menemukan port mana yang sebenarnya berjalan
 dengan melakukan kueri pada bidang `server.address`.
-
-Our implementation of the `.start` and `.stop` methods is now straightforward
 
 Implementasi kita atas metoda `.start` dan `.stop` pun tidak banyak basa-basi
 
@@ -15815,16 +15565,9 @@ Implementasi kita atas metoda `.start` dan `.stop` pun tidak banyak basa-basi
     Task.fail(new IOException(s) with NoStackTrace)
 ~~~~~~~~
 
-The `1.second` sleep is necessary to avoid shutting down the server before the
-response is sent back to the browser. IO doesn't mess around when it comes to
-concurrency performance!
-
 `1.second` *sleep* penting untuk menghindari matinya peladen sebelum respons
 dikirimkan balik ke peramban. IO tidak pernah main-main bila kita berbicara
 mengenai performa konkurensi.
-
-Finally, to create a `BlazeUserInteraction`, we just need the two uninitialised
-promises
 
 Dan pada akhirnya, untuk membuat sebuah `BlazeUserInteraction`, kita hanya perlu
 dua *promise* yang belum dimulai
@@ -15841,33 +15584,19 @@ dua *promise* yang belum dimulai
   }
 ~~~~~~~~
 
-We could use `IO[Void, ?]` instead, but since the rest of our application is
-using `Task` (i.e. `IO[Throwable, ?]`), we `.widenError` to avoid introducing
-any boilerplate that would distract us.
-
 Kita bisa saja menggunakan `IO[Void, ?]`, namun karena bagian-bagian aplikasi
 kita lainnya menggunakan `Task` (mis, `IO[Throwable, ?]`), kita dapat memperluas
 cakupan galat dengan menggunakan `.widenError` agar kita dapat menghindari
 pengenalan plat cetak baru sehingga fokus kita kembali terpecah.
 
 
-## Thank You
-
-And that is it! Congratulations on reaching the end.
+## Terima Kasih
 
 Demikian! Kami ucapkan selamat kepada pembaca yang selesai membaca sampai akhir.
-
-If you learnt something from this book, then please tell your friends. This book
-does not have a marketing department, so word of mouth is the only way that
-readers find out about it.
 
 Bila pembaca budiman mempelajari sesuatu dari buku ini, mohon untuk memberi tahu
 handai-taulan dan kawan-kawan mengenai buku ini. Buku ini tidak memiliki Bagian
 Pemasaran, sehingga promosi dari-mulut-ke-mulut sajalah pembaca lain dapat tahu.
-
-Get involved with Scalaz by joining the [gitter chat room](https://gitter.im/scalaz/scalaz). From there you can ask
-for advice, help newcomers (you're an expert now), and contribute to the next
-release.
 
 Pembaca budiman juga dapat ikut serta atas pengembangan Scalaz dengan bergabung
 pada [ruang obrolan gitter](https://gitter.im/scalaz/scalaz). Dari sini, pembaca
