@@ -216,35 +216,35 @@ A> berupa pilihan tambahan untuk waktu yang lama sebelum fitur tersebut diterima
 A> menjadi fitur utama.
 
 
-## Functions
+## Fungsi
 
-Although not necessary, it is good practice to explicitly write the type
-signature of a function: its name followed by its type. For example `foldl`
-specialised for a linked list
+Walaupun tidak wajib, menuliskan penanda tipe dari sebuah fungsi secara eksplisit
+merupakan kebiasaan yang bagus: nama fungsi diikuti tipenya. Sebagai contoh
+`foldl` yang dispesialisasikan untuk senarai berantai
 
 {lang="text"}
 ~~~~~~~~
   foldl :: (b -> a -> b) -> b -> [a] -> b
 ~~~~~~~~
 
-All functions are *curried* in Haskell, each parameter is separated by a `->`
-and the final type is the return type. This is equivalent to the following Scala
-signature:
+Semua fungsi di-*curry*-kan pada Haskell, tiap parameter dipisahkan oleh sebuah
+`->` dan tipe paling akhir merupakan tipe kembalian. Penanda tipe diatas ekuvalen
+dengan penanda tipe pada Scala:
 
 {lang="text"}
 ~~~~~~~~
   def foldLeft[A, B](f: (B, A) => B)(b: B)(as: List[A]): B
 ~~~~~~~~
 
-Some observations:
+Bebarapa pengamatan:
 
--   there is no keyword
--   there is no need to declare the types that are introduced
--   there is no need to name the parameters
+-   tidak ada kata kunci
+-   tidak diperlukannya tipe yang digunakan
+-   tidak diperlukannya nama parameter
 
-which makes for terse code.
+yang membuat kode ringkas
 
-Infix functions are defined in parentheses and need a fixity definition:
+Fungsi infiks didefinisikan dalam tanda kurung dan membutuhkan definisi ketetapan:
 
 {lang="text"}
 ~~~~~~~~
@@ -256,14 +256,19 @@ Regular functions can be called in infix position by surrounding their name with
 backticks, and an infix function can be called like a regular function if we
 keep it surrounded by brackets. The following are equivalent:
 
+Fungsi biasa dapat dipanggil pada posisi infiks dengan mengurung nama fungsi
+tersebut dengan tanda petik. Begitu juga dengan fungsi infiks yang bisa dipanggil
+sebagaimana fungsi pada umumnya dengan mengurungnya dengan tanda kurung. Berikut
+adalah ekuivalen:
+
 {lang="text"}
 ~~~~~~~~
   a `foo` b
   foo a b
 ~~~~~~~~
 
-An infix function can be curried on either the left or the right, often giving
-different semantics:
+Sebuah fungsi infiks dapat di-*curry*-kan pada bagian kiri maupun kanan yang
+sering kali memberikan semantik berbeda:
 
 {lang="text"}
 ~~~~~~~~
@@ -271,12 +276,12 @@ different semantics:
   half   = (/ 2.0)
 ~~~~~~~~
 
-Functions are typically written with the most general parameter first, to enable
-maximum reuse of the curried forms.
+Fungsi biasanya ditulis dengan parameter yang paling umum sebagai parameter awal,
+agar dapat digunakan berulang kali dalam bentuk ter-*curry*.
 
-The definition of a function may use pattern matching, with one line per case.
-This is where we may name the parameters, using the data constructors to extract
-parameters much like a Scala `case` clause:
+Definisi dari sebuah fungsi bisa digunakan untuk pencocokan pola, dengan satu
+baris untuk tiap kasus. Disinilah kita menamai parameter dengan menggunakan
+konstruktor data untuk mengekstrak parameter, seperti klausa `case` milik Scala:
 
 {lang="text"}
 ~~~~~~~~
@@ -285,8 +290,8 @@ parameters much like a Scala `case` clause:
   fmap _ Nothing  = Nothing
 ~~~~~~~~
 
-Underscores are a placeholder for ignored parameters and function names can be
-in infix position:
+Garis bawah merupakan *placeholder* untuk parameter yang diabaikan dan nama
+fungsi bisa diletakkan pada posisi infiks:
 
 {lang="text"}
 ~~~~~~~~
@@ -296,8 +301,9 @@ in infix position:
   Empty  <+> Empty  = Empty
 ~~~~~~~~
 
-We can define anonymous lambda functions with a backslash, which looks like the
-Greek letter λ. The following are equivalent:
+Kita dapat mendefinisikan fungsi lambda anonim dengan sebuah garis miring terbalik,
+yang bila kita maksa akan terlihat seperti huruf Yunani λ. Tiap baris berikut
+adalah ekuivalen:
 
 {lang="text"}
 ~~~~~~~~
@@ -306,55 +312,56 @@ Greek letter λ. The following are equivalent:
   (\a1 a2     -> a1 * a2)
 ~~~~~~~~
 
-Pattern matched Haskell functions are just syntax sugar for nested lambda
-functions. Consider a simple function that creates a tuple when given three
-inputs:
+Fungsi Haskell yang tercocokkan berdasarkan pola hanya merupakan pemanis sintaks
+dari fungsi lambda berlapis. Anggap fungsi sederhana berikut yang membuat sebuah
+tupel ketika diberikan tiga buah masukan:
 
 {lang="text"}
 ~~~~~~~~
   tuple :: a -> b -> c -> (a, b, c)
 ~~~~~~~~
 
-The implementation
+Implementasi
 
 {lang="text"}
 ~~~~~~~~
   tuple a b c = (a, b, c)
 ~~~~~~~~
 
-desugars into
+dijabarkan menjadi
 
 {lang="text"}
 ~~~~~~~~
   tuple = \a -> \b -> \c -> (a, b, c)
 ~~~~~~~~
 
-In the body of a function we can create local value bindings with `let` or
-`where` clauses. The following are equivalent definitions of `map` for a linked
-list (an apostrophe is a valid identifier name):
+Pada isi sebuah fungsi, kita dapat membuat sebuah penetapan fungsi lokal dengan
+menggunkan klausa `let` maupun `where`. Potongan kode berikut merupakan definisi
+yang ekuivalen dari map untuk senarai berantai (tanpa petik merupakan nama
+identifier yang valid):
 
 {lang="text"}
 ~~~~~~~~
   map :: (a -> b) -> [a] -> [b]
   
-  -- explicit
+  -- eksplisit
   map f as = foldr map' [] as
              where map' a bs = f a : bs
   
-  -- terser, making use of currying
+  -- lebih ringkas, menggunakan *curry*
   map f    = foldr map' []
              where map' a = (f a :)
   
-  -- let binding
+  -- penetapan menggunakan let
   map f    = let map' a = (f a :)
              in foldr map' []
   
-  -- actual implementation
+  -- implementasi sebenarnya
   map _ []       = []
   map f (x : xs) = f x : map f xs
 ~~~~~~~~
 
-`if` / `then` / `else` are keywords for conditional statements:
+`if` / `then` / `else` merupakan kata kunci untuk statemen kondisional:
 
 {lang="text"}
 ~~~~~~~~
@@ -365,7 +372,7 @@ list (an apostrophe is a valid identifier name):
                            else filter f tail
 ~~~~~~~~
 
-But it is considered better style to use *case guards*
+Namun penggunaan *pembatas case* dianggap sebagai gaya superior
 
 {lang="text"}
 ~~~~~~~~
@@ -373,7 +380,7 @@ But it is considered better style to use *case guards*
                          | otherwise = filter f tail
 ~~~~~~~~
 
-Pattern matching on any term is with `case ... of`
+Pencocokan pola pada tiap istilah dilakukan dengan menggunakan `case ... of`
 
 {lang="text"}
 ~~~~~~~~
@@ -383,8 +390,8 @@ Pattern matching on any term is with `case ... of`
                   Nothing       -> []
 ~~~~~~~~
 
-Guards can be used within matches. For example, say we want to special case
-zeros:
+Pembatas juga dapat digunakan pada pencocokan. Misalkan, kita ingin mengkhususkan
+nol:
 
 {lang="text"}
 ~~~~~~~~
@@ -395,22 +402,23 @@ zeros:
                      Nothing                  -> []
 ~~~~~~~~
 
-Finally, two functions that are worth noting are `($)` and `(.)`
+Dan pada akhirnya, dua fungsi yang patut diperhatikan adalah `($)` dan `(.)`
 
 {lang="text"}
 ~~~~~~~~
-  -- application operator
+  -- operator aplikasi
   ($) :: (a -> b) -> a -> b
   infixr 0
   
-  -- function composition
+  -- komposisi fungsi
   (.) :: (b -> c) -> (a -> b) -> a -> c
   infixr 9
 ~~~~~~~~
 
-Both of these functions are stylistic alternatives to nested parentheses.
+Kedua fungsi ini merupakan gaya penggunaan alternatif dari penggunaan
+tanda kurung berlapis.
 
-The following are equivalent:
+Potongan berikut setara:
 
 {lang="text"}
 ~~~~~~~~
@@ -418,7 +426,7 @@ The following are equivalent:
   Just $ f a
 ~~~~~~~~
 
-as are
+sebagaimana 
 
 {lang="text"}
 ~~~~~~~~
@@ -426,8 +434,8 @@ as are
   putStrLn $ show $ 1 + 1
 ~~~~~~~~
 
-There is a tendency to prefer function composition with `.` instead of multiple
-`$`
+Ada kecenderungan untuk menggunakan komposisi fungsi dengan `.` bila dibandingkan
+dengan penggunaan `$` jamak
 
 {lang="text"}
 ~~~~~~~~
