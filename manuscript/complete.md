@@ -11461,42 +11461,16 @@ mengikutsertakan tambahan `E`:
     aplikasi dengan performa tinggi.
 
 
-# Typeclass Derivation
-
-Typeclasses provide polymorphic functionality to our applications. But to use a
-typeclass we need instances for our business domain objects.
+# Derivasi Kelas Tipe
 
 Kelas tipe menyediakan fungsionalitas polimorfis untuk aplikasi kita. Namun, untuk
 menggunakan sebuah kelas tipe, kita butuh instans kelas tipe tersebut untuk objek
 domain bisnis kita.
 
-The creation of a typeclass instance from existing instances is known as
-*typeclass derivation* and is the topic of this chapter.
-
 Pembuatan instans kelas tipe dari instans yang sudah ada dikenal dengan *derivasi
 kelas tipe* dan menjadi topik pada bab ini.
 
-There are four approaches to typeclass derivation:
-
 Ada empat pendekatan atas derivasi kelas tipe:
-
-1.  Manual instances for every domain object. This is infeasible for real world
-    applications as it results in hundreds of lines of boilerplate for every line
-    of a `case class`. It is useful only for educational purposes and adhoc
-    performance optimisations.
-
-2.  Abstract over the typeclass by an existing Scalaz typeclass. This is the
-    approach of `scalaz-deriving`, producing automated tests and derivations for
-    products and coproducts
-
-3.  Macros. However, writing a macro for each typeclass requires an advanced and
-    experienced developer. Fortunately, Jon Pretty's [Magnolia](https://github.com/propensive/magnolia) library abstracts
-    over hand-rolled macros with a simple API, centralising the complex
-    interaction with the compiler.
-
-4.  Write a generic program using the [Shapeless](https://github.com/milessabin/shapeless/) library. The `implicit` mechanism
-    is a language within the Scala language and can be used to write programs at
-    the type level.
 
 1.  Instans manual untuk tiap objek domain. Pendekatan ini tidak mungkin dilakukan
     pada aplikasi nyata karena akan menghasilkan ratusan baris plat cetak untuk
@@ -11516,12 +11490,6 @@ Ada empat pendekatan atas derivasi kelas tipe:
     Mekanisme `implicit` merupakan sub-bahasa pada bahasa Scala dan dapat digunakan
     untuk menulis program pada tingkat tipe.
 
-In this chapter we will study increasingly complex typeclasses and their
-derivations. We will begin with `scalaz-deriving` as the most principled
-mechanism, repeating some lessons from Chapter 5 "Scalaz Typeclasses", then
-Magnolia (the easiest to use), finishing with Shapeless (the most powerful) for
-typeclasses with complex derivation logic.
-
 Pada bab ini, kita akan mempelajari kelas tipe yang semakin rumit dan derivasinya.
 Kita akan memulai dengan `scalaz-deriving` sebagai mekanisme paling sesuai dengan
 prinsip, mengulangi beberapa pelajaran pada bab 5 mengenai Kelas Tipe Scalaz,
@@ -11529,10 +11497,7 @@ dan Magnolia (paling mudah digunakan), dan diakhiri dengan Shapeless (paling
 leluasa) untuk kelas tipe dengan logika derivasi kompleks.
 
 
-## Running Examples
-
-This chapter will show how to define derivations for five specific typeclasses.
-Each example exhibits a feature that can be generalised:
+## Contoh Berfungsi
 
 Bab ini akan menunjukkan bagaimana cara mendefinisikan derivasi dari lima
 kelas tipe spesifik. Tiap contoh menunjukkan fitur yang dapat digeneralisasi:
@@ -11566,25 +11531,12 @@ kelas tipe spesifik. Tiap contoh menunjukkan fitur yang dapat digeneralisasi:
   }
 ~~~~~~~~
 
-A> There is a school of thought that says serialisation formats, such as JSON and
-A> XML, should **not** have typeclass encoders and decoders, because it can lead to
-A> typeclass decoherence (i.e. more than one encoder or decoder may exist for the
-A> same type). The alternative is to use algebras and avoid using the `implicit`
-A> language feature entirely.
-A>
 A> Ada mahdzab yang berpendapat bahwa format serialisasi, seperti JSON dan XML,
 A> **tidak** boleh mempunyai kelas tipe penyandi dan pembaca sandi karena akan
 A> menghasilkan dekoherensi kelas tipe (mis., ada kemungkinan lebih dari satu
 A> penyandi atau pembaca sandi untuk tipe yang sama). Alternatif yang disediakan
 A> adalah dengan menggunakan aljabar dan menghindari penggunaan fitur bahasa
 A> `implisit`.
-A> 
-A> Although it is possible to apply the techniques in this chapter to either
-A> typeclass or algebra derivation, the latter involves a **lot** more boilerplate.
-A> We therefore consciously choose to restrict our study to encoders and decoders
-A> that are coherent. As we will see later in this chapter, use-site automatic
-A> derivation with Magnolia and Shapeless, combined with limitations of the Scala
-A> compiler's implicit search, commonly leads to typeclass decoherence.
 A>
 A> Walaupun mungkin untuk menerapkan teknik pada bab ini ke kelas tipe atau
 A> derivasi aljabar, penerapan teknik pada derivasi aljabar akan melibatkan
@@ -11597,9 +11549,6 @@ A> dari kompilator Scala, biasanya berakhir pada dekoherensi kelas tipe.
 
 ## `scalaz-deriving`
 
-The `scalaz-deriving` library is an extension to Scalaz and can be added to a
-project's `build.sbt` with
-
 Pustaka `scalaz-deriving` merupakan perpanjangan dari Scalaz dan dapat ditambahkan
 ke `build.sbt` proyek dengan
 
@@ -11609,19 +11558,13 @@ ke `build.sbt` proyek dengan
   libraryDependencies += "org.scalaz" %% "scalaz-deriving" % derivingVersion
 ~~~~~~~~
 
-providing new typeclasses, shown below in relation to core Scalaz typeclasses:
-
 menyediakan kelas tipe baru, yang ditunjukkan dibawah, yang berhubungan dengan
 kelas tipe Scalaz 
 
 {width=60%}
 ![](images/scalaz-deriving-base.png)
 
-A> In Scalaz 7.3, `Applicative` and `Divisible` will inherit from `InvariantApplicative`
-A>
 A> Pada Scalaz 7.3, `Applicative` dan `Divisible` akan mewarisi dari `InvariantApplicative`
-
-Before we proceed, here is a quick recap of the core Scalaz typeclasses:
 
 Sebelum kita memulai, berikut merupakan rekap ulang dari kelas tipe utama Scalaz:
 
@@ -11666,15 +11609,10 @@ Sebelum kita memulai, berikut merupakan rekap ulang dari kelas tipe utama Scalaz
 ~~~~~~~~
 
 
-### Don't Repeat Yourself
-
-The simplest way to derive a typeclass is to reuse one that already exists.
+### Jangan Mengulang-Ulang
 
 Cara paling sederhana untuk menderivasi sebuah kelas tipe adalah menggunakan
 ulang derivasi yang sudah ada.
-
-The `Equal` typeclass has an instance of `Contravariant[Equal]`, providing
-`.contramap`:
 
 Kelas tipe `Equal` mempunyai instans `Contravariant[Equal]` yang menyediakan
 `.contramap`:
@@ -11690,10 +11628,6 @@ Kelas tipe `Equal` mempunyai instans `Contravariant[Equal]` yang menyediakan
   }
 ~~~~~~~~
 
-As users of `Equal`, we can use `.contramap` for our single parameter data
-types. Recall that typeclass instances go on the data type companions to be in
-their implicit scope:
-
 Sebagai pengguna dari `Equal`, kita dapat menggunakan `.contramap` untuk tipe
 data parameter tunggal kita. Harap diingat bahwa instans kelas tipe masuk pada
 pendamping tipe data agar masuk pada cakupan implisit mereka:
@@ -11708,10 +11642,6 @@ pendamping tipe data agar masuk pada cakupan implisit mereka:
   scala> Foo("hello") === Foo("world")
   false
 ~~~~~~~~
-
-However, not all typeclasses can have an instance of `Contravariant`. In
-particular, typeclasses with type parameters in covariant position may have a
-`Functor` instead:
 
 Namun, tidak semua kelas tipe mempunyai instans `Contravariant`. Terlebih lagi,
 kelas tipe dengan parameter tipe pada posisi kovarian mungkin malah memiliki
@@ -11730,8 +11660,6 @@ instans `Functor`:
   }
 ~~~~~~~~
 
-We can now derive a `Default[Foo]`
-
 Kita dapat menderivasi sebuah `Default[Foo]`
 
 {lang="text"}
@@ -11741,9 +11669,6 @@ Kita dapat menderivasi sebuah `Default[Foo]`
     ...
   }
 ~~~~~~~~
-
-If a typeclass has parameters in both covariant and contravariant position, as
-is the case with `Semigroup`, it may provide an `InvariantFunctor`
 
 Bila sebuah kelas tipe mempunyai parameter pada posisi kovarian dan kontravarian,
 seperti halnya `Semigroup`, kelas tipe ini mungkin menyediakan sebuah instans
@@ -11761,8 +11686,6 @@ seperti halnya `Semigroup`, kelas tipe ini mungkin menyediakan sebuah instans
   }
 ~~~~~~~~
 
-and we can call `.xmap`
-
 dan kita akan memanggil `.xmap`
 
 {lang="text"}
@@ -11772,8 +11695,6 @@ dan kita akan memanggil `.xmap`
     ...
   }
 ~~~~~~~~
-
-Generally, it is simpler to just use `.xmap` instead of `.map` or `.contramap`:
 
 Secara umum, jauh lebih mudah untuk menggunakan `.xmap` bila dibandingkan dengan
 menggunakan `.map` atau `.contramap`:
@@ -11813,12 +11734,6 @@ A> ~~~~~~~~
 
 ### `MonadError`
 
-Typically things that *write* from a polymorphic value have a `Contravariant`,
-and things that *read* into a polymorphic value have a `Functor`. However, it is
-very much expected that reading can fail. For example, if we have a default
-`String` it does not mean that we can simply derive a default `String Refined
-NonEmpty` from it
-
 Biasanya, sesuatu yang *menulis* dari sebuah nilai polimorfis mempunyai sebuah
 `Contravariant`. Dan, sesuatu yang *membaca* ke sebuah nilai polimorfis mempunyai
 sebuah `Functor`. Namun, sangat wajar bila pembacaan dapat gagal. Sebagai contoh,
@@ -11835,8 +11750,6 @@ bila kita mempunyai sebuah `String` default, bukan berarti kita tinggal menurunk
     Default[String].map(refineV[NonEmpty](_))
 ~~~~~~~~
 
-fails to compile with
-
 yang gagal dikompilasi dengan galat
 
 {lang="text"}
@@ -11848,14 +11761,8 @@ yang gagal dikompilasi dengan galat
   [error]                                          ^
 ~~~~~~~~
 
-Recall from Chapter 4.1 that `refineV` returns an `Either`, as the compiler has
-reminded us.
-
 Mohon diingat bahwa pada bab 4.1, `refineV` mengembalikan sebuah `Either`,
 sesuai dengan apa yang telah kompilator peringatkan.
-
-As the typeclass author of `Default`, we can do better than `Functor` and
-provide a `MonadError[Default, String]`:
 
 Sebaga penulis dari kelas tipe `Default`, kita dapat berbuat lebih daripada
 `Functor` dan menyediakan sebuah `MonadError[Default, String]`:
@@ -11874,8 +11781,6 @@ Sebaga penulis dari kelas tipe `Default`, kita dapat berbuat lebih daripada
   }
 ~~~~~~~~
 
-Now we have access to `.emap` syntax and can derive our refined type
-
 Setelah mendapatkan akses ke sintaks `.emap` dan dapat menderivasi tipe *refined*
 
 {lang="text"}
@@ -11883,8 +11788,6 @@ Setelah mendapatkan akses ke sintaks `.emap` dan dapat menderivasi tipe *refined
   implicit val nes: Default[String Refined NonEmpty] =
     Default[String].emap(refineV[NonEmpty](_).disjunction)
 ~~~~~~~~
-
-In fact, we can provide a derivation rule for all refined types
 
 Nyatanya, kita dapat menyediakan aturan derivasi untuk semua tipe terrefinasi
 
@@ -11895,13 +11798,8 @@ Nyatanya, kita dapat menyediakan aturan derivasi untuk semua tipe terrefinasi
   ): Default[A Refined P] = Default[A].emap(refineV[P](_).disjunction)
 ~~~~~~~~
 
-where `Validate` is from the refined library and is required by `refineV`.
-
 dimana `Validate` berasal dari pustaka `refined` dan dibutuhkan oleh `refineV`.
 
-A> The `refined-scalaz` extension to `refined` provides support for automatically
-A> deriving all typeclasses for refined types with the following import
-A>
 A> Ekstensi `refined-scalaz` untuk pustaka `refined` menyediakan dukungan untuk
 A> menderivasi semua kelas tipe untuk tipe terrefinasi dengan impor berikut
 A> 
@@ -11909,20 +11807,12 @@ A> {lang="text"}
 A> ~~~~~~~~
 A>   import eu.timepit.refined.scalaz._
 A> ~~~~~~~~
-A> 
-A> if there is a `Contravariant` or `MonadError[?, String]` in the implicit scope.
 A>
 A> bila ada `Contravariant` atau `MonadError[?, String]` pada cakupan implisit.
-A> 
-A> However, due to [limitations of the Scala compiler](https://github.com/scala/bug/issues/10753) it rarely works in practice
-A> and we must write `implicit def refined` derivations for each typeclass.
 A>
 A> Namun, karena [batasan dari kompilator Scala](https://github.com/scala/bug/issues/10753), hal ini jarang
 A> berfungsi di praktik pada lapangan dan kita harus menulis derivasi
 A> tiap kelas tipe `implicit def refined`.
-
-Similarly we can use `.emap` to derive an `Int` decoder from a `Long`, with
-protection around the non-total `.toInt` stdlib method.
 
 Kita juga dapat menggunakan `.emap` untuk menderivasi sebuah pembaca sandi
 `Int` dari sebuah `Long` dengan perlindungan atas metoda non-total `.toInt`
@@ -11937,9 +11827,6 @@ dari pustaka standar.
   }
 ~~~~~~~~
 
-As authors of the `Default` typeclass, we might want to reconsider our API
-design so that it can never fail, e.g. with the following type signature
-
 Sebagai penulis dari kelas tipe `Default`, kita mungkin ingin mempertimbangkan
 ulang desain APA kita sehingga tidak akan gagal, misalkan dengan menggunakan
 penanda tipe berikut
@@ -11951,11 +11838,6 @@ penanda tipe berikut
   }
 ~~~~~~~~
 
-We would not be able to define a `MonadError`, forcing us to provide instances
-that always succeed. This will result in more boilerplate but gains compiletime
-safety. However, we will continue with `String \/ A` as the return type as it is
-a more general example.
-
 Kita tidak akan dapat mendefinisikan sebuah `MonadError`, sehingga kita terpaksa
 untuk menyediakan instans yang selalu sukses. Hal ini akan menghasilkan plat cetak
 yang lebih banyak sebagai ganti atas keamanan tipe. Namun, kita akan tetap
@@ -11963,9 +11845,6 @@ menggunakan `String \/ A` sebagai nilai kembalian karena ini merupakan contoh
 yang lebih umum.
 
 ### `.fromIso`
-
-All of the typeclasses in Scalaz have a method on their companion with a
-signature similar to the following:
 
 Semua kelas tipe di Scalaz mempunyai sebuah metoda pada objek pendampingnya
 dengan sebuah penanda yang mirip sebagai berikut:
@@ -11983,15 +11862,9 @@ dengan sebuah penanda yang mirip sebagai berikut:
   }
 ~~~~~~~~
 
-These mean that if we have a type `F`, and a way to convert it into a `G` that
-has an instance, we can call `Equal.fromIso` to obtain an instance for `F`.
-
 Potongan diatas berarti bila kita mempunyai sebuah tipe `F` dan sebuah cara untuk
 mengkonversinya menjadi sebuah `G` yang mempunyai sebuah instans, kita dapat
 memanggil `Equal.fromIso` untuk mendapatkan instans dari `F`.
-
-For example, as typeclass users, if we have a data type `Bar` we can define an
-isomorphism to `(String, Int)`
 
 Sebagai contoh, sebagai pengguna kelas tipe, bila kita mempunyai tipe data `Bar`,
 kita dapat mendefinisikan sebuah isomorfisme ke `(String, Int)`
@@ -12006,8 +11879,6 @@ kita dapat mendefinisikan sebuah isomorfisme ke `(String, Int)`
   }
 ~~~~~~~~
 
-and then derive `Equal[Bar]` because there is already an `Equal` for all tuples:
-
 dan menderivasi `Equal[Bar]` karena sudah ada `Equal` untuk semua tuple:
 
 {lang="text"}
@@ -12018,19 +11889,10 @@ dan menderivasi `Equal[Bar]` karena sudah ada `Equal` untuk semua tuple:
   }
 ~~~~~~~~
 
-The `.fromIso` mechanism can also assist us as typeclass authors. Consider
-`Default` which has a core type signature of the form `Unit => F[A]`. Our
-`default` method is in fact isomorphic to `Kleisli[F, Unit, A]`, the `ReaderT`
-monad transformer.
-
 Mekanisme `.fromIso` juga dapat membantu kita sebagai penulis kelas tipe.
 Sebagai contoh, `Default` yang mempunyai penanda tipe utama dengan bentuk `Unit => F[A]`.
 Metoda `default` kita sebenarnya isomorfik terhadap `Kleisli[F, Unit, A]`,
 atau transformator monad `ReaderT`.
-
-Since `Kleisli` already provides a `MonadError` (if `F` has one), we can derive
-`MonadError[Default, String]` by creating an isomorphism between `Default` and
-`Kleisli`:
 
 Karena `Kleisli` sudah menyediakan sebuah `MonadError` (bila `F` sudah mempunyainya),
 kita dapat menderivasi `MonadError[Default, String]` dengan membuat sebuah
@@ -12046,24 +11908,14 @@ isomorfisme antara `Default` dan `Kleisli`:
   implicit val monad: MonadError[Default, String] = MonadError.fromIso(iso)
 ~~~~~~~~
 
-giving us the `.map`, `.xmap` and `.emap` that we've been making use of so far,
-effectively for free.
-
 memberikan kita `.map`, `.xmap`, dan `.emap` yang sudah kita gunakan selama ini.
 
 
-### `Divisible` and `Applicative`
-
-To derive the `Equal` for our case class with two parameters, we reused the
-instance that Scalaz provides for tuples. But where did the tuple instance come
-from?
+### `Divisible` dan `Applicative`
 
 Untuk menderivasi `Equal` pada kelas dengan dua parameter kita, kita akan
 menggunakan ulang instans yang disediakan oleh Scalaz untuk tuple. Namun, dari
 mana instans tuple itu berasal?
-
-A more specific typeclass than `Contravariant` is `Divisible`. `Equal` has an
-instance:
 
 Kelas tipe yang lebih spesifik untuk `Contravariant` adalah `Divisible`. `Equal`
 mempunyai sebuah instans:
@@ -12083,10 +11935,6 @@ mempunyai sebuah instans:
   }
 ~~~~~~~~
 
-A> When implementing `Divisible` the compiler will require us to provide
-A> `.contramap`, which we can do directly with an optimised implementation or with
-A> this derived combinator:
-A>
 A> Saat mengimplementasikan `Divisible`, kompilator akan meminta kita untuk
 A> menyediakan `.contramap`, yang dapat kita penuhi dengan sebuah implmentasi
 A> teroptimasi atau dengan kombinator terderivasi berikut:
@@ -12096,13 +11944,8 @@ A> ~~~~~~~~
 A>   override def contramap[A, B](fa: F[A])(f: B => A): F[B] =
 A>     divide2(conquer[Unit], fa)(c => ((), f(c)))
 A> ~~~~~~~~
-A> 
-A> This has been added to `Divisible` in Scalaz 7.3.
 A>
 A> Kombinator ini ditambahkan ke `Divisible` pada Scalaz 7.3.
-
-And from `divide2`, `Divisible` is able to build up derivations all the way to
-`divide22`. We can call these methods directly for our data types:
 
 Dan dari `divide2`, `Divisible` mampu membangun derivasi sampai ke `divide22`.
 Kita dapat memanggil metoda ini langsung ke tipe data kita:
@@ -12116,8 +11959,6 @@ Kita dapat memanggil metoda ini langsung ke tipe data kita:
   }
 ~~~~~~~~
 
-The equivalent for type parameters in covariant position is `Applicative`:
-
 Ekuivalen untuk parameter tipe ini pada posisi kovarian adalah `Applicative`:
 
 {lang="text"}
@@ -12129,11 +11970,6 @@ Ekuivalen untuk parameter tipe ini pada posisi kovarian adalah `Applicative`:
   }
 ~~~~~~~~
 
-But we must be careful that we do not break the typeclass laws when we implement
-`Divisible` or `Applicative`. In particular, it is easy to break the *law of
-composition* which says that the following two codepaths must yield exactly the
-same output
-
 Namun, kita harus berhati hati agar kita tidak melanggar hukum kelas tipe
 saat kita mengimplementasikan `Divisible` atau `Applicative`. Terlebih lagi,
 sangat mudah untuk melanggar *hukum komposisi* yang menyatakan bahwwa kedua
@@ -12143,11 +11979,7 @@ alur-kode ini harus menghasilkan keluaran yang sama
 -   `divide2(a1, divide2(a2, a3)(dupe))(dupe)`
 -   untuk semua `dupe: A => (A, A)`
 
-with similar laws for `Applicative`.
-
 dengan hukum yang sama untuk `Applicative`.
-
-Consider `JsEncoder` and a proposed instance of `Divisible`
 
 Misalk, `JsEncoder` dan instans `Divisible` yang diajukan
 
@@ -12166,8 +11998,6 @@ Misalk, `JsEncoder` dan instans `Divisible` yang diajukan
   }
 ~~~~~~~~
 
-On one side of the composition laws, for a `String` input, we get
-
 Pada satu sisi dari hukum komposisi, untuk sebuah input `String`, kita akan
 mendapatkan
 
@@ -12176,8 +12006,6 @@ mendapatkan
   JsArray([JsArray([JsString(hello),JsString(hello)]),JsString(hello)])
 ~~~~~~~~
 
-and on the other
-
 dan pada sisi lain
 
 {lang="text"}
@@ -12185,23 +12013,12 @@ dan pada sisi lain
   JsArray([JsString(hello),JsArray([JsString(hello),JsString(hello)])])
 ~~~~~~~~
 
-which are different. We could experiment with variations of the `divide`
-implementation, but it will never satisfy the laws for all inputs.
-
 yang berbeda. Kita dapat bereksperimen dengan implementasi `divide`, namun
 tidak akan pernah memenuhi hukum komposisi untuk semua input.
-
-We therefore cannot provide a `Divisible[JsEncoder]` because it would break the
-mathematical laws and invalidates all the assumptions that users of `Divisible`
-rely upon.
 
 Hal ini mengakibatkan kita tidak dapat menyediakan sebuah `Divisible[JsEncoder]
 karena akan melanggar hukum matematika dan membatalkan semua asumsi yang digunakan
 oleh pengguna `Divisible`.
-
-To aid in testing laws, Scalaz typeclasses contain the codified versions of
-their laws on the typeclass itself. We can write an automated test, asserting
-that the law fails, to remind us of this fact:
 
 Untuk membantu mengetes hukum, kelas tipe Scalaz berisi versi terkodifikasi
 dari hukum hukum atas kelas tipe itu sendiri. Kita dapat menulis tes terotomatis,
@@ -12214,8 +12031,6 @@ memastikan bahwa hukum tersebut terlanggar, dan mengingatkan kita bahwa:
   val E: Equal[JsEncoder[String]] = (p1, p2) => p1.toJson("hello") === p2.toJson("hello")
   assert(!D.divideLaw.composition(S, S, S)(E))
 ~~~~~~~~
-
-On the other hand, a similar `JsDecoder` test meets the `Applicative` composition laws
 
 Di sisi lain, sebuah tes `JsDecoder` memenuhi huku komposisi `Applicative`
 
@@ -12237,8 +12052,6 @@ Di sisi lain, sebuah tes `JsDecoder` memenuhi huku komposisi `Applicative`
   }
 ~~~~~~~~
 
-for some test data
-
 untuk beberapa data tes
 
 {lang="text"}
@@ -12249,33 +12062,18 @@ untuk beberapa data tes
   composeTest(JsObject(IList("b" -> JsInteger(1))))
 ~~~~~~~~
 
-Now we are reasonably confident that our derived `MonadError` is lawful.
-
 Sekarang, kita cukup yakin bathwa `MonadError` yang telah kita derivasi memenuhi
 hukum hukum yang berlaku.
-
-However, just because we have a test that passes for a small set of data does
-not prove that the laws are satisfied. We must also reason through the
-implementation to convince ourselves that it **should** satisfy the laws, and try
-to propose corner cases where it could fail.
 
 Namun, bukan berarti bila kita lulus tes untuk set data kecil, hukum tidak terpenuhi.
 Kita harus menalar implementasi sampai tuntas agar kita yakin bahwa implementasi
 ini **seharusnya** sudah memenuhi hukum yang berlaku, dan mencoba permasalahan
 di luar batas normal yang bisa saja gagal.
 
-One way of generating a wide variety of test data is to use the [scalacheck](https://github.com/rickynils/scalacheck)
-library, which provides an `Arbitrary` typeclass that integrates with most
-testing frameworks to repeat a test with randomly generated data.
-
 Salah satu cara untuk menghasilkan data tes yang bervariasi adalah dengan menggunakan
 pustaka [scalacheck](https://gihtub.com/rickynils/scalacheck) yang menyediakan
 kelas tipe `Arbitrary` yang dapat terintegrasi ke kebanyakan kerangka testing
 untuk mengulang sebuah test dengan data yang dihasilkan secara acak.
-
-The `jsonformat` library provides an `Arbitrary[JsValue]` (everybody should
-provide an `Arbitrary` for their ADTs!) allowing us to make use of Scalatest's
-`forAll` feature:
 
 Pustaka `jsonformat` menyediakan sebuah `Arbitrary[JsValue]` (dan semua orang
 harus menyediakan `Arbitrary` pada DTA mereka!) memperkenankan kita untuk menggunakan
@@ -12286,29 +12084,17 @@ fitur `forall` dari Scalatest:
   forAll(SizeRange(10))((j: JsValue) => composeTest(j))
 ~~~~~~~~
 
-This test gives us even more confidence that our typeclass meets the
-`Applicative` composition laws. By checking all the laws on `Divisible` and
-`MonadError` we also get **a lot** of smoke tests for free.
-
 Tes ini memberikan kita lebih percaya pada kelas tipe kita memenuhi hukum komposisi
 `Applicative`. Dengan memeriksa seuma hukum pada `Divisible` dan `MonadError`
 kita juga mendapat **banyak** tes secara cuma-cuma.
 
-A> We must restrict `forAll` to have a `SizeRange` of `10`, which limits both
-A> `JsObject` and `JsArray` to a maximum size of 10 elements. This avoids stack
-A> overflows as larger numbers can generate gigantic JSON documents.
-A>
 A> Kita harus membatasi `forAll` dengan `SizeRange` `10` yang membatasi
 A> `JsObject` dan `JsArray` sampai maksimum 10 elemen saja. Hal ini untuk
 A> menghindari lubernya karena jumlah yang lebih besar dapat menghasilkan
 A> dokumen JSON yang sangat besar.
 
 
-### `Decidable` and `Alt`
-
-Where `Divisible` and `Applicative` give us typeclass derivation for products
-(built from tuples), `Decidable` and `Alt` give us the coproducts (built from
-nested disjunctions):
+### `Decidable` dan `Alt`
 
 Bila `Divisible` dan `Applicative` memberikan kita derivasi kelas tipe untuk
 produk (dibangun dari tuple) `Decidable` dan `Alt` memberikan kita ko-prooduk
@@ -12335,25 +12121,17 @@ yang dibangun dari disjungsi berlapis:
   }
 ~~~~~~~~
 
-The four core typeclasses have symmetric signatures:
-
 Empat kelas tipe utama mempunyai penanda simetris:
 
 | Typeclass     | method    | given          | signature         | returns |
-| Kelas Tipe    | metoda    | diberi         | penanda           | kembali |
 |------------- |--------- |-------------- |----------------- |------- |
 | `Applicative` | `apply2`  | `F[A1], F[A2]` | `(A1, A2) => Z`   | `F[Z]`  |
 | `Alt`         | `altly2`  | `F[A1], F[A2]` | `(A1 \/ A2) => Z` | `F[Z]`  |
 | `Divisible`   | `divide2` | `F[A1], F[A2]` | `Z => (A1, A2)`   | `F[Z]`  |
 | `Decidable`   | `choose2` | `F[A1], F[A2]` | `Z => (A1 \/ A2)` | `F[Z]`  |
 
-supporting covariant products; covariant coproducts; contravariant products;
-contravariant coproducts.
-
 mendukung kovarian produk, kovarian koproduk, kontravarian produk, dan kontravarian
 koproduk.
-
-We can write a `Decidable[Equal]`, letting us derive `Equal` for any ADT!
 
 Kita dapat menulis sebuah instans `Decidable[Equal]` yang memperkenankan kita
 untuk menderivasi `Equal` untuk semua TDA!
@@ -12374,8 +12152,6 @@ untuk menderivasi `Equal` untuk semua TDA!
   }
 ~~~~~~~~
 
-For an ADT
-
 Untuk TDA
 
 {lang="text"}
@@ -12384,8 +12160,6 @@ Untuk TDA
   final case class Vader(s: String, i: Int)  extends Darth
   final case class JarJar(i: Int, s: String) extends Darth
 ~~~~~~~~
-
-where the products (`Vader` and `JarJar`) have an `Equal`
 
 dimana produk (`Vader` dan `JarJar`) mempunyai instans `Equal`
 
@@ -12400,8 +12174,6 @@ dimana produk (`Vader` dan `JarJar`) mempunyai instans `Equal`
     implicit val equal: Equal[JarJar] = Divisible[Equal].divide2(Equal[Int], Equal[String])(g)
   }
 ~~~~~~~~
-
-we can derive the equal for the whole ADT
 
 kita dapat menderivasi persamaan untuk semua TDA
 
@@ -12419,16 +12191,8 @@ kita dapat menderivasi persamaan untuk semua TDA
   false
 ~~~~~~~~
 
-A> Scalaz 7.2 does not provide a `Decidable[Equal]` out of the box, because it was
-A> a late addition.
-A>
 A> Scalaz 7.2 tidak menyediakan instans `Decidable[Equal]` secara otomatis karena
 A> instans tersebut merupakan tambahan susulan.
-
-Typeclasses that have an `Applicative` can be eligible for an `Alt`. If we want
-to use our `Kleisli.iso` trick, we have to extend `IsomorphismMonadError` and
-mix in `Alt`. Upgrade our `MonadError[Default, String]` to have an
-`Alt[Default]`:
 
 Kelas tipe yang mempunyai `Applicative` berhak memiliki sebuah instans dari `Alt`.
 Bila kita ingin menggunakan trik `Kleisli.iso`, kita dapat mengeksten `IsomorphismMonadError`
@@ -12446,10 +12210,6 @@ memililki `Alt[Default]`:
   }
 ~~~~~~~~
 
-A> The primitive of `Alt` is `alt`, much as the primitive of `Applicative` is `ap`,
-A> but it often makes more sense to use `altly2` and `apply2` as the primitives
-A> with the following overrides:
-A>
 A> Nilai primitif dari `Alt` adalah `alt`, sebagaimana primitif dari `Applicative`
 A> yang berupa `ap`, namun seringkali lebih masuk akal untuk menggunakan `altly2`
 A> dan `apply2` dan primitif dengan penimpaan berikut:
@@ -12464,14 +12224,9 @@ A>     case -\/(a) => a
 A>     case \/-(a) => a
 A>   }
 A> ~~~~~~~~
-A> 
-A> Just don't forget to implement `apply2` and `altly2` or there will be an
-A> infinite loop at runtime.
 A>
 A> Jangan lupa untuk mengimplementasikan `apply2` dan `altly2` atau akan ada
 A> ikalan tak-hingga pada saat waktu-jalan.
-
-Letting us derive our `Default[Darth]`
 
 Memperkenankan kita untuk menderivasi `Default[Darth]`
 
@@ -12500,9 +12255,6 @@ Memperkenankan kita untuk menderivasi `Default[Darth]`
   \/-(Vader())
 ~~~~~~~~
 
-Returning to the `scalaz-deriving` typeclasses, the invariant parents of `Alt`
-and `Decidable` are:
-
 Kembali ke kelas tipe `scalaz-deriving`, orangtua invarian dari `Alt` dan `Decidable`
 adalah:
 
@@ -12524,25 +12276,15 @@ adalah:
   }
 ~~~~~~~~
 
-supporting typeclasses with an `InvariantFunctor` like `Monoid` and `Semigroup`.
-
 mendukung kelas tipe dengan `InvarianFunctor` seperti `Monad` dan `Semigroup`
 
 
-### Arbitrary Arity and `@deriving`
-
-There are two problems with `InvariantApplicative` and `InvariantAlt`:
+### Arity Arbiter dan `@deriving`
 
 Ada dua masalah dengan `InvariantApplicative` dan `InvariantAlt`:
 
-1.  they only support products of four fields and coproducts of four entries.
-2.  there is a **lot** of boilerplate on the data type companions.
-
 1.  keduanya hanya mendukung produk dari 4 bidang dan koproduk dari 4 catatan.
 2.  ada **banyak** plat cetak pada tipe data pendamping.
-
-In this section we solve both problems with additional typeclasses introduced by
-`scalaz-deriving`
 
 Pada bagian ini, kita akan menyelesaikan kedua permasalahan tersebut dengan kelas
 tipe tambahan yang diperkenalkan oleh `scalaz-deriving`
@@ -12550,15 +12292,9 @@ tipe tambahan yang diperkenalkan oleh `scalaz-deriving`
 {width=75%}
 ![](images/scalaz-deriving.png)
 
-Effectively, our four central typeclasses `Applicative`, `Divisible`, `Alt` and
-`Decidable` all get extended to arbitrary arity using the [iotaz](https://github.com/frees-io/iota) library, hence
-the `z` postfix.
-
 Empat tipe kelas utama kita, `Applicative`, `Divisible`, `Alt`, dan `Decidable`,
 diperluas menjadi *arity* arbiter menggunakan pustaka [iotaz](https://github.com/frees-io/iota),
 maka dari itu mendapatkan akhiran `z`.
-
-The iotaz library has three main types:
 
 Pustaka iotaz mempunyai tiga tipe utama:
 
@@ -12569,9 +12305,6 @@ Pustaka iotaz mempunyai tiga tipe utama:
 -   `TList` yang mendeskripsikan panjang rantai tipe arbiter
 -   `Prod[A <: TList]` untuk produk
 -   `Cop[A <: TList]` untuk koproduk
-
-By way of example, a `TList` representation of `Darth` from the previous
-section is
 
 Sebagai contoh, sebuah representasi `TList` dari `Darth` pada bagian sebelumnya
 adalah
@@ -12585,8 +12318,6 @@ adalah
   type JarJarT = Int    :: String :: TNil
 ~~~~~~~~
 
-which can be instantiated:
-
 yang dapat diinstansiasi:
 
 {lang="text"}
@@ -12597,10 +12328,6 @@ yang dapat diinstansiasi:
   val VaderI = Cop.Inject[Vader, Cop[DarthT]]
   val darth: Cop[DarthT] = VaderI.inj(Vader("hello", 1))
 ~~~~~~~~
-
-To be able to use the `scalaz-deriving` API, we need an `Isomorphism` between
-our ADTs and the `iotaz` generic representation. It is a lot of boilerplate,
-we will get to that in a moment:
 
 Agar dapat menggunakan APA `scalaz-deriving`, kita membutuhkan `Isomorphism`
 antara TDA kita dengan representasi generik `iotaz`. Akan sangat banyak plat cetak
@@ -12643,9 +12370,6 @@ yang terjadi:
   }
 ~~~~~~~~
 
-With that out of the way we can call the `Deriving` API for `Equal`, possible
-because `scalaz-deriving` provides an optimised instance of `Deriving[Equal]`
-
 Setelah menulis plat cetak diatas, kita dapat memanggil APA `Deriving` untuk `Equal`.
 Hal ini mungkin terjadi karena `scalaz-deriving` menyediakan instans teroptimasi
 untuk `Deriving[Equal]`
@@ -12669,18 +12393,10 @@ untuk `Deriving[Equal]`
   }
 ~~~~~~~~
 
-A> Typeclasses in the `Deriving` API are wrapped in `Need` (recall `Name` from
-A> Chapter 6), which allows lazy construction, avoiding unnecessary work if the
-A> typeclass is not needed, and avoiding stack overflows for recursive GADTs.
-A>
 A> Kelas tipe pada APA `Deriving` terlapisi oleh `Need` (harap ingat `Name` pada
 A> bab 6) yang memperkenankan konstruksi luntung sehingga menghindari tugas
 A> yang tak perlu bila kelas tipe tidak dibutuhkan. Selain itu, *stack overflow*
 A> dapat dihindari untuk GADT rekursi.
-
-To be able to do the same for our `Default` typeclass, we need to provide an
-instance of `Deriving[Default]`. This is just a case of wrapping our existing
-`Alt` with a helper:
 
 Agar kelas tipe `Default` dapat diperlakukan sama, kita harus menyediakan sebuah
 instans `Deriving[Default]`. Untuk hal ini, kita tinggal melapisi `Alt` dengan
@@ -12693,10 +12409,6 @@ objek pembantu:
     implicit val deriving: Deriving[Default] = ExtendedInvariantAlt(monad)
   }
 ~~~~~~~~
-
-and then calling it from the companions
-
-dan memanggilnya dari objek pendamping
 
 {lang="text"}
 ~~~~~~~~
@@ -12716,16 +12428,8 @@ dan memanggilnya dari objek pendamping
       Prod(Need(Default[Int]), Need(Default[String])))(iso.to, iso.from)
   }
 ~~~~~~~~
-
-We have solved the problem of arbitrary arity, but we have introduced even more
-boilerplate.
-
 Kita telah menyelesaikan masalah *arity* arbiter, namun kita juga menambah plat
 cetak jauh lebih banyak.
-
-The punchline is that the `@deriving` annotation, which comes from
-`deriving-plugin`, generates all this boilerplate automatically and only needs
-to be applied at the top level of an ADT:
 
 Dan yang paling menjengkelkan, anotasi `@deriving` yang disediakan oleh `deriving-plugin`,
 membuat semua plat cetak ini secara manual dan hanya perlu diterapkan pada bagian
@@ -12739,25 +12443,12 @@ atas sebuah TDA:
   final case class JarJar(i: Int, s: String) extends Darth
 ~~~~~~~~
 
-Also included in `scalaz-deriving` are instances for `Order`, `Semigroup` and
-`Monoid`. Instances of `Show` and `Arbitrary` are available by installing the
-`scalaz-deriving-magnolia` and `scalaz-deriving-scalacheck` extras.
-
 Yang juga diikut-sertakan pada `scalaz-deriving` adalah instans dari `Order`,
 `Semigroup`, dan `Monoid`. Instans dari `Show` dan `Arbitrary` tersedia dengan
 memasang `scalaz-deriving-magnolia` dan `scalaz-deriving-scalacheck`.
 
-You're welcome!
 
-Terima kasih? Sama-sama.
-
-
-### Examples
-
-We finish our study of `scalaz-deriving` with fully worked implementations of
-all the example typeclasses. Before we do that we need to know about a new data
-type: `/~\`, aka the *snake in the road*, for containing two higher kinded
-structures that share the same type parameter:
+### Contoh
 
 Kita akan menutup pembelajaran kita mengenai `scalaz-deriving` dengan implementasi
 dari contoh kelas tipe yang bekerja seutuhnya. Sebelum kita melakukannya, kita
@@ -12778,19 +12469,10 @@ yang berisi dua jenis struktur lebih tinggi yang berbagi tipe parameter yang sam
   }
 ~~~~~~~~
 
-We typically use this in the context of `Id /~\ TC` where `TC` is our typeclass,
-meaning that we have a value, and an instance of a typeclass for that value,
-without knowing anything about the value.
-
 Biasanya, kita menggunakan uler-kasur pada konteks `Id /~\ TC` dimana `TC` merupakan
 kelas tipe, yang berarti kita mempunyai sebuah nilai dan sebuah instans dari
 sebuah kelas tipe untuk nilai tersebut tanpa harus tahu apapun mengenai nilai
 tadi.
-
-In addition, all the methods on the `Deriving` API have implicit evidence of the
-form `A PairedWith FA`, allowing the `iotaz` library to be able to perform
-`.zip`, `.traverse`, and other operations on `Prod` and `Cop`. We can ignore
-these parameters, as we don't use them directly.
 
 Sebagai tambahan, semua metoda pada APA `Deriving` mempunyai bukti tersirat
 dengan bentuk `A PairedWith FA`, memperkenankan pustaka `iotaz` agar dapat melaksanakan
@@ -12800,22 +12482,11 @@ mengabaikan parameter ini karena kita tidak menggunakannya secara langsung.
 
 #### `Equal`
 
-As with `Default` we could define a regular fixed-arity `Decidable` and wrap it
-with `ExtendedInvariantAlt` (the simplest approach), but we choose to implement
-`Decidablez` directly for the performance benefit. We make two additional
-optimisations:
-
 Sebagaimana dengan `Default`, kita dapat mendefinisikan `Decidable` biasa yang
 memiliki *arity* tetap dan melapisinya dengan `ExtendedInvariantAlt` (pendekatan
 paling sederhana), namun kita memilih untuk mengimplementasikan `Decidablez`
 secara langsung dengan alasa performa yang lebih baik. Kita juga menambah dua
 optimasi tambahan:
-
-1.  perform instance equality `.eq` before applying the `Equal.equal`, allowing
-    for shortcut equality between identical values.
-2.  `Foldable.all` allowing early exit when any comparison is `false`. e.g. if
-    the first fields don't match, we don't even request the `Equal` for remaining
-    values.
 
 1.  melakukan persamaan instans `.eq` sebelum menerapkan `Equal.equal`, memperkenankan
     persamaan antar nilai-nilai identik.
@@ -12846,10 +12517,6 @@ optimasi tambahan:
 
 
 #### `Default`
-
-Unfortunately, the `iotaz` API for `.traverse` (and its analogy, `.coptraverse`)
-requires us to define natural transformations, which have a clunky syntax, even
-with the `kind-projector` plugin.
 
 Sayangnya, APA `iotaz` untuk `.traverse` (dan analognya, `.coptraverse`) meminta
 kita untuk mendefinisikan transformasi natural, yang mempunyai sintaks kikuk,
@@ -12883,10 +12550,6 @@ bahkan dengan tambahan kompilator `kind-projector`.
 
 #### `Semigroup`
 
-It is not possible to define a `Semigroup` for general coproducts, however it is
-possible to define one for general products. We can use the arbitrary arity
-`InvariantApplicative`:
-
 Pendefinisian `Semigroup` untuk koproduk umum tidak mungkin didefinisikan, namun
 masih memungkinkan bila mendefinisikannya untuk produk umum. Kita dapat menggunakan
 *arity* arbiter `InvariantApplicative`:
@@ -12909,16 +12572,9 @@ masih memungkinkan bila mendefinisikannya untuk produk umum. Kita dapat mengguna
 
 #### `JsEncoder` and `JsDecoder`
 
-`scalaz-deriving` does not provide access to field names so it is not possible
-to write a JSON encoder or decoder.
-
 `scalaz-deriving` tidak menyediakan akses ke nama bidang. Jadi tidak memungkinkan
 untuk menulis penyandi dan pembaca sandi JSON.
 
-A> An earlier version of `scalaz-deriving` supported field names but it was clear
-A> that there was no advantage over using Magnolia, so the support was dropped to
-A> remain focused on typeclasses with lawful `Alt` and `Decidable`.
-A>
 A> Versi awal dari `scalaz-deriving` mendukung pembacaan nama bidang, namun tetap
 A> saja tidak ada keuntungan yang didapat bila dibandingkan bila menggunakan Magnolia.
 A> Jadi, dukungan dihapus agar tetap fokus pada kelas tipe `Alt` dan `Decidable`
@@ -12926,9 +12582,6 @@ A> yang taat hukum.
 
 
 ## Magnolia
-
-The Magnolia macro library provides a clean API for writing typeclass
-derivations. It is installed with the following `build.sbt` entry
 
 Pustaka makro Magnolia menyediakan APA yang rapi untuk menulis derivasi kelas
 tipe. Pemasangan Magnolia dapat dilakukan dengan menambah potongan berikut
@@ -12938,8 +12591,6 @@ pada `build.sbt`
 ~~~~~~~~
   libraryDependencies += "com.propensive" %% "magnolia" % "0.10.1"
 ~~~~~~~~
-
-A typeclass author implements the following members:
 
 Seorang penulis kelas tipe mengimplementasikan anggota-anggota berikut:
 
@@ -12956,8 +12607,6 @@ Seorang penulis kelas tipe mengimplementasikan anggota-anggota berikut:
     def gen[A]: Typeclass[A] = macro Magnolia.gen[A]
   }
 ~~~~~~~~
-
-The Magnolia API is:
 
 Sedangkan APA Magnolia:
 
@@ -12978,8 +12627,6 @@ Sedangkan APA Magnolia:
     def annotations: Seq[Any]
   }
 ~~~~~~~~
-
-with helpers
 
 dengan pembantu
 
@@ -13007,18 +12654,9 @@ dengan pembantu
   }
 ~~~~~~~~
 
-The `Monadic` typeclass, used in `constructMonadic`, is automatically generated
-if our data type has a `.map` and `.flatMap` method when we `import mercator._`
-
 Kelas tipe `Monadic`, yang digunakan pada `constructMonadic`, dibuat secara
 otomatis bila tipe data kita mempunyai metoda `.map` dan `.flatMap` saat kita
 mengimpor `mercator._`.
-
-It does not make sense to use Magnolia for typeclasses that can be abstracted by
-`Divisible`, `Decidable`, `Applicative` or `Alt`, since those abstractions
-provide a lot of extra structure and tests for free. However, Magnolia offers
-features that `scalaz-deriving` cannot provide: access to field names, type
-names, annotations and default values.
 
 Sebenarnya, tidak masuk akal bila kita menggunakan Magnolia untuk kelas tipe
 yang dapat diabstraksi dengan `Divisible`, `Decidable`, `Applicative`, atau `Alt`
@@ -13027,38 +12665,21 @@ Namun, Magnolia menawarkan fitur yang tidak dapat diberikan oleh `scalaz-derivin
 akses ke nama bidang, nama tipe, anotasi, dan nilai default.
 
 
-### Example: JSON
-
-We have some design choices to make with regards to JSON serialisation:
+### Contoh: JSON
 
 Kita mempunyai beberapa pilihan desain mengenai serialisasi JSON yang harus dipilih:
-
-1.  Should we include fields with `null` values?
-2.  Should decoding treat missing vs `null` differently?
-3.  How do we encode the name of a coproduct?
-4.  How do we deal with coproducts that are not `JsObject`?
 
 1.  Haruskah kita mengikut-sertakan bidang dengan nilai `null`?
 2.  Haruskah pembacaan sandi memperlakukan nilai yang hilang dan `null` secara berbeda?
 3.  Bagaimana kita menyandikan nama dari sebuah koproduk?
 4.  Bagaimana kita memperlakukan koproduk yang bukan berupa `JsObject`?
 
-We choose sensible defaults
-
 Kita akan memilih beberapa pengaturan default
-
--   do not include fields if the value is a `JsNull`.
--   handle missing fields the same as `null` values.
--   use a special field `"type"` to disambiguate coproducts using the type name.
--   put primitive values into a special field `"xvalue"`.
 
 -   tidak mengikut sertakan bidang bila nilai bidang tersebut berupa `JsNull`.
 -   menangani bidang yang hilang sama dengan nilai `null`.
 -   menggunakan bidang khusus `"type"` untuk membedakan koproduk yang menggunakan nama tipe.
 -   menempatkan nilai primitif pada bidang khusus `"xvalue"`.
-
-and let the users attach an annotation to coproducts and product fields to
-customise their formats:
 
 dan memperkenankan pengguna untuk menambahkan anotasi ke bidang koproduk dan produk
 agar dapat mengubah format sesuai keinginan mereka:
@@ -13073,14 +12694,9 @@ agar dapat mengubah format sesuai keinginan mereka:
   }
 ~~~~~~~~
 
-A> Magnolia is not limited to one annotation family. This encoding is so that we
-A> can do a like-for-like comparison with Shapeless in the next section.
-A>
 A> Magnolia tidak terbatas pada satu keluarga anotasi saja. Penyandian ini
 A> dimaksudkan agar kita dapat melakukan perbandingan semacam Shapeless pada
 A> bab selanjutnya.
-
-For example
 
 Sebagai contoh
 
@@ -13091,8 +12707,6 @@ Sebagai contoh
   final case class Time(s: String) extends Cost
   final case class Money(@json.field("integer") i: Int) extends Cost
 ~~~~~~~~
-
-Start with a `JsDecoder` that handles only our sensible defaults:
 
 Dimulai dengan `JsDecoder` yang hanya menangani pengaturan default kita:
 
@@ -13125,17 +12739,8 @@ Dimulai dengan `JsDecoder` yang hanya menangani pengaturan default kita:
   }
 ~~~~~~~~
 
-We can see how the Magnolia API makes it easy to access field names and
-typeclasses for each parameter.
-
 Kita dapat melihat bagaimana APA Magnolia mempermudah pengaksesan nama bidang
 dan kelas tipe untuk tiap parameter.
-
-Now add support for annotations to handle user preferences. To avoid looking up
-the annotations on every encoding, we will cache them in an array. Although field
-access to an array is non-total, we are guaranteed that the indices will always
-align. Performance is usually the victim in the trade-off between specialisation
-and generalisation.
 
 Sekarang, kita akan menambah anotasi untuk menangani prarasa pengguna. Untuk
 menghindari mengingat-ingat anotasi pada tiap penyandian, kita akan menyimpannya
@@ -13202,9 +12807,6 @@ ini adalah performa.
   }
 ~~~~~~~~
 
-For the decoder we use `.constructMonadic` which has a type signature similar to
-`.traverse`
-
 Untuk pembaca sandi, kita menggunakan `.constructMonadic` yang mempunyai penanda
 tipe mirip dengan `.traverse`
 
@@ -13239,9 +12841,6 @@ tipe mirip dengan `.traverse`
     def gen[A]: JsDecoder[A] = macro Magnolia.gen[A]
   }
 ~~~~~~~~
-
-Again, adding support for user preferences and default field values, along with
-some optimisations:
 
 Hal yang sama, penambahan dukungan untuk prarasa pengguna dan nilai bidang default,
 dan juga bebarapa optimasi:
@@ -13325,9 +12924,6 @@ dan juga bebarapa optimasi:
   }
 ~~~~~~~~
 
-We call the `JsMagnoliaEncoder.gen` or `JsMagnoliaDecoder.gen` method from the
-companion of our data types. For example, the Google Maps API
-
 Kita memanggil metoda `JsMagnoliaEncoder.gen` atau `JsMagnoliaDecoder.gen` dari
 objek pendamping tipe data kita. Sebagai contoh, APA Google Maps
 
@@ -13361,9 +12957,6 @@ objek pendamping tipe data kita. Sebagai contoh, APA Google Maps
   }
 ~~~~~~~~
 
-Thankfully, the `@deriving` annotation supports Magnolia! If the typeclass
-author provides a file `deriving.conf` with their jar, containing this text
-
 Untungnya, anotasi `@deriving` mendukung Magnolia. Bila penulis kelas tipe menyediakan
 berkas `deriving.conf` bersamaan dengan berkas jar mereka yang berisi teks berikut
 
@@ -13372,8 +12965,6 @@ berkas `deriving.conf` bersamaan dengan berkas jar mereka yang berisi teks berik
   jsonformat.JsEncoder=jsonformat.JsMagnoliaEncoder.gen
   jsonformat.JsDecoder=jsonformat.JsMagnoliaDecoder.gen
 ~~~~~~~~
-
-the `deriving-macro` will call the user-provided method:
 
 `deriving-macro` akan memanggil metoda yang disediakan oleh pengguna:
 
@@ -13395,11 +12986,7 @@ the `deriving-macro` will call the user-provided method:
 ~~~~~~~~
 
 
-### Fully Automatic Derivation
-
-Generating `implicit` instances on the companion of the data type is
-historically known as *semi-auto* derivation, in contrast to *full-auto* which
-is when the `.gen` is made `implicit`
+### Derivasi Otomatis
 
 Penghasilan instans `implicit` pada objek pendamping tipe data, secara historis,
 dikenal sebagai derivasi *semi-otomatis*. Berbeda dengan derivasi otomatis dimana
@@ -13417,9 +13004,6 @@ dikenal sebagai derivasi *semi-otomatis*. Berbeda dengan derivasi otomatis diman
   }
 ~~~~~~~~
 
-Users can import these methods into their scope and get magical derivation at
-the point of use
-
 Penggguna dapat mengimpor metoda ini ke cakupan kode mereka dan mendapatkan
 derivasi otomatis pada saat penggunaan
 
@@ -13431,24 +13015,13 @@ derivasi otomatis pada saat penggunaan
   res = JsObject([("text","hello"),("value",1)])
 ~~~~~~~~
 
-This may sound tempting, as it involves the least amount of typing, but there
-are two caveats:
-
 Mungkin terlihat menggiurkan, karena pengguna tidak perlu repot menulis kode,
 namun ada dua kerugian penting:
-
-1.  the macro is invoked at every use site, i.e. every time we call `.toJson`.
-    This slows down compilation and also produces more objects at runtime, which
-    will impact runtime performance.
-2.  unexpected things may be derived.
 
 1.  makro diselawat pada setiap penggunaan, misal tiap kali kita memanggil `.toJson`.
     Hal semacam ini memperlambat kompilasi dan juga menghasilkan objek lebih banyak
     pada saat waktu-jalan, yang secara tidak langsung berdampak pada performa waktu-jalan.
 2.  kemungkinan derivasi tak terduga.
-
-The first caveat is self evident, but unexpected derivations manifests as
-subtle bugs. Consider what would happen for
 
 Kerugian pertama cukup jelas, namun derivasi yang tak terduga akan terejawantah
 sebagai kutu yang hampir tidak kasat mata. Anggap contoh berikut
@@ -13459,9 +13032,6 @@ sebagai kutu yang hampir tidak kasat mata. Anggap contoh berikut
   final case class Foo(s: Option[String])
 ~~~~~~~~
 
-if we forgot to provide an implicit derivation for `Option`. We might expect a
-`Foo(Some("hello"))` to look like
-
 bila kita lupa menyediakan derivasi implisit untuk `Option`. Mungkin kita berharap
 `Foo(Some("hello"))` akan menjadi
 
@@ -13471,8 +13041,6 @@ bila kita lupa menyediakan derivasi implisit untuk `Option`. Mungkin kita berhar
     "s":"hello"
   }
 ~~~~~~~~
-
-But it would instead be
 
 Namun yang muncul adalah
 
@@ -13486,12 +13054,7 @@ Namun yang muncul adalah
   }
 ~~~~~~~~
 
-because Magnolia derived an `Option` encoder for us.
-
 karena Magnolia menderivasikan penyandi `Option` untuk kita.
-
-This is confusing, we would rather have the compiler tell us if we forgot
-something. Full auto is therefore not recommended.
 
 Hal semacam ini sangat membingungkan. Kita lebih memilih agar kompilator memberi-tahu
 kita bila kita lupa sesuatu. Maka dari itu, penderivasian otomatis tidak
@@ -13500,21 +13063,10 @@ direkomendasikan.
 
 ## Shapeless
 
-The [Shapeless](https://github.com/milessabin/shapeless/) library is notoriously the most complicated library in Scala. The
-reason why it has such a reputation is because it takes the `implicit` language
-feature to the extreme: creating a kind of *generic programming* language at the
-level of the types.
-
 Pustaka [Shapeles](https://github.com/milessabin/shapeless) dikenal sebagai pustaka
 paling rumit pada ekosistem Scala. Alasannya, pustaka ini menggunakan fitur bahasa
 `implicit` dengan sangat mendalam dengan membuat semacam *bahasa pemrograman generik*
 pada tingkat tipe.
-
-This is not an entirely foreign concept: in Scalaz we try to limit our use of
-the `implicit` language feature to typeclasses, but we sometimes ask the
-compiler to provide us with *evidence* relating types. For example Liskov or
-Leibniz relationship (`<~<` and `===`), and to `Inject` a free algebra into a
-`scalaz.Coproduct` of algebras.
 
 Hal semacam ini tidak sepenuhnya asing: pada Scalaz, kita membatasi penggunaan
 fitur bahasa `implicit` hanya pada kelas tipe. Namun, kadang kita meminta kompilator
@@ -13522,14 +13074,9 @@ menyediakan kita *bukti* yang behubungan dengan tipe. Sebagai contoh, hubungan
 Liskov atau Leibniz (`<~<` dan `===`) dan saat melakukan `Inject` ke sebuah
 aljabar `scalaz.Coproduct` dengan sebuah aljabar *free*.
 
-A> It is not necessary to understand Shapeless to be a Functional Programmer. If
-A> this chapter becomes too much, just skip to the next section.
-A>
 A> Bukan hal yang mutlak untuk memahami Shapeless bila ingin menjadi pemrogram
 A> fungsional. Bila bab ini terlalu berat, silakan untuk melewati sampai ke bagian
 A> berikutnya.
-
-To install Shapeless, add the following to `build.sbt`
 
 Untuk memasang Shapeless, tambahkan potongan kode berikut ke `build.sbt`
 
@@ -13537,8 +13084,6 @@ Untuk memasang Shapeless, tambahkan potongan kode berikut ke `build.sbt`
 ~~~~~~~~
   libraryDependencies += "com.chuusai" %% "shapeless" % "2.3.3"
 ~~~~~~~~
-
-At the core of Shapeless are the `HList` and `Coproduct` data types
 
 Inti dari Shapeless` adalah tipedata `HList` dan `Coproduct`
 
@@ -13560,15 +13105,9 @@ Inti dari Shapeless` adalah tipedata `HList` dan `Coproduct`
   sealed trait CNil extends Coproduct // no implementations
 ~~~~~~~~
 
-which are *generic* representations of products and coproducts, respectively.
-The `sealed trait HNil` is for convenience so we never need to type `HNil.type`.
-
 yang merupakan representasi *generik* dari produk dan koproduk, sedangkan
 `sealed trait HNil` digunakan sebagai pembantu agar kita tidak perlu menulis
 `HNil.type`
-
-Shapeless has a clone of the `IsoSet` datatype, called `Generic`, which allows
-us to move between an ADT and its generic representation:
 
 Shapeless juga mempunyai salinan tipe data `IsoSet` yang disebut sebagai `Generic`
 yang memperkenankan kita untuk berpindah antara sebuah TDA dan representasi
@@ -13587,11 +13126,6 @@ generiknya:
     implicit def materialize[T, R]: Aux[T, R] = macro ...
   }
 ~~~~~~~~
-
-Many of the types in Shapeless have a type member (`Repr`) and an `.Aux` type
-alias on their companion that makes the second type visible. This allows us to
-request the `Generic[Foo]` for a type `Foo` without having to provide the
-generic representation, which is generated by a macro.
 
 Banyak dari tipe Shapeless mempunyai tipe anggot (`Repr`) dan alias tipe `.Aux`
 (bantuan, *auxiliary*) pada objek pendamping yang membuat tipe kedua muncul
@@ -13620,8 +13154,6 @@ sebuah makro.
   res: Bar = Irish
 ~~~~~~~~
 
-There is a complementary `LabelledGeneric` that includes the field names
-
 Ada juga komplementer `LabelledGeneric` yang mengikutsertakan nama bidang
 
 {lang="text"}
@@ -13646,15 +13178,9 @@ Ada juga komplementer `LabelledGeneric` yang mengikutsertakan nama bidang
        Inl(Irish)
 ~~~~~~~~
 
-Note that the **value** of a `LabelledGeneric` representation is the same as the
-`Generic` representation: field names only exist in the type and are erased at
-runtime.
-
 Harap diperhatikan bahwa **nilai** dari sebuah representasi `LabelledGeneric`
 sama dengan representasi `Generic`. Nama bidang hanya ada pada tipe dan dihapus
 pada waktu-jalan.
-
-We never need to type `KeyTag` manually, we use the type alias:
 
 Kita tidak perlu untuk menulis `KeyTag` secara manual karena kita dapat menggunakan
 tipe alias:
@@ -13664,17 +13190,9 @@ tipe alias:
   type FieldType[K, +V] = V with KeyTag[K, V]
 ~~~~~~~~
 
-If we want to access the field name from a `FieldType[K, A]`, we ask for
-implicit evidence `Witness.Aux[K]`, which allows us to access the value of `K`
-at runtime.
-
 Bila kita ingin mengakses nama bidang dari sebuah `FieldType[K, A]`, kita dapat
 meminta bukti implisit `Witness.Aux[K]` yang memperkenankan kita untuk mengakses
 nilai dari `K` pada waktu-jalan.
-
-Superficially, this is all we need to know about Shapeless to be able to derive
-a typeclass. However, things get increasingly complex, so we will proceed with
-increasingly complex examples.
 
 Secara sekilas, ini semua yang harus kita tahu mengenai Shapeless agar dapat
 menderivasi sebuah kelas tipe. Namun, karena semua hal semakin rumit, misalkan
@@ -13682,11 +13200,7 @@ jawaban kapan kawin, punya anak, dan pensiun, kita akan melanjutkan pembahasan
 dengan contoh yang juga semakin kompleks.
 
 
-### Example: Equal
-
-A typical pattern to follow is to extend the typeclass that we wish to derive,
-and put the Shapeless code on its companion. This gives us an implicit scope
-that the compiler can search without requiring complex imports
+### Contoh: *Equal*
 
 Pola yang umum digunakan adalah mengeksten kelas tipe yang ingin kita derivasi
 dan menempatkan kode Shapeless pada objek pendampingnya. Pola ini memberikan
@@ -13700,12 +13214,6 @@ impor yang rumit.
     ...
   }
 ~~~~~~~~
-
-The entry point to a Shapeless derivation is a method, `gen`, requiring two type
-parameters: the `A` that we are deriving and the `R` for its generic
-representation. We then ask for the `Generic.Aux[A, R]`, relating `A` to `R`,
-and an instance of the `Derived` typeclass for the `R`. We begin with this
-signature and simple implementation:
 
 Titik mulai dari derivasi Shapeless adalah metoda `gen` yang meminta dua parameter
 tipe: `A` sebagai yang kita derivasikan dan `R` sebagai representasi generiknya.
@@ -13723,10 +13231,6 @@ implementasi sederhana berikut:
   }
 ~~~~~~~~
 
-We've reduced the problem to providing an implicit `Equal[R]` for an `R` that is
-the `Generic` representation of `A`. First consider products, where `R <:
-HList`. This is the signature we want to implement:
-
 Kita telah mereduksi permasalahan atas penyediaan sebuah `Equal[R]` implisit
 untuk `R` yang merupakan representasi generik dari `A`. Pertam, perhatikan produk
 yang berupa `R <: HList`. Penanda inilah yang kita inginkan untuk diimplementasikan:
@@ -13736,10 +13240,6 @@ yang berupa `R <: HList`. Penanda inilah yang kita inginkan untuk diimplementasi
   implicit def hcons[H: Equal, T <: HList: DerivedEqual]: DerivedEqual[H :: T]
 ~~~~~~~~
 
-because if we can implement it for a head and a tail, the compiler will be able
-to recurse on this method until it reaches the end of the list. Where we will
-need to provide an instance for the empty `HNil`
-
 karena bila kita dapat mengimplementasikannya untuk *head* dan *tail*, komplire
 akan dapat mengulang metoda ini sampai pada akhir daftar. Hal ini membawa kita
 pada keharusan untuk menyediakan sebuah instans untuk `HNil` kosong
@@ -13748,8 +13248,6 @@ pada keharusan untuk menyediakan sebuah instans untuk `HNil` kosong
 ~~~~~~~~
   implicit def hnil: DerivedEqual[HNil]
 ~~~~~~~~
-
-We implement these methods
 
 Kita akan mengimplementasikan metoda berikut
 
@@ -13761,8 +13259,6 @@ Kita akan mengimplementasikan metoda berikut
   implicit val hnil: DerivedEqual[HNil] = (_, _) => true
 ~~~~~~~~
 
-and for coproducts we want to implement these signatures
-
 dan untuk kooproduk, kita ingin mengimplementasikan penanda berikut
 
 {lang="text"}
@@ -13771,9 +13267,6 @@ dan untuk kooproduk, kita ingin mengimplementasikan penanda berikut
   implicit def cnil: DerivedEqual[CNil]
 ~~~~~~~~
 
-A> Scalaz and Shapeless share many type names, when mixing them we often need to
-A> exclude certain elements from the import, e.g.
-A>
 A> Scalaz dan Shapeless berbagi banyak nama tipe. Saat menggunakan secara bersamaan,
 A> sering kali kita harus mengecualikan beberapa elemen dari impor. Mis,
 A> 
@@ -13783,10 +13276,6 @@ A>   import scalaz.{ Coproduct => _, :+: => _, _ }, Scalaz._
 A>   import shapeless._
 A> ~~~~~~~~
 
-`.cnil` will never be called for a typeclass like `Equal` with type parameters
-only in contravariant position, but the compiler doesn't know that so we have to
-provide a stub:
-
 `.cnil` tidak akan pernah dipanggil untuk kelas tipe dengan parameter tipe yang
 hanya ada pada posisi kontravarian, seperti `Equal`, namun koompiler tidak tahu
 mengenai hal tersebut. Jadi, kita akan menyediakan potongan kode berikut:
@@ -13795,9 +13284,6 @@ mengenai hal tersebut. Jadi, kita akan menyediakan potongan kode berikut:
 ~~~~~~~~
   implicit val cnil: DerivedEqual[CNil] = (_, _) => sys.error("impossible")
 ~~~~~~~~
-
-For the coproduct case we can only compare two things if they align, which is
-when they are both `Inl` or `Inr`
 
 Untuk koproduk, kita hanya bisa membandingkan dua hal bila mereka selaras. Atau
 keduanya `Inl` atau `Inr`
@@ -13811,17 +13297,10 @@ keduanya `Inl` atau `Inr`
   }
 ~~~~~~~~
 
-It is noteworthy that our methods align with the concept of `conquer` (`hnil`),
-`divide2` (`hlist`) and `alt2` (`coproduct`)! However, we don't get any of the
-advantages of implementing `Decidable`, as now we must start from scratch when
-writing tests for this code.
-
 Hal yang patut dicatat adalah metoda kita selaras dengan konsep `conquer` (`hnil`),
 `divide2` (`hlist`), dan `alt2` (`coproduct`). Namun, kita tidak mendapat
 keuntungan apapun seperti pengimplementasian `Decidable`. Hal ini berarti kita
 harus memulai dari awal bila kita menulis tes untuk kode ini.
-
-So let's test this thing with a simple ADT
 
 Mari kita tes kode berikut dengan TDA sederhana
 
@@ -13832,8 +13311,6 @@ Mari kita tes kode berikut dengan TDA sederhana
   final case class Faz(b: Boolean, i: Int) extends Foo
   final case object Baz                    extends Foo
 ~~~~~~~~
-
-We need to provide instances on the companions:
 
 Kita harus menyediakan instans pada objek pendamping:
 
@@ -13853,8 +13330,6 @@ Kita harus menyediakan instans pada objek pendamping:
   }
 ~~~~~~~~
 
-But it doesn't compile
-
 Namun, kode tersebut tidak dapat dikompilasi
 
 {lang="text"}
@@ -13867,13 +13342,7 @@ Namun, kode tersebut tidak dapat dikompilasi
   [error]                                      ^
 ~~~~~~~~
 
-Welcome to Shapeless compilation errors!
-
 Nah, galat kompilasi Shapeless terlihat seperti ini.
-
-The problem, which is not at all evident from the error, is that the compiler is
-unable to work out what `R` is, and gets caught thinking it is something else.
-We need to provide the explicit type parameters when calling `gen`, e.g.
 
 Masalah ini, yang sama sekali tidak jelas terlihat dari pesan galat, terjadi
 karena kompilator tidak dapat menentukan `R` dan mengira `R` sebagai tipe lainnya.
@@ -13883,8 +13352,6 @@ Kita harus menyediakan parameter tipe eksplisit saat memanggil `gen`, mis.
 ~~~~~~~~
   implicit val equal: Equal[Baz.type] = DerivedEqual.gen[Baz.type, HNil]
 ~~~~~~~~
-
-or we can use the `Generic` macro to help us and let the compiler infer the generic representation
 
 atau kita dapat menggunakan makro `Generic` agar kompilator dapat menebak representasi
 generiknya
@@ -13898,13 +13365,8 @@ generiknya
   ...
 ~~~~~~~~
 
-A> At this point, ignore any red squigglies and only trust the compiler. This is
-A> the point where Shapeless departs from IDE support.
-A>
 A> Sampai disini, abaikan semua coretan merah dan hanya percaya pada kompilator.
 A> Disinilah dimana Shapeless tidak didukung oleh IDE.
-
-The reason why this fixes the problem is because the type signature
 
 Penanda tipe-lah yang menyelesaikan masalah tersebut
 
@@ -13913,8 +13375,6 @@ Penanda tipe-lah yang menyelesaikan masalah tersebut
   def gen[A, R: DerivedEqual](implicit G: Generic.Aux[A, R]): Equal[A]
 ~~~~~~~~
 
-desugars into
-
 yang dijabarkan menjadi
 
 {lang="text"}
@@ -13922,31 +13382,16 @@ yang dijabarkan menjadi
   def gen[A, R](implicit R: DerivedEqual[R], G: Generic.Aux[A, R]): Equal[A]
 ~~~~~~~~
 
-The Scala compiler solves type constraints left to right, so it finds many
-different solutions to `DerivedEqual[R]` before constraining it with the
-`Generic.Aux[A, R]`. Another way to solve this is to not use context bounds.
-
 Kompiler Scala menyelesaikan batasan tipe dari kiri ke kanan. Jadi kompilator
 akan mencari banyak solusi untuk `DerivedEqual[R]` sebelum membatasinya menjadi
 `Generic.Aux[A, R]`. Cara lain untuk menyelesaikan masalah ini adalah dengan
 tidak menggunakan batasan konteks.
 
-A> Rather than present the fully working version, we feel it is important to show
-A> when obvious code fails, such is the reality of Shapeless. Another thing we
-A> could have reasonably done here is to have `sealed` the `DerivedEqual` trait so
-A> that only derived versions are valid. But `sealed trait` is not compatible with
-A> SAM types! Living at the razor's edge, expect to get cut.
-A>
 A> Kita merasa penunjukkan gagalnya kompilasi kode, bukan versi yang benar-benar
 A> berjalan dengan baik, adalah karena memang keseharian nyata dari Shapeless
 A> begitu. Hal lain yang mungkin bisa saja kita lakukan disini adalah menggunakan
 A> `sealed` pada *trait* `DerivedEqual` sehingga hanya versi terderivasi saja
 A> yang valid. Namun, `sealed trait` tidak kompatibel dengan tipe SAM.
-
-With this in mind, we no longer need the `implicit val generic` or the explicit
-type parameters on the call to `.gen`. We can wire up `@deriving` by adding an
-entry in `deriving.conf` (assuming we want to override the `scalaz-deriving`
-implementation)
 
 Berbekal pengetahuan ini, kita tidak perlu lagi `implicit val generic` atau tipe
 parameter eksplisit pada panggilan `.gen`. Kita dapat menggunakan `@deriving`
@@ -13958,8 +13403,6 @@ menimpa implementasi `scalaz-deriving`)
   scalaz.Equal=fommil.DerivedEqual.gen
 ~~~~~~~~
 
-and write
-
 dan menulis
 
 {lang="text"}
@@ -13970,25 +13413,15 @@ dan menulis
   @deriving(Equal) final case object Baz
 ~~~~~~~~
 
-But replacing the `scalaz-deriving` version means that compile times get slower.
-This is because the compiler is solving `N` implicit searches for each product
-of `N` fields or coproduct of `N` products, whereas `scalaz-deriving` and
-Magnolia do not.
-
 Namun, mengganti versi `scalaz-deriving` juga berarti waktu kompilasi akan semakin
 panjang. Hal ini disebabkan karena kompilator menyelesaikan pencarian implisit `N`
 untuk tiap produk bidang `N` atau koproduk dari produk `N`. Hal semacam ini
 tidak terjadi pada `scalaz-deriving` dan Magnolia.
 
-Note that when using `scalaz-deriving` or Magnolia we can put the `@deriving` on
-just the top member of an ADT, but for Shapeless we must add it to all entries.
-
 Harap dicatat saat menggunakan `scalaz-deriving` atau Magnolia, kita dapat
 menuliskan `@deriving` pada bagian atas anggota dari sebuah TDA. Shapeless
 meminta perlakuan yang berbeda dengan mengharuskan kita untuk menambahkannya pada
 semua bagian.
-
-However, this implementation still has a bug: it fails for recursive types **at runtime**, e.g.
 
 Namun, implementasi ini masih memiliki kutu: kegagalan pada tipe rekursif **saat waktu jalan**, mis.
 
@@ -14013,32 +13446,18 @@ Namun, implementasi ini masih memiliki kutu: kegagalan pada tipe rekursif **saat
           ...
 ~~~~~~~~
 
-The reason why this happens is because `Equal[Tree]` depends on the
-`Equal[Branch]`, which depends on the `Equal[Tree]`. Recursion and BANG!
-It must be loaded lazily, not eagerly.
-
 Alasan hal ini terjadi adalah `Equal[Tree]` bergantung pada `Equal[Branch]` yang
 bergantung pada `Equal[Tree]`. Dan terjadilah rekursi. Maka dari itu, implementasi
 ini harus dipanggil secara lantung.
-
-Both `scalaz-deriving` and Magnolia deal with lazy automatically, but in
-Shapeless it is the responsibility of the typeclass author.
 
 `scalaz-deriving` dan Magnolia secara otomatis melakukan evaluasi lantung dan
 lagi-lagi Shapeless mengambil penekatan yang berbeda karena menyerahkan sepenuhnya
 ke penulis kelas tipe.
 
-The macro types `Cached`, `Strict` and `Lazy` modify the compiler's type
-inference behaviour allowing us to achieve the laziness we require. The pattern
-to follow is to use `Cached[Strict[_]]` on the entry point and `Lazy[_]` around
-the `H` instances.
-
 Tipe makro `Cached`, `Strict`, dan `Lazy` mengubah perilaku inferensi kompilator
 dan memperkenankan kita untuk mendapatkan kelantungan yang kita butuhkan. Pola
 yang harus diikut adalah dengan menggunakan `Cached[Strict[_]]` pada titik masuk
 dan `Lazy[_]` pada instans `H`.
-
-It is best to depart from context bounds and SAM types entirely at this point:
 
 Akah jauh lebih baik untuk tidak lagi menggunakan batasan konteks dan tipe
 SAM pada titik ini:
@@ -14088,13 +13507,8 @@ SAM pada titik ini:
   }
 ~~~~~~~~
 
-While we were at it, we optimised using the `quick` shortcut from
-`scalaz-deriving`.
-
 Sembari melepas batasan konteks, kita juga mengoptimasi dengan menggunakan
 jalan pintas `quick` dari `scalaz-deriving`.
-
-We can now call
 
 Sekarang, kita dapat memanggil
 
@@ -14103,17 +13517,10 @@ Sekarang, kita dapat memanggil
   assert(tree1 /== tree2)
 ~~~~~~~~
 
-without a runtime exception.
-
 tanpa mendapatkan pengecualian waktu-jalan.
 
 
-### Example: `Default`
-
-There are no new snares in the implementation of a typeclass with a type
-parameter in covariant position. Here we create `HList` and `Coproduct` values,
-and must provide a value for the `CNil` case as it corresponds to the case where
-no coproduct is able to provide a value.
+### Contoh: `Default`
 
 Tidak ada jebakan baru pada implementasi dari kelas tipe dengan parameter tipe
 di posisi kovarian. Disini, kita membuat nilai `HList` dan `Coproduct` dan harus
@@ -14159,52 +13566,29 @@ dimana tidak ada koproduk yang mampu menyediakan nilai tersebut.
   }
 ~~~~~~~~
 
-Much as we could draw an analogy between `Equal` and `Decidable`, we can see the
-relationship to `Alt` in `.point` (`hnil`), `.apply2` (`.hcons`) and `.altly2`
-(`.ccons`).
-
 Seperti analogi yang dapat kita tarik antara `Equal` dan `Decidable`, kita dapat
 melihat hubungan antara `Alt` pada `.point` (`hnil`), `.apply2` (`.hcons`),
 dan `.altly2` (`.ccons`).
-
-There is little to be learned from an example like `Semigroup`, so we will skip
-to encoders and decoders.
 
 Tidak banyak yang bisa dipelajari dari contoh seperti `Semigroup`, jadi kita
 akan melewati penyandian dan pembacaan sandi.
 
 
-### Example: `JsEncoder`
-
-To be able to reproduce our Magnolia JSON encoder, we must be able to access:
+### Contoh: `JsEncoder`
 
 Agar dapat mereproduksi penyandi JSON Magnolia kita, kita harus mampu mengakses
-
-1.  field names and class names
-2.  annotations for user preferences
-3.  default values on a `case class`
 
 1.  nama bidang dan nama kelas
 2.  anotasi untuk prarasa pengguna
 3.  nilai default pada sebuah `case class`
 
-We will begin by creating an encoder that handles only the sensible defaults.
-
 Kita akan memulai dengan membuat sebuah penyandi yang hanya menangani pengaturan
 yang masuk akal.
-
-To get field names, we use `LabelledGeneric` instead of `Generic`, and when
-defining the type of the head element, use `FieldType[K, H]` instead of just
-`H`. A `Witness.Aux[K]` provides the value of the field name at runtime.
 
 Untuk mendapatkan nama bidang, kita menggunakan `LabelledGeneric`, bukan `Generic`,
 dan pada saat mendefiniskan tipe dari elemen awal, kita menggunakan `FieldType[K, H]`,
 bukan hanya `H`. Sebuah `Witness.Aux[K]` menyediakan nilai dari nama bidang pada
 saat waktu-jalan.
-
-All of our methods are going to return `JsObject`, so rather than returning a
-`JsValue` we can specialise and create `DerivedJsEncoder` that has a different
-type signature to `JsEncoder`.
 
 Semua metooda kita akan mengembalikan `JsObject`, bukan `JsValue`, agar kita
 dapat mengkhususkan dan membuat `DerivedJsEncoder` yang mempunyai penanda tipe
@@ -14276,9 +13660,6 @@ berbeda dengan `JsEncoder`.
   }
 ~~~~~~~~
 
-A> A pattern has emerged in many Shapeless derivation libraries that introduce
-A> "hints" with a default `implicit`
-A>
 A> Sebuah pola yang muncul pada banya pustaka derivasi Shapeless yang memperkenalkan
 A> "petunjuk" dengan `implicit` default
 A> 
@@ -14295,12 +13676,6 @@ A>       def fieldname(field: String) = field
 A>     }
 A>   }
 A> ~~~~~~~~
-A> 
-A> Users are supposed to provide a custom instance of `ProductHint` on their
-A> companions or package objects. This is a **terrible idea** that relies on fragile
-A> implicit ordering and is a source of typeclass decoherence: if we derive a
-A> `JsEncoder[Foo]`, we will get a different result depending on which
-A> `ProductHint[Foo]` is in scope. It is best avoided.
 A>
 A> Pengguna dimaksudkan untuk menyediakan sebuah instans khusus dari `ProductHint`
 A> sendiri pada objek pendamping atau objek paket mereka sendiri. Hal semacam ini
@@ -14308,13 +13683,6 @@ A> sangat buruk karena bergantung pada pengurutan implisit yang rapuh dan merupa
 A> sumber dekoherensi kelas tipe: bila kita menderivasi sebuah `JsEncoder[Foo]`,
 A> kita akan mendapatkan hasil yang berbeda yang tergantung pada cakupan mana
 A> `ProductHint[Foo]` berada. Sangat dianjurkan untuk menghindari hal semacam ini.
-
-Shapeless selects codepaths at compiletime based on the presence of annotations,
-which can lead to more optimised code, at the expense of code repetition. This
-means that the number of annotations we are dealing with, and their subtypes,
-must be manageable or we can find ourselves writing 10x the amount of code. We
-change our three annotations into one containing all the customisation
-parameters:
 
 Shapeless menentukan jalur kode pada saat kompilasi berdasarkan pada ada atau tidaknya
 anotasi yang dapat memberikan potensi kode teroptimasi, walaupun dengan beban
@@ -14331,10 +13699,6 @@ semua parameter kustomasi:
     hint: Option[String]
   ) extends Annotation
 ~~~~~~~~
-
-All users of the annotation must provide all three values since default values
-and convenience methods are not available to annotation constructors. We can
-write custom extractors so we don't have to change our Magnolia code
 
 Semua pengguna anotasi harus menyediakan tiga nilai default dan metoda pembantu
 tidak tersedia untuk konstruktor anotasi. Kita dapat menulis pengekstrak kustom
@@ -14355,52 +13719,27 @@ sehingga kita tidak harus mengganti kode Magnolia kita.
   }
 ~~~~~~~~
 
-We can request `Annotation[json, A]` for a `case class` or `sealed trait` to get
-access to the annotation, but we must write an `hcons` and a `ccons` dealing
-with both cases because the evidence will not be generated if the annotation
-is not present. We therefore have to introduce a lower priority implicit scope
-and put the "no annotation" evidence there.
-
 Kita dapat meminta `Annotation[json, A]` untuk `case class` atau `sealed trait`
 agar mendapatkan akses ke anotasi. Namun, kita harus menulis `hcons` dan `ccons`
 untuk menangani kedua kasus tersebut karena bukti tidak akan dibuat bila anotasi
 tidak ada. Maka dari itu, kita memperkenalkan cakupan implisit dengan prioritas
 yang lebih rendah dan meletakkan bukti "tanpa anotasi" disana.
 
-We can also request `Annotations.Aux[json, A, J]` evidence to obtain an `HList`
-of the `json` annotation for type `A`. Again, we must provide `hcons` and
-`ccons` dealing with the case where there is and is not an annotation.
-
 Kita juga dapat meminta bukti `Annotations.Aux[json, A, J]` untuk mendapatkan
 `HList` dari anotasi `json` untuk tipe `A`. Hal yang sama, kita harus menyediakan
 `hcons` dan `ccoons` untuk menangani kejadian ada-atau-tidaknya sebuah anotasi.
 
-To support this one annotation, we must write four times as much code as before!
-
 Untuk mendukung anotasi satu ini, kita harus menulis kode empat kali lebih banyak.
-
-Lets start by rewriting the `JsEncoder`, only handling user code that doesn't
-have any annotations. Now any code that uses the `@json` will fail to compile,
-which is a good safety net.
 
 Dimulai dengan menulis ulang `JsEncoder` yang hanya menangani kode pengguna yang
 tidak mempunyai anotasi apapun. Sekarang, setiap kode yang menggunakan `@json`
 akan gagal dikompilasi. Hal ini merupakan jaring pengaman yang cukup baik.
-
-We must add an `A` and `J` type to the `DerivedJsEncoder` and thread through the
-annotations on its `.toJsObject` method. Our `.hcons` and `.ccons` evidence now
-provides instances for `DerivedJsEncoder` with a `None.type` annotation and we
-move them to a lower priority so that we can deal with `Annotation[json, A]` in
-the higher priority.
 
 Kita harus menambah sebuah tipe `A` dan `J` ke `DerivedJsEncoder` dan melangkahi
 anotasi pada metoda `.toJsObject`-nya. Bukti `.hcons` dan `.ccons` sudah menyediakan
 instans untuk `DerivedJsEncoder` dengan anotasi `None.type` dan kita akan memindahkan
 mereka ke prioritas yang lebih rendah sehingga kita dapat menangani `Annotation[json, A]`
 di prioritas yang lebih tinggi.
-
-Note that the evidence for `J` is listed before `R`. This is important, since
-the compiler must first fix the type of `J` before it can solve for `R`.
 
 Harap perhatikan bahwa bukti untuk `J` sudah diberikan sebelum `R`. Hal ini
 sangat penting karena kompilator harus menyelesaikan `J` sebelum dapat menyelesaikan
@@ -14472,19 +13811,10 @@ sangat penting karena kompilator harus menyelesaikan `J` sebelum dapat menyelesa
   }
 ~~~~~~~~
 
-Now we can add the type signatures for the six new methods, covering all the
-possibilities of where the annotation can be. Note that we only support **one**
-annotation in each position. If the user provides multiple annotations, anything
-after the first will be silently ignored.
-
 Sekarang kita dapat menambah penanda tipe untuk enam metoda baru tersebut, dan
 memenuhi semua kemungkinan dimana anotasi mungkin berada. Harap juga perhatikan
 bahwa kita hanya mendukung satu anotasi pada setiap posis. Bila pengguna menyediakan
 beberapa anotasi, semua anotasi lain setelah anotasi pertama akan diabaikan.
-
-We're now running out of names for things, so we will arbitrarily call it
-`Annotated` when there is an annotation on the `A`, and `Custom` when there is
-an annotation on a field:
 
 Saat ini, kita sudah kehabisan nama untuk banyak hal. Maka dari itu, kita akan
 menyebutnya, secara arbiter, sebagai `Annotated` bila `A` sudah memiliki anotasi
@@ -14544,17 +13874,10 @@ dan `Custom` bila ada sebuah anotasi pada sebuah bidang:
   }
 ~~~~~~~~
 
-We don't actually need `.hconsAnnotated` or `.hconsAnnotatedCustom` for
-anything, since an annotation on a `case class` does not mean anything to the
-encoding of that product, it is only used in `.cconsAnnotated*`. We can therefore
-delete two methods.
-
 Kita tidak benar-benar butuh `.hconsAnnotated` atau `.hconsAnnotatedCustom`, karena
 anotasi pada sebuah `case class` tidak berarti apapun pada penyandian produk tersebut.
 kedua metoda tersebut hanya dipakai pada `.cconsAnnotated*`. Maka dari itu, kita
 dapat menghapus kedua metoda tersebut.
-
-`.cconsAnnotated` and `.cconsAnnotatedCustom` can be defined as
 
 `.cconsAnnotated` dan `.cconsAnnotatedCustom` dapat didefinisikan sebagai
 
@@ -14572,8 +13895,6 @@ dapat menghapus kedua metoda tersebut.
     }
   }
 ~~~~~~~~
-
-and
 
 dan
 
@@ -14597,13 +13918,8 @@ dan
   }
 ~~~~~~~~
 
-The use of `.head` and `.get` may be concerned but recall that the types here
-are `::` and `Some` meaning that these methods are total and safe to use.
-
 Guna `.head` dan `.get` mungkin meragukan, namun harap diingat bahwa tipe disini
 berupa `::` dan `Some` yang berarti metoda ini total dan aman digunakan.
-
-`.hconsCustom` and `.cconsCustom` are written
 
 `.hconsCustom` dan `.cconsCustom` ditulis
 
@@ -14623,8 +13939,6 @@ berupa `::` dan `Some` yang berarti metoda ini total dan aman digunakan.
     }
   }
 ~~~~~~~~
-
-and
 
 dan
 
@@ -14647,23 +13961,10 @@ dan
   }
 ~~~~~~~~
 
-Obviously, there is a lot of boilerplate, but looking closely one can see that
-each method is implemented as efficiently as possible with the information it
-has available: codepaths are selected at compiletime rather than runtime.
-
 Terang saja, ada sangat banyak plat cetak, namun bila diperhatikan lebih seksama,
 kita dapat melihat bahwa tiap metoda diimplementasika se-efisien mungkin dengan
 informasi yang tersedia: alur kode dipilih saaat waktu kompilasi, bukan pada
 saat waktu jalan.
-
-The performance obsessed may be able to refactor this code so all annotation
-information is available in advance, rather than injected via the `.toJsFields`
-method, with another layer of indirection. For absolute performance, we could
-also treat each customisation as a separate annotation, but that would multiply
-the amount of code we've written yet again, with additional cost to compilation
-time on downstream users. Such optimisations are beyond the scope of this book,
-but they are possible and people do them: the ability to shift work from runtime
-to compiletime is one of the most appealing things about generic programming.
 
 Bagi para pengguna yang sangat menginginkan performa bisa saja melakukan faktorisasi
 ulang pada kode ini, sehingga informasi anotasi tersedia lebih awal, bukan disisipkan
@@ -14674,11 +13975,6 @@ pada pengguna hilir. Optimasi semacam itu berapa diluar cakupan buku ini, namun
 hal tersebut bisa saja dilakukan dan praktik di lapangan memang demikian adanya:
 pemindahan beban kerja dari waktu-jalan ke waktu-kompilasi merupakan hal yang
 paling menarik dari pemrograman generik.
-
-One more caveat that we need to be aware of: [`LabelledGeneric` is not compatible
-with `scalaz.@@`](https://github.com/milessabin/shapeless/issues/309), but there is a workaround. Say we want to effectively ignore
-tags so we add the following derivation rules to the companions of our encoder
-and decoder
 
 Satu lagi kekurangan yang harus kita sadari: [`LabelledGeneric` tidak kompatibel dengan `scalaz.@@`](https://github.com/milessabin/shapeless/issue/309),
 namun, tentu saja ada penyiasatannya. Misalkan kita ingin mengabaikan label, kita
@@ -14699,9 +13995,6 @@ pembaca sandi
   }
 ~~~~~~~~
 
-We would then expect to be able to derive a `JsDecoder` for something like our
-`TradeTemplate` from Chapter 5
-
 Lalu kita dapat men-derivasi sebuah `JsDecoder` untuk `TradeTemplate` kita dari
 bab 5
 
@@ -14715,8 +14008,6 @@ bab 5
   }
 ~~~~~~~~
 
-But we instead get a compiler error
-
 Namun, kita malah mendapat sebuah galat kompilator
 
 {lang="text"}
@@ -14725,8 +14016,6 @@ Namun, kita malah mendapat sebuah galat kompilator
   [error]   implicit val encoder: JsEncoder[TradeTemplate] = DerivedJsEncoder.gen
   [error]                                                                     ^
 ~~~~~~~~
-
-The error message is as helpful as always. The workaround is to introduce evidence for `H @@ Z` on the lower priority implicit scope, and then just call the code that the compiler should have found in the first place:
 
 Penyiasatan masalah ini adalah dengan memperkenalkan bukti untuk `H @@ Z` pada
 cakupan impliist yang lebih rendah dan memanggil kode tersebut, sehingga kompilator
@@ -14757,17 +14046,11 @@ dapat menemukannya:
   }
 ~~~~~~~~
 
-Thankfully, we only need to consider products, since coproducts cannot be tagged.
-
 Dan untungnya, kita hanya perlu memikirkan tentang produk, karena koproduk tidak
 dapat dilabeli.
 
 
 ### `JsDecoder`
-
-The decoding side is much as we can expect based on previous examples. We can
-construct an instance of a `FieldType[K, H]` with the helper `field[K](h: H)`.
-Supporting only the sensible defaults means we write:
 
 Bagian pembacaan sandi kurang lebih sama dengan contoh sebelumnya. Kita dapat
 menyusun sebuah instans dari `Field[K, H]` dengan metoda bantuan `field[K](h: D]`.
@@ -14837,27 +14120,15 @@ Kita hanya menulis default yang masuk akal saja:
   }
 ~~~~~~~~
 
-Adding user preferences via annotations follows the same route as
-`DerivedJsEncoder` and is mechanical, so left as an exercise to the reader.
-
 Menambahkan prarasa pengguna dengan cara anotasi, sama halnya dengan `DerivedJsonEncoder`
 dan terasa kaku. Jadi, kita akan memperlakukannya sebagai latihan bagi pembaca.
-
-One final thing is missing: `case class` default values. We can request evidence
-but a big problem is that we can no longer use the same derivation mechanism for
-products and coproducts: the evidence is never created for coproducts.
 
 Satu hal penting yang tertinggal: nilai default `case class`. Kita dapat meminta
 bukti namun yang menjadi masalah adalah kita tidak dapat lagi menggunakan mekanisme
 derivasi yang sama untuk produk dan koproduk: bukti tidak akan pernah dibuat untuk
 koproduk.
 
-The solution is quite drastic. We must split our `DerivedJsDecoder` into
-`DerivedCoproductJsDecoder` and `DerivedProductJsDecoder`. We will focus our
-attention on the `DerivedProductJsDecoder`, and while we are at it we will
-use a `Map` for faster field lookup:
-
-Soolusi yang dipakai cukup drastis, kita harus memisah `DerivedJsDecoder` menjadi
+Solusi yang dipakai cukup drastis, kita harus memisah `DerivedJsDecoder` menjadi
 `DerivedCoproductJsDecoder` dan `DerivedProductJsDecder`. Kita akan memfokuskan
 perhatian kita pada `DerivedProductJsDecoder` dan menggunakan `Map` untuk pencarian
 bidang yang lebih singkat:
@@ -14872,11 +14143,6 @@ bidang yang lebih singkat:
     ): String \/ R
   }
 ~~~~~~~~
-
-We can request evidence of default values with `Default.Aux[A, D]` and duplicate
-all the methods to deal with the case where we do and do not have a default
-value. However, Shapeless is merciful (for once) and provides
-`Default.AsOptions.Aux[A, D]` letting us handle defaults at runtime.
 
 Kita dapat meminta bukti nilai default dengan `Default.Aux[A, D]` dan menduplikasi
 semua metooda agar menangani kasus yang tergantung dari ketersediaan nilai default.
@@ -14901,9 +14167,6 @@ yang memperkenankan kita untuk menangani nilai default pada saat waktu-jalan.
     ...
   }
 ~~~~~~~~
-
-We must move the `.hcons` and `.hnil` methods onto the companion of the new
-sealed typeclass, which can handle default values
 
 Kita harus memindahkan metoda `.hcons` dan `.hnil` ke objek pasangan dari kelas
 tipe tertutup, yang dapat menangani nilai default
@@ -14953,8 +14216,6 @@ one entry in the `deriving.conf` file.
 Kita tidak dapat lagi menggunakan `@deriving` untuk produk dan koproduk: hanya
 boleh ada satu *entry* pada berkas `deriving.conf`.
 
-Oh, and don't forget to add `@@` support
-
 Dan jangan lupa untuk menambahkan dukungan `@@`
 
 {lang="text"}
@@ -14996,11 +14257,7 @@ Dan jangan lupa untuk menambahkan dukungan `@@`
 ~~~~~~~~
 
 
-### Complicated Derivations
-
-Shapeless allows for a lot more kinds of derivations than are possible with
-`scalaz-deriving` or Magnolia. As an example of an encoder / decoder that are
-not possible with Magnolia, consider this XML model from [`xmlformat`](https://github.com/scalaz/scalaz-deriving/tree/master/examples/xmlformat)
+### Derivasi Rumit
 
 Shapeless memperkenankan lebih banyak jenis derivasi bila dibandingkan dengan
 `scalaz-deriving` atau Magnolia. Sebagai contoh, sebuah penyandi / pembaca sandi
@@ -15032,14 +14289,6 @@ yang tidak mungkin bisa dilakukan dengan Magnolia. Sebagai contoh, model XML dar
   final case class XString(text: String) extends XNode
 ~~~~~~~~
 
-Given the nature of XML it makes sense to have separate encoder / decoder pairs
-for `XChildren` and `XString` content. We could provide a derivation for the
-`XChildren` with Shapeless but we want to special case fields based on the kind
-of typeclass they have, as well as `Option` fields. We could even require that
-fields are annotated with their encoded name. In addition, when decoding we wish
-to have different strategies for handling XML element bodies, which can be
-multipart, depending on if our type has a `Semigroup`, `Monoid` or neither.
-
 Dikarenakan sifat dari XML, akan masuk akal bila kita memiliki pasangan penyandi /
 pembaca sandi untuk konten `XChildren` dan `XString`. Kita dapat menyediakan
 sebuah derivasi untuk `XChildren` dengan Shapeless, namun kita ingin sebuah
@@ -15049,11 +14298,6 @@ tambahan, saat membaca penyandian, akan lebih baik bila kita memiliki strategi
 yang berbeda untuk menangani elemen dari XML, yang mungkin berupa banyak bagian,
 tergantung bila tipe kita mempunyai `Semigroup`, `Monoid`, ataupun tidak sama sekali.
 
-A> Many developers believe XML is simply a more verbose form of JSON, with angle
-A> brackets instead of curlies. However, an attempt to write a round trip converter
-A> between `XNode` and `JsValue` should convince us that JSON and XML are different
-A> species, with conversions only possible on a case-by-case basis.
-A>
 A> Banyak pengembang yang percaya XML hanya bentuk lebih lantung dari JSON dengan
 A> kurung sudut sebagai pengganti kurung kurawal. Namun, hanya dengan sebuah percobaan
 A> penulisan pengubah bolak balik antara `XNode` dan `JsValue` bisa meyakinkan
@@ -15061,12 +14305,7 @@ A> bahwa XML dan JSON merupakan hal yang berbeda, dengan konversi yang hanya mun
 A> pada kasus-per-kasus.
 
 
-### Example: `UrlQueryWriter`
-
-Along similar lines as `xmlformat`, our `drone-dynamic-agents` application could
-benefit from a typeclass derivation of the `UrlQueryWriter` typeclass, which is
-built out of `UrlEncodedWriter` instances for each field entry. It does not
-support coproducts:
+### Contoh: `UrlQueryWriter`
 
 Sama halnya dengan `xmlformat`, aplikasi `drone-dynamic-agents` dapat diuntungkan
 dari derivasi kelas tipe dari kelas tipe `UrqQueryWriter` yang dibangun dengan
@@ -15105,15 +14344,9 @@ koproduk:
   }
 ~~~~~~~~
 
-It is reasonable to ask if these 30 lines are actually an improvement over the 8
-lines for the 2 manual instances our application needs: a decision to be taken
-on a case by case basis.
-
 Cukup masuk akal bila kita bertanya apakan 30 baris kode ini memang peningkatan
 dari 8 baris untuk 2 instans manual yang dibutuhkan oleh aplikasi kita: pilihan
 yang ditentukan kasus-per-kasus.
-
-For completeness, the `UrlEncodedWriter` derivation can be written with Magnolia
 
 Agar lebih lengkap, derivasi `UrlEncodedWriter` dapat ditulis dengan Magnolia
 
@@ -15130,7 +14363,7 @@ Agar lebih lengkap, derivasi `UrlEncodedWriter` dapat ditulis dengan Magnolia
 ~~~~~~~~
 
 
-### The Dark Side of Derivation
+### Sisi Gelap Derivasi
 
 > "Beware fully automatic derivation. Anger, fear, aggression; the dark side of
 > the derivation are they. Easily they flow, quick to join you in a fight. If once
@@ -15139,21 +14372,10 @@ Agar lebih lengkap, derivasi `UrlEncodedWriter` dapat ditulis dengan Magnolia
 > 
 > ― an ancient Shapeless master
 
-In addition to all the warnings about fully automatic derivation that were
-mentioned for Magnolia, Shapeless is **much** worse. Not only is fully automatic
-Shapeless derivation [the most common cause of slow compiles](https://www.scala-lang.org/blog/2018/06/04/scalac-profiling.html), it is also a
-painful source of typeclass coherence bugs.
-
 Selain semua peringatan mengenai derivasi otomatis yang telah ditulis untuk
 Magnolia, Shapeless jauh lebih mengkuatirkan. Tak hanya derivasi otomatis
 Shapeless [sering kali penyebab lambannya kompilasi](https://www.scala-lang.org/blog/2018/06/04/scalac-profiling.html),
 Shapeless juga merupakan sumber dari kutu koherensi kelas tipe.
-
-Fully automatic derivation is when the `def gen` are `implicit` such that a call
-will recurse for all entries in the ADT. Because of the way that implicit scopes
-work, an imported `implicit def` will have a higher priority than custom
-instances on companions, creating a source of typeclass decoherence. For
-example, consider this code if our `.gen` were implicit
 
 Derivasi otomatis adalah ketika `def gen` bersifat `implicit` yang mana sebuah
 panggilan akan melakukan rekursi untuk semua *entry* pada TDA. Karena cara kerja
@@ -15171,8 +14393,6 @@ dekoherensi kelas tipe. Sebagai contoh, perhatikan kode berikut bila `.gen` kita
   final case class Bar(foo: Foo)
 ~~~~~~~~
 
-We might expect the full-auto encoded form of `Bar("hello")` to look like
-
 Kita mungkin berharap bentuk tersandi otomatis dari `Bar("hello")` terlihat
 seperti
 
@@ -15182,8 +14402,6 @@ seperti
     "foo":"hello"
   }
 ~~~~~~~~
-
-because we have used `xderiving` for `Foo`. But it can instead be
 
 karena kita menggunakan `xderiving` untuk `Foo`. Namun, hasil yang diberikan
 adalah sebagai berikut
@@ -15197,47 +14415,27 @@ adalah sebagai berikut
   }
 ~~~~~~~~
 
-Worse yet is when implicit methods are added to the companion of the typeclass,
-meaning that the typeclass is always derived at the point of use and users are
-unable opt out.
-
 Yang lebih parah adalah saat metoda implisit ditambahkan pada objek pendamping
 dari kelas tipe. Hal ini berarti kelas tipe selalu diderivasi pada saat penggunaan
 dan pengguna tidak dapat memilih untuk tidak menggunakannya.
 
-Fundamentally, when writing generic programs, implicits can be ignored by the
-compiler depending on scope, meaning that we lose the compiletime safety that
-was our motivation for programming at the type level in the first place!
-
 Secara mendasar, saat menulis program generik, `implicit` dapat diabaikan oleh
 kompilator, bergantung pada cakupan. Hal ini berarti kita kehilangan keamanan pada
 waktu-kompilasi yang menjadi motivasi utama atas pemrograman pada tingkat tipe.
-
-Everything is much simpler in the light side, where `implicit` is only used for
-coherent, globally unique, typeclasses. Fear of boilerplate is the path to the
-dark side. Fear leads to anger. Anger leads to hate. Hate leads to suffering.
 
 Semua akan menjadi lebih mudah pada sisi baik, dimana `implicit` hanya digunakan
 untuk kelas tipe yang koheren dan unik secara global. Ketakutan atas plat cetak
 merupakan pemicu ke sisi gelap. Ketakutan akan berubah menjadi amarah. Amarah
 akan menyebabkan benci. Dan, benci akan menyebabkan penderitaan.
 
-## Performance
-
-There is no silver bullet when it comes to typeclass derivation. An axis to
-consider is performance: both at compiletime and runtime.
+## Performa
 
 Tidak ada sesuatu yang namanya Busur Gandiwa bila kita berbicara mengenai derivasi
 kelas tipe. Salah satu hal yang harus dipertimbangkan adalah performa: baik pada
 saat kompilasi maupun waktu-jalan.
 
 
-#### Compile Times
-
-When it comes to compilation times, Shapeless is the outlier. It is not uncommon
-to see a small project expand from a one second compile to a one minute compile.
-To investigate compilation issues, we can profile our applications with the
-`scalac-profiling` plugin
+#### Waktu Kompilasi
 
 Bila kita berbicara mengenai waktu kompilasi, Shapeless merupakan pencilan. Bukan
 hal yang luar biasa bila kita mendapati sebuah proyek kecil menderita penggelembungan
@@ -15251,77 +14449,43 @@ plugin `scalac-profiling`
   scalacOptions ++= Seq("-Ystatistics:typer", "-P:scalac-profiling:no-profiledb")
 ~~~~~~~~
 
-It produces output that can generate a *flame graph*.
-
 Potongan diatas akan menghasilkan keluaran yang dapat menghasilkan sebuah graf
 api.
-
-For a typical Shapeless derivation, we get a lively chart
 
 Untuk derivasi Shapeless yang jamak digunakan, kita akan mendapat grafik yang menarik
 
 {width=90%}
 ![](images/implicit-flamegraph-jsonformat-jmh.png)
 
-almost the entire compile time is spent in implicit resolution. Note that this
-also includes compiling the `scalaz-deriving`, Magnolia and manual instances,
-but the Shapeless computations dominate.
-
 hampir semua waktu kompilasi dihabiskan untuk resolusi `implicit`. Harap diperhatikan,
 grafik ini juga mengikutsertakan kompilasi `scalaz-deriving`, Magnolia, dan instans
 manual. Namun, komputasi dari Shapeless mendominasi grafik tersebut.
-
-And this is when it works. If there is a problem with a shapeless derivation,
-the compiler can get stuck in an infinite loop and must be killed.
 
 Dan, ini bila kita berhasil melakukan *profiling*. Bila ada masalah dengan
 derivasi shapeless, kompilator dapat tersangkut pada sebuah ikalan tak hingga dan
 harus dibunuh.
 
 
-#### Runtime Performance
-
-If we move to runtime performance, the answer is always *it depends*.
+#### Performa Waktu-Jalan
 
 Bila kita berbicara mengenai performa waktu-jalan, tentu jawabannya selalu *tergantung*.
 
-Assuming that the derivation logic has been written in an efficient way, it is
-only possible to know which is faster through experimentation.
-
 Bila kita mengasumsikan logika derivasi sudah ditulis secara efisien, kita dapat
 mengetahui mana yang lebih cepat dengan menggunakan eksperimentasi.
-
-The `jsonformat` library uses the [Java Microbenchmark Harness (JMH)](http://openjdk.java.net/projects/code-tools/jmh/) on models
-that map to GeoJSON, Google Maps, and Twitter, contributed by Andriy
-Plokhotnyuk. There are three tests per model:
 
 Pustaka `jsonformat` menggunakan [Java Microbenchmark Harness (JMH)](http://openjdk.java.net/projects/code-tools/jmh/)
 pada model yang memetakan ke GeoJSON, GoogleMaps, dan Twitter. Pustaka ini dikontribusikan
 oleh Andriy Plokhotnyuk. Ada tiga tes untuk tiap model:
 
--   encoding the `ADT` to a `JsValue`
--   a successful decoding of the same `JsValue` back into an ADT
--   a failure decoding of a `JsValue` with a data error
-
 -   penyandian TDA ke `JsValue`
 -   pembacaan sandi yang berhasil dari `JsValue` dari poin pertama kembali ke TDA
 -   pembacaan sandi yang gagal dari `JsValue` dengan data galat
-
-applied to the following implementations:
 
 diterapkan pada implementasi berikut:
 
 -   Magnolia
 -   Shapeless
--   manually written
-
--   Magnolia
--   Shapeless
 -   manual
-
-with the equivalent optimisations in each. The results are in operations per
-second (higher is better), on a powerful desktop computer, using a single
-thread:
 
 dengan optimisasi yang setara untuk semua implementasi. Hasil berupa operasi
 per detik (lebih tinggi lebih baik), pada sebuah komputer *desktop* bertenaga,
@@ -15345,10 +14509,6 @@ menggunakan satu utas:
   TwitterAPIBenchmarks.encodeManual        thrpt    5  281606.574 ± 1975.873  ops/s
 ~~~~~~~~
 
-We see that the manual implementations are in the lead, followed by Magnolia,
-with Shapeless from 30% to 70% the performance of the manual instances. Now for
-decoding
-
 Sebagaimana yang kita lihat, implementasi manual memimpin dan diikuti oleh Magnolia.
 Implementasi dengan Shapeless memiliki performa 30 - 70% lebih buruk bila dibandingkan
 dengan instans manual. Sekarang untuk pembacaan sandi
@@ -15370,10 +14530,6 @@ dengan instans manual. Sekarang untuk pembacaan sandi
   TwitterAPIBenchmarks.decodeShapelessSuccess     thrpt    5   47711.161 ±  356.911  ops/s
   TwitterAPIBenchmarks.decodeManualSuccess        thrpt    5   71962.394 ±  465.752  ops/s
 ~~~~~~~~
-
-This is a tighter race for second place, with Shapeless and Magnolia keeping
-pace. Finally, decoding from a `JsValue` that contains invalid data (in an
-intentionally awkward position)
 
 Pacuan kali ini lebih ketat untuk tempat kedua, dengan Shapeless dan Magnolia
 menorehkan hasil yang mirip. Dan pada akhirnya, pembacaan sandi dari sebuah
@@ -15398,18 +14554,9 @@ kikuk)
   TwitterAPIBenchmarks.decodeManualError        thrpt    5   148814.730 ±  1105.316  ops/s
 ~~~~~~~~
 
-Just when we thought we were seeing a pattern, both Magnolia and Shapeless win
-the race when decoding invalid GeoJSON data, but manual instances win the Google
-Maps and Twitter challenges.
-
 Saat kita mengira kita menemukan sebuah pola, Magnolia dan Shapeless menang pacuan
 tersebut saat membaca penyandian tidak valid dari data GeoJSON. Namun, instans
 manual memenangkan pacuan Google Maps dan Twitter.
-
-We want to include `scalaz-deriving` in the comparison, so we compare an
-equivalent implementation of `Equal`, tested on two values that contain the same
-contents (`True`) and two values that contain slightly different contents
-(`False`)
 
 Kita ingin mengikut-sertakan `scalaz-deriving` pada perbandingan, jadi kita akan
 membandingan implementasi setara dari `Equal` yang dites pada dua nilai yang
@@ -15437,11 +14584,6 @@ berisi nilai yang sama (`True`) dan dua nilai yang memiliki isi yang sedikit ber
   TwitterAPIBenchmarks.equalManualTrue         thrpt    5   865845.158 ±  6339.379  ops/s
 ~~~~~~~~
 
-As expected, the manual instances are far ahead of the crowd, with Shapeless
-mostly leading the automatic derivations. `scalaz-deriving` makes a great effort
-for GeoJSON but falls far behind in both the Google Maps and Twitter tests. The
-`False` tests are more of the same:
-
 Sesuai dengan perkiraan kita, instans manual jauh lebih cepat bila dibandingkan
 dengan yang lainnya. Disusul dengan Shapeless dengan derivasi otomatis. `scalaz-deriving`
 bekerja keras untuk GeoJSON namun kalah mengenaskan pada pacuan Google Maps dan
@@ -15468,40 +14610,19 @@ Twitter. Tes tentang `False` kurang lebih memiliki hasil yang sama:
   TwitterAPIBenchmarks.equalManualFalse        thrpt    5  1631964.531 ± 13110.291  ops/s
 ~~~~~~~~
 
-The runtime performance of `scalaz-deriving`, Magnolia and Shapeless is usually
-good enough. We should be realistic: we are not writing applications that need to
-be able to encode more than 130,000 values to JSON, per second, on a single
-core, on the JVM. If that is a problem, look into C++.
-
 Performa waktu-jalan dari `scalaz-deriving`, Magnolia, dan Shapeless biasanya
 cukup baik. Tentu kita juga harus realistis: kita tidak menulis aplikasi yang
 harus mampu menyandikan 130.000 nilai ke JSON tiap detiknya, pada satu *core*,
 di JVM. Bila hal semacam itu menjadi masalah, silakan berpaling ke C++.
-
-It is unlikely that derived instances will be an application's bottleneck. Even
-if it is, there is the manually written escape hatch, which is more powerful and
-therefore more dangerous: it is easy to introduce typos, bugs, and even
-performance regressions by accident when writing a manual instance.
 
 Agak tidak mungkin instans terderivasi menjadi penyebab macetnya performa aplikasi.
 Bahkan bila memang demikian adanya, ada perahu penyelamat dengan penulisan ulang,
 yang jauh lebih leluasa dan berbahaya: lebih mudah terjadi salah ketik, pengenalan
 kutu, dan kemunduran performa tanpa sengaja saat menulis instans manual.
 
-In conclusion: hokey derivations and ancient macros are no match for a good hand
-written instance at your side, kid.
-
 Kesimpulannya: derivasi tipu-tipu dan makro jaman baheula bukan tandingan untuk
 instans yang ditulis secara manual, tong.
 
-A> We could spend a lifetime with the [`async-profiler`](https://github.com/jvm-profiling-tools/async-profiler) investigating CPU and object
-A> allocation flame graphs to make any of these implementations faster. For
-A> example, there are some optimisations in the actual `jsonformat` codebase not
-A> reproduced here, such as a more optimised `JsObject` field lookup, and inclusion
-A> of `.xmap`, `.map` and `.contramap` on the relevant typeclasses, but it is fair
-A> to say that the codebase primarily focuses on readability over optimisation and
-A> still achieves incredible performance.
-A>
 A> Kita dapat mengabiskan sisa hidup kita dengan [`async-profiler`](https://github.com/jvm-profiling-tools/async-profiler)
 A> untuk menyidik graf api CPU dan alokasi objek untuk membuat implementasi diatas
 A> menjadi lebih cepat. Sebagai contoh, ada beberapa optimasi pada basis kode
@@ -15512,24 +14633,10 @@ A> memiliki fokus utama keterbacaan, bukan optimasi, dan masih mencapai performa
 A> yang luar biasa.
 
 
-## Summary
-
-When deciding on a technology to use for typeclass derivation, this feature
-chart may help:
+## Kesimpulan
 
 Saat menentukan teknologi yang akan digunakan untuk menderivasi kelas tipe,
 bagan fitur ini mungkin membantu:
-
-| Feature        | Scalaz | Magnolia | Shapeless    | Manual       |
-|-------------- |------ |-------- |------------ |------------ |
-| `@deriving`    | yes    | yes      | yes          |              |
-| Laws           | yes    |          |              |              |
-| Fast compiles  | yes    | yes      |              | yes          |
-| Field names    |        | yes      | yes          |              |
-| Annotations    |        | yes      | partially    |              |
-| Default values |        | yes      | with caveats |              |
-| Complicated    |        |          | painfully so |              |
-| Performance    |        |          |              | hold my beer |
 
 | Fitur           | Scalaz | Magnolia | Shapeless    | Manual         |
 |--------------  |------ |-------- |------------ |------------ |
@@ -15542,17 +14649,9 @@ bagan fitur ini mungkin membantu:
 | Rumit           |        |          | memedihkan    |               |
 | Performa        |        |          |               | masuk pak eko |
 
-Prefer `scalaz-deriving` if possible, using Magnolia for encoders / decoders or
-if performance is a larger concern, escalating to Shapeless for complicated
-derivations only if compilation times are not a concern.
-
 Pilih `scalaz-deriving` bila memungkinkan, gunakan Magnolia untuk penyandian /
 pembacaan sandi atau bila performa agak penting, dan gunakan Shapeless untuk
 derivasi yang rumit bila waktu kompilasi tidak menjadi masalah.
-
-Manual instances are always an escape hatch for special cases and to achieve the
-ultimate performance. Avoid introducing typo bugs with manual instances by using
-a code generation tool.
 
 Instans manual selalu menjadi pelampung untuk kasus khusus dan untuk mencapai
 performa paling akhir. Hindari kutu karena salah ketik pada instans manual
