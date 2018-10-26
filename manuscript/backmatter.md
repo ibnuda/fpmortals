@@ -683,25 +683,25 @@ dengan ekstensi bahasa
 ~~~~~~~~
 
 
-## Evaluation
+## Evaluasi
 
-Haskell compiles to native code, there is no virtual machine, but there is a
-garbage collector. A fundamental aspect of the runtime is that all parameters
-are **lazily evaluated** by default. Haskell treats all terms as a promise to
-provide a value when needed, called a *thunk*. Thunks get reduced only as much
-as necessary to proceed, no more.
+Haskell mengkompilasi kode menjadi kode yang berjalan tanpa mesin virtual. Namun,
+ada sebuah pengoleksi sampah. Aspek fundamental dari waktu-jalan Haskell adalah
+semua parameter **dievaluasi secara landung** secara default. Haskell hanya menjanjikan
+sebuah nilai hanya disediakan bila diperlukan dalam bentuk sub-rutin *thunk*.
+*Thunk* hanya dikurangi bila diperlukan.
 
-A huge advantage of lazy evaluation is that it is much harder to trigger a stack
-overflow! A disadvantage is that there is an overhead compared to strict
-evaluation, which is why Haskell allows us to opt in to strict evaluation on a
-per parameter basis.
+Keuntungan utama dari evaluasi landung adalah *stack overflow* akan lebih sulit
+terpicu. Kerugiannya adalah akan ada beban tambahan bila dibandingkan dengan
+evaluasi tegas adalah. Sebagai penyiasatan seperti ini, kita dapat memilih
+evaluasi tugas per parameter.
 
-Haskell is also nuanced about what strict evaluation means: a term is said to be
-in *weak head normal-form* (WHNF) if the outermost code blocks cannot be reduced
-further, and *normal form* if the term is fully evaluated. Scala's default
-evaluation strategy roughly corresponds to normal form.
+Haskell juga agak sedikit berbeda mengenai arti dari evaluasi tegas: sebuah
+istilah dikatakan **weak head normal-form** (WHNF) bila blok kode terluar tidak
+dapat direduksi lebih lanjut, dan *normal form* bila sebuah istilah dapat dievaluasi
+seutuhnya. Strategi evaluasi default Scala kurang lebih sesuai dengan *normal form*.
 
-For example, these terms are normal form:
+Sebagai contoh, istilah berikut merupakan *normal form*:
 
 {lang="text"}
 ~~~~~~~~
@@ -710,18 +710,18 @@ For example, these terms are normal form:
   \x -> x + 1
 ~~~~~~~~
 
-whereas these are not in normal form (they can be reduced further):
+sedangkan istilah berikut bukan dalam bentuk normal (dapat direduksi lebih lanjut):
 
 {lang="text"}
 ~~~~~~~~
-  1 + 2            -- reduces to 3
-  (\x -> x + 1) 2  -- reduces to 3
-  "foo" ++ "bar"   -- reduces to "foobar"
-  (1 + 1, "foo")   -- reduces to (2, "foo")
+  1 + 2            -- direduksi menjadi 3
+  (\x -> x + 1) 2  -- direduksi menjadi 3
+  "foo" ++ "bar"   -- direduksi menjadi "foobar"
+  (1 + 1, "foo")   -- direduksi menjadi (2, "foo")
 ~~~~~~~~
 
-The following terms are in WHNF because the outer code cannot be reduced further
-(even though the inner parts can be):
+Istilah berikut berbentuk WHNF karena blok kode terluar tidak dapat direduksi
+lebih lanjut (walaupun bagian dalam dapat direduksi):
 
 {lang="text"}
 ~~~~~~~~
@@ -730,27 +730,27 @@ The following terms are in WHNF because the outer code cannot be reduced further
   'f' : ("oo" ++ "bar")
 ~~~~~~~~
 
-and the following are not in WHNF
+dan potongan berikut tidak dalam bentuk WHNF
 
 {lang="text"}
 ~~~~~~~~
-  1 + 1              -- reduces to 2
-  (\x y -> x + y) 2  -- reduces to \y -> 2 + y
-  "foo" ++ "bar"     -- reduces to "foobar"
+  1 + 1              -- direduksi menjadi 2
+  (\x y -> x + y) 2  -- direduksi menjadi \y -> 2 + y
+  "foo" ++ "bar"     -- direduksi menjadi "foobar"
 ~~~~~~~~
 
-The default evaluation strategy is to perform no reductions when passing a term
-as a parameter. Language level support allows us to request WHNF for any term
-with `($!)`
+Strategi evaluasi default adalah dengan dengan tidak melakukan reduksi ketika
+mengumpankan sebuah istilah sebagai parameter. Dukungan bahasa memperkenankan
+kita untuk meminta WHNF untuk semua istilah dengan `($!)`
 
 {lang="text"}
 ~~~~~~~~
-  -- evaluates `a` to WHNF, then calls the function with that value
+  -- mengevaluasi `a` menjadi WHNF, lalu memanggil fungsi dengan nilai tersebut
   ($!) :: (a -> b) -> a -> b
   infixr 0
 ~~~~~~~~
 
-We can use an exclamation mark `!` on `data` parameters
+Kita juga dapat menggunakan tanda seru `!` pada parameter `data`
 
 {lang="text"}
 ~~~~~~~~
@@ -759,15 +759,15 @@ We can use an exclamation mark `!` on `data` parameters
   data Employee = Employee { name :: !Text, age :: !Int}
 ~~~~~~~~
 
-The `StrictData` language extension enables strict parameters for all data in
-the module.
+Ekstensi bahasa `StrictData` menjadikan semua parameter data pada modul menjadi
+*tegas*.
 
-Another extension, `BangPatterns`, allows `!` to be used on the arguments of
-functions. The `Strict` language extension makes all functions and data
-parameters in the module strict by default.
+Ekstensi lain, `BangPatterns`, memperkenankan `!` digunakan pada argumen fungsi.
+Ekstensi bahasa `Strict` membuat semua parameter fungsi dan data pada modul menjadi
+*tegas* secara default.
 
-Going to the extreme we can use `($!!)` and the `NFData` typeclass for normal
-form evaluation:
+Bila kita *maksa*, kita dapat menggunakan `($!!)` dan kelastipe `NFData` untuk
+evaluasi bentuk normal:
 
 {lang="text"}
 ~~~~~~~~
@@ -777,23 +777,25 @@ form evaluation:
   ($!!) :: (NFData a) => (a -> b) -> a -> b
 ~~~~~~~~
 
-which is subject to the availability of an `NFData` instance.
+yang menjadi subjek ketersedian dari sebuah instans `NFData`.
 
-The cost of strictness is that Haskell behaves like any other strict language
-and may perform unnecessary work. Opting in to strictness must therefore be done
-with great care, and only for measured performance improvements. If in doubt, be
-lazy and stick with the defaults.
+Beban dari ketegasan semacam ini adalah Haskell berperilaku sebagaimana bahasa
+tegas lainnya dan mungkin saja melakukan tugas yang tak perlu. Memilih ketegasan
+harus dilakukan secara hati hati dan setelah dibuktikan adanya peningkatan performa.
+Bila masih ragu, mundur saja.
 
-A> There is a big gotcha with lazy evaluation: if an I/O action is performed that
-A> populates a lazy data structure, the action will be performed when the data
-A> structure is evaluated, which can fail in unexpected parts of the code and
-A> outside of the resource handling logic. To avoid this gotcha, only read into
-A> strict data structures when performing I/O.
+A> Ada jebakan betmen bila kita menggunakan evaluasi landung: bila I/O dilakukan
+A> dan menghasilkan struktur data landung, maka perbuatan tersebut akan dilakukan
+A> saat struktur data dievaluasi, dan harap diingat bahwa adanya kemungkinan gagal
+A> pada bagian kode yang tak terduga dan berada di luar cakupan logika penanganan
+A> sumber daya. Untuk menghindari jebakan betmen ini, hanya lakukan pembacaan
+A> struktur data tegas saat melakukan I/O.
 A> 
-A> Thankfully this gotcha only affects developers writing low-level I/O code. Third
-A> party libraries such as `pipes-safe` and `conduits` provide safe abstractions
-A> for the typical Haskeller. Most raw byte and `Text` primitives are strict, with
-A> `Lazy` variants.
+A> Untungnya, jebakan betmen ini hanya berlaku bagi pengembang yang menulis kode
+A> I/O tingkat rendah. Pustaka pihak ketiga seperti `pipes-safe` dan `conduits`
+A> menyediakan abstraksi yang aman untuk pengguna Haskell pada umumnya. Kebanyankan
+A> bita mentah dan primitif `Text` memiliki versi default evaluasi tegas, dengan
+A> varian landung (`Lazy`).
 
 
 ## Next Steps
