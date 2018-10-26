@@ -1032,9 +1032,9 @@ Kita bisa memulainya dengan data data yang dikhususkan untuk testing.
     val managed = NonEmptyList(node1, node2)
   
     val time1: Epoch = epoch"2017-03-03T18:07:00Z"
-    val time2: Epoch = epoch"2017-03-03T18:59:00Z" // +52 mins
-    val time3: Epoch = epoch"2017-03-03T19:06:00Z" // +59 mins
-    val time4: Epoch = epoch"2017-03-03T23:07:00Z" // +5 hours
+    val time2: Epoch = epoch"2017-03-03T18:59:00Z" // +52 menit
+    val time3: Epoch = epoch"2017-03-03T19:06:00Z" // +59 menit
+    val time4: Epoch = epoch"2017-03-03T23:07:00Z" // +5 jam
   
     val needsAgents = WorldView(5, 0, managed, Map.empty, Map.empty, time1)
   }
@@ -1288,7 +1288,7 @@ Blok bangunan mendasar dari tipe data adalah
 
 tanpa metoda ataupun bidang selain parameter konstruktor.
 Kita lebih memilih `abstract class` dibandingkan `trait` dengan alasan
-agar mendapatkan kompatibilitas biner dan juga me-makruh-kan pencampuran "mixin" (lol, mixin)
+agar mendapatkan kompatibilitas biner dan juga me-makruh-kan pencampuran "mixin"
 
 Ketiga tipe data diatas, secara paket, disebut juga dengan *Tipe Data Aljabar* (TDA).
 
@@ -1303,15 +1303,15 @@ yang bila ditulis menggunakan Scala
 
 {lang="text"}
 ~~~~~~~~
-  // values
+  // nilai
   case object A
   type B = String
   type C = Int
   
-  // product
+  // produk
   final case class ABC(a: A.type, b: B, c: C)
   
-  // coproduct
+  // koproduk
   sealed abstract class XYZ
   case object X extends XYZ
   case object Y extends XYZ
@@ -1360,7 +1360,7 @@ digunakan oleh *framework* populer walaupun alternatif yang lebih
 bagus banyak.
 Salah satu jebakan yang umum memakan korban adalah seorang penulis
 lupa bahwa `Serializable` bisa jadi berusaha untuk menyerikan fungsi
-*closure* secara keseluruhan dan bisa berakibat server rhemuk! (lol, rhemuk)
+*closure* secara keseluruhan dan bisa berakibat server rhemuk!
 Kekurangan lain yang mirip juga sama terjadi pada kelas Java peninggalan
 jaman dulu seperti `Throwable`, yang bisa saja berisi rujukan pada objek
 arbiter.
@@ -1420,7 +1420,7 @@ Agar tetap aman, jangan gunakan pengaman ketika menggunakan tipe tersegel.
 
 Panji [`-Xstrict-patmat-analysis`](https://github.com/scala/scala/pull/5617)
 sudah diajukan sebagai peningkatan bahasa untuk menampah pemeriksaan
-"pattern match" tambahan (lol, pattern match.)
+"pattern match" tambahan
 
 
 ### Produk dan Koproduk Alternatif
@@ -1507,7 +1507,7 @@ dan penegasan.
 {lang="text"}
 ~~~~~~~~
   final case class Person(name: String, age: Int) {
-    require(name.nonEmpty && age > 0) // breaks Totality, don't do this!
+    require(name.nonEmpty && age > 0) // Jangan lakukan ini, merusak totalitas
   }
 ~~~~~~~~
 
@@ -1736,7 +1736,7 @@ Kenyataannya, `Int => Boolean` bisa jadi hanya sebuah fungsi sederhana seperti
 bisa diganti dengan menggunakan ko-produk untuk menandai fungsi yang relevan.
 
 Ketika kompleksitas fungsi kita adalah "semua boleh masuk dan semua bisa keluar",
-kita harus memberikan tipe data yang terbatas dan proses validasi. etc (lol, help)
+kita harus memberikan tipe data yang terbatas dan proses validasi. etc
 
 Keuntungan lain yang bisa didapat saat kita bisa menghitung kompleksitas penanda
 tipe adalah kita bisa mencari penanda tipe yang lebih sederhana dengan
@@ -1788,7 +1788,7 @@ ekuivalen dengan
   (A, B) => C
 ~~~~~~~~
 
-yang dikenal dengan *Currying* (lol, bikin kare. tapi tidak sopan, nama orang.)
+yang dikenal dengan *Currying*
 
 
 ### Pilih Koproduk, bukan Produk
@@ -1972,7 +1972,7 @@ dari kelas tipe:
 Kita dapat melihat semua fitur utama dari sebuah kelas tipe pada
 cuplikan kode di atas:
 
--   Tidak ada state (lol, state).
+-   Tidak ada keadaan
 -   `Ordering` dan `Numeric` mempunyai parameter tipe `T`.
 -   `Ordering` mempunyai metoda abstrak `compare` dan `Numeric` mempunya metoda
     abstrak `plus`, `times`, `negate`, dan `zero`.
@@ -2022,7 +2022,7 @@ misal, merupakan `Numeric`
 ~~~~~~~~
 
 walaupun hal itu berarti kita harus selalu menggunakan `implicitly[Numeric[T]]`.
-Dengan mendefinisikan boilerplate (lol) pada kelas tipe,
+Dengan mendefinisikan plat cetak pada kelas tipe,
 
 {lang="text"}
 ~~~~~~~~
@@ -2059,7 +2059,7 @@ objek pendamping kelas tipe:
         def unary_-: T = N.negate(t)
         def abs: T = N.abs(t)
   
-        // duplicated from Ordering.ops
+        // disalin dari Ordering.ops
         def <(o: T): T = N.lt(t, o)
         def >(o: T): T = N.gt(t, o)
       }
@@ -2107,7 +2107,7 @@ Untuk lebih lengkapnya, bisa dilihat potongan kode berikut:
 ~~~~~~~~
 
 Saat ada simbol buatan `@op`, simbol ini diucapkan seperti nama metoda-nya.
-Misalkan simbol `<` disebut sebagai "kurang dari", bukan "kurung " (lol, apa ya?)
+Misalkan simbol `<` disebut sebagai "kurang dari", bukan "kurung"
 
 ### Instans
 
@@ -2125,7 +2125,7 @@ dari metoda tergeneralisasi:
     def zero: Double = 0.0
     def compare(x: Double, y: Double): Int = java.lang.Double.compare(x, y)
   
-    // optimised
+    // teroptimalkan
     override def lt(x: Double, y: Double): Boolean = x < y
     override def gt(x: Double, y: Double): Boolean = x > y
     override def abs(x: Double): Double = java.lang.Math.abs(x)
@@ -2247,7 +2247,7 @@ Pertama, cakupan variabel normal dicari dengan urutan:
 Bila semua gagal mencari yang cocok, maka pencarian pada cakupan khusus
 akan dilakukan. Pencarian ini dikhususkan untuk instans implisit yang ada
 pada objek pasangan, objek paket, objek luar (bila berlapis), dan diulang
-untuk ancestor (lol). Pencarian ini dilakukan dengan urutan sebagai berikut:
+untuk kelas induk. Pencarian ini dilakukan dengan urutan sebagai berikut:
 
 -   tipe parameter yang ada.
 -   tipe parameter yang diminta.
@@ -2393,7 +2393,7 @@ setelah mengganti dengan `BEARER_TOKEN` yang sebenarnya.
 Google hanya akan menerima 50 *bearer token* terakhir. Jadi, waktu kadaluarsa
 hanya merupakan panduan saja. *Refresh token* bertahan antar sesi dan dapat
 dibuat kadaluarsa secara manual oleh pengguna. Sehingga, kita memiliki
-aplikasi yang harus diatur sekali untuk mendapatkan "refresh token" (lol)
+aplikasi yang harus diatur sekali untuk mendapatkan "refresh token"
 dan mengikutsertakan "refresh token" sebagai konfigurasi untuk pemasangan
 server "headless".
 
@@ -2455,7 +2455,7 @@ W> Selain tidak umum, dan **sangat pelan**, metoda metoda tersebut dapat melempa
 W> eksepsi I/O, dan dapat berubah bergantung dengan konfigurasi jaringan.
 W> Dengan kata lain, tidak murni dan tidak deterministik.
 W> 
-W> Tipe terrefinasi (lol) `String Refined Url` menyediakan jalan untuk melakukan
+W> Tipe terrefinasi `String Refined Url` menyediakan jalan untuk melakukan
 W> pemeriksaan kesamaan berdasarkan `String` dan kita dapat membuat sebuah `URL`
 W> dengan aman jika ada kebutuhan dari API lama.
 W> 
@@ -2501,7 +2501,6 @@ kelas tipe penyandi dan pembaca sandi:
 A> `\/` merupakan implementasi `Either` dari Scalaz. Operator ini punya `.flatMap`
 A> sehingga bisa digunakan pada komprehensi `for`. Hal yang berbeda
 A> dengan pustaka standar Scala yang tidak mempunyai `.flatMap` sebelum Scala 2.12.
-A> Untuk namanya, biasa disebut dengan (lol, apa ini?)
 A> 
 A> `scala.Either` [dimasukkan pada pustaka standar Scala](https://issues.scala-lang.org/browse/SI-250) oleh penulis Scalaz, Tony Morris pada 2007.
 A> `\/` dibuat ketika metoda yang tidak aman ditambahkan ke `Either`.
@@ -2566,7 +2565,7 @@ Berikut adalah desain yang masuk akal:
 
 {lang="text"}
 ~~~~~~~~
-  // URL query key=value pairs, in un-encoded form.
+  // pasangan URL query key=value dalam bentuk borang tak tersandi
   final case class UrlQuery(params: List[(String, String)])
   
   @typeclass trait UrlQueryWriter[A] {
@@ -2598,7 +2597,7 @@ Kita harus menyediakan instans kelas tipe untuk tipe dasar:
       val raw = m.map {
         case (k, v) => k.toUrlEncoded.value + "=" + v.toUrlEncoded.value
       }.intercalate("&")
-      Refined.unsafeApply(raw) // by deduction
+      Refined.unsafeApply(raw) // berdasarkan deduksi
     }
   
   }
@@ -2871,7 +2870,7 @@ Sebelum kita berbincang mengenai hierarki kelas tipe, kita akan melihat
 | `Traverse`    | `sequence` | `F[G[A]]` |             | `G[F[A]]` |
 
 Sebagaimana yang kita tahu bahwa operasi-operasi yang mengembalikan sebuah `F[_]`
-dapat dijalankan secara berurutan pada `for` comprehension (lol) dengan memanggil
+dapat dijalankan secara berurutan pada komprehensi `for` dengan memanggil
 `.flatMap` yang didefinisikan pada `Monad[F]` terkait.
 Konteks `F[_]` bisa dianggap sebagai kontainer untuk *efek* intensional
 dengan `A` sebagai output: `flatMap` memberikan kita jalan untuk menghasilkan
@@ -3127,7 +3126,7 @@ A> Bisa saja kita membuat pembenaran atas perusakan koherensi kelas tipe
 A> dengan menjadikan `lastWins` metoda privat. Namun, saat kita sampai
 A> pada pembahasan kelas tipe `Plus`, kita akan tahu bahwa ada cara lain
 A> yang lebih disarankan untuk mengimplementasikan `Monoid`.
-A> Ketika kita membahas mengenai tipe bertanda (lol, tagged type), kita akan
+A> Ketika kita membahas mengenai tipe bertanda, kita akan
 A> tahu cara terbaik adalah dengan menggunakan `LastOption`, bukan `Option`,
 A> pada model data kita.
 
@@ -3325,7 +3324,7 @@ penanda tipe dengan seksama berikut sebelum melanjutkan seksi ini:
   def strengthL[A, B](a: A, f: F[B]): F[(A, B)]
   def strengthR[A, B](f: F[A], b: B): F[(A, B)]
   
-  // harder
+  // lebih susah
   def lift[A, B](f: A => B): F[A] => F[B]
   def mapply[A, B](a: A)(f: F[A => B]): F[B]
 ~~~~~~~~
@@ -3530,9 +3529,9 @@ rekursi akhir, `foldLeft` tidak menggunakan parameter panggilan.
 
 Hukum yang mengatur `Foldable` hanya ada satu, yaitu `foldLeft` dan
 `foldRight` harus konsisten dengan `foldMap` untuk operasi monoidal.
-Misalnya, menambahkan sebuah elemen di bagian awal dari sebuah list
+Misalnya, menambahkan sebuah elemen di bagian awal dari sebuah senarai
 untuk implmentasi `foldLeft` dan menambahkan sebuah elemen di bagian
-akhir dari sebuah list untuk `foldRight`.
+akhir dari sebuah senarai untuk `foldRight`.
 Di sisi lain, `foldLeft` dan `foldRight` tidak harus selalu konsisten
 satu sama lain. Bahkan, seringkali mereka mempunyai hasil yang berlawanan.
 
@@ -3641,7 +3640,7 @@ A> Kita telah melihat `NonEmptyList` pada bab sebelumnya. Demi keringkasan,
 A> kita akan menggunakan alias tipe `Nel` sebagai ganti `NonEmptyList`.
 A>
 A> Kita juga sudah diperkenalkan kepadaa `IList` sebagai alternatif
-A> untuk `List` pustaka standar dengan menghilangkan metoda tidak murni (lol, pure)
+A> untuk `List` pustaka standar dengan menghilangkan metoda tidak murni
 A> seperti `apply`.
 
 Untuk memecah sebuah `F[A]` menjadi beberapa bagian, kita bisa menggunakan
@@ -3668,7 +3667,7 @@ sebagai contoh
 
 patut diperhatikan bahwa ada dua nilai dengan indeks `'b'`.
 
-Bilamana sebuah list objek `A` yang  tidak memiliki kelas tipe `Equal`
+Bilamana sebuah senarai objek `A` yang  tidak memiliki kelas tipe `Equal`
 namun kita ingin memecahnya menjadi beberapa bagian, kita bisa menggunakan
 `splitByRelation` yang meminta operator pembanding sebagai gantinya.
 
@@ -3954,7 +3953,7 @@ struktur dari `\&/`
   }
 ~~~~~~~~
 
-yang seharusnya bisa terlihat dari *type signature* (lol, help) mereka.
+yang seharusnya bisa terlihat dari penanda tipe mereka.
 Contoh:
 
 {lang="text"}
@@ -4350,7 +4349,7 @@ A> yang disebabkan karena semua metoda adalah fungsi deterministik.
 A> Fungsi semacam ini juga dikenal dengan *rujukan transparan*. 
 A>
 A> Bilamana sebuah metoda mengembalikan nilai yang berbeda tiap kali metoda
-A> tersebut dipanggil, maka metoda ini dianggap tidak murni (lol, murni apa sih?)
+A> tersebut dipanggil, maka metoda ini dianggap tidak murni
 A> dan mengaburkan penalaran dan optimisasi yang seharusnya bisa dilakukan.
 A>
 A> Bila `F` merupakan sebuah efek, anggap saja salah satu dari drone kita
@@ -4585,9 +4584,9 @@ Selain itu, kelas tipe ini menyediakan metoda `.conquer` yang sama dengan
 
 `.conquer` memperkenankan kita untuk membuat penerapan sederhana yang
 mengabaikan parameter tipe. Nilai nilai tersebut biasa disebut sebagai
-*terkuantifikasi secara umum* (lol, help me senpai. ;-; ). Sebagai contoh,
+*terkuantifikasi secara umum*. Sebagai contoh,
 `Divisible[Equal].conquer[INil[String]]` akan mengembalikan sebuah
-implementasi `Equal` untuk list `String` kosong yang akan selalu `true`.
+implementasi `Equal` untuk senarai `String` kosong yang akan selalu `true`.
 
 
 ## Plus
@@ -4737,10 +4736,10 @@ kita diskusikan sebelumnya
 {lang="text"}
 ~~~~~~~~
   scala> IList(Option(1), Option.empty[Int], Option(2)).fold
-  res: Option[Int] = Some(3) // uses Monoid[Option[Int]]
+  res: Option[Int] = Some(3) // menggunakan Monoid[Option[Int]]
   
   scala> IList(Option(1), Option.empty[Int], Option(2)).msuml
-  res: Option[Int] = Some(1) // uses PlusEmpty[Option].monoid
+  res: Option[Int] = Some(1) // menggunakan PlusEmpty[Option].monoid
   
   scala> IList(1, 2).collapse[Option]
   res: Option[Int] = Some(1)
@@ -5219,9 +5218,9 @@ pada Scalaz dan juga tipe data yang memperkaya Scala dengan semantik multi guna
 dan keamanan tipe data.
 
 Alasan utama kita memberi perhatian lebih terhadap banyaknya jenis koleksi
-yang kita miliki adalah performa. Sebuah vektor dan list mampu melakukan hal
+yang kita miliki adalah performa. Sebuah vektor dan senarai mampu melakukan hal
 yang sama, namun karakteristik performa mereka berbeda: sebuah vektor mempunyai
-beban pencarian konstan sendangkan list harus melangkahi elemen satu per satu.
+beban pencarian konstan sendangkan senarai harus melangkahi elemen satu per satu.
 
 W> Estimasi performa - termasuk klai pada bab ini - tak perlu dianggap secara serius.
 W> Desain prosesor medore, penyaluran memori, dan pengumpulan sampah JVM bisa
@@ -5264,7 +5263,7 @@ Hal semacam ini sangat mempermudah hilangnya informasi tipe.
   res: List[Any] = List(hello,  , world!)
 ~~~~~~~~
 
-Harap perhatikan bahwa list kedua merupakan `List[Char]` dan kompilator
+Harap perhatikan bahwa senarai kedua merupakan `List[Char]` dan kompilator
 menyimpulkan, walaupun ngaco, bahwa *Batas Atas Terendah* (BAT) sebagai
 `Any`. Bila dibandingkan dengan `IList`, yang mengharuskan `.widen[Any]`
 secara eksplisit untuk memberikan celah untuk kecerobohan semacam ini:
@@ -5285,7 +5284,7 @@ secara eksplisit untuk memberikan celah untuk kecerobohan semacam ini:
 Hal yang sama juga terjadi ketika kompilator menyimpulkan bahwa
 sebuah tipe `with Product with Serializable` (yang berupa *Product*
 dan *Serializable*), hal semacam ini merupakan indikator yang kuat
-bahwa pelebaran tanpa sengaja (lol, aku bego) telah terjadi
+bahwa pelebaran tanpa sengaja telah terjadi
 dikarenakan kovarian.
 
 Sayangnya, kita harus berhati-hati saat menyusun tipe data invarian
@@ -5439,7 +5438,7 @@ Scalaz memperbaiki kedua kelas tadi dengan menggunakan *Liskov*
     ...
   }
   
-  // type signatures have been simplified
+  // penanda tipe sudah disederhanakan
   sealed abstract class Leibniz[A, B] {
     def apply(a: A): B = ...
     def subst[F[_]](p: F[A]): F[B]
@@ -5480,8 +5479,8 @@ A> oleh Eugenio Moggi.
 Pada bahasa pemrograman Java, evaluasi program dijalankan secara tegas:
 semua parameter dari sebuah metoda harus dievaluasi menjadi sebuah *nilai*
 sebelum metoda tersebut dipanggil. Scala, di sisi lain, memperkenalkan
-istilah parameter *by-name* (lol, help) pada metoda dengan sintaks `a: => A`.
-Parameter ini dibungkus (lol) sebagai fungsi tanpa argumen yang dipanggil
+istilah parameter *by-name* pada metoda dengan sintaks `a: => A`.
+Parameter ini dibungkus sebagai fungsi tanpa argumen yang dipanggil
 tiap kali `a` dirujuk. Seperti yang telah kita lihat pada bab-bab sebelumnya,
 kelas tipe cenderung menggunakan parameter *by-name*.
 
@@ -5531,9 +5530,9 @@ atau `Value`. Namun, kita memilih untuk mengasumsikan bahwa parameter
 normal akan selalu dibungkus dalam sebuah `Value` dan parameter *by-name*
 dapat dibungkus dengan `Name`.
 
-Ketika kita menulis *program murni* (lol), kita bebas untuk mengganti
+Ketika kita menulis *program murni*, kita bebas untuk mengganti
 `Name` dengan `Need` atau `Value`, begitu juga sebaliknya, tanpa
-mengubah kebenaran program (lol). Yang menjadi esensi dari *transparansi
+mengubah kebenaran program. Yang menjadi esensi dari *transparansi
 rujukan* adalah keluwesan untuk mengganti sebuah komputasi dengan nilai
 komputasi tersebut atau mengganti nilai sebuah komputasi dengan komputasi
 itu sendiri.
@@ -5621,11 +5620,11 @@ tadi:
          val mfoo = mem(foo)
   
   scala> mfoo(1)
-  running // evaluated
+  running // dievaluasi
   res: String = wobble
   
   scala> mfoo(1)
-  res: String = wobble // memoised
+  res: String = wobble // dimemoisasi
 ~~~~~~~~
 
 Bila sebuah fungsi menerima lebih dari sebuah parametr, kita harus mengubah
@@ -5644,7 +5643,7 @@ sebuah *tuple*.
 ~~~~~~~~
 
 `Memo` pada dasarnya dianggap sebagai konstruk khusus dan penegakan
-aturan mengenai *kemurnian* (lol, help) sedikit lebih longgar dengan
+aturan mengenai *kemurnian* sedikit lebih longgar dengan
 alasan memudahkan implmentasi. Agar tetap murni, yang perlu
 kita lakukan hanyalah memastikan implementasi `Memo` yang kita buat
 untuk selalu secara melakukan transparansi saat merujuk pada saat evaluasi
@@ -5838,10 +5837,6 @@ masalah kompatibilitas yang dikarenakan kompilator tidak mengetauhi asumsi-
 asumsi yang kita ketahui. Hal ini biasanya terjadi bila kita menggunakan
 kode dari pihak ketiga yang sama dengan kode kita yang sudah ada.
 
-This is when `Isomorphism` can help us out. An isomorphism defines a formal "is
-equivalent to" relationship between two types. There are three variants, to
-account for types of different shapes:
-
 Masalah seperti ini bisa diselesaikan dengan `Isomorphism`. Sebuah isomorfisme
 mendefinisikan secara formal hubungan setara antara dua tipe. Isomorphism
 mempunyai tiga varian berdasarkan perbedaan bentuk dari tipe:
@@ -5948,7 +5943,7 @@ kenapa bisa begitu.
 Metoda pasangan `.empty` dan `just` lebih disukai saat membuat instans
 `Empty` dan `Just` mentah karena kedua metoda tersebut mengembalikan
 sebuha `Maybe` dan membantu mempermudah pendugaan tipe. Pola ini seringkali
-digunakan karena mengembalikan a *sum type* (lol, help). *Sum type* sendiri
+digunakan karena mengembalikan a *sum type*. *Sum type* sendiri
 merupakan keadaan dimana kita mempunyai beberapa implementasi sebuah
 `sealed trait` namun tidak menggunakan sub-tipe khusus pada sebuah penanda tipe.
 
@@ -6029,7 +6024,7 @@ untuk pustaka koleksi standar dari metoda `.to` dari instans `Foldable`.
   scala> 1.just.orEmpty[IList]
   res: IList[Int] = [1]
   
-  scala> 1.just.to[List] // from Foldable
+  scala> 1.just.to[List] // dari Foldable
   res: List[Int] = List(1)
 ~~~~~~~~
 
@@ -6040,7 +6035,7 @@ A> Scalaz dan mempunyai alasan historis:
 A> 
 A> -   penyunting teks gagal menemukan metoda ekstensi, walaupun saat ini
 A>     IntelliJ, ENSIME, dan ScalaIDE mendukung penuh.
-A> -   ada beberapa kasus sudut (lol) dimana kompilator gagal menerka
+A> -   ada beberapa kasus sudut dimana kompilator gagal menerka
 A>     tipe dan tidak mampu menemunkan metoda ekstensi.
 A> -   pustaka standar mendefinisikan beberapa instans dari `implicit class`
 A>     yang menambah metoda ke semua nilai, termasuk dengan metoda dengan
@@ -6186,7 +6181,7 @@ menghiraukan isi dari sebuah `\/`, namun berdasarkan tipe dari isinya.
 {lang="text"}
 ~~~~~~~~
   scala> 1 <<?: foo :?>> 2
-  res: Int = 2 // foo is a \/-
+  res: Int = 2 // foo adalah \/-
   
   scala> 1 <<?: foo.swap :?>> 2
   res: Int = 1
@@ -6603,7 +6598,7 @@ kasus, kita mengembalikan nama dari fungsi yang dipanggil.
 ~~~~~~~~
 
 Dengan interpretasi program kita semacam ini, kita dapat memastikan pada
-metoda-metoda yang ada bahwa ada (lol, wat?)
+metoda-metoda yang ada bahwa ada
 
 {lang="text"}
 ~~~~~~~~
@@ -6703,16 +6698,12 @@ atas perilaku koleksi dideskripsikan dengan hierarki kelas tipe, misalkan
 implementasi strukutur data yang mempunyai karakteristik performa yang
 cukup berbeda dan metoda relung.
 
-This section goes into the implementation details for each data type. It is not
-essential to remember everything presented here: the goal is to gain a high
-level understanding of how each data structure works.
-
-Because all the collection data types provide more or less the same list of
-typeclass instances, we shall avoid repeating the list, which is often some
-variation of:
+Bagian ini langsung berbicara mengenai detail implementais untuk tiap tipe data.
+Tidak perlu mengingat semua yang ditunjukkan disini: tujuan utamanya adalah
+memahami konsep umum atas cara kerja tiap struktur data.
 
 Karena semua tipe data koleksi menyediakan instans kelas tipe yang kurang lebih
-sama, kita akan melewatkan daftar instans tersebut, yang biasanya terdiri
+sama, kita akan melewatkan senarai instans tersebut, yang biasanya terdiri
 atas variasi dari:
 
 -   `Monoid`
@@ -6801,7 +6792,7 @@ mengakali masalah performa pada desain koleksi pustaka standar:
 ~~~~~~~~
 
 Pembuatan `List` membutuhkan sinkronisasi `Thread` yang hati hati dan pelan
-untuk memastikan keamanan. `IList` tidak membutuhkan *hack* (lol, lupa)
+untuk memastikan keamanan. `IList` tidak membutuhkan tambalan
 semacam itu sehingga mempunyai performa yang lebih bagus bila dibandingkan
 `List`.
 
@@ -6827,7 +6818,7 @@ penggunaan metoda-metoda tidak aman.
     def tailOption: Option[EphemeralStream[A]]
     ...
   }
-  // private implementations
+  // implementasi privat
   object EphemeralStream extends EphemeralStreamInstances {
     type EStream[A] = EphemeralStream[A]
   
@@ -7576,7 +7567,7 @@ membangun sebuah `Sring` untuk tiap lapisan pada ADT.
   final case class Cord(self: FingerTree[Int, String]) {
     override def toString: String = {
       val sb = new java.lang.StringBuilder(self.measure)
-      self.foreach(sb.append) // locally scoped side effect
+      self.foreach(sb.append) // efek samping dengan cakupan lokal
       sb.toString
     }
     ...
@@ -8242,7 +8233,7 @@ satu instans `Monad` dan `Hoist` sehingga disebut `MonadTrans`:
   }
 ~~~~~~~~
 
-A> `T[_[_], _]` merupakan contoh lain dari jenis tipe tinggi (lol, kill me mate).
+A> `T[_[_], _]` merupakan contoh lain dari jenis tipe lebih tinggi
 A> Penanda tipe ini dibaca sebagai: `T` menerima dua parameter tipe, yang pertama
 A> juga menerima sebuah parameter tipe, yang ditulis sebagai `_[_]` dan yang kedua
 A> tidak menerima parameter tipe apapun yang ditulis dengan `_`.
@@ -8807,7 +8798,7 @@ mereka dapat memanggil `access.run(token)` dan mendapatkan sebuah `F[BearerToken
 Terus terang, karena kita tidak mempunyai banyak pemanggil, kita hanya perlu mengubah
 sebuah parameter fungsi. `MonadReader` paling berguna saat:
 
-1.  kita ingin melakukan refaktor (lol, help) kode suatu saat untuk memuat ulang
+1.  kita ingin melakukan refaktor kode suatu saat untuk memuat ulang
     konfigurasi
 2.  nilai tidak dibutuhkan oleh pemanggil perantara
 3.  atau kita ingin menentukan cakupan beberapa variabel secara lokal
@@ -8914,7 +8905,7 @@ Dan sering kali, penulisan log dilakukan pada tingkat aplikasi, bukan pada kompo
 mencatat semua jenis kalkulasi *monoidik* sebagai nilai sekunder bersamaan dengan
 program utama kita. Sebagai contoh, menghitung berapa kali kita melakukan sesuatu,
 membangun sebuah penjelasan dari sebuah kalkulasi, ataupun membangun sebuah
-`TradeTemplate` untuk *trade* (lol, help) baru saat kita menakar harganya.
+`TradeTemplate` untuk *trade* baru saat kita menakar harganya.
 
 Spesialisasi yang populer dari `WriterT` adalah saat monad yang digunakan adalah
 `Id`, yang juga berarti bahwa nilai `run` yang melandasinya hanyalah merupakan
@@ -8947,11 +8938,11 @@ pada pemrograman fungsional.
 sebuah nilai yang sedang ditangani pada konteks monadik. Monad ini merupakan
 pengganti `var` pada pemrograman fungsional.
 
-Bila kita harus menulis sebuah metoda tak murni (lol, help) yang mempunyai
+Bila kita harus menulis sebuah metoda tak murni yang mempunyai
 akses ke beberapa kondisi yang tidak tetap dan disimpan pada sebuah `var`, metoda
 ini mungkin mempunyai penanda `() => F[A]` dan mengembalikan nilai yang berbeda
 pada tiap kali pemanggilan dan pada akhirnya mengaburkan perujukan. Dengan
-pemrograman fungsional murni (lol, help), fungsi tersebut menerima sebuah keadaan
+pemrograman fungsional murni, fungsi tersebut menerima sebuah keadaan
 (*state*) sebagai masukan dan mengembalikan keadaan yang termutakhirkan sebagai
 keluaran. Ini-lah yang menjadi pendasaran mengapa tipe dasar dari `StateT` adalah
 `S => F[(S, A)]`.
@@ -9109,7 +9100,7 @@ A> Kita belum menulis ulang aplikasi kita untuk menggunakan tipe data dan kelas
 A> tipe Scalaz sepenuhnya. Saat ini, kita masih bergantung pada pustaka koleksi
 A> dari pustaka standar. Selain itu, tidak ada urgensi untuk menggantinya karena
 A> masih sederhana dan tipe-tipe ini bisa digunakan dengan gaya pemrograman
-A> fungsional murni. (lol, help. hard sentence.)
+A> fungsional murni.
 
 Pembeda utama adalah simpul `started` dan `stopped` dapat dipisahkan.
 Penerjemah kita dapat diimplementasikan menggunakan `State[World, a]` dan kita
@@ -9450,7 +9441,7 @@ batang coklatnya (`B`).
 pernah mengembalikan nilai, namun *melanjutkan* komputasi selanjutnya. CPS
 populer pada Javascript dan Lisp karena gaya ini memperkenankan operasi I/O
 asinkronus melalui panggilan balik saat data tersedia. Penulisan ulang untuk
-pola semacam ini pada Scala dengan gaya tidak murni (lol, help) kurang lebih
+pola semacam ini pada Scala dengan gaya tidak murni kurang lebih
 seperti ini:
 
 {lang="text"}
@@ -9458,7 +9449,7 @@ seperti ini:
   def foo[I, A](input: I)(next: A => Unit): Unit = next(doSomeStuff(input))
 ~~~~~~~~
 
-Kita dapat membuatnya menjadi murni (lol, help) dengan memperkenalkan konteks
+Kita dapat membuatnya menjadi murni dengan memperkenalkan konteks
 `F[_]`
 
 {lang="text"}
@@ -9466,7 +9457,7 @@ Kita dapat membuatnya menjadi murni (lol, help) dengan memperkenalkan konteks
   def foo[F[_], I, A](input: I)(next: A => F[Unit]): F[Unit]
 ~~~~~~~~
 
-dan melakukan refaktor (lol, help) agar mengembalikan sebuah fungsi yang
+dan melakukan refaktor agar mengembalikan sebuah fungsi yang
 menerima masukan yang disediakan
 
 {lang="text"}
@@ -9500,8 +9491,8 @@ dan sintaks pembantu untuk membuat sebuah `ContT` dari sebuah nilai monadik:
   }
 ~~~~~~~~
 
-Namun, penggunaan panggilan ulang sederhana untuk *continuation* (lol, help)
-tidak memberikan apapun untuk pemrograman fungsional murni (lol, help) karena
+Namun, penggunaan panggilan ulang sederhana untuk *continuation*
+tidak memberikan apapun untuk pemrograman fungsional murni karena
 kita sudah mengetahui bagaimana mengurutkan komputasi asinkoronus yang memungkinkan
 untuk didistribusi dengan menggunakan `Monad` beserta `bind` atau panah `Kleisli`. 
 Agar kita dapat melihat mengapa *continuation* berguna, kita harus memperhitungkan
@@ -9539,7 +9530,7 @@ dijalankan), kita cukup merangkai fungsi-fungsi di atas
 ~~~~~~~~
 
 Kita dapat mengangkat `.simple` menjadi bentuk kontinyuasi dengan menggunakan
-sintaks pembantu, `.cps`, dan sedikit *boilerplate* (lol, help) untuk tiap
+sintaks pembantu, `.cps`, dan sedikit plat cetak untuk tiap
 langkah:
 
 {lang="text"}
@@ -10031,7 +10022,7 @@ Kompiler tepat waktu (KTM) pada JVM bekerja dengan sangat baik sampai pada tahap
 fungsi-fungsi sederhana dapat mempunyai performa yang setara dengan ekuivalen
 yang ditulis pada bahasa pemrograman C maupun C++, bila mengabaikan beban pada
 pengumpulan sampah. Namun, KTM hanya bekerja pada *optimisasi tingkat rendah*
-seperti: prediksi cabang operasi, *inline* fungsi (lol, help!), membuka ikalan,
+seperti: prediksi cabang operasi, *inline* fungsi, membuka ikalan,
 dan sejenisnya. 
 
 KTM tidak melakukan optimasi pada logika bisnis kita, sebagai contoh, pengelompokan
@@ -10201,7 +10192,7 @@ aljabar `Drone` seperti ini
 
 Yang kita inginkan adalah PSA kita menjadi sebuah kombinasi dari PSA `Machines`
 dan `Drone`. Kita telah mempelajari `Coproduct` pada bab 6 yang merupakan
-sebuah disjungsi jenis tinggi (lol, help):
+sebuah disjungsi jenis tinggi:
 
 {lang="text"}
 ~~~~~~~~
@@ -10937,8 +10928,8 @@ pelangkahan secara berurutan maupun paralel:
   val input: IList[String] = ...
   def network(in: String): IO[Int] = ...
   
-  input.traverse(network): IO[IList[Int]] // one at a time
-  input.parTraverse(network): IO[IList[Int]] // all in parallel
+  input.traverse(network): IO[IList[Int]] // satu per satu
+  input.parTraverse(network): IO[IList[Int]] // semua paralel
 ~~~~~~~~
 
 Tidak berbeda jauh, kita dapat memanggil `.parApply` atau `.parTupled` setelah
@@ -11119,18 +11110,18 @@ aman, dan tidak aman:
 {lang="text"}
 ~~~~~~~~
   object IO {
-    // eager evaluation of an existing value
+    // evaluasi tegas dari nilai yang sudah ada
     def now[E, A](a: A): IO[E, A] = ...
-    // lazy evaluation of a pure calculation
+    // evaluasi lundung dari kalkulasi murni
     def point[E, A](a: =>A): IO[E, A] = ...
-    // lazy evaluation of a side-effecting, yet Total, code block
+    // evaluasi lundung dengan efek samping, namun Total, blok kode
     def sync[E, A](effect: =>A): IO[E, A] = ...
-    // lazy evaluation of a side-effecting code block that may fail
+    // evaluasi lundung dengan efek samping yang bisa saja gagal
     def syncThrowable[A](effect: =>A): IO[Throwable, A] = ...
   
-    // create a failed IO
+    // membuat galat IO
     def fail[E, A](error: E): IO[E, A] = ...
-    // asynchronously sleeps for a specific period of time
+    // tidur secara asinkron untuk periode waktu tertent
     def sleep[E](duration: Duration): IO[E, Unit] = ...
     ...
   }
@@ -11220,23 +11211,23 @@ metoda-metoda spesifik:
 {lang="text"}
 ~~~~~~~~
   sealed abstract class IO[E, A] {
-    // retries an action N times, until success
+    // mencoba ulang sebuah aksi N kali sampai berhasil
     def retryN(n: Int): IO[E, A] = ...
-    // ... with exponential backoff
+    // ... dengan jeda bertumbuh
     def retryBackoff(n: Int, factor: Double, duration: Duration): IO[E, A] = ...
   
-    // repeats an action with a pause between invocations, until it fails
+    // mengulangi sebuah aksi dengan jeda antar penyelawatan sampai gagal
     def repeat[B](interval: Duration): IO[E, B] = ...
   
-    // cancel the action if it does not complete within the timeframe
+    // batalkan aksi bila tidak selesai dalam kerangka waktu
     def timeout(duration: Duration): IO[E, Maybe[A]] = ...
   
-    // runs `release` on success or failure.
-    // Note that IO[Void, Unit] cannot fail.
+    // jalankan `release` saat sukses maupun gagal
+    // catat bahwa IO[Void, Unit] tidak dapat gagal
     def bracket[B](release: A => IO[Void, Unit])(use: A => IO[E, B]): IO[E, B] = ...
-    // alternative syntax for bracket
+    // sintaks alternatif untuk braket
     def ensuring(finalizer: IO[Void, Unit]): IO[E, A] =
-    // ignore failure and success, e.g. to ignore the result of a cleanup action
+    // abaikan galat dan sukses. misal, abaikan hasil dari aksi pembersihan
     def ignore: IO[Void, Unit] = ...
   
     // runs two effects in parallel
@@ -11251,14 +11242,14 @@ sukses). Perkakas yang berhubungan dengan terminasi adalah:
 {lang="text"}
 ~~~~~~~~
   ...
-    // terminate whatever actions are running with the given throwable.
-    // bracket / ensuring is honoured.
+    // bunuh aksi apapun yang sedang berjalan dengan throwable yang diberikan
+    // braket dihormati
     def terminate[E, A](t: Throwable): IO[E, A] = ...
   
-    // runs two effects in parallel, return the winner and terminate the loser
+    // jalankan dua efek secara paralel, kembalikan yang menang dan bunuh pecundang
     def race(that: IO[E, A]): IO[E, A] = ...
   
-    // ignores terminations
+    // abaikan terminasi
     def uninterruptibly: IO[E, A] = ...
   ...
 ~~~~~~~~
@@ -11327,7 +11318,7 @@ variabel dengan `get` tidak dibatasi.
     def error[E2](e: E): IO[E2, Boolean] = ...
     def get: IO[E, A] = ...
   
-    // interrupts all listeners
+    // interupsi semua pendengar
     def interrupt[E2](t: Throwable): IO[E2, Boolean] = ...
   }
   object Promise {
@@ -11355,14 +11346,14 @@ atau memutakhirkannya.
   final class IORef[A] private (ref: AtomicReference[A]) {
     def read[E]: IO[E, A] = ...
   
-    // write with immediate consistency guarantees
+    // tulis dengan garansi konsistensi sesegera mungkin
     def write[E](a: A): IO[E, Unit] = ...
-    // write with eventual consistency guarantees
+    // tulis dengan garansi konsistensi yang bisa saja terjadi
     def writeLater[E](a: A): IO[E, Unit] = ...
-    // return true if an immediate write succeeded, false if not (and abort)
+    // kembalikan true bila penulisan sukses, gagal bila tidak
     def tryWrite[E](a: A): IO[E, Boolean] = ...
   
-    // atomic primitives for updating the value
+    // primitif atom untuk pemutakhiran nilai
     def compareAndSet[E](prev: A, next: A): IO[E, Boolean] = ...
     def modify[E](f: A => A): IO[E, A] = ...
     def modifyFold[E, B](f: A => (B, A)): IO[E, B] = ...
@@ -11505,28 +11496,28 @@ kelas tipe spesifik. Tiap contoh menunjukkan fitur yang dapat digeneralisasi:
 {lang="text"}
 ~~~~~~~~
   @typeclass trait Equal[A]  {
-    // type parameter is in contravariant (parameter) position
+    // parameter tipe ada pada posisi kontravarian
     @op("===") def equal(a1: A, a2: A): Boolean
   }
   
-  // for requesting default values of a type when testing
+  // untuk meminta nilai default saat melakukan testing
   @typeclass trait Default[A] {
-    // type parameter is in covariant (return) position
+    // parameter tipe ada pada posisi kontravarian
     def default: String \/ A
   }
   
   @typeclass trait Semigroup[A] {
-    // type parameter is in both covariant and contravariant position (invariant)
+    // parameter tipe ada pada posisi kovarian dan kontravarian
     @op("|+|") def append(x: A, y: =>A): A
   }
   
   @typeclass trait JsEncoder[T] {
-    // type parameter is in contravariant position and needs access to field names
+    // parameter tipe ada pada posisi kontravarian dan butuh akses ke nama bidang
     def toJson(t: T): JsValue
   }
   
   @typeclass trait JsDecoder[T] {
-    // type parameter is in covariant position and needs access to field names
+    // parameter tipe ada pada posisi kovarian dan butuh akses ke nama bidang
     def fromJson(j: JsValue): String \/ T
   }
 ~~~~~~~~
@@ -11709,9 +11700,6 @@ menggunakan `.map` atau `.contramap`:
   }
 ~~~~~~~~
 
-A> The `@xderiving` annotation automatically inserts `.xmap` boilerplate. Add the
-A> following to `build.sbt`
-A>
 A> Anotasi `@xderiving` secara otomatis menyisipkan plat cetak `.xmap`. Tambahkan
 A> potongan berikut pada `build.sbt`
 A> 
@@ -13102,7 +13090,7 @@ Inti dari Shapeless` adalah tipedata `HList` dan `Coproduct`
   sealed trait :+:[+H, +T <: Coproduct] extends Coproduct
   final case class Inl[+H, +T <: Coproduct](head: H) extends :+:[H, T]
   final case class Inr[+H, +T <: Coproduct](tail: T) extends :+:[H, T]
-  sealed trait CNil extends Coproduct // no implementations
+  sealed trait CNil extends Coproduct // tanpa implementasi
 ~~~~~~~~
 
 yang merupakan representasi *generik* dari produk dan koproduk, sedangkan
@@ -14029,7 +14017,7 @@ dapat menemukannya:
   private[jsonformat] trait DerivedJsEncoder2 {
     this: DerivedJsEncoder.type =>
   
-    // WORKAROUND https://github.com/milessabin/shapeless/issues/309
+    // AKAL-AKALAN https://github.com/milessabin/shapeless/issues/309
     implicit def hconsTagged[A, K <: Symbol, H, Z, T <: HList, J <: HList](
       implicit
       K: Witness.Aux[K],
@@ -14440,7 +14428,7 @@ saat kompilasi maupun waktu-jalan.
 Bila kita berbicara mengenai waktu kompilasi, Shapeless merupakan pencilan. Bukan
 hal yang luar biasa bila kita mendapati sebuah proyek kecil menderita penggelembungan
 waktu kompilasi dari satu detik menjadi satu menit. Untuk mengusut masalah kompilasi,
-kita dapat melakukan *profiling* (lol, help) terhadap aplikasi kita dengan menggunakan
+kita dapat melakukan *profiling* terhadap aplikasi kita dengan menggunakan
 plugin `scalac-profiling`
 
 {lang="text"}
@@ -14662,7 +14650,7 @@ dengan menggunakan alat penghasil kode.
 
 Untuk menutup buku ini, kita akan menerapkan apa yang telah kita pelajari dengan
 menulis contoh aplikasi dan mengimplementasikan sebuah klien dan peladen HTTP
-menggunakan pustaka pemrogaram fungsional murni (lol, help) [http4s](https://http4s.org/).
+menggunakan pustaka pemrogaram fungsional murni [http4s](https://http4s.org/).
 
 Kode sumber dari aplikasi `drone-dynamic-agents` tersedia bersama dengan sumber
 kode buku pada `https://github.com/fommil/fpmortals` pada direktori `example`.
@@ -14762,7 +14750,7 @@ Penanda dari semua aljabar dapat diikhtisarkan sebagai
     def bearer(refresh: RefreshToken): F[BearerToken]
   }
   trait OAuth2JsonClient[F[_]] {
-    // same methods as JsonClient, but doing OAuth2 transparently
+    // metoda yang sama dengan JsonClient, namun melakukan OAuth2 secara transparan
   }
   
   trait UserInteraction[F[_]] {
@@ -15044,7 +15032,7 @@ mempertimbangkan bagaimana bentuk susunan monad kita. Konstruktor `BlazeJsonClie
 mengembalikan `Task` namun metoda milik `JsonClient` membutuhkan sebuah
 `MonadError[..., JsonClient.Error]`. Dan monad tersebut dapat disediakan oleh
 `EitherT`. Maka dari itu, kita dapat membangun susunan monad umum untuk semua
-*for comprehension* (lol, help) sebagai
+*for comprehension* sebagai
 
 {lang="text"}
 ~~~~~~~~
@@ -15104,7 +15092,7 @@ bahwa monad berikutlah yang kita butuhkan:
 Sayangnya, persyaratan dua `MonadState` menyebabkan konflik. Kita dapat membuat
 sebuah tipe data yang menangkap semua keadaan program. Namun, hal tersebut merupakan
 abstraksi yang penuh kebocoran. Maka dari itu, kita akan melapiskan komprehensi
-*for* (lol, help) kita dan menyediakan keadaan saat dibutuhkan.
+*for* kita dan menyediakan keadaan saat dibutuhkan.
 
 Sekarang kita harus berpikir mengenai tiga lapisan, yang kita sebut `F`, `G`, dan `H`
 
@@ -15290,7 +15278,7 @@ yang terdiri dari
   
   final case class Uri( ... )
   object Uri {
-    // not total, only use if `s` is guaranteed to be a URL
+    // tidak tootal, gunakan ini bila `s` dijamin berupa URL
     def unsafeFromString(s: String): Uri = ...
     ...
   }
@@ -15311,7 +15299,7 @@ dengan efek dan sebuah tipe konten, dan memiliki representasi efisien internal
 untuk mengelompokkan data. Sebagai contooh, walaupun kita menggunakan `Stream[F, Byte]`
 sebenarnya monad ini membungkus `Array[Byte]` yang tiba melalu jaringan.
 
-Kita dapat mengkonversi *header* (lol, help) dan representasi URL kita menjadi
+Kita dapat mengkonversi *header* dan representasi URL kita menjadi
 versi yang dibutuhkan oleh http4s:
 
 {lang="text"}
@@ -15324,7 +15312,7 @@ versi yang dibutuhkan oleh http4s:
     )
   
   def convert(uri: String Refined Url): http4s.Uri =
-    http4s.Uri.unsafeFromString(uri.value) // we already validated our String
+    http4s.Uri.unsafeFromString(uri.value) // sudah validasi string
 ~~~~~~~~
 
 Metoda `.get` dan `.post` keduanya membutuhkan sebuah konversi dari tipe `Response`
@@ -15381,7 +15369,7 @@ Berikut implementasi kita dari `.get`
       .emap(identity)
 ~~~~~~~~
 
-`.get` hanyalah berupa saluran (lol, help): kita mengkonversi tipe masukan
+`.get` hanyalah berupa saluran: kita mengkonversi tipe masukan
 menjadi `http4s.Request` lalu memanggil `.fetch` pada `Client` dengan `handler`
 kita. `handler` mengembalikan sebuah `Task[Error \/ A]`, namun kita membutuhkan
 sebuah `F[A]`. Maka dari itu, kita menggunakan `MonadIO.liftIO` untuk membuat
@@ -15400,7 +15388,7 @@ Galat akan terlihat seperti
 Pada dasarnya, ada kucing yang hilang.
 
 Alasan kegagalan ini adalah http4s menggunakan pustaka PF utama lain, bukan Scalaz.
-Untungnya, `scalaz-ioeffect` menyediakan lapisan kompatibilitas dan [*shims*](https://github.com/djspiewak/shims) (lol, help)
+Untungnya, `scalaz-ioeffect` menyediakan lapisan kompatibilitas dan [*shims*](https://github.com/djspiewak/shims)
 yang menyediakan konversi implisit tanpa batas. Kita dapat mengkompilasi kode kita
 dengan ketergantungan sebagai berikut:
 
