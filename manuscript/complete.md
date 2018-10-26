@@ -3830,9 +3830,9 @@ sebuah akumulator. Bilamana kita terbiasa dengan Java yang membuat kita
 ingin menggunakan sebuah `var` dan menggunakan `var` tersebut dalam sebuah
 `map`, maka kita harus menggunakan `mapAccumL`.
 
-Sebagai contoh, anggap saja kita mempunyai sebuah daftar kata dan kita ingin
+Sebagai contoh, anggap saja kita mempunyai sebuah senarai kata dan kita ingin
 mengabaikan kata-kata yang sudah ada. Algoritma penyaringan tidak diperkenankan
-untuk mengolah daftar kata dua kali. Keuntungan yang didapat adalah algoritma
+untuk mengolah senarai kata dua kali. Keuntungan yang didapat adalah algoritma
 ini bisa mencapai urutan tak hingga:
 
 {lang="text"}
@@ -4948,8 +4948,8 @@ merupakan salah satu cara untuk mengakses semua elemen beserta elemen
 yang berdekatan dengannya.
 
 Misalkan, sebuah *daerah sekeliling* (disingkat `Hood` dari *neighbourhood*) yang
-terdiri atas sebuah daftar elemen bagian kiri (`lefts`), elemen yang dilihat
-(`focus`), dan sebuah daftar elemen pada bagian kanan (`rights`).
+terdiri atas sebuah senarai elemen bagian kiri (`lefts`), elemen yang dilihat
+(`focus`), dan sebuah senarai elemen pada bagian kanan (`rights`).
 
 {lang="text"}
 ~~~~~~~~
@@ -5209,65 +5209,34 @@ Lebih lanjut, Valentin Kasas menjelaskan mengenai [Penggabungan `N` thing](https
 ![](images/shortest-fp-book.png)
 
 
-# Scalaz Data Types
-
-Who doesn't love a good data structure? The answer is *nobody*, because data
-structures are awesome.
+# Tipe Data Scalaz
 
 Siapa yang tidak suka dengan struktur data keren? Tentu tidak ada, karena
 semua struktur data keren!
 
-In this chapter we will explore the *collection-like* data types in Scalaz, as
-well as data types that augment the Scala language with useful semantics and
-additional type safety.
-
 Pada bab ini, kita akan mengeksplorasi tipe data *seperti koleksi*  yang ada
 pada Scalaz dan juga tipe data yang memperkaya Scala dengan semantik multi guna
 dan keamanan tipe data.
-
-The primary reason we care about having lots of collections at our disposal is
-performance. A vector and a list can do the same things, but their performance
-characteristics are different: a vector has constant lookup cost whereas a list
-must be traversed.
 
 Alasan utama kita memberi perhatian lebih terhadap banyaknya jenis koleksi
 yang kita miliki adalah performa. Sebuah vektor dan list mampu melakukan hal
 yang sama, namun karakteristik performa mereka berbeda: sebuah vektor mempunyai
 beban pencarian konstan sendangkan list harus melangkahi elemen satu per satu.
 
-W> Performance estimates - including claims in this chapter - should be taken with
-W> a pinch of salt. Modern processor design, memory pipelining, and JVM garbage
-W> collection can invalidate intuitive reasoning based on operation counting.
-W>
 W> Estimasi performa - termasuk klai pada bab ini - tak perlu dianggap secara serius.
 W> Desain prosesor medore, penyaluran memori, dan pengumpulan sampah JVM bisa
 W> saja mengahpuskan penalaran intuitif berdasarkan penghitungan operasi.
 W> 
-W> A hard truth of modern computers is that empirical performance tests, for a
-W> specific task, can shock and surprise: e.g. lookup in a `List` is often faster
-W> in practice than in a `Vector`. Use a tool such as [JMH](http://openjdk.java.net/projects/code-tools/jmh/) when performance testing.
-W>
 W> Kenyataan mutlak pada komputer modern pada tes performa empiris, untuk tugas
 W> khusus, hasil yang muncul bisa saja mengejutkan: mis., `lookup` pada sebuuah
 W> `List` sering kali lebih cepat bila dibandingkan dengan sebuah `Vector`.
 W> Sangat disarankan untuk menggunakan alat bantu seperti [JMH](http://openjdk.java.net/projects/code-tools/jmh) pada saat melakukan tes performa.
-
-All of the collections presented here are *persistent*: if we add or remove an
-element we can still use the old version. Structural sharing is essential to the
-performance of persistent data structures, otherwise the entire collection is
-rebuilt with every operation.
 
 Semua koleksi yang ditunjukkan di sini bersifat *persisten*: blia kita menambah
 ataupun menghapus sebuah elemen, kita masih bisa menggunakan koleksi sebelumnya.
 Pembagian struktural merupakan bagian penting bila kita berbicara mengenai performa
 dari struktur data persisten. Bila kita tidak memperhatikan pembagian struktural,
 koleksi akan dibuat ulang setiap kali operasi atas koleksi tersebut dilakukan.
-
-Unlike the Java and Scala collections, there is no hierarchy to the data types
-in Scalaz: these collections are much simpler to understand. Polymorphic
-functionality is provided by optimised instances of the typeclasses we studied
-in the previous chapter. This makes it a lot easier to swap implementations for
-performance reasons, and to provide our own.
 
 Tidak seperti koleksi pada pustaka standar Java dan Scala, Scalaz tidak mempunyai
 hierarki tipe data: koleksi-koleksi ini lebih sederhana dan mudah dipahami.
@@ -5276,22 +5245,14 @@ tipe yang telah kita pelajari pada bab sebelumnya. Penggunaan instans kelas tipe
 sangat mempermudah kita dalam menukar implementasi dengan alasan performa ataupun
 dengan membuat implementasi kita sendiri.
 
-## Type Variance
-
-Many of Scalaz's data types are *invariant* in their type parameters.
-For example, `IList[A]` is **not** a subtype of `IList[B]` when `A <:
-B`.
+## Varian Tipe
 
 Banyak dari tipe data Scalaz mempunyai parameter tipe yang bersifat *invarian*.
 Sebagai contoh, `IList[A]` bukan merupakan sub-tipe dari `IList[B]` walau
 `A <: B`.
 
 
-### Covariance
-
-The problem with *covariant* type parameters, such as `class
-List[+A]`, is that `List[A]` is a subtype of `List[Any]` and it is
-easy to accidentally lose type information.
+### Kovarian
 
 Salah satu permasalahan dari parameter tipe *kovarian*, seperti `class
 List[+A]`, adalah `List[A]` juga merupakan sub-tipe dari `List[Any]`.
@@ -5302,11 +5263,6 @@ Hal semacam ini sangat mempermudah hilangnya informasi tipe.
   scala> List("hello") ++ List(' ') ++ List("world!")
   res: List[Any] = List(hello,  , world!)
 ~~~~~~~~
-
-Note that the second list is a `List[Char]` and the compiler has
-unhelpfully inferred the *Least Upper Bound* (LUB) to be `Any`.
-Compare to `IList`, which requires explicit `.widen[Any]` to permit
-the heinous crime:
 
 Harap perhatikan bahwa list kedua merupakan `List[Char]` dan kompilator
 menyimpulkan, walaupun ngaco, bahwa *Batas Atas Terendah* (BAT) sebagai
@@ -5326,18 +5282,11 @@ secara eksplisit untuk memberikan celah untuk kecerobohan semacam ini:
   res: IList[Any] = [hello, ,world!]
 ~~~~~~~~
 
-Similarly, when the compiler infers a type `with Product with
-Serializable` it is a strong indicator that accidental widening has
-occurred due to covariance.
-
 Hal yang sama juga terjadi ketika kompilator menyimpulkan bahwa
 sebuah tipe `with Product with Serializable` (yang berupa *Product*
 dan *Serializable*), hal semacam ini merupakan indikator yang kuat
 bahwa pelebaran tanpa sengaja (lol, aku bego) telah terjadi
 dikarenakan kovarian.
-
-Unfortunately we must be careful when constructing invariant data
-types because LUB calculations are performed on the parameters:
 
 Sayangnya, kita harus berhati-hati saat menyusun tipe data invarian
 dikarenakan kalkulasi BAT dilakukan pada parameter:
@@ -5348,20 +5297,9 @@ dikarenakan kalkulasi BAT dilakukan pada parameter:
   res: IList[Any] = [hello, ,world]
 ~~~~~~~~
 
-Another similar problem arises from Scala's `Nothing` type, which is a subtype
-of all other types, including `sealed` ADTs, `final` classes, primitives and
-`null`.
-
 Masalah yang mirip dengan hal ini juga terjadi pada tipe `Nothing` milik Scala,
 yang merupakan sub-tipe dari semua tipe, termasuk ADT `sealed`, kelas `final`,
-primtif, dan `null`.
-
-There are no values of type `Nothing`: functions that take a `Nothing` as a
-parameter cannot be run and functions that return `Nothing` will never return.
-`Nothing` was introduced as a mechanism to enable covariant type parameters, but
-a consequence is that we can write un-runnable code, by accident. Scalaz says we
-do not need covariant type parameters which means that we are limiting ourselves
-to writing practical code that can be run.
+primitif, dan `null`.
 
 Dikarenakan tidak ada nilai dari tipe `Nothing`: fungsi yang menerima `Nothing`
 sebagai salah satu parameter tidak dapat dijalankan dan fungsi yang mengembalikan
@@ -5373,12 +5311,7 @@ berpendapat bahwa kita tidak butuh parameter tipe kovarian. Hal ini berarti
 bahwa kita membatasi diri kita untuk hanya menulis kode yang bisa dijalankan saja.
 
 
-### Contrarivariance
-
-On the other hand, *contravariant* type parameters, such as `trait
-Thing[-A]`, can expose devastating [bugs in the compiler](https://issues.scala-lang.org/browse/SI-2509). Consider Paul
-Phillips' (ex-`scalac` team) demonstration of what he calls
-*contrarivariance*:
+### Kontrarivarian
 
 Agak berbeda dengan kovarian, parameter tipe *kontravarian*, seperti
 `trait Thing[-A]`, bisa menimbulkan masalah tak terduga sebagaimana
@@ -5400,10 +5333,6 @@ apa yang dia sebut sebagai *kontrari-varian*.
   res = 2
 ~~~~~~~~
 
-As expected, the compiler is finding the most specific argument in
-each call to `f`. However, implicit resolution gives unexpected
-results:
-
 Sebagaimana yang telah pembaca yang budiman terka, kompilator berhasil
 menentukan argumen paling spesifik untuk setiap pemanggilan `f`.
 Namun, resolusi implisit dari kompilator memberikan hasil yang tak terduga:
@@ -5423,22 +5352,13 @@ Namun, resolusi implisit dari kompilator memberikan hasil yang tak terduga:
   res = 1
 ~~~~~~~~
 
-Implicit resolution flips its definition of "most specific" for contravariant
-types, rendering them useless for typeclasses or anything that requires
-polymorphic functionality. The behaviour is fixed in Dotty.
-
 Resolusi implisit membalik definisi kompilator atas "argumen paling spesifik"
 untuk tipe kontravarian sehingga argumen tersebut menjadi percuma bila digunakan
 dengan kelas tipe maupun semua yang menggunakan fungsionalitas polimorfis.
 Perilaku semacam ini sudah dibenahi pada Dotty.
 
 
-### Limitations of subtyping
-
-`scala.Option` has a method `.flatten` which will convert
-`Option[Option[B]]` into an `Option[B]`. However, Scala's type system
-is unable to let us write the required type signature. Consider the
-following that appears correct, but has a subtle bug:
+### Batasan dari Pembuatan Subtipe
 
 Sebagaimana yang telah pembaca yang budiman ketahui, `scala.Option`
 mempunyai metoda `.flatten` yang akan mengubah `Option[Option[B]]` menjadi
@@ -5454,9 +5374,6 @@ mempunyai sebuah kutu yang hampir tak kasat mata:
   }
 ~~~~~~~~
 
-The `A` introduced on `.flatten` is shadowing the `A` introduced on
-the class. It is equivalent to writing
-
 `A` yang diperkenalkan pada `.flatten` membayangi `A` yang diperkenalkan
 pada kelas. Hal seperti ini sama saja dengan menuliskan
 
@@ -5467,12 +5384,7 @@ pada kelas. Hal seperti ini sama saja dengan menuliskan
   }
 ~~~~~~~~
 
-which is not the constraint we want.
-
 yang berbeda dengan batasan yang kita inginkan.
-
-To workaround this limitation, Scala defines infix classes `<:<` and
-`=:=` along with implicit evidence that always creates a *witness*
 
 Untuk menyiasati batasan ini, Scala mendefinisikan kelas infiks `<:<` 
 dan `=:=` beserta bukti implisit yang selalu meninggalkan sebuah *saksi*
@@ -5485,10 +5397,6 @@ dan `=:=` beserta bukti implisit yang selalu meninggalkan sebuah *saksi*
   sealed abstract class =:=[ From,  To] extends (From => To)
   implicit def tpEquals[A]: A =:= A = new =:=[A, A] { def apply(x: A): A = x }
 ~~~~~~~~
-
-`=:=` can be used to require that two type parameters are exactly the
-same and `<:<` is used to describe subtype relationships, letting us
-implement `.flatten` as
 
 `=:=` bisa digunakan untuk memaksa kedua parameter tipe benar benar
 sama. Sedangkan `<:<` digunakan untuk mendeskripsikan hubungan sub-tipe.
@@ -5506,9 +5414,6 @@ Kedua kelas tersebut memperkenankan kita untuk mengimplementasikan
   final case class Some[+A](value: A) extends Option[A]
   case object None                    extends Option[Nothing]
 ~~~~~~~~
-
-Scalaz improves on `<:<` and `=:=` with *Liskov* (aliased to `<~<`)
-and *Leibniz* (`===`).
 
 Scalaz memperbaiki kedua kelas tadi dengan menggunakan *Liskov* 
 (dialiaskan sebagai `<~<`) dan Leibniz (`===`).
@@ -5555,40 +5460,22 @@ Scalaz memperbaiki kedua kelas tadi dengan menggunakan *Liskov*
   }
 ~~~~~~~~
 
-Other than generally useful methods and implicit conversions, the
-Scalaz `<~<` and `===` evidence is more principled than in the stdlib.
-
 Selain metoda-metoda umum yang tentu berguna dan konversi implisit,
 bukti dari kelas `<~<` dan `===` lebih memegang prinsip bila dibandingkan
 dengan kelas `<:<` dan `=:=` milik pustaka standar.
 
 
-A> Liskov is named after Barbara Liskov of *Liskov substitution
-A> principle* fame, the foundation of Object Oriented Programming.
-A> 
 A> Kelas Liskov dinamai berdasarkan Barbara Liskov yang meletakkan
 A> batu pondasi Pemrograman Berorientasi Objek dengan mengemukakan
 A> prinsip substitusi Liskov.
 A>
-A> Gottfried Wilhelm Leibniz basically invented *everything* in the 17th
-A> century. He believed in a [God called Monad](https://en.wikipedia.org/wiki/Monad_(philosophy)). Eugenio Moggi later reused
-A> the name for what we know as `scalaz.Monad`. Not a God, just a mere
-A> mortal.
-A>
 A> Gottfried Wilhelm Leibniz pada dasarnya menciptakan semua *yang* ada
 A> pada abad ke 17. Dia percaya pada [Tuhan yang disebut Monad](https://en.wikipedia.org/wiki/Monad_(philosophy)).
 A> Nama tersebut juga digunakan untuk apa yang kita ketahui sebagai `scalaz.Monad`
-A> oleh Eugenio Moggi. (lol, saya sensor.)
+A> oleh Eugenio Moggi.
 
 
-## Evaluation
-
-Java is a *strict* evaluation language: all the parameters to a method
-must be evaluated to a *value* before the method is called. Scala
-introduces the notion of *by-name* parameters on methods with `a: =>A`
-syntax. These parameters are wrapped up as a zero argument function
-which is called every time the `a` is referenced. We seen *by-name* a
-lot in the typeclasses.
+## Evaluasi
 
 Pada bahasa pemrograman Java, evaluasi program dijalankan secara tegas:
 semua parameter dari sebuah metoda harus dievaluasi menjadi sebuah *nilai*
@@ -5598,29 +5485,17 @@ Parameter ini dibungkus (lol) sebagai fungsi tanpa argumen yang dipanggil
 tiap kali `a` dirujuk. Seperti yang telah kita lihat pada bab-bab sebelumnya,
 kelas tipe cenderung menggunakan parameter *by-name*.
 
-Scala also has *by-need* evaluation of values, with the `lazy`
-keyword: the computation is evaluated at most once to produce the
-value. Unfortunately, Scala does not support *by-need* evaluation of
-method parameters.
-
 Scala juga mempunyai strategi evaluasi nilai berdasarkan pemanggilan *by-need*,
 menggunakan kata kunci `lazy`: komputasi dilakukan paling banyak satu kali
 ketika nilai parameter akan digunakan. Sayangnya, scala tidak mendukung
 evaluasi komputasi dengan pemanggilan *by-need* pada parameter metoda.
 
-A> If the calculation of a `lazy val` throws an exception, it is retried
-A> every time it is accessed. Because exceptions can break referential
-A> transparency, we limit our discussion to `lazy val` calculations that
-A> do not throw exceptions.
-A>
 A> Bila kalkulasi `lazy val` melempar pengecualian, kalkulasi ini akan
 A> diulang tiap kali nilai ini diakses. Karena pengecualian dapat merusak
 A> transparansi rujukan, kita akan membatasi diskusi kita hanya sampai pada
 A> kalkulasi `lazy val` yang tidak melempar pengecualian.
 
-Scalaz formalises the three evaluation strategies with an ADT
-
-Scalaz memformalisasi tiga strategi evaluasi yang menggunakan ADT
+Scalaz memformalisasi tiga strategi evaluasi yang menggunakan TDA
 
 {lang="text"}
 ~~~~~~~~
@@ -5644,22 +5519,11 @@ Scalaz memformalisasi tiga strategi evaluasi yang menggunakan ADT
   final case class Value[A](value: A) extends Need[A]
 ~~~~~~~~
 
-The weakest form of evaluation is `Name`, giving no computational
-guarantees. Next is `Need`, guaranteeing *at most once* evaluation,
-whereas `Value` is pre-computed and therefore *exactly once*
-evaluation.
-
 Bentuk evaluasi paling lemah adalah `Name` yang tidak memberikan
 jaminan komputasi. Selanjutnya adalah `Need`, yang menjamin evaluasi
 *paling banyak satu kali*. Dan evaluasi `Value` yang merupakan nilai
 hasil dari komputasi yang terjadi sebelum pemanggilan terjadi.
 Evaluasi `Value` menjamin satu kali evaluasi.
-
-If we wanted to be super-pedantic we could go back to all the
-typeclasses and make their methods take `Name`, `Need` or `Value`
-parameters. Instead we can assume that normal parameters can always be
-wrapped in a `Value`, and *by-name* parameters can be wrapped with
-`Name`.
 
 Bila kita berbengah diri, bisa saja kita munder ke kelas tipe dan membuat
 metoda mereka untuk secara spesifik menerima parameter `Name`, `Need`,
@@ -5667,24 +5531,12 @@ atau `Value`. Namun, kita memilih untuk mengasumsikan bahwa parameter
 normal akan selalu dibungkus dalam sebuah `Value` dan parameter *by-name*
 dapat dibungkus dengan `Name`.
 
-When we write *pure programs*, we are free to replace any `Name` with
-`Need` or `Value`, and vice versa, with no change to the correctness
-of the program. This is the essence of *referential transparency*: the
-ability to replace a computation by its value, or a value by its
-computation.
-
 Ketika kita menulis *program murni* (lol), kita bebas untuk mengganti
 `Name` dengan `Need` atau `Value`, begitu juga sebaliknya, tanpa
 mengubah kebenaran program (lol). Yang menjadi esensi dari *transparansi
 rujukan* adalah keluwesan untuk mengganti sebuah komputasi dengan nilai
 komputasi tersebut atau mengganti nilai sebuah komputasi dengan komputasi
 itu sendiri.
-
-In functional programming we almost always want `Value` or `Need`
-(also known as *strict* and *lazy*): there is little value in `Name`.
-Because there is no language level support for lazy method parameters,
-methods typically ask for a *by-name* parameter and then convert it
-into a `Need` internally, getting a boost to performance.
 
 Pada pemrograman fungsional, kita hampir selalu menggunakan `Value` atau
 `Need` (dikenal dengan *tegas* dan *lundung*) dikarenakan hampir tidak ada
@@ -5694,21 +5546,12 @@ metoda yang dipanggil secara lundung. Metoda secara umum meminta parameter
 *by-name* lalu mengubahnya menjadi `Need` secara internal agar mendapatkan
 tambahan performa.
 
-A> `Lazy` (with a capital `L`) is often used in core Scala libraries for
-A> data types with *by-name* semantics: a misnomer that has stuck.
-A> 
 A> `Lazy` seringkali  digunakan pada pustaka inti Scala untuk tipe data
 A> dengan semantik *by-name* walaupun hal ini adalah sebuah salah kaprah.
-A>
-A> More generally, we're all pretty lazy about how we talk about laziness: it can
-A> be good to seek clarification about what kind of laziness is being discussed. Or
-A> don't. Because, lazy.
 A>
 A> Secara umum, kita tidak begitu semangat bila membicarakan evaluasi lundung:
 A> mungkin akan lebih singkat bila kita mengklarifikasi tentang evaluasi lundung
 A> apa yang sedang didiskusikan. Hal ini dikarenakan
-
-`Name` provides instances of the following typeclasses
 
 `Name` menyediakan instans dari kelas tipe berikut:
 
@@ -5718,19 +5561,9 @@ A> apa yang sedang didiskusikan. Hal ini dikarenakan
 -   `Align`
 -   `Zip` / `Unzip` / `Cozip`
 
-A> *by-name* and *lazy* are not the free lunch they appear to be. When
-A> Scala converts *by-name* parameters and `lazy val` into bytecode,
-A> there is an object allocation overhead.
-A>
-A> pemanggilan *by name* yang lundung dan *lundung* tidak datang cuma cuma. 
+A> Pemanggilan *by name* yang lundung dan *lundung* tidak datang cuma cuma.
 A> Saat Scala mengkonversi parameter *by-name* dan `lazy val` menjadi
 A> bytecode akan selalu ada ongkons tambahan pada saat alokasi objek. 
-A> 
-A> Before rewriting everything to use *by-name* parameters, ensure that
-A> the cost of the overhead does not eclipse the saving. There is no
-A> benefit unless there is the possibility of **not** evaluating. High
-A> performance code that runs in a tight loop and always evaluates will
-A> suffer.
 A>
 A> Selalu pastikan agar ongkos tambahan tidak lebih besar daripada penghematan
 A> saat mengubah metoda untuk menggunakan pemanggilan parameter *by-name*.
@@ -5742,11 +5575,7 @@ A> selalu mengevaluasi akan kehilangan performa bila menggunakan strategi
 A> pemanggilan ini.
 
 
-## Memoisation
-
-Scalaz has the capability to memoise functions, formalised by `Memo`,
-which doesn't make any guarantees about evaluation because of the
-diversity of implementations:
+## Memoisasi
 
 Scalaz mampu melakukan memoisasi fungsi yang belum pasti akan selalu
 dievaluasi dikarenakan bermacamnya implementasi.
@@ -5770,20 +5599,12 @@ Secara formal, memoisasi diwakilkan dengan `Memo`:
   }
 ~~~~~~~~
 
-`memo` allows us to create custom implementations of `Memo`, `nilMemo`
-doesn't memoise, evaluating the function normally. The remaining
-implementations intercept calls to the function and cache results
-backed by stdlib collection implementations.
-
 `memo` memperkenankan kita untuk membuat implementasi khusus atas kelas
 tipe `Memo`. Sedangkan untuk `nilMemo`, metoda ini tidak melakukan
 memoisasi. Dengan kata lain, `nilMemo` mengevaluasi fungsi secara normal.
 Untuk implementasi metoda lainnya, mereka hanya mencegat pemanggilan
 fungsi dan nilai yang tersimpan di tembolok dengan menggunakan
 implementasi dari pustaka koleksi standar.
-
-To use `Memo` we simply wrap a function with a `Memo` implementation
-and then call the memoised function:
 
 Untuk menggunakan `Memo`, kita hanya perlu membungkus sebuah fungsi dengan
 implmentasi `Memo` dan  dilanjutkan dengan memanggil fungsi ter-memoisasi
@@ -5807,9 +5628,6 @@ tadi:
   res: String = wobble // memoised
 ~~~~~~~~
 
-If the function takes more than one parameter, we must `tupled` the
-method, with the memoised version taking a tuple.
-
 Bila sebuah fungsi menerima lebih dari sebuah parametr, kita harus mengubah
 parameter-parameter tadi menjadi sebuah *tuple* menggunakan metoda `tupled`
 sehingga fungsi tadi berubah menjadi fungsi ter-memoisasi yang menerima
@@ -5825,20 +5643,9 @@ sebuah *tuple*.
   res: String = "hello"
 ~~~~~~~~
 
-`Memo` is typically treated as a special construct and the usual rule
-about *purity* is relaxed for implementations. To be pure only
-requires that our implementations of `Memo` are referential
-transparent in the evaluation of `K => V`. We may use mutable data and
-perform I/O in the implementation of `Memo`, e.g. with an LRU or
-distributed cache, without having to declare an effect in the type
-signature. Other functional programming languages have automatic
-memoisation managed by their runtime environment and `Memo` is our way
-of extending the JVM to have similar support, unfortunately only on an
-opt-in basis.
-
 `Memo` pada dasarnya dianggap sebagai konstruk khusus dan penegakan
 aturan mengenai *kemurnian* (lol, help) sedikit lebih longgar dengan
-alasan memudahkan implmentasi. Agar tetap *murni* (lol, help), yang perlu
+alasan memudahkan implmentasi. Agar tetap murni, yang perlu
 kita lakukan hanyalah memastikan implementasi `Memo` yang kita buat
 untuk selalu secara melakukan transparansi saat merujuk pada saat evaluasi
 `K => V`. Kita bisa juga menggunakan data yang bisa bermutasi dan melakukan
@@ -5849,13 +5656,7 @@ lingkungan waktu jalan mereka. `Memo` di sisi lain, merupakan satu-satunya
 cara kita untuk menambal JVM agar mempunyai dukungan yang mirip. 
 
 
-## Tagging
-
-In the section introducing `Monoid` we built a `Monoid[TradeTemplate]` and
-realised that Scalaz does not do what we wanted with `Monoid[Option[A]]`. This
-is not an oversight of Scalaz: often we find that a data type can implement a
-fundamental typeclass in multiple valid ways and that the default implementation
-doesn't do what we want, or simply isn't defined.
+## Pelabelan
 
 Pada bagian dimana kita memperkenalkan kelas tipe `Monoid` , kita membuat sebuah
 instans `Monoid` untuk `TradeTemplate` (yang disimbolkan dengan `Monoid[TradeTemplate]`).
@@ -5863,30 +5664,17 @@ Namun, kita juga menemukan bahwa perilaku Scalaz tidak sesuai dengan ekspektasi
 kita terhadap `Monoid[Option[A]]`. Perbedaan perilaku semacam ini bukan sebuah
 keluputan dari Scalaz: Seringkali kita akan mendapatkan tipe data yang bisa menerapkan
 kelas tipe mendasar dengan banyak cara, namun tidak berperilaku sesuai dengan yang
-kita inginkan. (lol, help)
-
-Basic examples are `Monoid[Boolean]` (conjunction `&&` vs disjunction `||`) and
-`Monoid[Int]` (multiplication vs addition).
+kita inginkan.
 
 Contoh sederhana atas permasalahan seperti ini adalah `Monoid[Boolean]` (konjungsi `&&`
 dan disjungsi `||`) dan `Monoid[Int]` (perkalian dan penjumlahan).
 
-To implement `Monoid[TradeTemplate]` we found ourselves either breaking
-typeclass coherency, or using a different typeclass.
-
 Untuk menerapkan `Monoid[TradeTemplate]`, kita terpaksa harus merusak harmonisasi
 kelas tipe, atau tinggal menggunakan kelas tipe lain.
-
-`scalaz.Tag` is designed to address the multiple typeclass implementation
-problem without breaking typeclass coherency.
 
 Untuk menyelesaikan masalah yang muncul pada penerapan beberapa kelas tipe pada
 satu kelas, `scalaz.Tag` bisa digunakan tanpa merusak koherensi dari kelas tipe
 yang sudah ada.
-
-The definition is quite contorted, but the syntax to use it is very clean. This
-is how we trick the compiler into allowing us to define an infix type `A @@ T`
-that is erased to `A` at runtime:
 
 Pendefinisian metoda `Tag` memang agak rancu. Namun, sintaks yang  digunakan
 sangat jelas. Beginilah cara kita untuk mengelabuhi kompilator agar kita bisa mendefinisikan
@@ -5916,10 +5704,6 @@ tipe infiks `A && T` yang menghapus penanda tipe menjadi `A` pada saat waktu jal
   }
 ~~~~~~~~
 
-A> i.e. we tag things with Princess Leia hair buns `@@`.
-
-Some useful tags are provided in the `Tags` object
-
 Beberapa label yang bermanfaat yang disediakan pada objek `Tags`
 
 {lang="text"}
@@ -5944,19 +5728,10 @@ Beberapa label yang bermanfaat yang disediakan pada objek `Tags`
   }
 ~~~~~~~~
 
-`First` / `Last` are used to select `Monoid` instances that pick the first or
-last non-zero operand. `Multiplication` is for numeric multiplication instead of
-addition. `Disjunction` / `Conjunction` are to select `&&` or `||`,
-respectively.
-
 `First` / `Last` digunakan untuk memilih instans `Monoid` dengan mengambil
 oeran bukan-nol pertama / terakhir yang ditemui. `Multiplication`, tentu,
 digunakan untuk perkalian numerik, bukan penambahan. `Disjunction` / `Conjunction`
 digunakan untuk memilih `&&` atau `||`.
-
-In our `TradeTemplate`, instead of using `Option[Currency]` we can use
-`Option[Currency] @@ Tags.Last`. Indeed this is so common that we can use the
-built-in alias, `LastOption`
 
 Pada `TradeTemplate`, jauh lebih disukai untuk menggunakan `Option[Currency] @@ Tags.Last`
 bila dibandingkan hanya menggunakan `Option[Currency]` saja. Karena hal semacam ini
@@ -5966,8 +5741,6 @@ sangat jamak dijumpai, maka kita bisa menggunakan alias bawaan, `LastOption`
 ~~~~~~~~
   type LastOption[A] = Option[A] @@ Tags.Last
 ~~~~~~~~
-
-letting us write a much cleaner `Monoid[TradeTemplate]`
 
 yang memperkenankan kita untuk menulis `Monoid[TradeTemplate]` menjadi lebih jelas
 
@@ -5989,24 +5762,12 @@ yang memperkenankan kita untuk menulis `Monoid[TradeTemplate]` menjadi lebih jel
   }
 ~~~~~~~~
 
-To create a raw value of type `LastOption`, we apply `Tag` to an `Option`. Here
-we are calling `Tag(None)`.
-
 Sedangkan bila kita harus membuat sebuah nilai mentah untuk tipe `LastOption`,
 kita bisa menggunakan `Tag` pada sebuah `Option`. Kita akan menyebut hal ini
 sebagai `Tag(None)`.
 
-In the chapter on typeclass derivation, we will go one step further and
-automatically derive the `monoid`.
-
 Pada bab mengenai derivasi kelas tipe, kita akan melangkah lebih lanjut dengan
 melakukan derivasi otomatis atas `monoid`.
-
-It is tempting to use `Tag` to markup data types for some form of validation
-(e.g. `String @@ PersonName`), but this should be avoided because there are no
-checks on the content of the runtime value. `Tag` should only be used for
-typeclass selection purposes. Prefer the `Refined` library, introduced in
-Chapter 4, to constrain values.
 
 Tentu sangat menggiurkan untuk menggunakan `Tag` agar tipe data pada
 validasi borang (mis, `String @@ PersonName`), namun hal ini harus dihindari
@@ -6015,20 +5776,13 @@ hanya boleh digunakan untuk pemilihan kelas tipe saja. Pembaca budiman
 dianjurkan untuk menggunakan pustaka `Refined` yang diperkenalkan pada bab
 4 untuk membatasi nilai.
 
-## Natural Transformations
-
-A function from one type to another is written as `A => B` in Scala, which is
-syntax sugar for a `Function1[A, B]`. Scalaz provides similar syntax sugar `F ~>
-G` for functions over type constructors `F[_]` to `G[_]`.
+## Transformasi Natural
 
 Pada Scala, penulisan sebuah fungsi yang memetakan sebuah tipe ke tipe lainnya
 biasa dituliskan sebagai `A => B`. Penulisan tersebut sendiri merupakan
 pemanis sintaksis untuk `Function[A, B]`. Sedangkan untuk memetakan konstruktor
 tipe `F[_]` ke `G[_]`. Scalaz menyediakan pemanis sintaks yeang mirip dengan
 `A => B` yaitu `F ~> G`.
-
-These `F ~> G` are called *natural transformations* and are *universally
-quantified* because they don't care about the contents of `F[_]`.
 
 `F ~> G` disebut sebagai *transformasi natural* dan *secara umum terkuantifikasi*
 karena sintaks ini tidak menghiraukan isi dari `F_]`.
@@ -6044,9 +5798,6 @@ karena sintaks ini tidak menghiraukan isi dari `F_]`.
   }
 ~~~~~~~~
 
-An example of a natural transformation is a function that converts an `IList`
-into a `List`
-
 Sebagai contoh transformasi natural, mari kita lihat sebuah fungsi yang
 mengubah `IList` menjadi `List`
 
@@ -6060,8 +5811,6 @@ mengubah `IList` menjadi `List`
   res: List[Int] = List(1, 2, 3)
 ~~~~~~~~
 
-Or, more concisely, making use of `kind-projector`'s syntax sugar:
-
 atau yang lebih ringkas,  dengan menggunakan pemanis `kind-projector`:
 
 {lang="text"}
@@ -6070,14 +5819,6 @@ atau yang lebih ringkas,  dengan menggunakan pemanis `kind-projector`:
   
   scala> val convert = Lambda[IList ~> List](_.toList)
 ~~~~~~~~
-
-However, in day-to-day development, it is far more likely that we will use a
-natural transformation to map between algebras. For example, in
-`drone-dynamic-agents` we may want to implement our Google Container Engine
-`Machines` algebra with an off-the-shelf algebra, `BigMachines`. Instead of
-changing all our business logic and tests to use this new `BigMachines`
-interface, we may be able to write a transformation from `Machines ~>
-BigMachines`. We will return to this idea in the chapter on Advanced Monads.
 
 Namun pada tahap pengembangan sehari-hari, sangat mungkin kita menggunakan
 transformasi natural untuk memetakan dari aljabar satu ke aljabar lainnya.
@@ -6092,11 +5833,6 @@ Monad Lanjutan.
 
 ## `Isomorphism`
 
-Sometimes we have two types that are really the same thing, causing
-compatibility problems because the compiler doesn't know what we know. This
-typically happens when we use third party code that is the same as something we
-already have.
-
 Seringkali kita mendapati dua tipe yang benar-benar sama dan mengakibatkan
 masalah kompatibilitas yang dikarenakan kompilator tidak mengetauhi asumsi-
 asumsi yang kita ketahui. Hal ini biasanya terjadi bila kita menggunakan
@@ -6106,9 +5842,9 @@ This is when `Isomorphism` can help us out. An isomorphism defines a formal "is
 equivalent to" relationship between two types. There are three variants, to
 account for types of different shapes:
 
-Masalah sepetri ini bisa diselesaikan dengan `Isomorphism`. Sebuah isomorfisme
+Masalah seperti ini bisa diselesaikan dengan `Isomorphism`. Sebuah isomorfisme
 mendefinisikan secara formal hubungan setara antara dua tipe. Isomorphism
-mempunyai tiga varian berdasarkan bentuk dari tipe: (lol, help)
+mempunyai tiga varian berdasarkan perbedaan bentuk dari tipe:
 
 {lang="text"}
 ~~~~~~~~
@@ -6144,12 +5880,6 @@ mempunyai tiga varian berdasarkan bentuk dari tipe: (lol, help)
   }
 ~~~~~~~~
 
-The type aliases `IsoSet`, `IsoFunctor` and `IsoBifunctor` cover the common
-cases: a regular function, natural transformation and binatural. Convenience
-functions allow us to generate instances from existing functions or natural
-transformations. However, it is often easier to use one of the abstract
-`Template` classes to define an isomorphism. For example:
-
 Tipe alias `IsoSet`, `IsoFunctor`, dan `IsoBifunctor` mencakup hal-hal
 umum: fungsi reguler, transformasi atural, dan  transformasi binatural.
 Fungsi fungsi pembantu mempermudah kita dalam membuat instans dari fungsi
@@ -6166,9 +5896,6 @@ menggunakan abstrak `Template`. Sebagai contoh:
     }
 ~~~~~~~~
 
-If we introduce an isomorphism, we can generate many of the standard
-typeclasses. For example
-
 Bila kita memperkenalkan sebuah isomorfisme, kita juga akan membuat
 banyak instans kelas tipe standar. Sebagai contoh:
 
@@ -6181,11 +5908,6 @@ banyak instans kelas tipe standar. Sebagai contoh:
   }
 ~~~~~~~~
 
-allows us to derive a `Semigroup[F]` for a type `F` if we have an `F <=> G` and
-a `Semigroup[G]`. Almost all the typeclasses in the hierarchy provide an
-isomorphic variant. If we find ourselves copying and pasting a typeclass
-implementation, it is worth considering if `Isomorphism` is the better solution.
-
 memperkenankan kita untuk menderivasi sebuah `Semigroup[F]` untuk tipe `F` bila
 kita mempunyai sebuah `F <=> G` dan `Semigroup[G]`. Hampir semua kelas tipe
 pada hierarki menyediakan varian isomorfik. Bila kita berada pada situasi
@@ -6193,23 +5915,15 @@ salin-tempel saat menulis implementasi kelas tipe, mungkin ada baiknya
 mempertimbangkan `Isomorphism` sebagai solusi yng lebih baik.
 
 
-## Containers
+## Kontainer
 
 
 ### Maybe
 
-We have already encountered Scalaz's improvement over `scala.Option`, called
-`Maybe`. It is an improvement because it is invariant and does not have any
-unsafe methods like `Option.get`, which can throw an exception.
-
 Sebagaimana yang telah kita saksikan, Scalaz menyediakan peningkatan atas
 `scala.Option` dengan konstruk `Maybe`. `Maybe` dianggap sebagai peningkatan
 dikarenakann konstruk ini merupakan sebuah invarian dan tidak mempunyai
-metoda rawan seperti `Option.get`, yang bisa melempar pengecualian. 
-
-It is typically used to represent when a thing may be
-present or not without giving any extra context as to why it may be
-missing.
+metoda rawan seperti `Option.get`, yang bisa melempar pengecualian.
 
 Secara umum, konstruk ini digunakan untuk merepresentasikan keadaan
 dimana sebuah objek bisa ada maupun tidak, tnapa memberikan konteks
@@ -6231,21 +5945,12 @@ kenapa bisa begitu.
   }
 ~~~~~~~~
 
-The `.empty` and `.just` companion methods are preferred to creating
-raw `Empty` or `Just` instances because they return a `Maybe`, helping
-with type inference. This pattern is often referred to as returning a
-*sum type*, which is when we have multiple implementations of a
-`sealed trait` but never use a specific subtype in a method signature.
-
 Metoda pasangan `.empty` dan `just` lebih disukai saat membuat instans
 `Empty` dan `Just` mentah karena kedua metoda tersebut mengembalikan
 sebuha `Maybe` dan membantu mempermudah pendugaan tipe. Pola ini seringkali
 digunakan karena mengembalikan a *sum type* (lol, help). *Sum type* sendiri
 merupakan keadaan dimana kita mempunyai beberapa implementasi sebuah
 `sealed trait` namun tidak menggunakan sub-tipe khusus pada sebuah penanda tipe.
-
-A convenient `implicit class` allows us to call `.just` on any value
-and receive a `Maybe`
 
 Kita juga bisa tinggal memanggil `.just` pada semua nilai dan mendapatkan sebuah
 `Maybe`. Hal ini dikarenakan kelas pembantu `implicit class`
@@ -6257,8 +5962,6 @@ Kita juga bisa tinggal memanggil `.just` pada semua nilai dan mendapatkan sebuah
   }
 ~~~~~~~~
 
-`Maybe` has a typeclass instance for all the things
-
 `Maybe` mempunyai instans kelas tipe untuk
 
 -   `Align`
@@ -6268,15 +5971,10 @@ Kita juga bisa tinggal memanggil `.just` pada semua nilai dan mendapatkan sebuah
 -   `Cozip` / `Zip` / `Unzip`
 -   `Optional`
 
-and delegate instances depending on `A`
-
 dan mendelegasi instans yang bergantung pada `A`
 
 -   `Monoid` / `Band`
 -   `Equal` / `Order` / `Show`
-
-In addition to the above, `Maybe` has functionality that is not supported by a
-polymorphic typeclass.
 
 Sebagai tambahan untuk kelas tipe di atas, `Maybe` juga mempunyai
 beberapa fungsionalitas yang tidak didukung oleh kelas tipe polimorfis.
@@ -6303,27 +6001,15 @@ beberapa fungsionalitas yang tidak didukung oleh kelas tipe polimorfis.
   }
 ~~~~~~~~
 
-`.cata` is a terser alternative to `.map(f).getOrElse(b)` and has the
-simpler form `|` if the map is `identity` (i.e. just `.getOrElse`).
-
 `.cata` merupakan bentuk singkat dari `.map(f).getOrElse(b)` dan bahkan
 mempunyai bentuk yang lebih sederhana dalam bentuk `|` bila map berupa
 sebuah `identity` (mis, hanya `.getOrElse`).
-
-`.toLeft` and `.toRight`, and their symbolic aliases, create a disjunction
-(explained in the next section) by taking a fallback for the `Empty` case.
 
 `.toLeft` dan `toRight`, dan alias simbolis mereka, membuat sebuah disjungsi
 (yang akan dijelaskan pada bagian selanjutnya) dengan menerima sebuah
 penadah untuk kasus `Empty`.
 
-`.orZero` takes a `Monoid` to define the default value.
-
 `.orZero` menerima sebuah `Monoid` untuk mendefinisikan nilai bawaan.
-
-`.orEmpty` uses an `ApplicativePlus` to create a single element or
-empty container, not forgetting that we already get support for stdlib
-collections from the `Foldable` instance's `.to` method.
 
 `orEmpty` menggunakan `ApplicativePlus` untuk membuat sebuah elemen atau
 kontainer kosong, tanpa melupakan bahwa kita sudah mempunyai dukungan
@@ -6347,23 +6033,11 @@ untuk pustaka koleksi standar dari metoda `.to` dari instans `Foldable`.
   res: List[Int] = List(1)
 ~~~~~~~~
 
-A> Methods are defined in OOP style on `Maybe`, contrary to our Chapter 4
-A> lesson to use an `object` or `implicit class`. This is a common theme
-A> in Scalaz and the reason is largely historical:
-A>
 A> Metoda pada `Maybe` didefinisikan dengan menggunakan gaya OOP, walaupun
 A> berlawanan dengan apa yang telah dipelajari pada bab 4 untuk menggunakan
 A> `object` atau `implicit class`. Hal ini merupakan hal yang biasa pada
 A> Scalaz dan mempunyai alasan historis:
 A> 
-A> -   text editors failed to find extension methods, but this now works
-A>     seamlessly in IntelliJ, ENSIME and ScalaIDE.
-A> -   there are corner cases where the compiler would fail to infer the
-A>     types and not be able to find the extension method.
-A> -   the stdlib defines some `implicit class` instances that add methods
-A>     to all values, with conflicting method names. `+` is the most
-A>     prominent example, turning everything into a concatenated `String`.
-A>
 A> -   penyunting teks gagal menemukan metoda ekstensi, walaupun saat ini
 A>     IntelliJ, ENSIME, dan ScalaIDE mendukung penuh.
 A> -   ada beberapa kasus sudut (lol) dimana kompilator gagal menerka
@@ -6373,10 +6047,6 @@ A>     yang menambah metoda ke semua nilai, termasuk dengan metoda dengan
 A>     nama yang bertabrakan. Contoh paling nyata adalah metoda `+`.
 A>     Metoda ini mengubah semua menjadi `String` yang disambung.
 A> 
-A> The same is true for functionality that is provided by typeclass
-A> instances, such as these methods which are otherwise provided by
-A> `Optional`
-A>
 A> Hal yang sama juga berlaku untuk fungsionalitas yang disediakan oleh
 A> instans kelas tipe, seperti metoda berikut yang bila tidak ada, akan
 A> disediakan oleh `Optional`
@@ -6388,18 +6058,12 @@ A>     def getOrElse(a: =>A): A = ...
 A>     ...
 A>   }
 A> ~~~~~~~~
-A> 
-A> However, recent versions of Scala have addressed many bugs and we are
-A> now less likely to encounter problems.
 A>
 A> Namun, versi Scala baru-baru ini sudah menangani banyak kutu dan kita
 A> mungkin semakin jaran menemui masalah semacam ini.
 
 
 ### Either
-
-Scalaz's improvement over `scala.Either` is symbolic, but it is common
-to speak about it as *either* or `Disjunction`
 
 Untuk perbaikan yang diberikan oleh Scalaz terhadap `scala.Either`,
 walaupun hanya dalam bentuk simbol operator, adalah hal yang jamak untuk
@@ -6422,8 +6086,6 @@ menyebut operator tersebut sebagai *antara* (*either*)atau `Disjunction`.
   }
 ~~~~~~~~
 
-with corresponding syntax
-
 dengan sintaks
 
 {lang="text"}
@@ -6433,11 +6095,6 @@ dengan sintaks
     final def right[B]: (B \/ A) = \/-(self)
   }
 ~~~~~~~~
-
-allowing for easy construction of values. Note that the extension
-method takes the type of the *other side*. So if we wish to create a
-`String \/ Int` and we have an `Int`, we must pass `String` when
-calling `.right`
 
 Harap diperhatikan, metoda ekstensi di atas menerima tipe untuk
 *sisi yang berseberangan*. Jadi, bila kita ingin membuat sebuah
@@ -6454,18 +6111,11 @@ Harap diperhatikan, metoda ekstensi di atas menerima tipe untuk
   res: String \/ Int = -\/(hello)
 ~~~~~~~~
 
-The symbolic nature of `\/` makes it read well in type signatures when
-shown infix. Note that symbolic types in Scala associate from the left
-and nested `\/` must have parentheses, e.g. `(A \/ (B \/ (C \/ D))`.
-
 Sifat simbolis dari `\/`-lah yang mempermudah pembacaan kontainer ini
 pada penanda tipe. Harap diperhatikan bahwa tipe simbolis pada Scala
 selalu diasosiasikan dari kiri. Ditambah lagi bila kita ingin menggunakan
 `\/` berlapis, kita harus menggunakan tanda kurung. Sebagai contoh,
 `(A \/ (B \/ (C \/ D)))`. 
-
-`\/` has right-biased (i.e. `flatMap` applies to `\/-`) typeclass
-instances for:
 
 `\/` mempunyai kecenderungan untuk memilih bagian kanan (mis, `flatMap`
 juga berlaku pada `\/-`) untuk instans kelas tipe:
@@ -6476,14 +6126,10 @@ juga berlaku pada `\/-`) untuk instans kelas tipe:
 -   `Optional`
 -   `Cozip`
 
-and depending on the contents
-
 dan bergantung pada konten
 
 -   `Equal` / `Order`
 -   `Semigroup` / `Monoid` / `Band`
-
-In addition, there are custom methods
 
 Sebagai tambahan, ada beberapa metoda khususs
 
@@ -6515,41 +6161,24 @@ Sebagai tambahan, ada beberapa metoda khususs
   }
 ~~~~~~~~
 
-`.fold` is similar to `Maybe.cata` and requires that both the left and
-right sides are mapped to the same type.
-
 `.fold` mirip dengan `Maybe.cata` dan mengharuskan kedua sisi dipetakan
 ke tipe yang sama.
 
-`.swap` swaps a left into a right and a right into a left.
-
 `.swap` menukar sisi kiri ke kanan dan sebaliknya.
-
-The `|` alias to `getOrElse` appears similarly to `Maybe`. We also get
-`|||` as an alias to `orElse`.
 
 `|` yang merupakan alias dari `getOrElse` terlihat mirip dengan `Maybe`.
 Kita juga bisa menggunakan `|||` sebagai alias untuk `orElse`.
 
-`+++` is for combining disjunctions with lefts taking preference over
-right:
-
 `+++` merupakan penggabungan disjungsi dengan kecenderungan untuk memilih
 bagian kiri:
 
--   `right(v1) +++ right(v2)` gives `right(v1 |+| v2)`
--   `right(v1) +++ left (v2)` gives `left (v2)`
--   `left (v1) +++ right(v2)` gives `left (v1)`
--   `left (v1) +++ left (v2)` gives `left (v1 |+| v2)`
-
-`.toEither` is provided for backwards compatibility with the Scala
-stdlib.
+-   `right(v1) +++ right(v2)` menghasilkan `right(v1 |+| v2)`
+-   `right(v1) +++ left (v2)` menghasilkan `left (v2)`
+-   `left (v1) +++ right(v2)` menghasilkan `left (v1)`
+-   `left (v1) +++ left (v2)` menghasilkan `left (v1 |+| v2)`
 
 `.toEither` disediakan untuk kompatibilitas terbalik dengan pustaka
 standar Scala.
-
-The combination of `:?>>` and `<<?:` allow for a convenient syntax to
-ignore the contents of an `\/`, but pick a default based on its type
 
 Untuk kombinasi dari `:?>>` dan `<<?:` memperkenankan kita untuk
 menghiraukan isi dari sebuah `\/`, namun berdasarkan tipe dari isinya. 
@@ -6565,9 +6194,6 @@ menghiraukan isi dari sebuah `\/`, namun berdasarkan tipe dari isinya.
 
 
 ### Validation
-
-At first sight, `Validation` (aliased with `\?/`, *happy Elvis*)
-appears to be a clone of `Disjunction`:
 
 Secara sekilas, `Validation` yang mempunyai alias dengan `\?/,
 terlihat seperti salinan dari `Disjunction`:
@@ -6594,8 +6220,6 @@ terlihat seperti salinan dari `Disjunction`:
   }
 ~~~~~~~~
 
-With convenient syntax
-
 Dengan sintaks
 
 {lang="text"}
@@ -6608,10 +6232,6 @@ Dengan sintaks
   }
 ~~~~~~~~
 
-However, the data structure itself is not the complete story.
-`Validation` intentionally does not have an instance of any `Monad`,
-restricting itself to success-biased versions of:
-
 Namun, struktur data tersebut tidak mewakili cerita yang melatar-
 belakanginya. `Validation` memang dimaksudkan untuk tidak memiliki
 instans dari `Monad` dan membatasi dirinya berdasarkan versi
@@ -6623,19 +6243,11 @@ yang diharapkan dari:
 -   `Plus`
 -   `Optional`
 
-and depending on the contents
-
 dan berdasarkan konten
 
 -   `Equal` / `Order`
 -   `Show`
 -   `Semigroup` / `Monoid`
-
-The big advantage of restricting to `Applicative` is that `Validation`
-is explicitly for situations where we wish to report all failures,
-whereas `Disjunction` is used to stop at the first failure. To
-accommodate failure accumulation, a popular form of `Validation` is
-`ValidationNel`, having a `NonEmptyList[E]` in the failure position.
 
 Keuntungan utama atas pembatasann yang hanya sampai pada `Applicative`
 adalah pada saat kita membutuhkan semua galat dilaporkan, `Validation`
@@ -6643,9 +6255,6 @@ akan menerima semua galat tersebut. Berbeda dengan `Disjunction`  yang
 berhenti dieksekusi pada saat galat pertama terjadi. Untuk mengakomodasi
 akumulusai galat, bentuk paling umum yang ditemui dari `Validation` adalah
 `ValidationNel` yang mempunyai `NonEmptyList[E]` pada posisi galat.
-
-Consider performing input validation of data provided by a user using
-`Disjunction` and `flatMap`:
 
 Misalkan saat pembaca yang budiman sedang melakukan validasi terhadap
 data yang diberikan oleh pengguna menggunakan `Disjunction` dan `flatMap`:
@@ -6673,8 +6282,6 @@ data yang diberikan oleh pengguna menggunakan `Disjunction` dan `flatMap`:
   res = -\/(username contains spaces)
 ~~~~~~~~
 
-If we use `|@|` syntax
-
 Bila kita menggunakan `|@|`
 
 {lang="text"}
@@ -6682,11 +6289,6 @@ Bila kita menggunakan `|@|`
   scala> (username("sam halliday") |@| realname("")) (Credentials.apply)
   res = -\/(username contains spaces)
 ~~~~~~~~
-
-we still get back the first failure. This is because `Disjunction` is
-a `Monad`, its `.applyX` methods must be consistent with `.flatMap`
-and not assume that any operations can be performed out of order.
-Compare to:
 
 Kita akan tetap mendapat galat pertama saja. Hal ini disebabkan oleh
 kelas tipe dari `Disjunction` yang juga mempunyai instans `Monad`.
@@ -6709,12 +6311,7 @@ bahwa semua operasi bisa dijalankan secara bebas. Bandingkan dengan:
   res = Failure(NonEmpty[username contains spaces,empty real name])
 ~~~~~~~~
 
-This time, we get back all the failures!
-
 Sekarang, kita bakal mendapat semua galat yang terjadi. 
-
-`Validation` has many of the same methods as `Disjunction`, such as
-`.fold`, `.swap` and `+++`, plus some extra:
 
 `Validation` punya beberapa metoda yang mirip dengan yang dipunyai
 oleh `Disjunction` seperti, `.fold`, `.swap`, `+++`, dan beberapa tambahan:
@@ -6729,32 +6326,18 @@ oleh `Disjunction` seperti, `.fold`, `.swap`, `+++`, dan beberapa tambahan:
   }
 ~~~~~~~~
 
-`.append` (aliased by `+|+`) has the same type signature as `+++` but
-prefers the `success` case
-
 `.append` (dengan alias `+|+`) mempunyai penanda tipe yang sama dengan `+++`
 namun lebih memilih hasil yang `success`
 
--   `failure(v1) +|+ failure(v2)` gives `failure(v1 |+| v2)`
--   `failure(v1) +|+ success(v2)` gives `success(v2)`
--   `success(v1) +|+ failure(v2)` gives `success(v1)`
--   `success(v1) +|+ success(v2)` gives `success(v1 |+| v2)`
-
-A> `+|+` the surprised c3p0 operator.
-
-`.disjunction` converts a `Validated[A, B]` into an `A \/ B`.
-Disjunction has the mirror `.validation` and `.validationNel` to
-convert into `Validation`, allowing for easy conversion between
-sequential and parallel failure accumulation.
+-   `failure(v1) +|+ failure(v2)` menghasilkan `failure(v1 |+| v2)`
+-   `failure(v1) +|+ success(v2)` menghasilkan `success(v2)`
+-   `success(v1) +|+ failure(v2)` menghasilkan `success(v1)`
+-   `success(v1) +|+ success(v2)` menghasilkan `success(v1 |+| v2)`
 
 `.disjunction` mengubah sebuah `Validated[A, B]` menjadi `A \/ B`.
 `Disjunction` mencerminkan `.validation` dan `.validationNel` dan
 mengubahnya menjadi `Validation`. Sehingga hal ini mempermudah
 konversi dari akumulasi galat berurutan dan paralel.
-
-`\/` and `Validation` are the more performant FP equivalent of a checked
-exception for input validation, avoiding both a stacktrace and requiring the
-caller to deal with the failure resulting in more robust systems.
 
 `\/` dan `Validation` merupakan solusi dari pemrograman fungsional yang
 setara dengan pemeriksaan pengecualian untuk validasi input.
@@ -6763,24 +6346,12 @@ tidak menggunakan *stacktrace* dan tanpa memaksa metoda pemanggil untuk
 berurusan dengan galat. Hal semacam ini menghasilkan sistem yang lebih
 kokoh. 
 
-A> One of the slowest things on the JVM is to create an exception, due to the
-A> resources required to construct the stacktrace. It is traditional to use
-A> exceptions for input validation and parsing, which can be thousands of times
-A> slower than the equivalent functions written with `\/` or `Validation`.
-A>
 A> Salah satu hal yang paling pelan pada JVM adalah pembuatan sebuah pengecualian.
 A> Penyebab dari kelambanan ini adalah alokasi sumber daya yang dibutuhkan untuk
 A> membuat *stacktrace*. Yang jamak dilakukan saat melakukan validasi input dan
 A> penguraian adalah penggunaan eksepsi, walau eksepsi tersebut memakan waktu
-A> yang jauh lebih banyak bila dibandingkan dengan menggunakan `\/` atau `Validation`.  
+A> yang jauh lebih banyak bila dibandingkan dengan menggunakan `\/` atau `Validation`.
 A> 
-A> Some people claim that predictable exceptions for input validation are
-A> referentially transparent because they will occur every time. However, the
-A> stacktrace inside the exception depends on the call chain, giving a different
-A> value depending on who calls it, thus breaking referential transparency.
-A> Regardless, throwing an exception is not pure because it means the function is
-A> not *Total*.
-A>
 A> Beberapa pihak meng-klaim bahwa eksepsi terduga untuk validasi input
 A> adalah transparan secara rujukan. Alasan yang pihak tersebut gunakan adalah
 A> eksepsi tersebut pasti akan muncul bila situasi sesuai dengan yang kita
@@ -6788,14 +6359,11 @@ A> definisikan. Namun, *stacktrace* yang ada pada pengecualian bergantung pada
 A> rantai panggilan metoda. Hal ini menyebabkan nilai *stacktrace* akan berbeda
 A> tergantung pada siapa yang memanggil eksepsi tersebut. Dan pada akhirnya,
 A> eksepsi mengaburkan transparansi rujukan.
-A> Bagaimanapun juga, melempar sebuah eksepsi dianggap tidak *pure* (lol) karena
+A> Bagaimanapun juga, melempar sebuah eksepsi dianggap tidak murni karena
 A> fungsi tersebut tidak *Total*.
 
 
 ### These
-
-We encountered `These`, a data encoding of inclusive logical `OR`,
-when we learnt about `Align`.
 
 Seperti yang telah kita temui pada bab sebelumnya mengenai `Align`,
 `These` berbicara mengenai penyandian data dengan logika inklusif atau
@@ -6815,8 +6383,6 @@ yang disebut juga `OR`.
   }
 ~~~~~~~~
 
-with convenient construction syntax
-
 dengan sintaks konstruktor
 
 {lang="text"}
@@ -6830,8 +6396,6 @@ dengan sintaks konstruktor
   }
 ~~~~~~~~
 
-`These` has typeclass instances for
-
 `These` mempunyai instans kelas tipe untuk
 
 -   `Monad`
@@ -6839,16 +6403,11 @@ dengan sintaks konstruktor
 -   `Traverse`
 -   `Cobind`
 
-and depending on contents
-
 dan bergantung dengan konten
 
 -   `Semigroup` / `Monoid` / `Band`
 -   `Equal` / `Order`
 -   `Show`
-
-`These` (`\&/`) has many of the methods we have come to expect of
-`Disjunction` (`\/`) and `Validation` (`\?/`)
 
 `These` (`\&/`) mempunyai banyak metoda yang setara dengan metoda
 dari `Disjunction` (`\/`) dan `Validation` (`\?/`)
@@ -6866,19 +6425,9 @@ dari `Disjunction` (`\/`) dan `Validation` (`\?/`)
   }
 ~~~~~~~~
 
-`.append` has 9 possible arrangements and data is never thrown away
-because cases of `This` and `That` can always be converted into a
-`Both`.
-
 `.append` mempunyai 9 cara penyusunan yang mungkin dibuat dan data tidak
 pernah dibuang dikarenakan `This` dan `That` selalu bisa dikonversi menjadi
 `Both`.  
-
-`.flatMap` is right-biased (`Both` and `That`), taking a `Semigroup`
-of the left content (`This`) to combine rather than break early. `&&&`
-is a convenient way of binding over two of *these*, creating a tuple
-on the right and dropping data if it is not present in each of
-*these*.
 
 `.flatMap` merupakan metoda yang cenderung memilih parameter sebelah kanan.
 `.flatMap` menerima sebuah `Semigroup` pada konten bagian kiri (`This`)
@@ -6886,12 +6435,6 @@ untuk digabungkan, bukan meng-arus-pendekkannya. `&&&` dapat digunakan
 untuk menggabungkan dua `These` dan membuat sebuah tuple di bagian kanan
 dan memmbuang data yang bersangkutan bila data tersebut tidak ada pada
 kedua sisi `These`.
-
-Although it is tempting to use `\&/` in return types, overuse is an
-anti-pattern. The main reason to use `\&/` is to combine or split
-potentially infinite *streams* of data in finite memory. Convenient
-functions exist on the companion to deal with `EphemeralStream`
-(aliased here to fit in a single line) or anything with a `MonadPlus`
 
 Walaupun merupakan hal yang menggiurkan untuk menggunakan `\&/` pada
 tipe kembalian, penggunaan berlebihan merupakan salah satu *anti-pattern*.
@@ -6922,9 +6465,6 @@ dengan `EphemeralStream` atau apapun dengan sebuah `MonadPlus`.
 
 ### Higher Kinded Either
 
-The `Coproduct` data type (not to be confused with the more general concept of a
-*coproduct* in an ADT) wraps `Disjunction` for type constructors:
-
 Tipe data `Coproduct` (berbeda dengan konsep umum ko-produk pada sebuah ADT)
 membungkus `Disjunction` untuk konstruktor tipe:
 
@@ -6938,28 +6478,17 @@ membungkus `Disjunction` untuk konstruktor tipe:
   }
 ~~~~~~~~
 
-Typeclass instances simply delegate to those of the `F[_]` and `G[_]`.
-
 Instans kelas tipe diserahkan ke fungtor `F[_]` dan `G[_]`. 
-
-The most popular use case for `Coproduct` is when we want to create an anonymous
-coproduct for a GADT.
 
 Penggunaan `Coproduct` yang paling jamak dijumpai adalah saat kita ingin
 membuat sebuah ko-produk anonimus untuk sebuah GADT.
 
 
-### Not So Eager
-
-Built-in Scala tuples, and basic data types like `Maybe` and
-`Disjunction` are eagerly-evaluated value types.
+### Jangan Terburu-Buru
 
 Tipe data tuple bawaan dari pustaka standar Scala dan tipe data sederhana
 seperti `Maybe` dan `Disjunction` merupakan tipe dengan nilai yang selalu
 dievaluasi secara tegas.
-
-For convenience, *by-name* alternatives to `Name` are provided, having
-the expected typeclass instances:
 
 Untuk memudahkan pemakaian, alternatif *by-name* untuk `Name` juga disediakan
 beserta beberapa instans kelas tipe:
@@ -6987,18 +6516,11 @@ beserta beberapa instans kelas tipe:
   private case class LazyRight[A, B](b: () => B) extends LazyEither[A, B]
 ~~~~~~~~
 
-The astute reader will note that `Lazy*` is a misnomer, and these data
-types should perhaps be: `ByNameTupleX`, `ByNameOption` and
-`ByNameEither`.
-
 Pembaca yang teliti akan memperhatikan bahwa `Lazy*` merupakan salah kaprah
 dan tipe data ini seharusnya `ByNameTupleX`, `ByNameOption`, and `ByNameEither`.
 
 
 ### Const
-
-`Const`, for *constant*, is a wrapper for a value of type `A`, along with a
-spare type parameter `B`.
 
 `Const`, untuk konstan, merupakan pelapis untuk nilai dari tipe `A`, beserta
 sebuah tipe parameter cadangan `B`.
@@ -7007,9 +6529,6 @@ sebuah tipe parameter cadangan `B`.
 ~~~~~~~~
   final case class Const[A, B](getConst: A)
 ~~~~~~~~
-
-`Const` provides an instance of `Applicative[Const[A, ?]]` if there is a
-`Monoid[A]` available:
 
 `Const` menyediakan sebuah instans dari `Applicative[Const[A, ?]]` bila
 `Monoid[A]` tersedia:
@@ -7025,17 +6544,9 @@ sebuah tipe parameter cadangan `B`.
     }
 ~~~~~~~~
 
-The most important thing about this `Applicative` is that it ignores the `B`
-parameters, continuing on without failing and only combining the constant values
-that it encounters.
-
 Yang menjadi esensi dari `Applicative` ini adalah `Applicative` tersebut
 menghiraukan parameter `B` dan melanjutkan eksekusi dengan lancar dan
 hanya mengkombinasikan nilai konstan yang ditemu.
-
-Going back to our example application `drone-dynamic-agents`, we should first
-refactor our `logic.scala` file to use `Applicative` instead of `Monad`. We
-wrote `logic.scala` before we learnt about `Applicative` and now we know better:
 
 Kembali ke contoh aplikasi `drone-dynamic-agents`, kita harus me-*refaktor*
 berkas `logic.scala` terlebih dahulu agar menggunakan `Applicative`.
@@ -7065,10 +6576,6 @@ yang lebih sesuai untuk konteks permasalahan ini.
   }
 ~~~~~~~~
 
-Since our business logic only requires an `Applicative`, we can write mock
-implementations with `F[a]` as `Const[String, a]`. In each case, we return the
-name of the function that is called:
-
 Karena logika bisnis kita hanya membutuhkan sebuah `Applicative`, kita bisa
 menulis tiruan implementasi `F[a]` dengan `Const[String, a]`. Pada setiap
 kasus, kita mengembalikan nama dari fungsi yang dipanggil.
@@ -7095,9 +6602,6 @@ kasus, kita mengembalikan nama dari fungsi yang dipanggil.
   }
 ~~~~~~~~
 
-With this interpretation of our program, we can assert on the methods that are
-called:
-
 Dengan interpretasi program kita semacam ini, kita dapat memastikan pada
 metoda-metoda yang ada bahwa ada (lol, wat?)
 
@@ -7113,28 +6617,14 @@ metoda-metoda yang ada bahwa ada (lol, wat?)
   }
 ~~~~~~~~
 
-Alternatively, we could have counted total method calls by using `Const[Int, ?]`
-or an `IMap[String, Int]`.
-
 Bisa juga kita menghitung jumlah pemanggilan metoda secara keseluruhan
 dengan menggunakan `Const[Int, ?]` atau `IMap[String, Int]`. 
-
-With this test, we've gone beyond traditional *Mock* testing with a `Const` test
-that asserts on *what is called* without having to provide implementations. This
-is useful if our specification demands that we make certain calls for certain
-input, e.g. for accounting purposes. Furthermore, we've achieved this with
-compiletime safety.
 
 Dengan tes semacam ini, kita sudah jauh melampau tes tiruan tradisional
 dengan menggunakan test `Const` yang memeriksa apa yang dites tanpa harus
 menyediakan implementasi. Hal semacam ini berguna bila spesifikasi kita
 mengharuskan untuk menerima input untuk panggilan-panggilan tertentu.
 Terlebih lagi, kita mencapai hasil ini dengan keamanan waktu kompilasi.
-
-Taking this line of thinking a little further, say we want to monitor (in
-production) the nodes that we are stopping in `act`. We can create
-implementations of `Drone` and `Machines` with `Const`, calling it from our
-wrapped version of `act`
 
 Melanjutkan penggunaan pola pikir semacam ini sedikit lebih jauh, misal
 kita ingin memonitor node yang kita hentikan pada `act`. Kita bisa
@@ -7165,15 +6655,8 @@ dari metoda `act`
   }
 ~~~~~~~~
 
-We can do this because `monitor` is *pure* and running it produces no side
-effects.
-
 Kita bisa melakukan hal semacam ini karena `monitor` merupakan metoda
-*pure* (lol, help) yang berjalan tanpa menghasilkan efek samping.
-
-This runs the program with `ConstImpl`, extracting all the calls to
-`Machines.stop`, then returning it alongside the `WorldView`. We can unit test
-this:
+murni yang berjalan tanpa menghasilkan efek samping.
 
 Potongan kode ini menjalankan program dengan `ConstImpl` yang dilanjutkan
 dengan mengekstrak semua pemanggilan ke `Machines.stop` dan pada akhirnya
@@ -7193,29 +6676,15 @@ mengembalikan bersama `WorldView`. Kita bisa mengetesnya dengan:
   }
 ~~~~~~~~
 
-We have used `Const` to do something that looks like *Aspect Oriented
-Programming*, once popular in Java. We built on top of our business logic to
-support a monitoring concern, without having to complicate the business logic.
-
 Kita sudah menggunakan `Const` untuk melakukan apa yang terlihat seperti
 Pemrograman Berorientasi Aspek, yang dulu pernah populer di Java. Kita
 membangun logika bisnis kita untuk mendukung pemantauan tanpa harus
 mengaburkan logika bisnis.
 
-It gets even better. We can run `ConstImpl` in production to gather what we want
-to `stop`, and then provide an **optimised** implementation of `act` that can make
-use of implementation-specific batched calls.
-
 Dan menariknya, kita dapat menjalankan `ConstImpl` pada lingkungan produksi
 untuk mengumpulkan apa yang ingin kita `stop` dan menyediakan implementasi
 teroptimis dari `act` yang bisa menggunakan kelompok panggilan implementasi
 khusus.
-
-The silent hero of this story is `Applicative`. `Const` lets us show off what is
-possible. If we need to change our program to require a `Monad`, we can no
-longer use `Const` and must write full mocks to be able to assert on what is
-called under certain inputs. The *Rule of Least Power* demands that we use
-`Applicative` instead of `Monad` wherever we can.
 
 Namun, pahlawan tanpa tanda jasa dari cerita ini adalah `Applicative`.
 `Const` memperkenankan kita untuk menunjukkan apa yang bisa kita lakukan.
@@ -7226,12 +6695,7 @@ menyeluruh untuk dapat memastikan apa yang dipanggil pada input tertentu.
 dibandingkan `Monad` bila memungkinkan.
 
 
-## Collections
-
-Unlike the stdlib Collections API, the Scalaz approach describes collection
-behaviours in the typeclass hierarchy, e.g. `Foldable`, `Traverse`, `Monoid`.
-What remains to be studied are the implementations in terms of data structures,
-which have different performance characteristics and niche methods.
+## Koleksi
 
 Berbeda halnya dengan APA Koleksi dari pustaka standar, pendekatan Scalaz
 atas perilaku koleksi dideskripsikan dengan hierarki kelas tipe, misalkan
@@ -7242,10 +6706,6 @@ cukup berbeda dan metoda relung.
 This section goes into the implementation details for each data type. It is not
 essential to remember everything presented here: the goal is to gain a high
 level understanding of how each data structure works.
-
-Bagian ini akan membahas mengenai detail implementasi untuk tiap tipe data.
-Tujuan utama dari bagian ini adalah mendapatkan pemahaman umum tentang
-cara kerja dari tiap struktur data.
 
 Because all the collection data types provide more or less the same list of
 typeclass instances, we shall avoid repeating the list, which is often some
@@ -7264,25 +6724,18 @@ atas variasi dari:
 -   `Equal` / `Order`
 -   `Show`
 
-Data structures that are provably non-empty are able to provide
-
 Struktur data yang sudah terbukti tidak kosong akan menyediakan
 
 -   `Traverse1` / `Foldable1`
 
-and provide `Semigroup` instead of `Monoid`, `Plus` instead of `IsEmpty`.
-
 Dan menyediakan `Semigroup`, bukan `Monooid`, dan `Plus`, bukan `IsEmpty`.
 
 
-### Lists
-
-We have used `IList[A]` and `NonEmptyList[A]` so many times by now that they
-should be familiar. They codify a classic linked list data structure:
+### Senarai
 
 Kita sudah menggunakan `IList[A]` dan `NonEmptyList[A]` berulang kali
 sehingga akan terasa familiar. Kedua struktur data tersebut mengkodifikasikan
-struktur data klasik daftar tertaut:
+struktur data klasik senarai berantai:
 
 {lang="text"}
 ~~~~~~~~
@@ -7303,7 +6756,6 @@ struktur data klasik daftar tertaut:
   }
 ~~~~~~~~
 
-A> The source code for Scalaz 7.3 reveals that `INil` is implemented as
 A> Pada kode sumber Scalaz 7.3, `INil` diimplementasikan dengan
 A> 
 A> {lang="text"}
@@ -7314,35 +6766,18 @@ A>     private[this] val value: INil[Nothing] = new INil[Nothing]{}
 A>     def apply[A](): IList[A] = value.asInstanceOf[IList[A]]
 A>   }
 A> ~~~~~~~~
-A> 
-A> which exploits JVM implementation details to avoid an object allocation when
-A> creating an `INil`.
 A>
 A> yang menggunakan detail implementasi JVM untuk menghindari alokasi objek pada
 A> saat membuat sebuah `INil`.
 A> 
-A> This optimisation is manually applied to all zero-parameter classes. Indeed,
-A> Scalaz is full of many optimisations of this nature: debated and accepted only
-A> when presented with evidence of a significant performance boost and no risk of a
-A> semantic change.
-A>
 A> Optimisasi semacam ini ditulis secara manual pada semua kelas tanpa parameter.
 A> Dan memang, Scalaz dipenuhi dengan optimisasi semacam ini setelah didiskusikan
 A> dan ditunjukkan bahwa terdapat peningkatan perfroma yang signifikan dan
 A> tanpa memperkenalkan perubahan semantik.
 
-The main advantage of `IList` over stdlib `List` is that there are no
-unsafe methods, like `.head` which throws an exception on an empty
-list.
-
 Keuntungan utama dari `IList` atas `List` milik pustaka standar adalah
 tidak adanya metoda yang tidak aman seperti `.head` yang melempar eksepsi
-pada sebuah daftar kosong.
-
-In addition, `IList` is a **lot** simpler, having no hierarchy and a
-much smaller bytecode footprint. Furthermore, the stdlib `List` has a
-terrifying implementation that uses `var` to workaround performance
-problems in the stdlib collection design:
+pada sebuah senarai kosong.
 
 Sebagai tambahan, `IList` jauh lebih sederhana, tanpa hierarki dan mempunyai
 jejak bytecode yang jauh lebih kecil. Terlebih lagi, `List` pustaka standar
@@ -7365,35 +6800,20 @@ mengakali masalah performa pada desain koleksi pustaka standar:
   ) extends List[B] { ... }
 ~~~~~~~~
 
-`List` creation requires careful, and slow, `Thread` synchronisation
-to ensure safe publishing. `IList` requires no such hacks and can
-therefore outperform `List`.
-
 Pembuatan `List` membutuhkan sinkronisasi `Thread` yang hati hati dan pelan
 untuk memastikan keamanan. `IList` tidak membutuhkan *hack* (lol, lupa)
 semacam itu sehingga mempunyai performa yang lebih bagus bila dibandingkan
 `List`.
 
-A> Isn't `NonEmptyList` just the same as `ICons`? Yes, at a data structure level.
-A> But the difference is that `ICons` is part of the `IList` ADT whereas
-A> `NonEmptyList` is outside it. Typeclass instances should always be provided at
-A> the level of an ADT, not for each entry, to avoid complexity.
-A>
 A> Bukannya `NonEmptyList` sama halnya dengan `ICons`? Ya, pada tingkat struktur
-A> data. Namun yang membedakan adalah `ICons` merupakan ADT dari `IList` sedangkan
+A> data. Namun yang membedakan adalah `ICons` merupakan TDA dari `IList` sedangkan
 A> `NonEmptyList` tidak. Instans kelas tipe harus selalu disediakan pada tingkat
 A> ADT untuk menghindari kerumitan yang tidak perlu.
 
 
 ### `EphemeralStream`
 
-The stdlib `Stream` is a lazy version of `List`, but is riddled with
-memory leaks and unsafe methods. `EphemeralStream` does not keep
-references to computed values, helping to alleviate the memory
-retention problem, and removing unsafe methods in the same spirit as
-`IList`.
-
-Struktur data `Stream` dari pustaka standar merupakan bentuk lundung (lol, lupa)
+Struktur data `Stream` dari pustaka standar merupakan bentuk lundung
 dari `List`, namun implementasinya dipenuhi dengan kebocoran memori dan metoda
 tak aman. Untuk menghilangkan masalah semacam ini, `EphemerealStream` tidak
 menyimpan rujukan pada nilai yang telah dikomputasi. Selain itu, sama halnya
@@ -7428,20 +6848,9 @@ penggunaan metoda-metoda tidak aman.
   }
 ~~~~~~~~
 
-A> The use of the word *stream* for a data structure of this nature comes down to
-A> legacy. *Stream* is now used by marketing departments alongside the ✨ *Reactive
-A> Manifesto* ✨ and implementing frameworks like Akka Streams.
-A>
 A> Penggunaan kata *stream* pada struktur data semacam ini merupakan sisa-sisa
 A> peninggalan masa lalu. *Stream* sekarang digunakan oleh bagian pemasaran
 A> dan ✨ *Reactive Manifesto* ✨ beserta pembuatan *framework* seperti Akka Stream.
-
-`.cons`, `.unfold` and `.iterate` are mechanisms for creating streams, and the
-convenient syntax `##::` puts a new element at the head of a by-name `EStream`
-reference. `.unfold` is for creating a finite (but possibly infinite) stream by
-repeatedly applying a function `f` to get the next value and input for the
-following `f`. `.iterate` creates an infinite stream by repeating a function `f`
-on the previous element.
 
 `.cons`, `.unfold`, dan `.iterate` digunakan untuk membuat *stream*. Sedangkan
 untuk `##::`, operator ini digunakan untuk menambah elemen baru pada bagian
@@ -7451,22 +6860,11 @@ mengaplikasikan fungsi `f` secara berulang untuk mendapatkan nilai selanjutnya
 dan input untuk fungsi `f` itu sendiri. `.iterate` membuat sebuah *stream*
 tak hingga dengan mengulang fungsi `f` pada elemen sebelumnya.
 
-`EStream` may appear in pattern matches with the symbol `##::`,
-matching the syntax for `.cons`.
-
 `Estream` bisa saja muncul pada *pattern match* dengan simobl `##::` dengan
 mencocokkan sintaks untuk `.cons`.
 
-A> `##::` sort of looks like an Exogorth: a giant space worm that lives
-A> on an asteroid.
-A>
 A> `##::` mirip dengan Exogorth, seekor cacing raksasa yang tinggal di
 A> asteroid.
-
-Although `EStream` addresses the value memory retention problem, it is
-still possible to suffer from *slow memory leaks* if a live reference
-points to the head of an infinite stream. Problems of this nature, as
-well as the need to compose effectful streams, are why fs2 exists.
 
 Walau `Estream` menjawab masalah memori, struktur data ini bisa saja
 tetap terkena masalah memori bila ada nilai yang masih dirujuk terletak
@@ -7477,10 +6875,6 @@ merupakan alasan dibuatnya fs2.
 
 ### `CorecursiveList`
 
-*Corecursion* is when we start from a base state and produce subsequent steps
-deterministically, like the `EphemeralStream.unfold` method that we just
-studied:
-
 Korekursi adalah saat kita memulai sesuatu dari sebuah kondisi awal dan
 membuat langkah-langkah selanjutnya secara deterministik yang sama halnya
 dengan `EphemerealStream.unfold` yang baru saja kita pelajari.
@@ -7490,14 +6884,8 @@ dengan `EphemerealStream.unfold` yang baru saja kita pelajari.
   def unfold[A, B](b: =>B)(f: B => Option[(A, B)]): EStream[A] = ...
 ~~~~~~~~
 
-Contrast to *recursion*, which breaks data into a base state and then
-terminates.
-
 Sangat berbeda dengan rekursi, yang memecah data menjadi kondisi dasar
 lalu berakhir.
-
-A `CorecursiveList` is a data encoding of `EphemeralStream.unfold`, offering an
-alternative to `EStream` that may perform better in some circumstances:
 
 `CorecursiveList` merupakan penyandian data dari `EphemerealStream.unfold`
 yang memberikan alternatif untuk `EStream` yang berpeluang untuk memberikan
@@ -7524,11 +6912,6 @@ performa yang lebih bagus dalam beberapa situasi tertentu:
   }
 ~~~~~~~~
 
-Corecursion is useful when implementing `Comonad.cojoin`, like our `Hood`
-example. `CorecursiveList` is a good way to codify non-linear recurrence
-equations like those used in biology population models, control systems, macro
-economics, and investment banking models.
-
 Korekursi berguna saat mengimplementasikan `Comonad.cojoin`, seperti contoh
 pada `Hood`. `CorecursiveList` merupakan contoh untuk mengkodifikasi persamaan
 non-linear berulang seperti yang digunakan pada pemodelan biologi populasi,
@@ -7536,9 +6919,6 @@ sistem kontrol, ekonomi makro, dan investasi perbankan.
 
 
 ### `ImmutableArray`
-
-A simple wrapper around mutable stdlib `Array`, with primitive
-specialisations:
 
 Sebuah pembungkus sederhana untuk struktur data `Array` dengan spesialisasi
 primitif: 
@@ -7562,12 +6942,6 @@ primitif:
   }
 ~~~~~~~~
 
-`Array` is unrivalled in terms of read performance and heap size.
-However, there is zero structural sharing when creating new arrays,
-therefore arrays are typically used only when their contents are not
-expected to change, or as a way of safely wrapping raw data from a
-legacy system.
-
 Bila kita berbicara mengenai performa pembacaan dan ukuran *heap*, tidak
 ada yang mengalahkan `Array`. Namun, pembagian struktural sama sekali
 tidak ada saat pembuatan array baru. Tiadanya penggunaan struktur memori
@@ -7577,12 +6951,7 @@ yang sama seperti ini merupakan salah satu alasan untuk menggunakan deret
 
 ### `Dequeue`
 
-A `Dequeue` (pronounced like a "deck" of cards) is a linked list that
-allows items to be put onto or retrieved from the front (`cons`) or
-the back (`snoc`) in constant time. Removing an element from either
-end is constant time on average.
-
-`Dequeue`, diucapkan seperti "dek" kapal, merupakan daftar tertaut
+`Dequeue`, diucapkan seperti "dek" kapal, merupakan senarai berantai
 yang memperkenankan penambahan dan pengambilan item dari depan maupun
 dari belakang dengan waktu konstan. Penghapusan elemen dari ujung-ujungnya
 juga menggunakan waktu konstan.
@@ -7618,12 +6987,8 @@ juga menggunakan waktu konstan.
   }
 ~~~~~~~~
 
-The way it works is that there are two lists, one for the front data
-and another for the back. Consider an instance holding symbols `a0,
-a1, a2, a3, a4, a5, a6`
-
 Cara kerja dari `Dequeue` adalah dengan menggunakan dua daftar, satu
-di depan dan lainnya di belakang. ANggap sebuah instans yang berisi
+di depan dan lainnya di belakang. Anggap sebuah instans yang berisi
 simbol `a0, a1, a2, a3, a4, a5, a6`
 
 {lang="text"}
@@ -7633,24 +6998,12 @@ simbol `a0, a1, a2, a3, a4, a5, a6`
     NonEmptyList('a6, IList('a5, 'a4)), 3)
 ~~~~~~~~
 
-which can be visualised as
-
 yang dapat digambarkan sebagai
 
 {width=30%}
 ![](images/dequeue.png)
 
-Note that the list holding the `back` is in reverse order.
-
-Harap perhatikan bahwa daftar pada `back` disusun secara terbalik.
-
-Reading the `snoc` (final element) is a simple lookup into
-`back.head`. Adding an element to the end of the `Dequeue` means
-adding a new element to the head of the `back`, and recreating the
-`FullDequeue` wrapper (which will increase `backSize` by one). Almost
-all of the original structure is shared. Compare to adding a new
-element to the end of an `IList`, which would involve recreating the
-entire structure.
+Harap perhatikan bahwa senarai pada `back` disusun secara terbalik.
 
 Untuk membaca `snoc` (elemen paling akhir) hanya merupakan pencarian
 sederhana pada `back.head`. Sedangkan untuk penambahan sebuah elemen
@@ -7660,13 +7013,6 @@ akan menambah ukuran `backSize`). Hampir semua struktur data awal
 akan digunakan ulang bila terjadi perubahan. Sebagai perbandingan,
 penambahan sebuah elemen pada ujung belakan `IList` akan menciptakan
 seluruh struktur yang baru.
-
-The `frontSize` and `backSize` are used to re-balance the `front` and
-`back` so that they are always approximately the same size.
-Re-balancing means that some operations can be slower than others
-(e.g. when the entire structure must be rebuilt) but because it
-happens only occasionally, we can take the average of the cost and say
-that it is constant.
 
 `frontSize` dan `backSize` digunakan untuk menyeimbangkan ulang `front`
 dan `back` sehingga ukuran keduanya kurang lebih sama. Penyeimbangan ulang
@@ -7679,11 +7025,8 @@ konstan.
 
 ### `DList`
 
-Linked lists have poor performance characteristics when large lists are appended
-together. Consider the work that goes into evaluating the following:
-
-Daftar terkait mempunyai karakteristik performa yang kurang baik bila
-daftar berukuran besar digabungkan. Sebagai gambaran, silakan diperhatikan
+Senarai berantai mempunyai karakteristik performa yang kurang baik bila
+senarai berukuran besar digabungkan. Sebagai gambaran, silakan diperhatikan
 operasi yang berjalan saat mengevaluasi potongan kode berikut:
 
 {lang="text"}
@@ -7694,16 +7037,9 @@ operasi yang berjalan saat mengevaluasi potongan kode berikut:
 {width=50%}
 ![](images/dlist-list-append.png)
 
-This creates six intermediate lists, traversing and rebuilding every list three
-times (except for `gs` which is shared between all stages).
-
-Operasi tersebut membuat enam daftar sementara, melangkahi, dan membangun
-ulang tiap daftar sebanyak tiga kali (kecuali `gs` yang dibagi pada
+Operasi tersebut membuat enam senarai sementara, melangkahi, dan membangun
+ulang tiap senarai sebanyak tiga kali (kecuali `gs` yang dibagi pada
 semua tahap).
-
-The `DList` (for *difference list*) is a more efficient solution for this
-scenario. Instead of performing the calculations at each stage, it is
-represented as a function `IList[A] => IList[A]`
 
 `DList` (*difference list*) merupakan solusi yang lebih efisien untuk
 skenario semacam ini. Kita tidak melakukan evaluasi pada tiap tahap,
@@ -7721,14 +7057,9 @@ namun kita merepresentasikannya sebagai sebuah fungsi `IList[A] => IList[A]`
   }
 ~~~~~~~~
 
-A> This is a simplified implementation: it has a stack overflow bug that we will
-A> fix in the chapter on Advanced Monads.
-A>
 A> Potongan kode disamping merupakan implementasi yang disederhanakan:
 A> terdapat kutu *stack overflow* yang akan kita benahi pada bab Monad
 A> Lanjutan.
-
-The equivalent calculation is (the symbols created via `DList.fromIList`)
 
 Kalkulasi yang ekuivalen adalah (simbol dibuat dengan menggunakan
 `DList.fromIList`) 
@@ -7738,24 +7069,16 @@ Kalkulasi yang ekuivalen adalah (simbol dibuat dengan menggunakan
   (((a ++ b) ++ (c ++ d)) ++ (e ++ (f ++ g))).toIList
 ~~~~~~~~
 
-which breaks the work into *right-associative* (i.e. fast) appends
-
-yang membagi tugas menjadi penambahan dengan sifat asosiatif-kanan 
+yang membagi tugas menjadi penambahan dengan sifat *asosiatif-kanan*
 
 {lang="text"}
 ~~~~~~~~
   (as ::: (bs ::: (cs ::: (ds ::: (es ::: (fs ::: gs))))))
 ~~~~~~~~
 
-utilising the fast constructor on `IList`.
-
 menggunakan konstruktor pada `IList`.
 
-As always, there is no free lunch. There is a memory allocation overhead that
-can slow down code that naturally results in right-associative appends. The
-largest speedup is when `IList` operations are *left-associative*, e.g.
-
-Sebagaimana biasanya, tentu ada harga yang harus dibayar. Terdapat
+Sebagaimana biasanya, selalu ada harga yang harus dibayar. Terdapat
 alokasi memori tambahan yang dapat memperlambat kode yang berasal dari
 penambahan yang bersifat asosiatif-kanan. Operasi yang mendapatkan
 percepatan paling besar adalah ketika operasi pada `IList` bersifat
@@ -7766,22 +7089,12 @@ asosiatif kiri, mis,
   ((((((as ::: bs) ::: cs) ::: ds) ::: es) ::: fs) ::: gs)
 ~~~~~~~~
 
-Difference lists suffer from bad marketing. If they were called a
-`ListBuilderFactory` they'd probably be in the standard library.
-
 Bila `DList` bernama `ListBuilderFactory`, sangat memungkinkan
 bahwa struktur data ini akan ada pada pustaka standar. Namun
 karena reputasi yang buruk, hal ini tidak terjadi.
 
 
 ### `ISet`
-
-Tree structures are excellent for storing ordered data, with every *binary node*
-holding elements that are *less than* in one branch, and *greater than* in the
-other. However, naive implementations of a tree structure can become
-*unbalanced* depending on the insertion order. It is possible to maintain a
-perfectly balanced tree, but it is incredibly inefficient as every insertion
-effectively rebuilds the entire tree.
 
 Struktur pohon dikenal sangat cocok untuk menyimpan data yang terurut
 dengan tiap simpul berisi elemen bernilai yang lebih kecil dari pada
@@ -7791,9 +7104,6 @@ tidak seimbangnya pohon tersebut pada saat penyisipan elemen. Juga
 memungkinkan untuk memiliki pohon yang seimbang namun sangat tidak
 efisien dilakukan karena tiap kali penyisipan elemen dilakukan, pohon
 tersebut akan dibangun ulang.
-
-`ISet` is an implementation of a tree of *bounded balance*, meaning that it is
-approximately balanced, using the `size` of each branch to balance a node.
 
 `ISet` merupakan implementasi dari pohon dengan keseimbangan berbatas yang
 berarti pohon ini diperkirakan seimbang, dengan menggunakan ukuran (`size`)
@@ -7820,22 +7130,10 @@ dari tiap cabang untuk menyeimbangka sebuah simpul.
   }
 ~~~~~~~~
 
-`ISet` requires `A` to have an `Order`. The `Order[A]` instance must remain the
-same between calls or internal assumptions will be invalid, leading to data
-corruption: i.e. we are assuming typeclass coherence such that `Order[A]` is
-unique for any `A`.
-
 `ISet` mengharap `A` untuk mempunyai kelas tipe `Order`. Instans `Order[A]`
 harus tetap sama disela tiap pemanggilan. Bila tidak, asumsi internal akan
 invalid dan menyebabkan korupsi data: mis, kita mengasumsikan koherensi
 kelas tipe dimana `Order[A]` unik untuk tiap `A`.
-
-The `ISet` ADT unfortunately permits invalid trees. We strive to write ADTs that
-fully describe what is and isn't valid through type restrictions, but sometimes
-there are situations where it can only be achieved by the inspired touch of an
-immortal. Instead, `Tip` / `Bin` are `private`, to stop users from accidentally
-constructing invalid trees. `.insert` is the only way to build an `ISet`,
-therefore defining what constitutes a valid tree.
 
 Sayangnya, ADT `ISet` melarang adanya pohon invalid. Kita akan berusaha untuk
 menulis ADT yang mendeskripsikan secara lengkap mengenai apa yang valid dan
@@ -7866,10 +7164,6 @@ sebuah pohon yang valid.
   }
 ~~~~~~~~
 
-The internal methods `.balanceL` and `.balanceR` are mirrors of each other, so
-we only study `.balanceL`, which is called when the value we are inserting is
-*less than* the current node. It is also called by the `.delete` method.
-
 Metoda internal `.balanceL` dan `.balanceR` merupakan pencerminan satu sama
 lain. Sehingga, kita hanya perlu mempelajari `.balanceL` yang akan dipanggil
 ketika nilai yang kita sisipkan kurang dari nilai yang ada pada simpul saat ini.
@@ -7881,27 +7175,14 @@ Metoda ini juga dipanggil oleh metoda `.delete`.
   ...
 ~~~~~~~~
 
-Balancing requires us to classify the scenarios that can occur. We will go
-through each possible scenario, visualising the `(y, left, right)` on the left
-side of the page, with the balanced structure on the right, also known as the
-*rotated tree*.
-
 Menyeimbangkan sebuah pohon mengharuskan kita untuk mengklasifikasi
 skenario yang mungkin terjadi. Kita akan melihat satu persatu dan memvisualisasi
 `(y, left, right)` yang ada pada bagian kira laman dan struktur yang sudah
 diseimbangkan pada bagian kanan. Hal ini juga dikenal sebagai pohon yang dirotasi.
 
--   filled circles visualise a `Tip`
--   three columns visualise the `left | value | right` fields of `Bin`
--   diamonds visualise any `ISet`
-
 -   lingkaran yang terisi melambangkan sebuah `Tip`
 -   tiga kolom melambangkan nilai `left | value | right` dari `Bin`
 -   wajik melambangkan `ISet`
-
-The first scenario is the trivial case, which is when both the `left` and
-`right` are `Tip`. In fact we will never encounter this scenario from `.insert`,
-but we hit it in `.delete`
 
 Skenario pertama merupakan contoh sepele, dimana kedua sisi merupakan `Tip`.
 Nyatanya, kita tidak akan pernah menemui hal semacam ini dari pemanggilan
@@ -7915,9 +7196,6 @@ Nyatanya, kita tidak akan pernah menemui hal semacam ini dari pemanggilan
 {width=50%}
 ![](images/balanceL-1.png)
 
-The second case is when `left` is a `Bin` containing only `Tip`, we don't need
-to balance anything, we just create the obvious connection:
-
 Pada contoh kedua, `left` merupakan sebuah `Bin` yang hanya berisi sebuah
 `Tip`. Kita tidak perlu menyeimbangkan apaun, cukup membuat kesimpulan
 sederhana:
@@ -7929,9 +7207,6 @@ sederhana:
 
 {width=60%}
 ![](images/balanceL-2.png)
-
-The third case is when it starts to get interesting: `left` is a `Bin`
-containing a `Bin` in its `right`
 
 Contoh ketiga-lah yang menarik: `left` berupa sebuah `Bin` yang merisi `Bin`
 pada `right`
@@ -7945,20 +7220,12 @@ pada `right`
 {width=70%}
 ![](images/balanceL-3.png)
 
-But what happened to the two diamonds sitting below `lrx`? Didn't we just lose
-information? No, we didn't lose information, because we can reason (based on
-size balancing) that they are always `Tip`! There is no rule in any of the
-following scenarios (or in `.balanceR`) that can produce a tree of the shape
-where the diamonds are `Bin`.
-
 Apa yang terjadi pada kedua wajik yang ada pada di bawah `lrx`?
 Apakah kita akan kehilangan informasi? Tentu tidak, kita tidak kehilangan
 informasi karena kita dapat menalar (menggunakan penyeimbangan ukuran) bahwa
 kedua wajik tersebut menjadi `Tip`.
 Tidak ada aturan khusus untuk skenario berikut (atau pada `.balanceR`) yang
 dapat membuat sebuah pohon dimana sebuah wajik-lah yang menjadi `Bin`.
-
-The fourth case is the opposite of the third case.
 
 Contoh keempat merupakan kebalikan dari contoh ketiga.
 
@@ -7969,9 +7236,6 @@ Contoh keempat merupakan kebalikan dari contoh ketiga.
 
 {width=70%}
 ![](images/balanceL-4.png)
-
-The fifth case is when we have full trees on both sides of the `left` and we
-must use their relative sizes to decide on how to re-balance.
 
 Untuk contoh ke lima, kita mempunyai pohon yang lengkap pada kedua sisi
 dari `left` dan kita harus menggunakan ukuran relatifnya untuk menentukan
@@ -7985,23 +7249,15 @@ bagaimana kita harus menyeimbangkan.
     Bin(lrx, Bin(lx, ll, lrl), Bin(y, lrr, Tip()))
 ~~~~~~~~
 
-For the first branch, `2*ll.size > lr.size`
-
 Pada cabang pertama, `2ll.size > lr.size`
 
 {width=50%}
 ![](images/balanceL-5a.png)
 
-and for the second branch `2*ll.size <= lr.size`
-
 dan untuk cabang kedua `2ll.size <= lr.size`
 
 {width=75%}
 ![](images/balanceL-5b.png)
-
-The sixth scenario introduces a tree on the `right`. When the `left` is empty we
-create the obvious connection. This scenario never arises from `.insert` because
-the `left` is always non-empty:
 
 Pada skenario ke enam, kita akan mendapatkan sebuah pohon pada `right`.
 Saat `left` kosong, kita menarik sebuah sambungan sederhana. Skenario ini
@@ -8015,10 +7271,6 @@ tidak pernah muncul dari `.insert` karena `left` tidak boleh kosong:
 {width=50%}
 ![](images/balanceL-6.png)
 
-The final scenario is when we have non-empty trees on both sides. Unless the
-`left` is three times or more the size of the `right`, we can do the simple
-thing and create a new `Bin`
-
 Skenario akhir adalah kondisi dimana kita tidak mempunyai pohon yang tidak kosong
 pada kedua sisinya. Bila `left` tidak lebih dari tiga kali ukuran dari `right`
 kita hanya tinggal membuat sebuah `Bin`
@@ -8030,10 +7282,6 @@ kita hanya tinggal membuat sebuah `Bin`
 
 {width=50%}
 ![](images/balanceL-7a.png)
-
-However, should the `left` be more than three times the size of the `right`, we
-must balance based on the relative sizes of `ll` and `lr`, like in scenario
-five.
 
 Namun, bila `left` berukuran tiga kali ataupun lebih bila dibandingkan `right`,
 kita harus menyeimbangkan pohon tersebut dahulu berdasarkan ukuran dari
@@ -8053,20 +7301,11 @@ kita harus menyeimbangkan pohon tersebut dahulu berdasarkan ukuran dari
 {width=75%}
 ![](images/balanceL-7c.png)
 
-This concludes our study of the `.insert` method and how the `ISet` is
-constructed. It should be of no surprise that `Foldable` is implemented in terms
-of depth-first search along the `left` or `right`, as appropriate. Methods such
-as `.minimum` and `.maximum` are optimal because the data structure already
-encodes the ordering.
-
 Skenario ini menutup pembelajaran kita atas metoda `.insert` dan bagaimana
 `ISet` dibangun. Seharusnya bukan hal yang mengejutkan bila `Foldable`
 diimplementasikan dalam bentuk pencarian pertama mendalam pada `left` dan `right`.
 Metoda semacam `.minimum` dan `.maximum` akan optimum diimplementasikan karena
 struktur data sudah tersandikan berurutan.
-
-It is worth noting that some typeclass methods *cannot* be implemented as
-efficiently as we would like. Consider the signature of `Foldable.element`
 
 Hal yang patut diperhatikan adalah beberapa metoda pada kelas tipe tidak dapat
 diterapkan secara efisien. Misal, penanda untuk `Foldable.element`
@@ -8080,19 +7319,9 @@ diterapkan secara efisien. Misal, penanda untuk `Foldable.element`
   }
 ~~~~~~~~
 
-The obvious implementation for `.element` is to defer to (almost) binary-search
-`ISet.contains`. However, it is not possible because `.element` provides `Equal`
-whereas `.contains` requires `Order`.
-
 Penerapan yang paling jelas untuk `.element` adalah dengan menunda pencarian
 biner `ISet.contains`. Walaupun demikian, hal ini tidak mungkin dilakukan karena
 `.element` menyediakan `Equal`, sedangkan `.contains` meminta `Order`.
-
-`ISet` is unable to provide a `Functor` for the same reason. In practice this
-turns out to be a sensible constraint: performing a `.map` would involve
-rebuilding the entire structure. It is sensible to convert to some other
-datatype, such as `IList`, perform the `.map`, and convert back. A consequence
-is that it is not possible to have `Traverse[ISet]` or `Applicative[ISet]`.
 
 Karena beberapa hal, `ISet` tidak dapat menyediakan `Functor`. Di lapangan,
 ternyata hal ini menjadi batasan yang masuk akal: melakukan pemetaan `.map`
@@ -8133,12 +7362,6 @@ maupun `Applicative[ISet]`.
   }
 ~~~~~~~~
 
-This is very familiar! Indeed, `IMap` (an alias to the lightspeed operator
-`==>>`) is another size-balanced tree, but with an extra `value: B` field in
-each binary branch, allowing it to store key/value pairs. Only the key type `A`
-needs an `Order` and a suite of convenient methods are provided to allow easy
-entry updating
-
 Terlihat familiar, bukan? Dan memang demikian adanya. `IMap` yang mempunyai
 alias `==>>`, merupakan pohon dengan ukuran yang diseimbangkan dan ditambah
 dengan sebuah bidang tambahan `value: B` pada tiap cabang biner.
@@ -8158,14 +7381,10 @@ untuk memutakhirkan isi dari pohon ini.
 ~~~~~~~~
 
 
-### `StrictTree` and `Tree`
+### `StrictTree` dan `Tree`
 
-Both `StrictTree` and `Tree` are implementations of a *Rose Tree*, a tree
-structure with an unbounded number of branches in every node (unfortunately
-built from standard library collections for legacy reasons):
-
-`StrictTree` dan `Tree` merupakan penerapan dari pohon beringin (lol, cabang banyak apa, ya?)
-pohon beringin sendiri merupakan struktur pohon dengan jumlah cabang yang tak
+`StrictTree` dan `Tree` merupakan penerapan dari pohon beringin.
+Pohon beringin sendiri merupakan struktur pohon dengan jumlah cabang yang tak
 dibatasi pada tiap simpulnya. Kedua struktur data ini, dibangun dengan
 menggunakan pustaka koleksi dari pustaka standar dikarenakan alasan
 peninggalan masa lalu:
@@ -8177,8 +7396,6 @@ peninggalan masa lalu:
     subForest: Vector[StrictTree[A]]
   )
 ~~~~~~~~
-
-`Tree` is a *by-need* version of `StrictTree` with convenient constructors
 
 `Tree` merupakan versi *by-need* dari `StrictTree` dengan konstruktor
 
@@ -8201,13 +7418,6 @@ peninggalan masa lalu:
   }
 ~~~~~~~~
 
-The user of a Rose Tree is expected to manually balance it, which makes it
-suitable for cases where it is useful to encode domain knowledge of a hierarchy
-into the data structure. For example, in artificial intelligence, a Rose Tree
-can be used in [clustering algorithms](https://arxiv.org/abs/1203.3468) to organise data into a hierarchy of
-increasingly similar things. It is possible to represent XML documents with a
-Rose Tree.
-
 Secara umum, pengguna pohon beringin diharapkan untuk menyeimbangkan pohon ini
 secara manual. Dengan demikian, struktur ini cocok untuk digunakan pada
 domain tertentu untuk menyandikan hierarki pada struktur data. Sebagai contoh,
@@ -8215,18 +7425,12 @@ pada kecerdasan buatan, sebuah pohon beringin dapat digunakan pada [algoritma pe
 untuk mengelompokkan data menjadi sebuah hierarki atas hal hal yang semakin
 mirip. Struktur ini juga bisa digunakan untuk merepresentasikan dokumen XML.
 
-When working with hierarchical data, consider using a Rose Tree instead of
-rolling a custom data structure.
-
 Saat bekerja dengan struktur data hierarkis, adalah cukup bijak untuk
 mempertimbangkan untuk menggunakan struktur data ini, bukan membuat struktur
 data sendiri.
 
 
 ### `FingerTree`
-
-Finger trees are generalised sequences with amortised constant cost lookup and
-logarithmic concatenation. `A` is the type of data, ignore `V` for now:
 
 *Finger Tree* (selanjutnya disebut pohon palem) merupakan deretan yang digeneralisasikan
 dengan beban pencarian konstan yang teramortisasi dan penggabungan logaritmik.
@@ -8263,14 +7467,7 @@ dengan beban pencarian konstan yang teramortisasi dan penggabungan logaritmik.
   }
 ~~~~~~~~
 
-A> `<++>` is the TIE Bomber. Admittedly, sending in the proton torpedoes is a bit
-A> of an overreaction: it is the same thing as the regular `Monoid` TIE Fighter
-A> `|+|`.
-A>
 A> `<++>` mirip dengan `|+|` milik `Monoid`.
-
-Visualising `FingerTree` as dots, `Finger` as boxes and `Node` as boxes within
-boxes:
 
 `FingerTree` digambarkan sebagai titk, `Finger` sebagai persegi, dan `Node`
 sebagai persegi dalam persegi:
@@ -8278,45 +7475,25 @@ sebagai persegi dalam persegi:
 {width=35%}
 ![](images/fingertree.png)
 
-Adding elements to the front of a `FingerTree` with `+:` is efficient because
-`Deep` simply adds the new element to its `left` finger. If the finger is a
-`Four`, we rebuild the `spine` to take 3 of the elements as a `Node3`. Adding to
-the end, `:+`, is the same but in reverse.
-
 Penambahanan elemen pada bagian depan sebuah `FingerTree` dengan `+:` efisien
 karena `Deep` hanya menambah elemen baru pada bagian kiri (`left`) dari palem.
 Bila palem berupa sebuah `Four`, kita akan membangun ulang batang (`spine`)
 untuk mengambil 3 elemen sebagai sebuah `Node3`. Sama halnya dengan penambahan
 sebuah elemen pada bagian belakang menggunakan `:+`, namun dibalik.
 
-Appending `|+|` (also `<++>`) is more efficient than adding one element at a
-time because the case of two `Deep` trees can retain the outer branches,
-rebuilding the spine based on the 16 possible combinations of the two `Finger`
-values in the middle.
-
 Penambahan menggunakan `|+|` dan `<++>` lebih efisien bila dibandingkan dengan
 menambahkan sebuah elemen satu persatu karena dua pohon `Deep` mampu memelihara
 cabang bagian luar, membangun batang (`spine`) berdasarkan 16 kombinasi yang
 mungkin dari dua nilai `Finger` pada bagian tengah.
 
-In the above we skipped over `V`. Not shown in the ADT description is an
-`implicit measurer: Reducer[A, V]` on every element of the ADT.
-
 Di atas, kita melewatkan `V`. Yang tidak diperlihatkan pada deskripsi
 ADT merupakan sebuah `implicit measurer: Reducer[A, V]` pada tiap elemen
 dari ADT.
 
-A> Storing typeclass instances on the ADT is considered bad style and also
-A> increases the memory requirement by 64 bits for every entry. The implementation
-A> of `FingerTree` is almost a decade old and is due a rewrite.
-A>
-A> Menyimpan instans kelas tipe pada ADT dianggap gaya penulisan yang buruk
+A> Menyimpan instans kelas tipe pada TDA dianggap gaya penulisan yang buruk
 A> dan dapat menambah kebutuhan penggunaan memori sebanyak 64 bit untuk
 A> tiap catatan. Implementasi `FingerTree` sudah hampir satu dekade
 A> dan waktunya penulisan ulang.
-
-`Reducer` is an extension of `Monoid` that allows for single elements to be
-added to an `M`
 
 `Reducer` merupakan sebuah ekstensi dari `Monoid` yang memperkenankan agar
 sebuah elemen dapat ditambahkan ke sebuah `M`
@@ -8331,8 +7508,6 @@ sebuah elemen dapat ditambahkan ke sebuah `M`
   }
 ~~~~~~~~
 
-For example, `Reducer[A, IList[A]]` can provide an efficient `.cons`
-
 Sebagai contoh, `Reducer[A, IList[A]]` menyediakan implementasi `.cons`
 yang efisien
 
@@ -8344,19 +7519,12 @@ yang efisien
   }
 ~~~~~~~~
 
-A> `Reducer` should have been called `CanActuallyBuildFrom`, in honour of the
-A> similarly named stdlib `class`, since it is effectively a collection builder.
-A>
 A> `Reducer` seharusnya dinamai `CanActuallyBuildFrom` untuk menghormati
 A> `class` dari pustaka standar yang juga memiliki fungsionalitas yang sama
 A> dalam hal pembangunan koleksi.
 
 
 #### `IndSeq`
-
-If we use `Int` as `V`, we can get an indexed sequence, where the measure is
-*size*, allowing us to perform index-based lookup by comparing the desired index
-with the size at each branch in the structure:
 
 Bila kita menggunakan `Int` sebagai `V`, kita bisa mendapatkan barisan terindeks
 dimana yang menjadi ukuran adalah jumlah satuan `V`. Hal ini memperkenankan
@@ -8371,9 +7539,6 @@ yang diinginkan dengan ukuran dari tiap cabang pada struktur:
     def apply[A](as: A*): IndSeq[A] = ...
   }
 ~~~~~~~~
-
-Another use of `FingerTree` is as an ordered sequence, where the measure stores
-the largest value contained by each branch:
 
 Penggunaan lain dari `FingerTree` adalah barisan terurut, dimana yang menjadi
 ukuran merupakan nilai terbesar dari setiap cabang:
@@ -8394,21 +7559,12 @@ ukuran merupakan nilai terbesar dari setiap cabang:
   }
 ~~~~~~~~
 
-`OrdSeq` has no typeclass instances so it is only useful for incrementally
-building up an ordered sequence, with duplicates. We can access the underlying
-`FingerTree` when needed.
-
 `OrdSeq` tidak mempunyai instans kelas tipe dikarenakan struktur data ini
 hanya berguna untuk pembangunan deret terurut secara bertahap dengan duplikat.
 Kita dapat mengakses `FingerTree` yang melandasi struktur data ini bila dibutuhkan.
 
 
 #### `Cord`
-
-The most common use of `FingerTree` is as an intermediate holder for `String`
-representations in `Show`. Building a single `String` can be thousands of times
-faster than the default `case class` implementation of nested `.toString`, which
-builds a `String` for every layer in the ADT.
 
 Penggunaan `FingerTree` yang paling jamak adalah wadah sementara untuk representasi
 `String` pada `Show`. Pembuatan sebuah `String` bisa saja ribuan kali lebih cepat
@@ -8427,9 +7583,6 @@ membangun sebuah `Sring` untuk tiap lapisan pada ADT.
   }
 ~~~~~~~~
 
-For example, the `Cord[String]` instance returns a `Three` with the string in
-the middle and quotes on either side
-
 Sebagai contoh, instans `Cord[String]` mengembalikan sebuah `Three` dengan
 string pada bagian tengah dan tanda petik pada kedua sisi
 
@@ -8437,8 +7590,6 @@ string pada bagian tengah dan tanda petik pada kedua sisi
 ~~~~~~~~
   implicit val show: Show[String] = s => Cord(FingerTree.Three("\"", s, "\""))
 ~~~~~~~~
-
-Therefore a `String` renders as it is written in source code
 
 Sehingga, sebuah `String` memberikan hasil sebagaimana yang tertulis pada
 kode sumber
@@ -8453,21 +7604,12 @@ kode sumber
   res: Cord = "foo"
 ~~~~~~~~
 
-A> The `Cord` in Scalaz 7.2 is unfortunately not as efficient as it could be. This
-A> has been fixed in Scalaz 7.3 by a [custom data structure optimised for `String`
-A> concatenation](https://github.com/scalaz/scalaz/pull/1793).
-A>
 A> Yang disayangkan adalah,`Cord` pada Scalaz 7.2 tidak se-efisien yang diharapkan.
 A> Hal ini sudah dibenahi pada Scalaz 7.3 dengan menggunakan [struktur data teroptimasi
 A> untuk penggabungan `String`](https://github.com/scalaz/scalaz/pull/1793).
 
 
-### `Heap` Priority Queue
-
-A *priority queue* is a data structure that allows fast insertion of ordered
-elements, allowing duplicates, with fast access to the *minimum* value (highest
-priority). The structure is not required to store the non-minimal elements in
-order. A naive implementation of a priority queue could be
+### Antrian Prioritas `Heap`
 
 Antrian prioritas merupakan struktur data yang memperkenankan untuk penyisipan
 yang relatif singkat pada elemen terurut yang memperbolehkan adanya duplikasi
@@ -8494,15 +7636,8 @@ secara berurutan. Implementasi naif dari antrian prioritas dapat berupa
   }
 ~~~~~~~~
 
-This `push` is a very fast `O(1)`, but `reorder` (and therefore `pop`) relies on
-`IList.sorted` costing `O(n log n)`.
-
 `push` bisa sangat cepat (`O(1)`)  walau `reorder` (dan `pop`) sangat bergantung
 pada `IList.sorted` yang bernilai `O(n log n)`.
-
-Scalaz encodes a priority queue with a tree structure where every node has a
-value less than its children. `Heap` has fast push (`insert`), `union`, `size`,
-pop (`uncons`) and peek (`minimumO`) operations:
 
 Scalaz menyandikan antrian prioritas dengan struktur pohon dimana setiap simpul
 mempunyai nilai kurang dari anaknya. `Heap` mempunyai waktu operasi `insert`,
@@ -8537,22 +7672,12 @@ mempunyai nilai kurang dari anaknya. `Heap` mempunyai waktu operasi `insert`,
   }
 ~~~~~~~~
 
-A> `size` is memoized in the ADT to enable instant calculation of
-A> `Foldable.length`, at a cost of 64 bits per entry. A variant of `Heap` could be
-A> created with a smaller footprint, but slower `Foldable.length`.
-A>
-A> `size` dimemoisasi pada ADT untuk memperkenankan kalkulasi instan berdasarkan
+A> `size` dimemoisasi pada TDA untuk memperkenankan kalkulasi instan berdasarkan
 A> `Foldable.length` dengan ganti rugi sebesar 64 bit untuk tiap catatan.
 A> Varian dari `Heap` bisa dibuat dengan ukuran yang lebih kecil namun dengn
 A> waktu eksekusi `Foldable.length` yang lebih lamban.
 
-`Heap` is implemented with a Rose `Tree` of `Ranked` values, where the `rank` is
-the depth of a subtree, allowing us to depth-balance the tree. We manually
-maintain the tree so the `minimum` value is at the top. An advantage of encoding
-the minimum value in the data structure is that `minimumO` (also known as
-*peek*) is a free lookup:
-
-`Head` diimplementasi dengan Pohon Palem berdasarkan nilai `Ranked` dimana
+`Heap` diimplementasi dengan Pohon Palem berdasarkan nilai `Ranked` dimana
 `rank`ing merupakan kedalaman dari cabang pohon. Hal ini memperkenankan kita untuk
 menyeimbangkan kedalaman dari struktur pohon tersebut. Kita juga mempertahankan
 secara manual agar nilai `minimum` selalu pada bagian paling atas. Keuntungan
@@ -8567,10 +7692,7 @@ pencarian gratis:
   }
 ~~~~~~~~
 
-When inserting a new entry, we compare to the current minimum and replace if the
-new entry is lower:
-
-Ketika menpisipkan sebuah catatan, kita membandingkan nilai minimum saat ini
+Ketika menyisipkan sebuah catatan, kita membandingkan nilai minimum saat ini
 dan menggantinya dengan catatan baru bila ternyata lebih rendah:
 
 {lang="text"}
@@ -8583,11 +7705,7 @@ dan menggantinya dengan catatan baru bila ternyata lebih rendah:
   ...
 ~~~~~~~~
 
-Insertions of non-minimal values result in an *unordered* structure in the
-branches of the minimum. When we encounter two or more subtrees of equal rank,
-we optimistically put the minimum to the front:
-
-Penyisipan atas nilai nilai non-minimal menghasilkan struktur tak-urut pada
+Penyisipan nilai nilai non-minimal menghasilkan struktur tak-urut pada
 cabang minimum. Saat kita menemukan dua atau lebih sub-pohon dengan `rank`ing
 yang sama, kita akan menempatkan nilai minimum pada bagian depan:
 
@@ -8614,39 +7732,22 @@ yang sama, kita akan menempatkan nilai minimum pada bagian depan:
   }
 ~~~~~~~~
 
-Avoiding a full ordering of the tree makes `insert` very fast, `O(1)`, such that
-producers adding to the queue are not penalised. However, the consumer pays the
-cost when calling `uncons`, with `deleteMin` costing `O(log n)` because it must
-search for the minimum value, and remove it from the tree by rebuilding. That Is
-fast when compared to the naive implementation.
-
 Dengan menghindari pengurutan secara menyeluruh terhadap pohon, `insert` menjadi
 sangat cepat (dengan kompleksitas `O(1)`), dimana yang melakukan operasi ini
 tidak terbebani oleh operasi ini. Namun, saat melakukan `uncons` dengan `deleteMin`,
-kita akan mendapati bahwa operasi ini mempunyai beban `O(log n)` yang disebabkan
+kita akan mendapati bahwa operasi ini mempunyai kompleksitas `O(log n)` yang disebabkan
 oleh pencarian nilai minimum dan menghapusnya dari pohon dengan membangun ulang.
 Secara umum, hal ini lebih cepat bila dibandingkan dengan implementasi naif.
 
-The `union` operation also delays ordering allowing it to be `O(1)`.
-
 Operasi `union` juga dapat menghambat pengurutan sehingga operasi ini mempunyai
 kompleksitas `O(1)`.
-
-If the `Order[Foo]` does not correctly capture the priority we want for the
-`Heap[Foo]`, we can use `Tag` and provide a custom `Order[Foo @@ Custom]` for a
-`Heap[Foo @@ Custom]`.
 
 Bila `Order[Foo]` tidak dapat dengat tepat menentukan prioritas yang kita inginkan
 atas `Heap[Foo]`, kita dapat menggunakan `Tag` dan menyediakan instans
 `Order[Foo @@ Custom]` khusus untuk `Head[Foo @@ Custom]`.
 
 
-### `Diev` (Discrete Intervals)
-
-We can efficiently encode the (unordered) integer values 6, 9, 2, 13, 8, 14, 10,
-7, 5 as inclusive intervals `[2, 2], [5, 10], [13, 14]`. `Diev` is an efficient
-encoding of *intervals* for elements `A` that have an `Enum[A]`, getting more
-efficient as the contents become denser.
+### `Diev` (Interval Diskrit)
 
 Kita dapat dengan mudah menyandikan nilai integer antara 6, 9, 2, 13, 8, 14, 10,
 7, 5 sebagai interval inklusif `[2, 2], [5, 10], [13, 14]`. `Diev` merupakan
@@ -8681,9 +7782,6 @@ semakin padat.
   }
 ~~~~~~~~
 
-When updating the `Diev`, adjacent intervals are merged (and then ordered) such
-that there is a unique representation for a given set of values.
-
 Saat memutakirkan `Diev`, interval yang berdekatan akan digabungkan (dan diurutkan)
 sehingga sebuah set nilai akan mempunyai sebuah representasi yang unik.
 
@@ -8695,9 +7793,6 @@ sehingga sebuah set nilai akan mempunyai sebuah representasi yang unik.
   scala> Diev.fromValuesSeq(List(6, 9, 2, 13, 8, 14, 10, 7, 5).reverse)
   res: Diev[Int] = ((2,2)(5,10)(13,14))
 ~~~~~~~~
-
-A great usecase for `Diev` is for storing time periods. For example, in our
-`TradeTemplate` from the previous chapter
 
 Salah satu contoh penggunaan untuk `Diev` adalah penyimpanan periode waktu.
 Sebagai contoh konkret, pada `TradeTemplate` kita pada bab sebelumnya.
@@ -8711,12 +7806,6 @@ Sebagai contoh konkret, pada `TradeTemplate` kita pada bab sebelumnya.
   )
 ~~~~~~~~
 
-if we find that the `payments` are very dense, we may wish to swap to a `Diev`
-representation for performance reasons, without any change in our business logic
-because we used `Monoid`, not any `List` specific methods. We would, however,
-have to provide an `Enum[LocalDate]`, which is an otherwise useful thing to
-have.
-
 kita akan menemui bahwa `payments` sangat padat, kita mungkin berharap untuk
 menggantinya dengan representasi `Diev` dengan alasan performa tanpa mengubah
 logika bisnis dikarenakan kita menggunakan `Monoid`, bukan `List`. Walaupun hal
@@ -8724,11 +7813,6 @@ itu berarti kita harus menyediakan instance `Enum[LocalDate]`.
 
 
 ### `OneAnd`
-
-Recall that `Foldable` is the Scalaz equivalent of a collections API and
-`Foldable1` is for non-empty collections. So far we have only seen
-`NonEmptyList` to provide a `Foldable1`. The simple data structure `OneAnd`
-wraps any other collection to turn it into a `Foldable1`:
 
 Seperti yang sudah dipelajari, `Foldable` merupakan pustaka setara untuk
 pustaka koleksi dan `Foldable1` untuk koleksi non-kosong. Sementara ini, kita
@@ -8740,12 +7824,6 @@ sederhana `OneAnd` melapisi semua koleksi lain menkadi `Foldable1`:
   final case class OneAnd[F[_], A](head: A, tail: F[A])
 ~~~~~~~~
 
-`NonEmptyList[A]` could be an alias to `OneAnd[IList, A]`. Similarly, we can
-create non-empty `Stream`, `DList` and `Tree` structures. However it may break
-ordering and uniqueness characteristics of the underlying structure: a
-`OneAnd[ISet, A]` is not a non-empty `ISet`, it is an `ISet` with a guaranteed
-first element that may also be in the `ISet`.
-
 `NonEmptyList` bisa merupakan alias untuk `OneAnd[IList]`. Sama halnya dengan
 alias dari struktur data ini, kita bisa membuat `Stream`, `DList`, dan `Tree`.
 Namun, penggunaan ini dapat menghapus penyusunan dan keunikan dari struktur yang
@@ -8754,17 +7832,7 @@ Namun, elemen pertama dari struktur ini pasti tidak kosong dan bisa jadi juga
 merupakan elemen dari `ISet` sehingga struktur ini tidak menjadi unik lagi.
 
 
-## Summary
-
-In this chapter we have skimmed over the data types that Scalaz has to offer.
-
-It is not necessary to remember everything from this chapter: think of each
-section as having planted the kernel of an idea.
-
-The world of functional data structures is an active area of research. Academic
-publications appear regularly with new approaches to old problems. Implementing
-a functional data structure from the literature is a good contribution to the
-Scalaz ecosystem.
+## Kesimpulan
 
 Pada bab ini, kita sudah mempelajari secara sekilas tentang tipe data yang
 ditawarkan oleh Scalaz.
