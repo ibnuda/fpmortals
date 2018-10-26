@@ -153,14 +153,13 @@ didefinisikan sebagai senarai berantai dari `Char`
   type String = [Char]
 ~~~~~~~~
 
-which is very inefficient and we always want to use `Text` instead.
-
 yang sangat tidak efisien. Kami sangat menyarankan untuk menggunakan `Text`
 sebagai gantinya.
 
-Finally we can define field names on ADTs using *record syntax*, which means we
-contain the data constructors in curly brackets and use double colon *type
-annotations* to indicate the types
+Dan pada akhirnya, kita dapat mendefinisikan nama bidang pada TDA dengan
+menggunakan *sintaks rekor*, yang juga berarti, kita dapat menampung konstruktor
+data didalam kurung kurawal dan menggunakan *anotasi tipe* dua titik dua untuk
+mengindikasikan tipe dari bidang tersebut
 
 {lang="text"}
 ~~~~~~~~
@@ -173,9 +172,9 @@ annotations* to indicate the types
   data Company  = Company { companyName :: String, employees :: [Resource] }
 ~~~~~~~~
 
-Note that the `Human` data constructor and `Resource` type do not need to be the
-same name. Record syntax generates the equivalent of a field accessor and a copy
-method.
+Harap perhatikan bahwa konstruktor data `Human` dan tipe `Resource` tidak harus
+memiliki nama yang sama. Sintaks rekor membuat ekuivalen dari metoda pengakses
+bidang dan penyalinan. 
 
 {lang="text"}
 ~~~~~~~~
@@ -187,20 +186,22 @@ method.
   eve = adam { humanName = "Eve" }
 ~~~~~~~~
 
-A more efficient alternative to single field `data` definitions is to use a
-`newtype`, which has no runtime overhead:
+Alternatif yang lebih efisien untuk pendefinisian `data` dengan satu bidang
+saja adalah dengan menggunakan `newtype` yang tidak meminta beban tambahan
+saat waktu-jalan:
 
 {lang="text"}
 ~~~~~~~~
   newtype Alpha = Alpha { underlying :: Double }
 ~~~~~~~~
 
-equivalent to `extends AnyVal` but without the caveats.
+yang ekuivalen dengan `extends AnyVal` namun tanpa kekurangannya.
 
-A> A limitation of Haskell's record syntax is that a field name cannot be used in
-A> different data types. However, we can workaround this by enabling a `LANGUAGE`
-A> extension, allowing us to use `name` in both `Human` and `Company`:
-A> 
+A> Batasan dari sintaks rekor Haskell adalah nama dari sebuah bidang tidak dapat
+A> digunakan pada tipe data lain. Namun, kita dapat menyiasatinya dengan
+A> menggunakan ekstensi `LANGUAGE` yang memperkenankan kita untuk menggunakan
+A> `name` pada `Human` dan `Company`:
+A>
 A> {lang="text"}
 A> ~~~~~~~~
 A>   {-# LANGUAGE DuplicateRecordFields #-}
@@ -208,11 +209,11 @@ A>
 A>   data Resource = Human { serial :: Int, name :: String }
 A>   data Company  = Company { name :: String, employees :: [Resource] }
 A> ~~~~~~~~
-A> 
-A> There are a lot of language extensions and it is not uncommon to have 20 or more
-A> in a small project. Haskell is extremely conservative and new language features
-A> are opt in for a long period of time before they can be accepted into the
-A> vanilla language.
+A>
+A> Ada beberapa ekstensi bahasa dan tidak jarang untuk menggunakan 20 atau lebih
+A> pada sebuah proyek kecil. Haskell sangat konservatif dan fitur bahasa biasanya
+A> berupa pilihan tambahan untuk waktu yang lama sebelum fitur tersebut diterima
+A> menjadi fitur utama.
 
 
 ## Functions
