@@ -2847,42 +2847,21 @@ Sekarang, kita akan menulis modul klien OAuth2:
 -   *Derivasi kelas tipe* merupakan komposisi yang dijalankan pada saat kompilasi atas
     instans kelas tipe.
 
-# Scalaz Typeclasses
-
-In this chapter we will tour most of the typeclasses in `scalaz-core`.
-We don't use everything in `drone-dynamic-agents` so we will give
-standalone examples when appropriate.
+# Kelas Tipe Scalaz
 
 Pada bab ini, kita akan melihat-lihat tipe kelas yang ada pada `scalaz-core`.
 Tentu kita tidak akan menggunakan semuanya pada `drone-dynamic-agents`.
 Maka dari itu, kita akan menggunakan contoh sederhana bila dibutuhkan.
-
-There has been criticism of the naming in Scalaz, and functional programming in
-general. Most names follow the conventions introduced in the Haskell programming
-language, based on *Category Theory*. Feel free to set up `type` aliases if
-verbs based on the primary functionality are easier to remember when learning
-(e.g. `Mappable`, `Pureable`, `FlatMappable`).
 
 Sebenarnya, banyak sekali kritik tentang penamaan pada Scala dan pemrograman
 fungsional secara umum. Kebanyakan nama yang digunakan, menggunakan konvensi
 yang dikenalkan oleh bahasa pemrograman Haskell berdasarkan *Teori Kategori*.
 Silakan menggunakan tipe alias bila kata kerja yang melandasi fungsionalitas
 utama lebih mudah diingat saat belajar. (Mis, `Mappable` untuk yang bisa dipetakan,
-`Pureable` untuk yang bisa "diangkat" (lol, lift, help!), dll).
-
-Before we introduce the typeclass hierarchy, we will peek at the four
-most important methods from a control flow perspective: the methods we
-will use the most in typical FP applications:
+`Pureable` untuk yang bisa "diangkat", dll).
 
 Sebelum kita berbincang mengenai hierarki kelas tipe, kita akan melihat
-4 metoda yang paling penting, bila dilihat dari sudut pandang "control flow"
-
-| Typeclass     | Method     | From      | Given       | To        |
-|------------- |---------- |--------- |----------- |--------- |
-| `Functor`     | `map`      | `F[A]`    | `A => B`    | `F[B]`    |
-| `Applicative` | `pure`     | `A`       |             | `F[A]`    |
-| `Monad`       | `flatMap`  | `F[A]`    | `A => F[B]` | `F[B]`    |
-| `Traverse`    | `sequence` | `F[G[A]]` |             | `G[F[A]]` |
+4 metoda yang paling penting, bila dilihat dari sudut pandang kontrol alur
 
 | Kelas Tipe | Metoda | Dari  | Diberikan | Untuk   |
 |------------- |---------- |--------- |----------- |--------- |
@@ -2891,25 +2870,12 @@ Sebelum kita berbincang mengenai hierarki kelas tipe, kita akan melihat
 | `Monad`       | `flatMap`  | `F[A]`    | `A => F[B]` | `F[B]`    |
 | `Traverse`    | `sequence` | `F[G[A]]` |             | `G[F[A]]` |
 
-We know that operations which return a `F[_]` can be run sequentially
-in a `for` comprehension by `.flatMap`, defined on its `Monad[F]`. The
-context `F[_]` can be thought of as a container for an intentional
-*effect* with `A` as the output: `flatMap` allows us to generate new
-effects `F[B]` at runtime based on the results of evaluating previous
-effects.
-
 Sebagaimana yang kita tahu bahwa operasi-operasi yang mengembalikan sebuah `F[_]`
 dapat dijalankan secara berurutan pada `for` comprehension (lol) dengan memanggil
 `.flatMap` yang didefinisikan pada `Monad[F]` terkait.
 Konteks `F[_]` bisa dianggap sebagai kontainer untuk *efek* intensional
 dengan `A` sebagai output: `flatMap` memberikan kita jalan untuk menghasilkan
 efek `F[B]` pada saat waktu jalan berdasarkan hasil dari evaluasi efek sebelumnya.
-(lol, kalimat kepanjangan)
-
-Of course, not all type constructors `F[_]` are effectful, even if
-they have a `Monad[F]`. Often they are data structures. By using the
-least specific abstraction, we can reuse code for `List`, `Either`,
-`Future` and more.
 
 Dan sudah barang tentu tidak semua konstruktor `F[_]` mempunyai efek.
 Bahkan, bila konstruktor tersebut mempunyai instans `Monad[F]`, juga
@@ -2918,12 +2884,6 @@ Seringkali, konstruktor tersebut hanya merupakan struktur data yang
 digunakan untuk pengabstraksian. Misalkan, kita bisa menggunakan `List`,
 `Either`, `Future`, dan lain lain untuk membuat struktur data.
 
-If we only need to transform the output from an `F[_]`, that is just
-`map`, introduced by `Functor`. In Chapter 3, we ran effects in
-parallel by creating a product and mapping over them. In Functional
-Programming, parallelisable computations are considered **less**
-powerful than sequential ones.
-
 Bila kita hanya perlu mengubah output dari sebuah `F[_]`, maka kita
 bisa menggunakan `map` yang diperkenalkan oleh `Functor`.
 Pada bab 3, kita menjalankan banyak efek secara paralel dengan membuat
@@ -2931,17 +2891,9 @@ sebuah produk dan melakukan pemetaan ("mapping") kepada produk tersebut.
 Pada pemrograman fungsional, komputasi yang bisa diparalelkan seringkali
 dianggap kurang manjur bila dibandingkan dengan komputasi sekuensial.
 
-In between `Monad` and `Functor` is `Applicative`, defining `pure`
-that lets us lift a value into an effect, or create a data structure
-from a single value.
-
 Di antara `Monad` dan `Functor` ada `Applicative` yang mendefinisikan
 `pure`. `pure` sendiri berfungsi untuk mengumpil sebuah nilai menjadi
 sebuah efek ataupun membuat sebuah struktur data dari sebuah nilai tunggal.
-
-`.sequence` is useful for rearranging type constructors. If we have an `F[G[_]]`
-but need a `G[F[_]]`, e.g. `List[Future[Int]]` but need a `Future[List[Int]]`,
-that is `.sequence`.
 
 Untuk `.sequence`, metoda ini paling manjur bila digunakan untuk menyusun-ulang
 konstruktor tipe. Bilamana kita mempunyai sebuah `F[G[_]]` namun kita butuh `G[F[_]]`, (tfw no gf)
@@ -2952,34 +2904,21 @@ memanggil metoda tadi.
 
 ## Agenda
 
-This chapter is longer than usual and jam-packed with information: it is
-perfectly reasonable to attack it over several sittings. Remembering everything
-would require super-human powers, so treat this chapter as a way of knowing
-where to look for more information.
-
 Bab ini jauh lebih panjang dan padat informasi bila dibandingkan dengan
 bab lain. Kami sangat menyarankan pembaca nan budiman untuk membaca
 bab ini dalam beberapa kesempatan. Selain itu, juga disarankan untuk
 menganggap bab ini sebagai lumbung pencarian informasi lebih lanjut,
 tidak untuk mengingat-ingat.
 
-Notably absent are typeclasses that extend `Monad`. They get their own chapter
-later.
-
 Dan sebuah hal yang tidak mengejutkan bahwa kelas tipe yang memperpanjang
 `Monad` tidak dibahas pada bab ini karena kelas tipe tersebut akan dibahas pada
 bab tersendiri.
 
-Scalaz uses code generation, not simulacrum. However, for brevity, we present
-code snippets with `@typeclass`. Equivalent syntax is available when we `import
-scalaz._, Scalaz._` and is available under the `scalaz.syntax` package in the
-scalaz source code.
-
-Sebagai pengingat, Scalaz menggunakan code generation (lol, help), bukan
-tiruan atau simulakrum (lol, help). Namun, jangan kuatir, kita hanya akan
-menempelkan potongan kode dengan `@typeclass` dengan alasan keringkasan.
-Sintaks yang ekuivalen juga tersedia ketika kita meng-`import scalaz._, Scalaz._`.
-Lebih tepatnya, ada pada paket `scalaz.syntax` pada sumber kode scalaz.
+Sebagai pengingat, Scalaz menggunakan pembuatan kode, bukan tiruan. Namun,
+jangan kuatir, kita hanya akan menempelkan potongan kode dengan `@typeclass`
+dengan alasan keringkasan.  Sintaks yang ekuivalen juga tersedia ketika
+kita meng-`import scalaz._, Scalaz._`.  Lebih tepatnya, ada pada paket
+`scalaz.syntax` pada sumber kode scalaz.
 
 {width=100%}
 ![](images/scalaz-core-tree.png)
@@ -2991,7 +2930,7 @@ Lebih tepatnya, ada pada paket `scalaz.syntax` pada sumber kode scalaz.
 ![](images/scalaz-core-loners.png)
 
 
-## Appendable Things
+## Yang dapat Dibubuhkan
 
 {width=25%}
 ![](images/scalaz-semigroup.png)
@@ -3014,15 +2953,8 @@ Lebih tepatnya, ada pada paket `scalaz.syntax` pada sumber kode scalaz.
   @typeclass trait Band[A] extends Semigroup[A]
 ~~~~~~~~
 
-A> `|+|` is known as the TIE Fighter operator. There is an Advanced TIE
-A> Fighter in an upcoming section, which is very exciting.
-A>
 A> `|+|` secara umum dikenal sebagai operator dasi. Ada dasi lanjutan
 A> pada bagian selanjutnya.
-
-A `Semigroup` can be defined for a type if two values can be combined. The
-operation must be *associative*, meaning that the order of nested operations
-should not matter, i.e.
 
 Sebuah `Semigroup` bisa didefinisikan sebagai sebuah tipe bila dua buah nilai
 bisa digabungkan. Operasi penggabungan tersebut harus *asosiatif* yang berarti
@@ -3035,9 +2967,6 @@ urutan dari operasi berlapis tidak boleh berpengaruh.
   (1 |+| 2) |+| 3 == 1 |+| (2 |+| 3)
 ~~~~~~~~
 
-A `Monoid` is a `Semigroup` with a *zero* element (also called *empty*
-or *identity*). Combining `zero` with any other `a` should give `a`.
-
 Sebuah `Monoid` merupakan sebuah `Semigroup` dengan elemen "*zero*" / *nol*
 (juga dikenal dengan elemen *kosong* atau *identitas*). Penggabungan `zero`
 dengan sebuah nilai `a` harus menghasilkan `a`.
@@ -3048,10 +2977,6 @@ dengan sebuah nilai `a` harus menghasilkan `a`.
   
   a |+| 0 == a
 ~~~~~~~~
-
-This is probably bringing back memories of `Numeric` from Chapter 4. There are
-implementations of `Monoid` for all the primitive numbers, but the concept of
-*appendable* things is useful beyond numbers.
 
 Pembicaraan ini membuat kita teringat tentang kennagan atas `Numeric` pada bab 4.
 Semua angka primitif mempunyai implementasi `Monoid`. Namun, konsep "*appendable*" /
@@ -3066,12 +2991,6 @@ Semua angka primitif mempunyai implementasi `Monoid`. Namun, konsep "*appendable
   res: List[Int] = List(1, 2, 3, 4)
 ~~~~~~~~
 
-`Band` has the law that the `append` operation of the same two
-elements is *idempotent*, i.e. gives the same value. Examples are
-anything that can only be one value, such as `Unit`, least upper
-bounds, or a `Set`. `Band` provides no further methods yet users can
-make use of the guarantees for performance optimisation.
-
 Ada hukum yang membatasi perilaku dari operasi `append` pada kelas tipe
 `Band`, salah satunya adalah penambahan dari dua elemen harus idempoten.
 Idempoten yang dimaksud disini adalah selalu memberikan nilai yang sama.
@@ -3080,20 +2999,9 @@ nilai saja. `Set` juga bisa digunakan. Walaupun `Band` tidak mempunyai
 metoda lain, pengguna dapat memanfaatkan properti ini untuk optimisasi
 performa.
 
-A> Viktor Klang, of Lightbend fame, lays claim to the phrase
-A> [effectively-once delivery](https://twitter.com/viktorklang/status/789036133434978304) for message processing with idempotent
-A> operations, i.e. `Band.append`.
-A>
 A> Orang kondang dari Lightbend, Viktor Klang, lah yang memperkenalkan
 A> istilah [eksekusi sekali saja](https://twitter.com/viktorklang/status/789036133434978304)
-A> untuk pemrosesan pesan idempoten. (lol, wtf is this?)
-
-As a realistic example for `Monoid`, consider a trading system that has a large
-database of reusable trade templates. Populating the default values for a new
-trade involves selecting and combining multiple templates, with a "last rule
-wins" merge policy if two templates provide a value for the same field. The
-"selecting" work is already done for us by another system, it is our job to
-combine the templates in order.
+A> untuk pemrosesan pesan idempoten.
 
 Sebuah contoh yang cukup realistis untuk `Monoid` adalah mengenai sebuah sistem
 *trading* yang mempunyai basis data templat jual beli yang sangat besar.
@@ -3102,10 +3010,6 @@ penggabungan dari banyak templat dengan aturan "aturan terbaru yang dipakai"
 bila ada dua templat sama sama menyediakan sebuah nilai untuk bidang yang sama.
 Proses pemilahan sendiri sudah dilakukan oleh sistem lain. Tugas kitalah
 yang menggabungkan templat templat tersebut.
-
-We will create a simple template schema to demonstrate the principle,
-but keep in mind that a realistic system would have a more complicated
-ADT.
 
 Kita akan membuat skema templat sederhana untuk menunjukkan prinsip
 penggunaan monad. Harap diingat bahwa sebuah sistem yang realistis tentu
@@ -3124,9 +3028,6 @@ mempunyai tipe data aljabar yang jauh lebih kompleks.
   )
 ~~~~~~~~
 
-If we write a method that takes `templates: List[TradeTemplate]`, we
-only need to call
-
 Bila kita menulis sebuah metoda yang menerima `templates: List[TradeTemplate]`,
 kita hanya perlu memanggil
 
@@ -3136,13 +3037,7 @@ kita hanya perlu memanggil
   templates.foldLeft(zero)(_ |+| _)
 ~~~~~~~~
 
-and our job is done!
-
 dan selesai.
-
-But to get `zero` or call `|+|` we must have an instance of
-`Monoid[TradeTemplate]`. Although we will generically derive this in a
-later chapter, for now we will create an instance on the companion:
 
 Tetapi, untuk bisa menggunakan `zero` atau memanggil `|+|`, kita harus
 mempunyai instans `Monoid[TradeTemplate]`. Walaupun kita bisa menurunkan
@@ -3162,9 +3057,6 @@ secara manual pada objek pasangan:
   }
 ~~~~~~~~
 
-However, this doesn't do what we want because `Monoid[Option[A]]` will append
-its contents, e.g.
-
 Yang disayangkan dari contoh di atas adalah `Monoid[Option[A]]` akan menambah
 konten dari `A`. Bisa dilihat dari hasil REPL berikut:
 
@@ -3175,9 +3067,6 @@ konten dari `A`. Bisa dilihat dari hasil REPL berikut:
   scala> Option(2) |+| Option(1)
   res: Option[Int] = Some(3)
 ~~~~~~~~
-
-whereas we want "last rule wins". We can override the default
-`Monoid[Option[A]]` with our own:
 
 sedangkan, yang kita inginkan adalah "yang digunakan adalah aturan terakhir".
 Kita dapat mengesampingkan nilai bawaan `Monoid[Option[A]]` dengan mengganti
@@ -3195,8 +3084,6 @@ dengan kode berikut:
     None
   )
 ~~~~~~~~
-
-Now everything compiles, let's try it out...
 
 Dan semua terkompil dengan baik.
 
@@ -3218,20 +3105,8 @@ Dan semua terkompil dengan baik.
                          Some(false))
 ~~~~~~~~
 
-All we needed to do was implement one piece of business logic and
-`Monoid` took care of everything else for us!
-
 Yang kita butuhkan hanyalah pengimplementasian sebuah logika bisnis
 dan `Monoid` menyelesaikan semuanya.
-
-Note that the list of `payments` are concatenated. This is because the
-default `Monoid[List]` uses concatenation of elements and happens to
-be the desired behaviour. If the business requirement was different,
-it would be a simple case of providing a custom
-`Monoid[List[LocalDate]]`. Recall from Chapter 4 that with compiletime
-polymorphism we can have a different implementation of `append`
-depending on the `E` in `List[E]`, not just the base runtime class
-`List`.
 
 Harap diperhatikan bahwa daftar `payments` digabungkan. Kenapa demikian?
 Karena perilaku bawaan dari `Monoid[List]` adalah menggabungkan elemen-elemen
@@ -3242,23 +3117,11 @@ saat kompilasi, kita bisa mendapatkan implementasi `append` yang berbeda
 sesuai dengan `E` pada `List[E]`.
 
 
-A> When we introduced typeclasses in Chapter 4 we said that there can only be one
-A> implementation of a typeclass for a given type parameter, e.g. there is only one
-A> `Monoid[Option[Boolean]]` in the application. *Orphan instances* such as
-A> `lastWins` are the easiest way to break coherence.
-A>
 A> Saat kita berkenalan dengan kelas tipe pada bab 4, saat itu kita
 A> berbicara bahwa implementasi kelas tipe untuk sebuah parameter tipe
 A> hanya boleh ada satu saja. Misalkan, hanya boleh ada satu `Monoid[Option[Boolean]]`
 A> pada aplikasi. *Orphan instance* semacam `lastWins` merupakan cara yang
 A> paling mudah untuk merusak koherensi kelas tipe kita.
-A> 
-A> We could try to justify locally breaking typeclass coherence by making
-A> `lastWins` private, but when we get to the `Plus` typeclass we will see a better
-A> way to implement our `Monoid`. When we get to tagged types, we will see an even
-A> better way: using `LastOption` instead of `Option` in our data model.
-A> 
-A> Please don't break typeclass coherence at home, kids.
 A>
 A> Bisa saja kita membuat pembenaran atas perusakan koherensi kelas tipe
 A> dengan menjadikan `lastWins` metoda privat. Namun, saat kita sampai
@@ -3269,14 +3132,7 @@ A> tahu cara terbaik adalah dengan menggunakan `LastOption`, bukan `Option`,
 A> pada model data kita.
 
 
-## Objecty Things
-
-In the chapter on Data and Functionality we said that the JVM's notion
-of equality breaks down for many things that we can put into an ADT.
-The problem is that the JVM was designed for Java, and `equals` is
-defined on `java.lang.Object` whether it makes sense or not. There is
-no way to remove `equals` and no way to guarantee that it is
-implemented.
+## Semacam Objek
 
 Pada bab mengenai Data dan Fungsionalitas, kita secara sekilas menyimpulkan
 mengenai gagasan JVM atas persamaan menghancurkan banyak hal yang bisa
@@ -3284,9 +3140,6 @@ kita masukkan ke dalam sebuah ADT. Permasalahan mendasar mengenai hal ini
 adalah JVM didesain untuk Java. Dan Java sendiri, `equals` didefinisikan
 pada `java.lang.Object`. Hal ini diperparah dengan kenyataan bahwa metoda
 tersebut tidak bisa dihapus dan tidak ada jaminan bahwa pasti sudah diimplementasikan.
-
-However, in FP we prefer typeclasses for polymorphic functionality and even the
-concept of equality is captured at compiletime.
 
 Untungnya, pada pemprograman fungsional, kita lebih memilih untuk menggunakan
 kelas tipe untuk memenuhi kebutuhun atas fungsionalitas polimorfis.
@@ -3303,38 +3156,20 @@ Ditambah dengan konsep persamaan diperiksa pada saat waktu kompilasi.
   }
 ~~~~~~~~
 
-Indeed `===` (*triple equals*) is more typesafe than `==` (*double
-equals*) because it can only be compiled when the types are the same
-on both sides of the comparison. This catches a lot of bugs.
-
 Dan faktanya, `===` adalah lebih aman dibandingkan `==` yang hanya bisa
 dikompilasi bila tipe dari kedua belah sisi operator ini mempunyai tipe
 yang sama. Kita bisa mengatakan bahwa operator ini salah satu jaring
 pengaman yang bagus.
 
-`equal` has the same implementation requirements as `Object.equals`
-
 `equal` mempunyai persyaratan implementasi yang sama dengan `Object.equals`
-
--   *commutative* `f1 === f2` implies `f2 === f1`
--   *reflexive* `f === f`
--   *transitive* `f1 === f2 && f2 === f3` implies `f1 === f3`
 
 -   *komutatif* `f1 === f2` yang juga sama dengan `f2 === f1`
 -   *refleksif* `f === f`
 -   *tarnsitif* `f1 === f2 && f2 === f3` yang juga sama dengan `f1 === f3`
 
-By throwing away the universal concept of `Object.equals` we don't
-take equality for granted when we construct an ADT, stopping us at
-compiletime from expecting equality when there is none.
-
 Dengan membuang konsep umum `Object.equals`, kita tidak akan menyia-nyiakan
 persamaan saat kita menyusun sebuah ADT. Selain itu, kita tak akan mendapatkan
 harapan palsu akan persamaan dimana sebenarnya tidak pernah ada.
-
-Continuing the trend of replacing old Java concepts, rather than data
-*being a* `java.lang.Comparable`, they now *have an* `Order` according
-to:
 
 Melanjutkan tren pengubahan konsep Java, data tidak lagi *merupakan*
 `java.lang.Comparable` namun *memiliki* `Order`, berdasarkan:
@@ -3363,12 +3198,6 @@ Melanjutkan tren pengubahan konsep Java, data tidak lagi *merupakan*
   }
 ~~~~~~~~
 
-`Order` implements `.equal` in terms of the new primitive `.order`. When a
-typeclass implements a parent's *primitive combinator* with a *derived
-combinator*, an **implied law of substitution** for the typeclass is added. If an
-instance of `Order` were to override `.equal` for performance reasons, it must
-behave identically the same as the original.
-
 `Order` mengimplementasikan `.equal` dalam primitif baru `.order`. Ketika
 sebuah kelas tipe mengimplementasikan *kombinator primitif* bapaknya dengan
 sebuah *kombinator turunan*, maka **hukum substitusi** untuk kelas
@@ -3381,7 +3210,7 @@ Things that have an order may also be discrete, allowing us to walk
 successors and predecessors:
 
 Objek-objek yang mempunyai order bisa jadi juga merupakan objek diskrit,
-hal ini memberikan kita ruang untuk walk successors and predecessors (lol, wat?)
+hal ini memberikan kita ruang untuk memeriksa objek sebelum dan sesudahnya:
 
 {lang="text"}
 ~~~~~~~~
@@ -3410,25 +3239,13 @@ hal ini memberikan kita ruang untuk walk successors and predecessors (lol, wat?)
   res: List[Char] = List(m, n, o, p, q, r, s, t, u)
 ~~~~~~~~
 
-A> `|-->` is Scalaz's Lightsaber. This is the syntax of a Functional
-A> Programmer. Not as clumsy or random as `fromStepToL`. An elegant
-A> syntax... for a more civilised age.
-A>
 A> `|-->` merupakan *Lightsaber* dari Scalaz. Pengguna pemrograman fungsional
 A> biasa menggunakan sintaks seperti ini.
-
-We will discuss `EphemeralStream` in the next chapter, for now we just need to
-know that it is a potentially infinite data structure that avoids the memory
-retention problems in the stdlib `Stream`.
 
 Kita akan berdiskusi mengenai `EphemeralStream` pada bab berikutnya. Untuk
 saat ini, kita hanya perlu tahu bahwa tipe data ini bisa digunakan untuk menyusun
 struktur data tak hingga tanpa harus kuatir mengenai masalah memori sebagaimana
 struktur data `Stream` dari pustaka standar.
-
-Similarly to `Object.equals`, the concept of `.toString` on every `class` does
-not make sense in Java. We would like to enforce stringyness at compiletime and
-this is exactly what `Show` achieves:
 
 Sama halnya dengan `Object.equals`, konsep `.toString` yang ada pada tiap kelas
 sangat tidak masuk akal di Java. Idealnya, kita harus memastikan bahwa sebuah
@@ -3443,18 +3260,11 @@ Untuk mendapatkan hasil tersebut, kita dapat menggunakan `Show`:
   }
 ~~~~~~~~
 
-We will explore `Cord` in more detail in the chapter on data types, we need only
-know that it is an efficient data structure for storing and manipulating
-`String`.
-
 Kita akan membahas `Cord` lebih mendetail pada bab selanjutnya mengenai tipe data.
 Untuk saat ini, kita hanya perlu tahu bahwa `Cord` merupakan struktur data yang
 efisien yang dipergunakan untuk menyimpan dan memanipulasi `String`.
 
-## Mappable Things
-
-We're focusing on things that can be mapped over, or traversed, in
-some sense:
+## Yang Dapat Dipetakan
 
 Kita akan fokus pada benda benda yang bisa dipetakan atau dilalui:
 
@@ -3462,7 +3272,7 @@ Kita akan fokus pada benda benda yang bisa dipetakan atau dilalui:
 ![](images/scalaz-mappable.png)
 
 
-### Functor
+### Fungtor
 
 {lang="text"}
 ~~~~~~~~
@@ -3481,11 +3291,7 @@ Kita akan fokus pada benda benda yang bisa dipetakan atau dilalui:
   }
 ~~~~~~~~
 
-The only abstract method is `map`, and it must *compose*, i.e. mapping
-with `f` and then again with `g` is the same as mapping once with the
-composition of `f` and `g`:
-
-Satu-satunya metoda abstrak adalah `map` yang harus bisa menggabungkan
+Satu-satunya metoda abstrak adalah `map` yang harus bisa *menggabungkan*
 dua fungsi. Sebagai contoh, memetakan `f` dan dilanjutkan dengan `g`
 sama dengan memetakan dengan hasil komposisi dari `f` dan `g`:
 
@@ -3493,9 +3299,6 @@ sama dengan memetakan dengan hasil komposisi dari `f` dan `g`:
 ~~~~~~~~
   fa.map(f).map(g) == fa.map(f.andThen(g))
 ~~~~~~~~
-
-The `map` should also perform a no-op if the provided function is
-`identity` (i.e. `x => x`)
 
 `map` juga harus melakukan no-op bila fungsi yang disediakan berupa
 fungsi `identity` (`x => x`).
@@ -3507,15 +3310,11 @@ fungsi `identity` (`x => x`).
   fa.map(x => x) == fa
 ~~~~~~~~
 
-`Functor` defines some convenience methods around `map` that can be optimised by
-specific instances. The documentation has been intentionally omitted in the
-above definitions to encourage guessing what a method does before looking at the
-implementation. Please spend a moment studying only the type signature of the
-following before reading further:
-
-`Functor` mendefinisikan beberapa metoda pembantu untuk `map` yang bisa dioptimisasi
-dengan instans khusus. Sangat disarankan untuk memperhatikan dengan seksama atas
-type signature berikut sebelum melanjutkan seksi ini:
+`Functor` mendefinisikan beberapa metoda pembantu untuk `map` yang bisa dioptimalkan
+dengan instans khusus. Dokumentasi memang sengaja dihilangkan pada definisi diatas
+agar pembaca budiman memnebak apa yang sebuah metoda lakukan sebelum melihat
+ke implementasi dari metoda tersebut. Sangat disarankan untuk memperhatikan dengan
+penanda tipe dengan seksama berikut sebelum melanjutkan seksi ini:
 
 {lang="text"}
 ~~~~~~~~
@@ -3530,25 +3329,6 @@ type signature berikut sebelum melanjutkan seksi ini:
   def lift[A, B](f: A => B): F[A] => F[B]
   def mapply[A, B](a: A)(f: F[A => B]): F[B]
 ~~~~~~~~
-
-1.  `void` takes an instance of the `F[A]` and always returns an
-    `F[Unit]`, it forgets all the values whilst preserving the
-    structure.
-2.  `fproduct` takes the same input as `map` but returns `F[(A, B)]`,
-    i.e. it tuples the contents with the result of applying the
-    function. This is useful when we wish to retain the input.
-3.  `fpair` twins all the elements of `A` into a tuple `F[(A, A)]`
-4.  `strengthL` pairs the contents of an `F[B]` with a constant `A` on
-    the left.
-5.  `strengthR` pairs the contents of an `F[A]` with a constant `B` on
-    the right.
-6.  `lift` takes a function `A => B` and returns a `F[A] => F[B]`. In
-    other words, it takes a function over the contents of an `F[A]` and
-    returns a function that operates **on** the `F[A]` directly.
-7.  `mapply` is a mind bender. Say we have an `F[_]` of functions `A
-       => B` and a value `A`, then we can get an `F[B]`. It has a similar
-    signature to `pure` but requires the caller to provide the `F[A =>
-       B]`.
 
 1.  `void` menerima sebuah instans dari `F[A]` dan selalu mengembalikan
     `F[Unit]`. Metoda ini selalu menghapus semua nilai sembari menjaga
@@ -3572,16 +3352,10 @@ type signature berikut sebelum melanjutkan seksi ini:
     mirip dengan `pure`, namun mengharuskan pemanggil fungsi ini untuk
     mempunyai `F[A => B]`.
 
-`fpair`, `strengthL` and `strengthR` look pretty useless, but they are
-useful when we wish to retain some information that would otherwise be
-lost to scope.
-
 Secara sekilas, `fpair`, `strengthL`, dan `strengthR` terlihat tidak berguna.
 Namun, kita bisa menggunakannya saat kita ingin tetap menggunakan informasi
 yang bisa jadi hilang saat keluar dari cakupan fungsi. Misal, indeks dari
 sebuah `List` atau `Set` saat melakukan `traverse`.
-
-`Functor` has some special syntax:
 
 `Functor` punya beberapa sintaks khusus, antara lain:
 
@@ -3593,18 +3367,9 @@ sebuah `List` atau `Set` saat melakukan `traverse`.
   }
 ~~~~~~~~
 
-`.as` and `>|` are a way of replacing the output with a constant.
-
 `.as` dan `>|` digunakan untuk mengganti keluaran fungsi dengan sebuah
 konstanta.
 
-A> When Scalaz provides additional functionality as syntax, rather than on the
-A> typeclass itself, it is because of binary compatibility.
-A> 
-A> When a `X.Y.0` version of Scalaz is released, it is not possible to add methods
-A> to typeclasses in that release series for Scala 2.10 and 2.11. It is therefore
-A> worth reading both the typeclass source and its syntax.
-A>
 A> Ketika Scalaz menyediakan fungsionalitas tambahan dalam bentuk sintaks, hal
 A> ini dilakukan dengan alasan kompatibilitas biner.
 A>
@@ -3613,12 +3378,8 @@ A> metoda ke kelas tipe untuk versi tersebut. Apalagi dengan kewajiban atas duku
 A> terhadap Scala versi 2.10 dan 2.11. Maka dari itu, sangat dianjurkan untuk
 A> mempelajari kode sumber dan sintaks dari kelas tipe.
 
-In our example application, as a nasty hack (which we didn't even
-admit to until now), we defined `start` and `stop` to return their
-input:
-
-Pada contoh aplikasi kita, terdapat sebuah retas (lol, help) yang tidak kita
-ungkap sampai sekarang. Retasan adalah pendefinisian `start` dan `stop`
+Pada contoh aplikasi kita, terdapat sebuah tambalan yang tidak kita
+ungkap sampai sekarang. Tambalan tersebut adalah pendefinisian `start` dan `stop`
 untuk mengembalikan input:
 
 {lang="text"}
@@ -3627,9 +3388,7 @@ untuk mengembalikan input:
   def stop (node: MachineNode): F[MachineNode]
 ~~~~~~~~
 
-This allowed us to write terse business logic such as
-
-Pendefinisian diatas memberikan kita jalan untuk menulis logika
+Pendefinisian diatas memperkenankan kita untuk menulis logika
 bisnis yang ringkas seperti
 
 {lang="text"}
@@ -3651,10 +3410,7 @@ dan
   } yield update
 ~~~~~~~~
 
-But this hack pushes unnecessary complexity into the implementations. It is
-better if we let our algebras return `F[Unit]` and use `as`:
-
-Namun, retasan ini melimpahkan kompleksitas ke bagian implementasi secara mubazir.
+Namun, tambalan ini melimpahkan kompleksitas ke bagian implementasi secara mubazir.
 Sungguh, jauh lebih disukai bila kita mendesain aljabar kita untuk
 mengembalikan `F[Unit]` dan menggunakan `as`:
 
@@ -3675,19 +3431,12 @@ dan
 ~~~~~~~~
 
 
-### Foldable
-
-Technically, `Foldable` is for data structures that can be walked to produce a
-summary value. However, this undersells the fact that it is a one-typeclass army
-that can provide most of what we would expect to see in a Collections API.
+### *Foldable*
 
 Secara teknis, `Foldable` merupakan struktur data yang bisa langkahi satu-per-satu
 untuk menghasilkan sebuah nilai ijmal. Namun, terlalu meremehkan bila kita hanya
 berhenti sampai disitu. Kenyataannya, `Foldable` merupakan kelas tipe yang
 bisa menjawab hampir semua apa yang diharapkan dari sebuah Koleksi APA.
-
-There are so many methods we are going to have to split them out,
-beginning with the abstract methods:
 
 Berhubung kelas tipe ini mempunyai begitu banyak metoda, ada baiknya
 kita pecah pecah. Dimulai dengan metoda abstrak:
@@ -3700,19 +3449,10 @@ kita pecah pecah. Dimulai dengan metoda abstrak:
     def foldLeft[A, B](fa: F[A], z: B)(f: (B, A) => B): B = ...
 ~~~~~~~~
 
-An instance of `Foldable` need only implement `foldMap` and
-`foldRight` to get all of the functionality in this typeclass,
-although methods are typically optimised for specific data structures.
-
 Secara teori, untuk mendapatkan semua fungsionalitas dari kelas tipe `Foldable`,
 sebuah instans hanya perlu mengimplementasikan `foldMap` dan `foldRight`.
 Walaupun pada kenyataannya, banyak sekali metoda lain yang diimplementasikan
 sesuai dengan struktur data yang dibutuhkan agar waktu jalan lebih optimal.
-
-`.foldMap` has a marketing buzzword name: **MapReduce**. Given an `F[A]`, a
-function from `A` to `B`, and a way to combine `B` (provided by the `Monoid`,
-along with a zero `B`), we can produce a summary value of type `B`. There is no
-enforced operation order, allowing for parallel computation.
 
 Di pasaran, santer terdengar istilah keren **MapReduce**. Pada Scala
 sendiri, istilah tersebut dikenal dengan `.foldMap`. `.foldMap` sendiri
@@ -3723,24 +3463,12 @@ untuk menghasilkan nilai ijmal `B`. Selain itu, tidak ada urutan operasi
 dari fungsi yang memetakan `A` ke `B`. Sehingga, memungkinkan untuk
 dilakukannya komputasi paralel.
 
-`foldRight` does not require its parameters to have a `Monoid`,
-meaning that it needs a starting value `z` and a way to combine each
-element of the data structure with the summary value. The order for
-traversing the elements is from right to left and therefore it cannot
-be parallelised.
-
 Untuk `foldRight`, metoda ini tidak memaksa parameternya untuk mempunyai
 instans `Monoid` walau harus menerima sebuah nilai awal `z` dan cara
 penggabungan tiap elemen dari struktur data. Selain itu, urutan pelangkahan
 dari elemen elemen input adalah dari kiri ke kanan. Hal ini juga berarti
 bahwa metoda ini tidak bisa dijalankan secara paralel.
 
-A> `foldRight` is conceptually the same as the `foldRight` in the Scala
-A> stdlib. However, there is a problem with the stdlib `foldRight`
-A> signature, solved in Scalaz: very large data structures can stack
-A> overflow. `List.foldRight` cheats by implementing `foldRight` as a
-A> reversed `foldLeft`
-A>
 A> Secara konsep, `foldRight` dari Scalaz mempunyai perilaku yang sama
 A> dengan `foldRight` yang disediakan oleh pustaka standar. Salah satu
 A> yang menjadikan metoda dari Scalaz lebih unggul dibandingkan dengan
@@ -3754,10 +3482,6 @@ A>   override def foldRight[B](z: B)(op: (A, B) => B): B =
 A>     reverse.foldLeft(z)((right, left) => op(left, right))
 A> ~~~~~~~~
 A> 
-A> but the concept of reversing is not universal and this workaround cannot be used
-A> for all data structures. Say we want to find a small number in a `Stream`, with
-A> an early exit:
-A>
 A> namun, konsep pembalikkan seperti ini tidaklah universal. Banyak struktur data
 A> tidak bisa ditangani dengan menggunakan pembalikan seperti ini. Misal, kita
 A> ingin mencari beberapa nilai kecil di sebuah `Stream` dengan penyelesaian dini:
@@ -3773,9 +3497,6 @@ A>     at scala.collection.Iterator.toStream(Iterator.scala:1403)
 A>     ...
 A> ~~~~~~~~
 A> 
-A> Scalaz solves the problem by taking a *byname* parameter for the
-A> aggregate value
-A>
 A> Scalaz menyelesaikan masalah ini dengan mengambil sebuah parameter
 A> panggilan untuk nilai agregat
 A> 
@@ -3785,14 +3506,8 @@ A>   scala> (1 |=> 100000).foldRight(false)(el => acc => isSmall(el) || acc )
 A>   res: Boolean = true
 A> ~~~~~~~~
 A> 
-A> which means that the `acc` is not evaluated unless it is needed.
-A>
 A> yang berarti `acc` tidak akan dievaluasi sebelum nilai tersebut benar
 A> benar dibutuhkan.
-A> 
-A> It is worth baring in mind that not all operations are stack safe in
-A> `foldRight`. If we were to require evaluation of all elements, we can
-A> also get a `StackOverflowError` with Scalaz's `EphemeralStream`
 A>
 A> Juga harap dipahami bahwa tidak semua operasi tidak berbahaya bagi
 A> *stack memory* saat menggunakan `foldRight`. Bila kita benar-benar
@@ -3807,23 +3522,11 @@ A>     at scalaz.Foldable.$anonfun$foldr$1(Foldable.scala:100)
 A>     ...
 A> ~~~~~~~~
 
-`foldLeft` traverses elements from left to right. `foldLeft` can be
-implemented in terms of `foldMap`, but most instances choose to
-implement it because it is such a basic operation. Since it is usually
-implemented with tail recursion, there are no *byname* parameters.
-
 `foldLeft` melangkahi semua elemen dari kiri ke kanan. Untuk mengimplementasikan
 `foldLeft`, kita bisa menggunakan `foldMap` walau kebanyakan instans
 juga mengimplementasikan sendiri `foldLeft` khusus untuk instans tersebut.
 Hal lain yang patut diperhatikan adalah implementasi metoda ini berupa
 rekursi akhir, `foldLeft` tidak menggunakan parameter panggilan.
-
-The only law for `Foldable` is that `foldLeft` and `foldRight` should
-each be consistent with `foldMap` for monoidal operations. e.g.
-appending an element to a list for `foldLeft` and prepending an
-element to a list for `foldRight`. However, `foldLeft` and `foldRight`
-do not need to be consistent with each other: in fact they often
-produce the reverse of each other.
 
 Hukum yang mengatur `Foldable` hanya ada satu, yaitu `foldLeft` dan
 `foldRight` harus konsisten dengan `foldMap` untuk operasi monoidal.
@@ -3833,12 +3536,10 @@ akhir dari sebuah list untuk `foldRight`.
 Di sisi lain, `foldLeft` dan `foldRight` tidak harus selalu konsisten
 satu sama lain. Bahkan, seringkali mereka mempunyai hasil yang berlawanan.
 
-The simplest thing to do with `foldMap` is to use the `identity`
-function, giving `fold` (the natural sum of the monoidal elements),
-with left/right variants to allow choosing based on performance
-criteria:
-
-Saya tidak paham paragraf ini. (lol, tulung!)
+Hal yang paling sederhana untuk dilakukan pada `foldMap` adalah menggunakan
+fungsi `identity` yang menghasilkan `fold` (ijmal natural dari elemen monoidal)
+dengan varian kiri/kanan agar dapat memperkenankan pemilihan berdasarkan
+kriteria performa:
 
 {lang="text"}
 ~~~~~~~~
@@ -3847,16 +3548,12 @@ Saya tidak paham paragraf ini. (lol, tulung!)
   def suml[A: Monoid](fa: F[A]): A = ...
 ~~~~~~~~
 
-Recall that when we learnt about `Monoid`, we wrote this:
-
 Mengulang apa yang kita pelajari tentang `Monoid`, kita menulis:
 
 {lang="text"}
 ~~~~~~~~
   scala> templates.foldLeft(Monoid[TradeTemplate].zero)(_ |+| _)
 ~~~~~~~~
-
-We now know this is silly and we should have written:
 
 Namun, kode di atas bisa ditulis ulang menjadi
 
@@ -3869,15 +3566,9 @@ Namun, kode di atas bisa ditulis ulang menjadi
                          Some(false))
 ~~~~~~~~
 
-`.fold` doesn't work on stdlib `List` because it already has a method
-called `fold` that does it is own thing in its own special way.
-
 Sayangnya, `.fold` tidak bisa dipanggil dari `List` milik pustaka standar.
 Hal ini dikarenakan `List` sudah memiliki metoda dengan nama `fold` yang
 berbeda dengan metoda `fold` dari kelas tipe `Foldable`.
-
-The strangely named `intercalate` inserts a specific `A` between each
-element before performing the `fold`
 
 Untuk metoda `intercalate`, metoda ini menyisipkan sebuah `A` spesifik
 diantara elemen sebelum melakukan operasi `fold`
@@ -3887,19 +3578,14 @@ diantara elemen sebelum melakukan operasi `fold`
   def intercalate[A: Monoid](fa: F[A], a: A): A = ...
 ~~~~~~~~
 
-which is a generalised version of the stdlib's `mkString`:
-
-metoda ini bisa dianggap sebagai metoda `mkString` yang diumumkan
-dari pustaka standar:
+metoda ini bisa dianggap sebagai metoda `mkString` dari pustaka standar
+yang diumumkan:
 
 {lang="text"}
 ~~~~~~~~
   scala> List("foo", "bar").intercalate(",")
   res: String = "foo,bar"
 ~~~~~~~~
-
-The `foldLeft` provides the means to obtain any element by traversal
-index, including a bunch of other related methods:
 
 `foldLeft` menyediakan kita cara untuk mendapatkan elemen manapun dengan
 melangkahi semua elemen satu per satu, termasuk dengan beberapa metoda
@@ -3915,12 +3601,6 @@ lainnya:
   def element[A: Equal](fa: F[A], a: A): Boolean = ...
 ~~~~~~~~
 
-Scalaz is a pure library of only *total functions*. Whereas `List(0)` can throw
-an exception, `Foldable.index` returns an `Option[A]` with the convenient
-`.indexOr` returning an `A` when a default value is provided. `.element` is
-similar to the stdlib `.contains` but uses `Equal` rather than ill-defined JVM
-equality.
-
 Berbeda dengan `List(0)` yang sangat mungkin melempar eksepsi, `Foldable.index`
 lebih memilih untuk mengembalikan sebuah `Option[A]` atau bisa juga dengan
 mengembalikan sebuah `A` bila menggunakan `.indexOr` (dengan sebuah nilai
@@ -3928,24 +3608,16 @@ bawaan `A`). Sama halnya dengan `.contains` punya pustaka standar yang menggunak
 persamaan standar dari JVM, Scalaz menyediakan `.element` yang menggunakan `Equal`
 yang jauh lebih unggul.
 
-These methods *really* sound like a collections API. And, of course,
-anything with a `Foldable` can be converted into a `List`
-
-Dan yang paling utama, `Foldable` bisa diubah menjadi `List`.
+Metoda ini *sangat* terlihat mirip dengan APA koleksi. Dan yang paling utama,
+`Foldable` bisa diubah menjadi `List`.
 
 {lang="text"}
 ~~~~~~~~
   def toList[A](fa: F[A]): List[A] = ...
 ~~~~~~~~
 
-There are also conversions to other stdlib and Scalaz data types such
-as `.toSet`, `.toVector`, `.toStream`, `.to[T <: TraversableLike]`,
-`.toIList` and so on.
-
 Selain itu, konversi ke tipe data lain juga ada. Sebagai contoh, `.toStream`,
 `.toSet`, `.toVector`, `.to[T <: TraversableLike]`, dan lain sebagainya.
-
-There are useful predicate checks
 
 Untuk pengecekan predikat, Foldable menyediakan
 
@@ -3956,10 +3628,6 @@ Untuk pengecekan predikat, Foldable menyediakan
   def any[A](fa: F[A])(p: A => Boolean): Boolean = ...
 ~~~~~~~~
 
-`filterLength` is a way of counting how many elements are `true` for a
-predicate, `all` and `any` return `true` if all (or any) element meets
-the predicate, and may exit early.
-
 Untuk memeriksa jumlah elemen yang bernilai `true` terhadap sebuah predikat,
 kita bisa menggunakan `filterLength`. Sedangkan untuk memeriksa apakah
 semua elemen bernilai `true`, `all` adalah fungsi yang tepat guna.
@@ -3969,18 +3637,12 @@ bernilai `true` terhadap predikat yang disediakan.
 A> We've seen the `NonEmptyList` in previous chapters. For the sake of
 A> brevity we use a type alias `Nel` in place of `NonEmptyList`.
 A>
-A> ??? (lol, intensi tidak jelas. mungkin menyingkat `NonEmptyList` jadi `Nel`.)
-A>
-A> We've also seen `IList` in previous chapters, recall that it is an
-A> alternative to stdlib `List` with impure methods, like `apply`,
-A> removed.
+A> Kita telah melihat `NonEmptyList` pada bab sebelumnya. Demi keringkasan,
+A> kita akan menggunakan alias tipe `Nel` sebagai ganti `NonEmptyList`.
 A>
 A> Kita juga sudah diperkenalkan kepadaa `IList` sebagai alternatif
 A> untuk `List` pustaka standar dengan menghilangkan metoda tidak murni (lol, pure)
 A> seperti `apply`.
-
-We can split an `F[A]` into parts that result in the same `B` with
-`splitBy`
 
 Untuk memecah sebuah `F[A]` menjadi beberapa bagian, kita bisa menggunakan
 `splitBy`
@@ -4004,36 +3666,19 @@ sebagai contoh
   res = [(f, [foo]), (b, [bar, bar]), (f, [faz]), (g, [gaz]), (b, [baz])]
 ~~~~~~~~
 
-noting that there are two values indexed by `'b'`.
-
 patut diperhatikan bahwa ada dua nilai dengan indeks `'b'`.
-
-`splitByRelation` avoids the need for an `Equal` but we must provide
-the comparison operator.
 
 Bilamana sebuah list objek `A` yang  tidak memiliki kelas tipe `Equal`
 namun kita ingin memecahnya menjadi beberapa bagian, kita bisa menggunakan
 `splitByRelation` yang meminta operator pembanding sebagai gantinya.
-
-`splitWith` splits the elements into groups that alternatively satisfy
-and don't satisfy the predicate. `selectSplit` selects groups of
-elements that satisfy the predicate, discarding others. This is one of
-those rare occasions when two methods share the same type signature
-but have different meanings.
 
 Bisa juga kita memecah sebuah `Foldable` menjadi dua bagian, satu bagian
 memenuhi sebuah predikat, dan sebaliknya, dengan menggunakan `splitWith`.
 Sedangkan untuk memilih himpunan yang memenuhi predikat sembari membuang
 yang lain, kita menggunakan `selectSplit`.
 
-`findLeft` and `findRight` are for extracting the first element (from
-the left, or right, respectively) that matches a predicate.
-
 Untuk `findLeft` dan `findRight` sendiri, metoda ini mengambil elemen
 pertama dari kiri atau kanan yang sesuai dengan predikat.
-
-Making further use of `Equal` and `Order`, we have the `distinct`
-methods which return groupings.
 
 Dengan menggunakan `Equal` dan `Order`, kita juga mendapat metoda lain
 yang mengembalikan himpunan.
@@ -4045,12 +3690,6 @@ yang mengembalikan himpunan.
   def distinctBy[A, B: Equal](fa: F[A])(f: A => B): IList[A] =
 ~~~~~~~~
 
-`distinct` is implemented more efficiently than `distinctE` because it
-can make use of ordering and therefore use a quicksort-esque algorithm
-that is much faster than the stdlib's naive `List.distinct`. Data
-structures (such as sets) can implement `distinct` in their `Foldable`
-without doing any work.
-
 `distinct`, secara pengimplementasian, lebih efisien bila dibandingkan
 dengan `distinctE`. Hal ini disebabkan karena `distinct` menggunakan
 pengurutan (menggunakan `Order`) sehingga menggunakan algoritma yang
@@ -4058,24 +3697,15 @@ mirip dengan quicksort yang relatif lebih cepat bila dibandingkan dengan
 menggunakan `List.distinct` dari pustaka standar. Keuntungan lain
 adalah struktur data semacam set secara otomatis mempunyai `distinct`.
 
-`distinctBy` allows grouping by the result of applying a function to
-the elements. For example, grouping names by their first letter.
-
 Untuk mengelompokkan berdasarkan dari hasi sebuah fungsi atas tiap elemen,
 kita bisa menggunakan `distinctBy`. Sebagai contoh, kita bisa mengelompokkan
 nama berdasarkan huruf pertama.
 
-We can make further use of `Order` by extracting the minimum or
-maximum element (or both extrema) including variations using the `Of`
-or `By` pattern to first map to another type or to use a different
-type to do the order comparison.
-
-Masih dengan gigi dua, kita akan menggunakan `Order` lebih jauh untuk
-mengekstrak elemen dengan nilai terkecil maupun terbesar dari sebuah
-`Foldable`. Lebih lanjut lagi, kita juga akan menggunakan pola varian `Of`
-dan `By` untuk memetakan elemen elemen tadi ke tipe lain ataupun
-menggunakan tipe lain sebagai pembanding.
-(lol, help!)
+Kita dapat menggunakan `Order` lebih lanjut untuk mengekstrak elemen dengan
+nilai terkecil maupun terbesar dari sebuah `Foldable`. Lebih lanjut lagi,
+kita juga akan menggunakan pola varian `Of` dan `By` untuk memetakan
+elemen-elemen tadi ke tipe lain ataupun menggunakan tipe lain sebagai
+pembanding urutan.
 
 {lang="text"}
 ~~~~~~~~
@@ -4092,13 +3722,10 @@ menggunakan tipe lain sebagai pembanding.
   def extremaBy[A, B: Order](fa: F[A])(f: A => B): Option[(A, A)] =
 ~~~~~~~~
 
-For example we can ask which `String` is maximum `By` length, or what
-is the maximum length `Of` the elements.
-
 Sebagai contoh, kita bisa memeriksa `String` manakah mempunyai nilai
 paling besar berdasarkan panjang dengan menggunakan varian `By`.
 Bisa juga kita mencari nilai paling besar dari elemen-elemen yang ada
-dengan menggunakan varian `Of`. (lol, ilang penggunaan `By` dan `Of`)
+dengan menggunakan varian `Of`.
 
 {lang="text"}
 ~~~~~~~~
@@ -4109,17 +3736,10 @@ dengan menggunakan varian `Of`. (lol, ilang penggunaan `By` dan `Of`)
   res: Option[Int] = Some(4)
 ~~~~~~~~
 
-This concludes the key features of `Foldable`. The takeaway is that anything
-we'd expect to find in a collection library is probably on `Foldable` and if it
-isn't already, it probably should be.
-
 Dengan ini, fitur utama dari `Foldable` sudah digambarkan secara sekilas.
 Dan hikmah yang bisa kita ambil dari sub-bab ini adalah apapun yang bisa
 kita gunakan pada pustaka *collection*, kita juga bisa mendapatkannya
 pada `Foldable`.
-
-We will conclude with some variations of the methods we've already seen.
-First there are methods that take a `Semigroup` instead of a `Monoid`:
 
 Kita akan menutup sub-bab ini dengan beberapa variasi metoda yang sudah
 kita lihat sebelumnya. Pertama, berikut adalah metoda yang menerima
@@ -4134,29 +3754,15 @@ subah `Semigroup`, bukan `Monoid`:
   ...
 ~~~~~~~~
 
-returning `Option` to account for empty data structures (recall that
-`Semigroup` does not have a `zero`).
-
 yang mengembalikan `Option` dengan pertimbangan struktur data yang kosong. 
 (Harap ingat, `Semigroup` tidak mempunyai `zero`)
 
-A> The methods read "one-Option", not `10 pt` as in typesetting.
-A>
 A> Metoda tersebut menggunakan "satu-Option" bukan `10pt`
-
-The typeclass `Foldable1` contains a lot more `Semigroup` variants of
-the `Monoid` methods shown here (all suffixed `1`) and makes sense for
-data structures which are never empty, without requiring a `Monoid` on
-the elements.
 
 Kelas tipe `Foldable1` berisi jauh lebih banyak varian `Semigroup` dari
 metoda `Monoid` bila dibandingkan dengan yang ditampilkan di sini.
 Dan hal itu dirasa masuk akal untuk struktur data yang tidak bisa kosong,
 tanpa harus memaksa elemen elemennya mempunyai kelas `Monoid`.
-
-Importantly, there are variants that take monadic return values. We already used
-`foldLeftM` when we first wrote the business logic of our application, now we
-know that it is from `Foldable`:
 
 Tidak kalah penting, ada beberapa varian yang menerima nilai nilai kembalian monadik.
 Kita juga telah menggunakan `foldLeftM` saat kita menulis logika bisnis dari
@@ -4175,9 +3781,7 @@ Sekarang, kita tahu dari mana asal fungsi tersebut.
 ~~~~~~~~
 
 
-### Traverse
-
-`Traverse` is what happens when we cross a `Functor` with a `Foldable`
+### *Traverse*
 
 `Traverse` bisa dikatakan sebagai penggabungan antara `Functor` dan `Foldable`
 
@@ -4200,26 +3804,14 @@ Sekarang, kita tahu dari mana asal fungsi tersebut.
   }
 ~~~~~~~~
 
-At the beginning of the chapter we showed the importance of `traverse`
-and `sequence` for swapping around type constructors to fit a
-requirement (e.g. `List[Future[_]]` to `Future[List[_]]`).
-
 Pada awal bab, kita telah menunjukkan mengenai pentingnya `traverse` dan
 `sequence` untuk membolak-balik konstruktor tipe agar sesuai dengan *requirement*.
 Sebagai contoh, `List[Future[_]]` menjadi `Future[List[_]]`.
-
-In `Foldable` we weren't able to assume that `reverse` was a universal
-concept, but now we can reverse a thing.
 
 Tidak seperti `Foldable` dimana kita tidak dapat serta merta mengasumsikan
 bahwa `reverse` adalah sebuah hak asasi, dengan `Traverse` kita dapat
 dengan santai membolak-balik sesuatu.
 
-We can also `zip` together two things that have a `Traverse`, getting
-back `None` when one side runs out of elements, using `zipL` or `zipR`
-to decide which side to truncate when the lengths don't match. A
-special case of `zip` is to add an index to every entry with
-`indexed`.
 
 Selain itu, kita juga bisa merekatkan dua buah objek yang mempunyai `Traverse`
 menjadi `F[(A, B)]`. Namun, harap diingat bahwa ada kemungkinan bahwa panjang
@@ -4230,25 +3822,13 @@ dengan panjang benda lainnya. Untuk menangani hal tersebut, kita bisa menggunaka
 berbeda. `zip` merupakan fungsi khusus untuk menambahkan sebuah indeks untuk
 setiap entri yang terindeks.
 
-`zipWithL` and `zipWithR` allow combining the two sides of a `zip`
-into a new type, and then returning just an `F[C]`.
-
 `zipWithL` dan `zipWithR` memberikan kita kesempatan untuk membuat sebuah `F[C]`
 dengan menggabungkan kedua sisi dari panggabungan tadi.
-
-`mapAccumL` and `mapAccumR` are regular `map` combined with an accumulator. If
-we find our old Java ways make us want to reach for a `var`, and refer to it
-from a `map`, we should be using `mapAccumL`.
 
 `mapAccumR` dan `mapAccumL` sebenarnya hanya `map` yang dikombinasi dengan
 sebuah akumulator. Bilamana kita terbiasa dengan Java yang membuat kita
 ingin menggunakan sebuah `var` dan menggunakan `var` tersebut dalam sebuah
 `map`, maka kita harus menggunakan `mapAccumL`.
-
-For example, let's say we have a list of words and we want to blank
-out words we've already seen. The filtering algorithm is not allowed
-to process the list of words a second time so it can be scaled to an
-infinite stream:
 
 Sebagai contoh, anggap saja kita mempunyai sebuah daftar kata dan kita ingin
 mengabaikan kata-kata yang sudah ada. Algoritma penyaringan tidak diperkenankan
@@ -4280,23 +3860,13 @@ ini bisa mencapai urutan tak hingga:
      control _ program _ what it does _ _"""
 ~~~~~~~~
 
-Finally `Traverse1`, like `Foldable1`, provides variants of these methods for
-data structures that cannot be empty, accepting the weaker `Semigroup` instead
-of a `Monoid`, and an `Apply` instead of an `Applicative`. Recall that
-`Semigroup` does not have to provide an `.empty`, and `Apply` does not have to
-provide a `.point`.
-
 Pada akhirnya, `Traverse1`, sebagaimana `Foldable1`, menyediakan varian metoda
 metoda untuk struktur data yang tidak bisa kosong. Selain itu, `Traverse1` juga
 menerima `Semigroup`, bukan `Monoid`, dan sebuah `Apply`, bukan `Applicative`.
 Harap diingat bahwa `Semigroup` tidak mempunyai `.empty` dan `Apply` tidak harus
 mempunyai `.point`.
 
-### Align
-
-`Align` is about merging and padding anything with a `Functor`. Before
-looking at `Align`, meet the `\&/` data type (spoken as *These*, or
-*hurray!*).
+### *Align*
 
 Untuk bab ini, kita berbicara tentang `Align`. `Align` sendiri juga berbicara
 mengenai penggabungan pelapisan `Functor`. Ada baiknya sebelum kita menyelami
@@ -4310,9 +3880,6 @@ panggil dengan *hore!*
   final case class That[B](bb: B) extends (Nothing \&/ B)
   final case class Both[A, B](aa: A, bb: B) extends (A \&/ B)
 ~~~~~~~~
-
-i.e. it is a data encoding of inclusive logical `OR`. `A` or `B` or both `A` and
-`B`.
 
 bisa dibilang, *hore!* merupakan penyandian data logika inklusif `OR`.
 `A`, `B`, ataupun keduanya. Jadi, bilamana ada token `F[A \&/ B]`,
@@ -4331,20 +3898,11 @@ ataupun `B`."
     def padWith[A, B, C](f: (Option[A], Option[B]) => C): (F[A], F[B]) => F[C] = ...
 ~~~~~~~~
 
-`alignWith` takes a function from either an `A` or a `B` (or both) to
-a `C` and returns a lifted function from a tuple of `F[A]` and `F[B]`
-to an `F[C]`. `align` constructs a `\&/` out of two `F[_]`.
-
 `alignWith` menerima sebuah fungsi yang menghasilkan `C`, bisa dari `A`,
 `B`, ataupun keduanya, dan mengembalikan sebuah fungsi yang terangkat
 dari tuple `F[A]` dan `F[B]` menjadi `F[C]`. Sedangkan bila kita ingin
 membuat sebuah fungtor *hore!*, kita bisa menggunakan `align` yang
 membuat sebuah `\&/` dari dua `F[_]`.
-
-`merge` allows us to combine two `F[A]` when `A` has a `Semigroup`. For example,
-the implementation of `Semigroup[Map[K, V]]` defers to `Semigroup[V]`, combining
-two entries results in combining their values, having the consequence that
-`Map[K, List[A]]` behaves like a multimap:
 
 `merge` memberikan kita jalan untuk menggabungkan dua `F[A]` bila `A`
 mempunyai `Semigroup`. Sebagai contoh, implementasi dari `Semigroup[Map[K, V]]`
@@ -4358,8 +3916,6 @@ sebagaimana sebuah multimap:
   res = Map(foo -> List(1, 1), bar -> List(2))
 ~~~~~~~~
 
-and a `Map[K, Int]` simply tally their contents when merging:
-
 dan ketika penggabungan terjadi, `Map[K, Int]` hanya perlu menambahkan
 isi dari map tersebut:
 
@@ -4368,10 +3924,6 @@ isi dari map tersebut:
   scala> Map("foo" -> 1) merge Map("foo" -> 1, "bar" -> 2)
   res = Map(foo -> 2, bar -> 2)
 ~~~~~~~~
-
-`.pad` and `.padWith` are for partially merging two data structures that might
-be missing values on one side. For example if we wanted to aggregate independent
-votes and retain the knowledge of where the votes came from
 
 `.pad` dan `.padWith` biasa digunakan untuk menggabungkan dua struktur data,
 yang munggkin saja tidak lengkap pada salah satunya, secara parsial.
@@ -4387,9 +3939,6 @@ penghitungan suara independen dan tetap menyimpan asal dari suara tersebut.
   res = Map(foo -> (Some(1),Some(1)), bar -> (Some(2),None))
 ~~~~~~~~
 
-There are convenient variants of `align` that make use of the
-structure of `\&/`
-
 Ada beberapa varian dari `align` yang memudahkan kita untuk menggunakan
 struktur dari `\&/`
 
@@ -4404,8 +3953,6 @@ struktur dari `\&/`
     def alignBoth[A, B](a: F[A], b: F[B]): F[Option[(A, B)]] = ...
   }
 ~~~~~~~~
-
-which should make sense from their type signatures. Examples:
 
 yang seharusnya bisa terlihat dari *type signature* (lol, help) mereka.
 Contoh:
@@ -4431,19 +3978,12 @@ Contoh:
   res = List(Some((1,4)), Some((2,5)), None)
 ~~~~~~~~
 
-Note that the `A` and `B` variants use inclusive `OR`, whereas the
-`This` and `That` variants are exclusive, returning `None` if there is
-a value in both sides, or no value on either side.
-
 Harap dicatat bahwa varian `A` dan `B` menggunakan inklusif `OR` sedangkan
 varian `This` dan `That` menggunakan ekslusif `OR` yang mengembalikan `None`
 bila nilai pada salah satu sisi.
 
 
-## Variance
-
-We must return to `Functor` for a moment and discuss an ancestor that
-we previously ignored:
+## *Variance*
 
 Mungkin adalah sebuah keputusan yang tepat bila kita kembali membahas
 `Functor` sesaat dan mendiskusikan hierarki yang sebelumnya kita abaikan:
@@ -4451,27 +3991,15 @@ Mungkin adalah sebuah keputusan yang tepat bila kita kembali membahas
 {width=100%}
 ![](images/scalaz-variance.png)
 
-`InvariantFunctor`, also known as the *exponential functor*, has a
-method `xmap` which says that given a function from `A` to `B`, and a
-function from `B` to `A`, then we can convert `F[A]` to `F[B]`.
-
 `InvariantFunctor`, yang juga dikenal sebagai *fungtor eksponensial*,
 mempunyai metoda `xmap` yang menyatakan bahwa bila kita mempunyai fungsi
 yang memetakan `A` ke `B` dan sebuah fungsi yang memetakan `B` ke `A`,
 maka kita dapat mengkonversi `F[A]` ke `F[B]`.
 
-`Functor` is a short name for what should be *covariant functor*. But
-since `Functor` is so popular it gets the nickname. Likewise
-`Contravariant` should really be *contravariant functor*.
-
 `Functor` merupakan kependekan dari yang seharusnya disebut *fungtor kovarian*.
 Dikarenakan `Functor` sudah lebih dulu dikenal, maka penyebutan ini
 diteruskan. Begitu halnya dengan `Contravariant`, fungtor ini seharusnya
 disebut sebagai *fungtor kontravarian*.
-
-`Functor` implements `xmap` with `map` and ignores the function from
-`B` to `A`. `Contravariant`, on the other hand, implements `xmap` with
-`contramap` and ignores the function from `A` to `B`:
 
 `Functor` mengimplementasikan `xmap` dengan `map` dan mengabaikan fungsi
 dari `B` ke `A`. Sedangkan `Contravariant` mengimplementasikan `xmap`
@@ -4497,39 +4025,21 @@ dengan `contramap` dan mengabaikan fungsi dari `A` ke `B`:
   }
 ~~~~~~~~
 
-It is important to note that, although related at a theoretical level,
-the words *covariant*, *contravariant* and *invariant* do not directly
-refer to Scala type variance (i.e. `+` and `-` prefixes that may be
-written in type signatures). *Invariance* here means that it is
-possible to map the contents of a structure `F[A]` into `F[B]`. Using
-`identity` we can see that `A` can be safely downcast (or upcast) into
-`B` depending on the variance of the functor.
-
 Adalah hal yang penting untuk diperhatikan, walaupun secara teori berkaitan,
 kata *kovarian*, *kontravarian*, dan *invarian* tidak berhubungan secara
 langsung dengan varian tipe punya Scala (mis, `+` dan `-` yang biasa ditulis
-pada *type signature* (lol, help!)). *Invarian* yang dimaksudkan disini
+pada penanda tipe). *Invarian* yang dimaksudkan disini
 adalah bisa dilakukannya pemetaan konten dari struktur `F[A]` ke `F[B]`.
 Menggunakan `identity`, kita dapat menentukan bahwa `A` bisa dengan aman
-di-downcast atau upcast (lol, help) menjadi `B` dengan melihat varian dari
+di-downcast atau upcast menjadi `B` dengan melihat varian dari
 fungtor.
-
-`.map` may be understand by its contract "if you give me an `F` of `A` and a way
-to turn an `A` into a `B`, then I can give you an `F` of `B`".
 
 `.map` bisa dipahami dengan "bila kamu punya sebuah `F` atas `A` dan cara untuk
 mengubah `A` ke `B`, maka saya bisa memberi kamu sebuah `F` atas `B`."
 
-Likewise, `.contramap` reads as "if you give me an `F` of `A` and a way to turn
-a `B` into a `A`, then I can give you an `F` of `B`".
-
 Sebaliknya, `.contramap` dapat dibaca sebagai "bila kamu mempunyai `F` atas `A`
 dan cara untuk mengubah `B` menjadi `A`, maka saya dapat memberi kamu sebuah `F`
 atas `B`."
-
-We will consider an example: in our application we introduce domain specific
-types `Alpha`, `Beta`, `Gamma`, etc, to ensure that we don't mix up numbers in a
-financial calculation:
 
 Anggap contoh berikut: pada aplikasi kita, kita memperkenalkan tipe spesifik domain
 `Alpha`, `Beta`, `Gamma`, dan lain lain untuk memastikan bahwa kita tidak akan
@@ -4540,27 +4050,15 @@ mencampur aduk angka angka pada kalkulasi finansial:
   final case class Alpha(value: Double)
 ~~~~~~~~
 
-but now we're faced with the problem that we don't have any typeclasses for
-these new types. If we use the values in JSON documents, we have to write
-instances of `JsEncoder` and `JsDecoder`.
-
 namun, masalah diatas tergantikan dengan masalah baru mengenai tidak adanya
 kelas tipe untuk tipe baru ini. Bilamana kita menggunakan nilai pada dokumen
 JSON, kita harus menulis instans dari `JsEncoder` dan `JsDecoder` untuk tipe
 baru tadi.
 
-However, `JsEncoder` has a `Contravariant` and `JsDecoder` has a `Functor`, so
-we can derive instances. Filling in the contract:
-
 Untungnya, `JsEncoder` mempunyai sebuah `Contravariant` dan `JsDecoder` mempunyai
 sebuah `Functor` sehingga kita dapat menurunkan instans tersebut dengan mengisi
 kontrak:
 
--   "if you give me a `JsDecoder` for a `Double`, and a way to go from a `Double`
-    to an `Alpha`, then I can give you a `JsDecoder` for an `Alpha`".
--   "if you give me a `JsEncoder` for a `Double`, and a way to go from an `Alpha`
-    to a `Double`, then I can give you a `JsEncoder` for an `Alpha`".
-    
 -  "bila kamu memberi saya sebuah `JsDecoder` untuk `Double` dan cara untuk mengubah
    `Double` menjadi `Alpha`, maka saya akan memberikan sebuah `JsDecoder` untuk `Alpha`."
 -  "bila kamu memberi saya sebuah `JsEncoder` untuk `Double` dan cara untuk mengubah
@@ -4574,12 +4072,6 @@ kontrak:
   }
 ~~~~~~~~
 
-Methods on a typeclass can have their type parameters in *contravariant
-position* (method parameters) or in *covariant position* (return type). If a
-typeclass has a combination of covariant and contravariant positions, it might
-have an *invariant functor*. For example, `Semigroup` and `Monoid` have an
-`InvariantFunctor`, but not a `Functor` or a `Contravariant`.
-
 Metoda pada kelas tipe bisa saja mempunyai tipe parameter dengan posisi kontravarian
 (parameter metoda) atau posisi kovarian (tipe kembalian). Bila sebuah kelas tipe
 mempunyai sebuah kombinasi atas posisi kovarian dan kontravarian, bisa jadi
@@ -4588,9 +4080,7 @@ dan `Monoid` mempunyai `InvariantFunctor` namun tidak memiliki `Functor` maupun
 `Contravariant`.
 
 
-## Apply and Bind
-
-Consider this the warm-up act to `Applicative` and `Monad`
+## *Apply* dan *Bind*
 
 Sub-bab ini bisa dianggap sebagai pemanasan untuk `Applicative` dan `Monad`
 
@@ -4599,10 +4089,6 @@ Sub-bab ini bisa dianggap sebagai pemanasan untuk `Applicative` dan `Monad`
 
 
 ### Apply
-
-`Apply` extends `Functor` by adding a method named `ap` which is
-similar to `map` in that it applies a function to values. However,
-with `ap`, the function is in the same context as the values.
 
 `Apply` memperpanjang `Functor` dengan menambahkan sebuah metoda dengan
 nama `ap` yang mirip dengan `map`, dalam batasan `ap` juga menerapkan
@@ -4616,13 +4102,7 @@ konteks yang sama dengan nilai yang diterapi.
     ...
 ~~~~~~~~
 
-A> `<*>` is the Advanced TIE Fighter, as flown by Darth Vader. Appropriate since it
-A> looks like an angry parent.
-A>
 A> Mari kita anggap `<*>` sebagai pesawat TIE dari Star Wars.
-
-It is worth taking a moment to consider what that means for a simple data
-structure like `Option[A]`, having the following implementation of `.ap`
 
 Implikasi dari hal ini adalah struktur data sederhana seperti `Option[A]`
 juga mempunyai implementasi `.ap`
@@ -4638,21 +4118,13 @@ juga mempunyai implementasi `.ap`
   }
 ~~~~~~~~
 
-To implement `.ap`, we must first extract the function `ff: A => B` from `f:
-Option[A => B]`, then we can map over `fa`. The extraction of the function from
-the context is the important power that `Apply` brings, allowing multiple
-function to be combined inside the context.
-
 Untuk mengimplementasikan `.ap`, pertama-tama kita harus mengekstrak
 fungsi `ff: A => B` dari `f: Option[A => B]`, dan dilanjutkan dengan memetakan
 `ff` atas `fa`. Ekstraksi fungsi dari konteks adalah fitur penting dari `Apply`
 yang memberikan ruang untuk menggabungkan isi dari konteks yang melingkupi
 operasi pemanggilan `ap`.
 
-Returning to `Apply`, we find `.applyX` boilerplate that allows us to combine
-parallel functions and then map over their combined output:
-
-Kembali ke `Apply`, kita menemukan *boilerplate* (lol, help) `.applyX` yang
+Kembali ke `Apply`, kita menemukan plat cetak `.applyX` yang
 menyediakan jalan untuk menggabungkan fungsi-fungsi paralel dan pada akhirnya
 memetakan nilai keluaran mereka:
 
@@ -4666,25 +4138,14 @@ memetakan nilai keluaran mereka:
     def apply12[...]
 ~~~~~~~~
 
-Read `.apply2` as a contract promising: "if you give me an `F` of `A` and an `F`
-of `B`, with a way of combining `A` and `B` into a `C`, then I can give you an
-`F` of `C`". There are many uses for this contract and the two most important are:
-
 `.apply2` bisa dibaca sebagai: "bila kamu memberi saya sebuah `F` atas `A` dan
 `F` atas `B` dan sebuah cara untuk menggabungkan `A` dan `B` menjadi `C`, maka
 saya akan memberi kamu `F` atas `C`." Ada beberapa penggunaan atas metoda ini.
 Dan, dua yang paling penting adalah:
 
--   constructing some typeclasses for a product type `C` from its constituents `A`
-    and `B`
--   performing *effects* in parallel, like the drone and google algebras we
-    created in Chapter 3, and then combining their results.
-    
 -   membuat kelas tipe untuk tipe produk `C` dari `A` dan `B`
 -   melakukan *efek* secara paralel, sebagaimana drone dan aljabar google
     yang kita buat pada Bab 3, dan menggabungkan hasilnya.
-
-Indeed, `Apply` is so useful that it has special syntax:
 
 Sudah barang tentu `Apply` mempunyai beberapa sintaks khusus yang
 berguna:
@@ -4708,8 +4169,6 @@ berguna:
   }
 ~~~~~~~~
 
-which is exactly what we used in Chapter 3:
-
 yang sudah kita gunakan pada Bab 3:
 
 {lang="text"}
@@ -4717,31 +4176,15 @@ yang sudah kita gunakan pada Bab 3:
   (d.getBacklog |@| d.getAgents |@| m.getManaged |@| m.getAlive |@| m.getTime)
 ~~~~~~~~
 
-A> The `|@|` operator has many names. Some call it the *Cartesian Product Syntax*,
-A> others call it the *Cinnamon Bun*, the *Admiral Ackbar* or the *Macaulay
-A> Culkin*. We prefer to call it *The Scream* operator, after the Munch painting,
-A> because it is also the sound our CPU makes when it is parallelising All The
-A> Things.
-
-The syntax `<*` and `*>` (left bird and right bird) offer a convenient way to
-ignore the output from one of two parallel effects.
-
 Sintaks `<*` dan `*>` (paruh buruh kiri dan kanan) menawarkan cara mudah untuk
 mengabaikan keluaran dari salah satu dari dua efek paralel .
-
-Unfortunately, although the `|@|` syntax is clear, there is a problem
-in that a new `ApplicativeBuilder` object is allocated for each
-additional effect. If the work is I/O-bound, the memory allocation
-cost is insignificant. However, when performing CPU-bound work, use
-the alternative *lifting with arity* syntax, which does not produce
-any intermediate objects:
 
 Walaupun sintaks `|@|` cukup jelas, ada masalah yang ada pada `ApplicativeBuilder`.
 Yaitu, pengalokasian objek dengan instans `ApplicativeBuilder` baru tiap kali
 penambahan efek. Bila tugas yang diberikan sangat bergantung pada I/O, maka
 alokasi memori tidak signifikan. Namun, bila tugas sangat bergantung pada
-CPU, maka sangat disarankan untuk menggunakan sintaks alternatif *lifting with arity* (lol, mengangkat dengan arity?)
-yang tidak membuat objek intermediate.
+CPU, maka sangat disarankan untuk menggunakan sintaks alternatif *pengangkatan dengan arity*
+yang tidak membuat objek penengah.
 
 
 {lang="text"}
@@ -4766,9 +4209,6 @@ atau memanggil `applyX` secara langsung
   Apply[F].apply5(d.getBacklog, d.getAgents, m.getManaged, m.getAlive, m.getTime)
 ~~~~~~~~
 
-Despite being more commonly used with effects, `Apply` works just as well with
-data structures. Consider rewriting
-
 Walaupun lebih sering digunakan bersama dengan efek, `Apply` juga bisa digunakan
 dengan struktur data. Misalkan, kita bisa menulis ulang
 
@@ -4787,9 +4227,6 @@ sebagai
   (data.foo |@| data.bar)(_ + _.shows)
 ~~~~~~~~
 
-If we only want the combined output as a tuple, methods exist to do
-just that:
-
 Bila kita hanya ingin menggabungkan keluaran sebagai sebuah tuple, ada
 metoda yang bisa memenuhi hal tersebut:
 
@@ -4806,9 +4243,6 @@ metoda yang bisa memenuhi hal tersebut:
   (data.foo tuple data.bar) : Option[(String, Int)]
 ~~~~~~~~
 
-There are also the generalised versions of `ap` for more than two
-parameters:
-
 Juga ada versi umum dari `ap` untuk lebih dari dua parameter:
 
 {lang="text"}
@@ -4818,9 +4252,6 @@ Juga ada versi umum dari `ap` untuk lebih dari dua parameter:
   ...
   def ap12[...]
 ~~~~~~~~
-
-along with `.lift` methods that take normal functions and lift them into the
-`F[_]` context, the generalisation of `Functor.lift`
 
 yang bersamaan dengan metoda `.lift` yang menerima fungsi normal dan mengangkat
 mereka pada konteks `F[_]`
@@ -4833,16 +4264,12 @@ mereka pada konteks `F[_]`
   def lift12[...]
 ~~~~~~~~
 
-and `.apF`, a partially applied syntax for `ap`
-
 juga ada pula aplikasi sintaks parsial untuk `ap`
 
 {lang="text"}
 ~~~~~~~~
   def apF[A,B](f: =>F[A => B]): F[A] => F[B] = ...
 ~~~~~~~~
-
-Finally `.forever`
 
 Dan terakhir, `.forever`
 
@@ -4851,24 +4278,17 @@ Dan terakhir, `.forever`
   def forever[A, B](fa: F[A]): F[B] = ...
 ~~~~~~~~
 
-repeating an effect without stopping. The instance of `Apply` must be
-stack safe or we will get `StackOverflowError`.
-
 yang mengulang operasi dengan efek tanpa henti. Instans dari `Apply` harus aman
 secara alokasi stack atau kita bisa mendapatkan galat `StackOverflowError`.
 
 
-### Bind
-
-`Bind` introduces `.bind`, synonymous with `.flatMap`, which allows functions
-over the result of an effect to return a new effect, or for functions over the
-values of a data structure to return new data structures that are then joined.
+### *Bind*
 
 Fungsi utama yang dibawa oleh `Bind` tentu adalah `.bind` yang sama dan sebangun
 dengan `.flatMap`. Dan sebagaimana yang telah kita pelajari pada bab sebelumnya,
 fungsi ini, `.bind`, memperkenankan sebuah fungsi untuk menerima nilai input dari
 keluaran dari fungsi dengan efek, dan pada akhirnya fungsi `.bind` mengembalikan
-sebuah nilai dengan efek yang sama dari fungsi pemberi nilai input. 
+sebuah nilai dengan efek yang sama dari fungsi pemberi nilai input.
 Fungsi `.bind` ini juga bisa menggabungkan dua buah struktur data.
 
 {lang="text"}
@@ -4891,29 +4311,17 @@ Fungsi `.bind` ini juga bisa menggabungkan dua buah struktur data.
   }
 ~~~~~~~~
 
-The `.join` may be familiar to users of `.flatten` in the stdlib, it takes a
-nested context and squashes it into one.
-
 Pembaca budiman yang biasa menggunakan fungsi `.flatten` dari pustaka standar
 mungkin akan merasa familiar dengan fungsi `.join`. `.join` menerima sebuah
 konteks yang berlapis dan meratakan lapisan lapisan tadi menjadi satu.
-
-Derived combinators are introduced for `.ap` and `.apply2` that require
-consistency with `.bind`. We will see later that this law has consequences for
-parallelisation strategies.
 
 Untuk kombinator turunan yang ada pada kelas tipe ini, pembaca budiman mendapatkan
 `.ap` dan `.apply2` yang mempunyai batasan untuk selalu berkesesuaian dengan `.bind`.
 Pada nantinya, kita akan menyaksikan bahwa hukum ini berpengaruh besar dalam
 strategi paralelisasi.
 
-`mproduct` is like `Functor.fproduct` and pairs the function's input
-with its output, inside the `F`.
-
 Sebagaimana halnya dengan `Functor.fproduct`, `mproduct` juga memasangkan
 masukan dan keluaran dari fungsi tersebut di dalam `F`.
-
-`ifM` is a way to construct a conditional data structure or effect:
 
 Bilamana `if` merupakan konstruk kondisional, `ifM` merupakan konstruk
 kondisional yang menerima struktur data atau operasi dengan efek:
@@ -4924,11 +4332,8 @@ kondisional yang menerima struktur data atau operasi dengan efek:
   res: List[Int] = List(0, 1, 1, 0)
 ~~~~~~~~
 
-`ifM` and `ap` are optimised to cache and reuse code branches, compare
-to the longer form
-
 Untuk masalah performa, pembaca budiman tidak perlu kuatir bila menggunakan
-`ifM` dan `ap` karena kedua fungsi ini sudah dioptimisasi untuk menyimpan
+`ifM` dan `ap` karena kedua fungsi ini sudah dioptimalkan untuk menyimpan
 hasil eksekusi cabang kode di tembolok dan menggunakannya kembali saat
 kondisi terpenuhi. Sebagai contoh, silakan perhatikan contoh berikut
 
@@ -4937,32 +4342,16 @@ kondisi terpenuhi. Sebagai contoh, silakan perhatikan contoh berikut
   scala> List(true, false, true).flatMap { b => if (b) List(0) else List(1, 1) }
 ~~~~~~~~
 
-which produces a fresh `List(0)` or `List(1, 1)` every time the branch
-is invoked.
-
 yang menciptakan objek `List(0)` atau `List(1, 1)` baru tiap kali percabangan
 dieksekusi.
 
-A> These kinds of optimisations are possible in FP because all methods
-A> are deterministic, also known as *referentially transparent*.
-A>
 A> Optimisasi semacam ini mungkin dilakukan pada pemrograman fungsional
 A> yang disebabkan karena semua metoda adalah fungsi deterministik.
 A> Fungsi semacam ini juga dikenal dengan *rujukan transparan*. 
-A> 
-A> If a method returns a different value every time it is called, it is
-A> *impure* and breaks the reasoning and optimisations that we can
-A> otherwise make.
 A>
 A> Bilamana sebuah metoda mengembalikan nilai yang berbeda tiap kali metoda
 A> tersebut dipanggil, maka metoda ini dianggap tidak murni (lol, murni apa sih?)
 A> dan mengaburkan penalaran dan optimisasi yang seharusnya bisa dilakukan.
-A> 
-A> If the `F` is an effect, perhaps one of our drone or Google algebras,
-A> it does not mean that the output of the call to the algebra is cached.
-A> Rather the reference to the operation is cached. The performance
-A> optimisation of `ifM` is only noticeable for data structures, and more
-A> pronounced with the difficulty of the work in each branch.
 A>
 A> Bila `F` merupakan sebuah efek, anggap saja salah satu dari drone kita
 A> atau aljabar Google, bukan berarti keluaran atas pemanggilan aljabar
@@ -4971,14 +4360,9 @@ A> tersebutlah yang disimpan. Sedangkan optimisasi performa dari `ifM` hanya
 A> terlihat bila kita melakukan perbandingan atas struktur data. Selain itu
 A> perbedaan semakin jelas terlihat bila tugas yang dikerjakan pada tiap
 A> cabang semakin berat.
-A> 
-A> We will explore the concept of determinism and value caching in more
-A> detail in the next chapter.
 A>
 A> Kita akan mengeksplorasi konsep atas determinisme dan penyimpanan nilai di
 A> tembolok lebih lanjut pada bab selanjutnya.
-
-`Bind` also has some special syntax
 
 Untuk pembaca yang menyukai operator sintaks, `Bind` juga menyediakan
 sintaks khusus.
@@ -4991,18 +4375,12 @@ sintaks khusus.
   }
 ~~~~~~~~
 
-`>>` is when we wish to discard the input to `bind` and `>>!` is when
-we want to run an effect but discard its output.
-
 Operator `>>` biasa digunakan bila kita ingin membuang masukan `bind`.
 Sebaliknya, `>>!` digunakan ketika kita ingin menjalankan sebuah efek
 dan membuang keluarannya.
 
 
-## Applicative and Monad
-
-From a functionality point of view, `Applicative` is `Apply` with a
-`pure` method, and `Monad` extends `Applicative` with `Bind`.
+## *Applicative* dan *Monad*
 
 Bila dipandang dari sudut pandang fungsionalitas, `Applicative` merupakan
 `Apply` dengan metoda `pure`. Kurang lebih hal yang sama dengan `Monad`,
@@ -5021,17 +4399,10 @@ merupakan `Applicative` yang diperluas dengan menggabungkan `Bind`.
   @typeclass trait Monad[F[_]] extends Applicative[F] with Bind[F]
 ~~~~~~~~
 
-In many ways, `Applicative` and `Monad` are the culmination of everything we've
-seen in this chapter. `.pure` (or `.point` as it is more commonly known for data
-structures) allows us to create effects or data structures from values.
-
 Setelah mempertimbangkan banyak hal, `Applicative` dan `Monad` bisa dianggap sebagai
 puncak atas semua yang telah kita pelajari dari bab ini.
 Sebagai contoh, `.pure`, atau `.point` bagi struktur data, acap kali digunakan
 untuk menghasilkan efek ataupun struktur data dari nilai.
-
-Instances of `Applicative` must meet some laws, effectively asserting
-that all the methods are consistent:
 
 Untuk membuat instans `Applicative`, pembaca budiman harus menerapkan sifat-sifat
 sebagai berikut:
@@ -5045,37 +4416,25 @@ sebagai berikut:
     an `F[A => B]`), i.e. `pure` is a left and right identity
 -   **Mappy**: `map(fa)(f) === fa <*> pure(f)`
 
--   Identitas: `fa <*> pure(identity) === fa` dimana `fa` merupakan sebuah `F[A]`.
+-   **Identitas**: `fa <*> pure(identity) === fa` dimana `fa` merupakan sebuah `F[A]`.
     Sebagai contoh, pengaplikasian `pure(identity)` harus tidak mempunyai efek apapun
     tanpa mengubah apapun.
--   Homomorfisme: `pure(a) <*> pure(ab) === pure(ab(a))` dimana `ab` merupakan
+-   **Homomorfisme**: `pure(a) <*> pure(ab) === pure(ab(a))` dimana `ab` merupakan
     pemeteaan dari `A` ke `B` (`A => B`). Misalkan, penerapan sebuah fungsi `pure`
     ke sebuah nilai `pure` adalah sama dengan penerapan fungsi tersebut ke sebuah
     nilai yang sama dan dilanjutkan dengan menerapkan fungsi `pure` pada hasilnya.
--   Komutatif: `pure(a) <*> fab == fab <*> pure (f => f(a))` dimana `fab` merupakan
+-   **Komutatif**: `pure(a) <*> fab == fab <*> pure (f => f(a))` dimana `fab` merupakan
     sebuah `F[A => B]`. Contoh yang paling sederhana dari sifat ini adalah `pure`
     yang merupakan sebuah fungsi identitas baik untuk sisi kiri maupun sisi kanan.
--   Mappy (lol, ini apa, ya?): `map(fa)(f) === fa <*> pure(f)`.
-
-`Monad` adds additional laws:
+-   **Mappy**: `map(fa)(f) === fa <*> pure(f)`.
 
 Dan sifat tambahan untuk `Monad` diatas adalah:
 
--   **Left Identity**: `pure(a).bind(f) === f(a)`
--   **Right Identity**: `a.bind(pure(_)) === a`
--   **Associativity**: `fa.bind(f).bind(g) === fa.bind(a => f(a).bind(g))` where
-    `fa` is an `F[A]`, `f` is an `A => F[B]` and `g` is a `B => F[C]`.
-
--   Identitas Kiri: `pure(a).bind(f) === f(a)`.
--   Identitas Kanan: `a.bind(pure(_)) === a`.
--   Asosiatif: `fa.bind(f).bind(g) === fa.bind(a => f(a).bind(g))` dimana `fa`
+-   **Identitas Kiri**: `pure(a).bind(f) === f(a)`.
+-   **Identitas Kanan**: `a.bind(pure(_)) === a`.
+-   **Asosiatif**: `fa.bind(f).bind(g) === fa.bind(a => f(a).bind(g))` dimana `fa`
     merupkana sebuah `F[A]`, `f` merupakan sebuah `A => F[B]` dan `g` merupakan
     `B => F[C]`.
-
-Associativity says that chained `bind` calls must agree with nested
-`bind`. However, it does not mean that we can rearrange the order,
-which would be *commutativity*. For example, recalling that `flatMap`
-is an alias to `bind`, we cannot rearrange
 
 Sifat asosiatif menentukan bahwa pemanggilan fungsi `bind` yang disambung harus
 sesuai dengan fungsi `bind` lainnya. Walaupun bukan berarti kita bisa dengan
@@ -5101,15 +4460,8 @@ menjadi
   } yield true
 ~~~~~~~~
 
-`start` and `stop` are **non**-*commutative*, because the intended
-effect of starting then stopping a node is different to stopping then
-starting it!
-
 karena `start` dan `stop` tidak bersifat komutatif. Tentu karena efek dari
 kedua fungsi tersebut berbeda (bahkan berkebalikan!).
-
-But `start` is commutative with itself, and `stop` is commutative with
-itself, so we can rewrite
 
 Berbeda halnya dengan penerapan sifat komutatif untuk pemanggilan beberapa `start`
 maupun `stop`. Sebagai contoh, kita dapat menulis ulang fungsi berikut
@@ -5132,19 +4484,11 @@ menjadi
   } yield true
 ~~~~~~~~
 
-which are equivalent for our algebra, but not in general. We're making a lot of
-assumptions about the Google Container API here, but this is a reasonable choice
-to make.
-
 yang, bila menggunakan dipandang menggunakan kacamata aljabar kita, setara.
 Tentu hal ini tidak bisa secara buta diterapkan ke semua aljabar.
 Lalu, kenapa kita melakukan hal ini? Karena kita mengasumsikan banyak hal dari
 Antarmuka Pemrograman Aplikasi dari Google Container yang kurang lebih cukup masuk
 akal dilakukan.
-
-A practical consequence is that a `Monad` must be *commutative* if its
-`applyX` methods can be allowed to run in parallel. We cheated in
-Chapter 3 when we ran these effects in parallel
 
 Konsekuensi praktis dari hal ini adalah sebuah `Monad` harus bersifat komutatif
 bila moteda `applyX` dapat dijalankan secara paralel. Dan pada Bab 3, kita mengambil
@@ -5155,11 +4499,6 @@ jalan pintas saat kita menjalankan efek efek ini secara paralel
   (d.getBacklog |@| d.getAgents |@| m.getManaged |@| m.getAlive |@| m.getTime)
 ~~~~~~~~
 
-because we know that they are commutative among themselves. When it comes to
-interpreting our application, later in the book, we will have to provide
-evidence that these effects are in fact commutative, or an asynchronous
-implementation may choose to sequence the operations to be on the safe side.
-
 karena kita tahu bahwa fungsi-fungsi diatas bersifat komutatif bila dijalankan
 secara bebarengan. Bila nanti sudah waktunya untuk kita menerjemahkan aplikasi kita,
 kita harus membuktikan bahwa efek-efek yang dihasilkan oleh fungsi-fungsi diatas
@@ -5167,20 +4506,15 @@ harus bersifat komutatif dan bila implementasi bersifat asinkronus, kita bisa sa
 mengubah operasi menjadi bersifat berurutan, untuk menghindari kejadian yang
 tidak diinginkan.
 
-The subtleties of how we deal with (re)-ordering of effects, and what
-those effects are, deserves a dedicated chapter on Advanced Monads.
-
 Mengenai seluk beluk tentang cara yang dianjurkan saat kita berurusan dengan
 pengurutan efek dan apa saja efek efek yang ada, akan dibahas pada bab khusus
 mengenai Monad Lanjutan.
 
 
-## Divide and Conquer
+## *Divide* dan *Conquer*
 
 {width=100%}
 ![](images/scalaz-divide.png)
-
-`Divide` is the `Contravariant` analogue of `Apply`
 
 Sebagaimana yang terlihat pada gambar di atas, `Divide` berkorelasi
 dengan `Contravariant` sebagaimana `Apply` berkorelasi dengan `Functor`.
@@ -5196,18 +4530,9 @@ dengan `Contravariant` sebagaimana `Apply` berkorelasi dengan `Functor`.
     def divide22[...] = ...
 ~~~~~~~~
 
-`divide` says that if we can break a `C` into an `A` and a `B`, and
-we're given an `F[A]` and an `F[B]`, then we can get an `F[C]`. Hence,
-*divide and conquer*.
-
 `divide` menyatakan bahwa bila kita bisa memecah sebuah `C` menjadi sebuah
 `A` dan `B`, dan kita mendapat sebuah `F[A]` dan `F[B]`, maka kita bisa
 mendapatkan seubah `F[C]`.
-
-This is a great way to generate contravariant typeclass instances for
-product types by breaking the products into their parts. Scalaz has an
-instance of `Divide[Equal]`, let's construct an `Equal` for a new
-product type `Foo`
 
 Hal semacam ini sangat memudahkan kita untuk membuat instans kelas tipe
 kontravarian untuk tipe produk dengan memecah produk-produk menjadi
@@ -5226,9 +4551,6 @@ Scalaz
   res: Boolean = false
 ~~~~~~~~
 
-Mirroring `Apply`, `Divide` also has terse syntax for tuples. A softer
-*divide so that we may reign* approach to world domination:
-
 Sebagaimana dengan `Apply`, `Divide` juga mempunyai sintaks untuk tuple.
 Berikut merupakan contoh memecah belah lalu menguasai dalah menyelesaikan
 permasalah pada perangkat lunak:
@@ -5242,21 +4564,12 @@ permasalah pada perangkat lunak:
   }
 ~~~~~~~~
 
-Generally, if encoder typeclasses can provide an instance of `Divide`,
-rather than stopping at `Contravariant`, it makes it possible to
-derive instances for any `case class`. Similarly, decoder typeclasses
-can provide an `Apply` instance. We will explore this in a dedicated
-chapter on Typeclass Derivation.
-
 Secara umum, bila kelas tipe penyandi mampu menyediakan sebuah instans
 dari `Divide`, dan tidak berhenti hanya pada `Contravariant`, adalah
 sebuah hal yang tidak mustahil untuk menurunkan instans untuk semua
 `case class`. Sama halnya dengan kelas tipe dekoder juga mampu menyediakan
 instans `Apply`. Pembahasan mengenai penurunan kelas tipe akan dibahas
 lebih lanjut pada bab berikutnya.
-
-`Divisible` is the `Contravariant` analogue of `Applicative` and introduces
-`.conquer`, the equivalent of `.pure`
 
 Seperti yang sudah dibahas pada beberapa paragraf di atas, `Divisible` ke
 `Contravariant` adalah sama halnya dengan `Applicative` ke `Functor`.
@@ -5270,11 +4583,6 @@ Selain itu, kelas tipe ini menyediakan metoda `.conquer` yang sama dengan
   }
 ~~~~~~~~
 
-`.conquer` allows creating trivial implementations where the type parameter is
-ignored. Such values are called *universally quantified*. For example, the
-`Divisible[Equal].conquer[INil[String]]` returns an implementation of `Equal`
-for an empty list of `String` which is always `true`.
-
 `.conquer` memperkenankan kita untuk membuat penerapan sederhana yang
 mengabaikan parameter tipe. Nilai nilai tersebut biasa disebut sebagai
 *terkuantifikasi secara umum* (lol, help me senpai. ;-; ). Sebagai contoh,
@@ -5286,10 +4594,6 @@ implementasi `Equal` untuk list `String` kosong yang akan selalu `true`.
 
 {width=100%}
 ![](images/scalaz-plus.png)
-
-`Plus` is `Semigroup` but for type constructors, and `PlusEmpty` is
-the equivalent of `Monoid` (they even have the same laws) whereas
-`IsEmpty` is novel and allows us to query if an `F[A]` is empty:
 
 `Plus` merupakan `Semigroup` yang dikhususkan untuk konstruktor tipe.
 Sedangkan `PlusEmpty` adalah padanan untuk `Monoid`. Untuk `IsEmpty`
@@ -5308,11 +4612,6 @@ lebih dikhususkan untuk menentukan apakah sebuah `F[A]` kosong atau tidak.
   }
 ~~~~~~~~
 
-A> `<+>` is the TIE Interceptor, and now we're almost out of TIE
-A> Fighters...
-
-Although it may look on the surface as if `<+>` behaves like `|+|`
-
 Walaupun secara kasat mata `<+>` berperilaku seperti `|+|`
 
 {lang="text"}
@@ -5323,11 +4622,6 @@ Walaupun secara kasat mata `<+>` berperilaku seperti `|+|`
   scala> List(2,3) <+> List(7)
   res = List(2, 3, 7)
 ~~~~~~~~
-
-it is best to think of it as operating only at the `F[_]` level, never looking
-into the contents. `Plus` has the convention that it should ignore failures and
-"pick the first winner". `<+>` can therefore be used as a mechanism for early
-exit (losing information) and failure-handling via fallbacks:
 
 alangkah baiknya untuk menganggap operator ini hanya beroperasi pada `F[_]` dan
 tidak melihat isi dari fungtor tersebut. `Plus` juga mempunyai konvensi untuk
@@ -5347,10 +4641,6 @@ melalui gerakan mundur teratur:
   res = Some(1)
 ~~~~~~~~
 
-For example, if we have a `NonEmptyList[Option[Int]]` and we want to ignore
-`None` values (failures) and pick the first winner (`Some`), we can call `<+>`
-from `Foldable1.foldRight1`:
-
 Sebagai contoh, bila kita mempunyai `NonEmptyList[Option[Int]]` dan kita ingin
 menghiraukan nilai `None` beserta mengambil hasil yang pertama kali munncul,
 kita akan memanggil `<+>` dari `Foldable1.foldRight1`:
@@ -5369,11 +4659,11 @@ which is the same as "pick the winner" if the arguments are swapped. Note the
 use of the TIE Interceptor for `ccy` and `otc` with arguments swapped.
 
 Bahkan nyatanya, setelah kita tahu mengenai `Plus`, kita akan menyadari bahwa
-kita tidak perlu merusak keharmonisan atas kelas tipe (saat mendefinisikan
+kita tidak perlu merusak koherensi kelas tipe (saat mendefinisikan
 sebuah `Monoid[Option[A]]` dengan cakupan lokal) pada seksi Appendable Things.
 Tujuan kita adalah "mengambil hasil pertama yang ditemui" yang sama saja dengan
-(lol, help!!!). Mohon diperhatikan, penggunaan `<+>` untuk `ccy` dan `otc` ditukar
-termpatnya.
+"mengambil hasil terakhir" bila argumen dibalik. Mohon diperhatikan, argumen
+`<+>` untuk `ccy` dan `otc` ditukar termpatnya.
 
 {lang="text"}
 ~~~~~~~~
@@ -5384,8 +4674,6 @@ termpatnya.
     TradeTemplate(Nil, None, None)
   )
 ~~~~~~~~
-
-`Applicative` and `Monad` have specialised versions of `PlusEmpty`
 
 `Applicative` dan `Monad` juga mempunyai versi khusus dari `PlusEmpty`
 
@@ -5399,11 +4687,6 @@ termpatnya.
     def withFilter[A](fa: F[A])(f: A => Boolean): F[A] = ...
   }
 ~~~~~~~~
-
-`.unite` lets us fold a data structure using the outer container's
-`PlusEmpty[F].monoid` rather than the inner content's `Monoid`. For
-`List[Either[String, Int]]` this means `Left[String]` values are converted into
-`.empty`, then everything is concatenated. A convenient way to discard errors:
 
 `.unite` memperkenankan kita untuk menekuk struktur data menggunakan kontainer
 `PlusEmpty[F].monoid` paling luar, bukan kontainer bagian dalam. Sebagai contoh,
@@ -5431,12 +4714,9 @@ support as discussed in Chapter 2. It is fair to say that the Scala
 language has built-in language support for `MonadPlus`, not just
 `Monad`!
 
-`withFilter` memperkenankan kita untuk menggunakna dukungan `for` comprehension
-(lol, help) yang sudah dibahas pada Bab 2. Hal ini menunjukkan bahwa Scala
+`withFilter` memperkenankan kita untuk menggunakna dukungan komprehensi `for`
+yang sudah dibahas pada Bab 2. Hal ini menunjukkan bahwa Scala
 sudah mendukung `MonadPlus` dan tidak hanya `Monad` saja.
-
-Returning to `Foldable` for a moment, we can reveal some methods that
-we did not discuss earlier
 
 Kembali ke `Foldable`, kita akan menunjukkan beberapa metoda yang tidak
 kita diskusikan sebelumnya
@@ -5450,10 +4730,6 @@ kita diskusikan sebelumnya
     ...
   }
 ~~~~~~~~
-
-`msuml` does a `fold` using the `Monoid` from the `PlusEmpty[G]` and
-`collapse` does a `foldRight` using the `PlusEmpty` of the target
-type:
 
 `msuml` akan mem-`fold` menggunakan `Monoid` dari `PlusEmpty[G]` dan
 `collapse` mem-`foldRight` dengan menggunakan `PlusEmpty` dari tipe target:
@@ -5471,10 +4747,7 @@ type:
 ~~~~~~~~
 
 
-## Lone Wolves
-
-Some of the typeclasses in Scalaz are stand-alone and not part of the
-larger hierarchy.
+## Penyendiri
 
 Beberapa kelas tipe pada Scalaz tidak dapat menjadi bagian dari hierarki
 seperti `Monad`, `Applicative`, `Functor` dkk.
@@ -5483,7 +4756,7 @@ seperti `Monad`, `Applicative`, `Functor` dkk.
 ![](images/scalaz-loners.png)
 
 
-### Zippy
+### **Zippy**
 
 {lang="text"}
 ~~~~~~~~
@@ -5500,25 +4773,15 @@ seperti `Monad`, `Applicative`, `Functor` dkk.
   }
 ~~~~~~~~
 
-The core method is `zip` which is a less powerful version of
-`Divide.tuple2`, and if a `Functor[F]` is provided then `zipWith` can
-behave like `Apply.apply2`. Indeed, an `Apply[F]` can be created from
-a `Zip[F]` and a `Functor[F]` by calling `ap`.
-
 Metoda inti dari kelas tipe ini adalah `zip` yang bisa dianggap sebagai
 `Divide.tuple2` yang kurang fleksibel. Dan bila terdapat sebuah `Functor[F]`
 maka `zipWith` bisa berperilaku sebagaimana `Apply.apply2`.
 Dan menariknya, sebuah `Apply[F]` dapat dibuat dengan mamnggil `ap` dan
 mengaplikasikannya pada `Zip[F]` dan `Functor[F]`.
 
-`apzip` takes an `F[A]` and a lifted function from `F[A] => F[B]`,
-producing an `F[(A, B)]` similar to `Functor.fproduct`.
-
 `apzip`, mirip dengan `Functor.fproduct` menerima sebuah `F[A]` dan sebuah
 fungsi terangkat dari `F[A] => F[B]` dan menghasilkan sebuah `F[(A, B)]`.
 
-A> `<*|*>` is the creepy Jaws operator.
-A>
 A> Anggap operator `<*|*>` sebagai hiu pada film Jaws.
 
 {lang="text"}
@@ -5535,18 +4798,10 @@ A> Anggap operator `<*|*>` sebagai hiu pada film Jaws.
   }
 ~~~~~~~~
 
-The core method is `unzip` with `firsts` and `seconds` allowing for
-selecting either the first or second element of a tuple in the `F`.
-Importantly, `unzip` is the opposite of `zip`.
-
 Metoda utama dari kelas tipe `Unzip` adalah `unzip` dengan `firsts` 
 dan `seconds` sebagai pemilih elemen pertama ataupun kedua dari pasangan
 pada `F`. Dan yang paling penting adalah, `unzip` merupakan kebalikan
 dari `zip`.
-
-The methods `unzip3` to `unzip7` are repeated applications of `unzip`
-to save on boilerplate. For example, if handed a bunch of nested
-tuples, the `Unzip[Id]` is a handy way to flatten them:
 
 Metoda `unzip3` sampai `unzip7` merupakan pengaplikasian yang diulang
 dari `unzip` untuk menghilangkan basa basi. Sebagai contoh, bila kita
@@ -5558,26 +4813,15 @@ menerima sebuah tuple berlapis, `Unzip[Id]` bisa dengan sigap meratakannya:
   res = (1,2,3,4,5,6,7)
 ~~~~~~~~
 
-In a nutshell, `Zip` and `Unzip` are less powerful versions of
-`Divide` and `Apply`, providing useful features without requiring the
-`F` to make too many promises.
-
 Pendek kata, `Zip` dan `Unzip` merupakan versi yang lebih kaku dari
 `Divide` dan `Apply`. Selain itu, kedua kelas tipe sebelumnya menyediakan
 fitur fitur berguna tanpa harus menyaratkan penggunaan `F`.
 
 
-### Optional
+### *Optional*
 
-`Optional` is a generalisation of data structures that can optionally
-contain a value, like `Option` and `Either`.
-
-Pada dasarnya, `Optional` adalah bentuk umu dari struktur data yang
+Pada dasarnya, `Optional` adalah bentuk umum dari struktur data yang
 mungkin mempunyai nilai, seperti `Option` dan `Either`.
-
-Recall that `\/` (*disjunction*) is Scalaz's improvement of
-`scala.Either`. We will also see `Maybe`, Scalaz's improvement of
-`scala.Option`
 
 Bila pembaca budiman ingat mengenai operator disjungsi (`\/`), operator
 tersebut merupakan perbaikan atas `scala.Either`. Selain itu, Scalaz juga
@@ -5607,18 +4851,11 @@ memberikan operator lain sebagai peningkatan untuk `scala.Option`.
   }
 ~~~~~~~~
 
-These are methods that should be familiar, except perhaps `pextract`,
-which is a way of letting the `F[_]` return some implementation
-specific `F[B]` or the value. For example, `Optional[Option].pextract`
-returns `Option[Nothing] \/ A`, i.e. `None \/ A`.
-
 Sebagaimana cuplikan diatas, tentu pembaca budiman cukup familiar
 dengan metoda-metoda di atas. Satu metoda yang mungkin agak asing adalah
 `pextract` yang menerima sebuah `Functor[A]` dan mengembalikan salah satu
 dari `F[B]` atau nilai `a`. Sebagai contoh, `Optional[Option].pextract`
 akan mengembalikan `Option[Nothing] \/ A`.
-
-Scalaz gives a ternary operator to things that have an `Optional`
 
 Selain itu, Scalaz juga memberikan operator terner untuk apapun yang
 mempunyai kelas tipe `Optional`
@@ -5642,18 +4879,13 @@ sebagai contoh
 ~~~~~~~~
 
 
-## Co-things
-
-A *co-thing* typically has some opposite type signature to whatever
-*thing* does, but is not necessarily its inverse. To highlight the
-relationship between *thing* and *co-thing*, we will include the type
-signature of *thing* wherever we can.
+## Co-
 
 Tipe kelas dengan awalan "ko" pada umumnya, kelas ini merupakan lawan
 dari kelas tipe yang diawali "ko" tadi. Walaupun, bukan berarti kelas tipe
 ini selalu berupa invers. Untuk menunjukkan hubungan antara, misal, "sesuatu"
-dengan "ko-sesuatu", kita akan mengikutsertakan type signature (lol, help)
-dari "sesuatu" bilamana memungkinkan.
+dengan "ko-sesuatu", kita akan mengikutsertakan penanda tipe dari "sesuatu"
+bilamana memungkinkan.
 
 {width=100%}
 ![](images/scalaz-cothings.png)
@@ -5662,7 +4894,7 @@ dari "sesuatu" bilamana memungkinkan.
 ![](images/scalaz-coloners.png)
 
 
-### Cobind
+### *Cobind*
 
 {lang="text"}
 ~~~~~~~~
@@ -5675,21 +4907,12 @@ dari "sesuatu" bilamana memungkinkan.
   }
 ~~~~~~~~
 
-`cobind` (also known as `coflatmap`) takes an `F[A] => B` that acts on
-an `F[A]` rather than its elements. But this is not necessarily the
-full `fa`, it is usually some substructure as defined by `cojoin`
-(also known as `coflatten`) which expands a data structure.
-
 `cobind` (juga dikenal sebagai `coflatmap`) menerima sebuah `F[A] => B`
 dan beroperasi atas `F[A]`, bukan `A`. Walaupun hal ini bukan berarti
 `F[A]` harus benar benar merupakan fungtor dengan isi `A`. Biasanya,
 `F[A]` yang dimaksud di sini merupakan sub-struktur yang didefinisikan
 oleh `cojoin` (atau `coflatten`) yang mempunyai fungsi untuk memperluas
-sebuah data struktur. 
-
-Compelling use-cases for `Cobind` are rare, although when shown in the
-`Functor` permutation table (for `F[_]`, `A` and `B`) it is difficult
-to argue why any method should be less important than the others:
+sebuah data struktur.
 
 Contoh permasalahan yang cocok untuk diselesaikan oleh `Cobind` sebenarnya
 cukup sulit untuk ditemui. Walaupun, sebagaimana yang diperlihatkan pada
@@ -5697,7 +4920,7 @@ tabel permutasi `Functor`, adalah sebuah hal yang sulit untuk menyanggah
 mengenai penting atau tidaknya sebuah metoda bila dibandingka dengan metoda
 lainnya:
 
-| method      | parameter          |
+| metoda      | parameter          |
 |----------- |------------------ |
 | `map`       | `A => B`           |
 | `contramap` | `B => A`           |
@@ -5707,7 +4930,7 @@ lainnya:
 | `cobind`    | `F[A] => B`        |
 
 
-### Comonad
+### *Comonad*
 
 {lang="text"}
 ~~~~~~~~
@@ -5717,22 +4940,12 @@ lainnya:
   }
 ~~~~~~~~
 
-`.copoint` (also `.copure`) unwraps an element from its context. Effects do not
-typically have an instance of `Comonad` since would break referential
-transparency to interpret an `IO[A]` into an `A`. But for collection-like *data
-structures*, it is a way to construct a view of all elements alongside their
-neighbours.
-
 `.copoint` (atau `.copure`) mengelupas sebuah elemen dari konteks yang
 melingkupinya. Efek biasanya tidak mempunyai instans `Comonad` karena
 `Comonad` akan menghapus transparansi rujukan saat penginterpretasian sebuah
 `IO[A]` menjadi `A`. Namun, untuk struktur data koleksi, penggunaan `.copoint`
 merupakan salah satu cara untuk mengakses semua elemen beserta elemen
 yang berdekatan dengannya.
-
-Consider a *neighbourhood* (`Hood` for short) for a list containing all the
-elements to the left of an element (`lefts`), the element itself (the `focus`),
-and all the elements to its right (`rights`).
 
 Misalkan, sebuah *daerah sekeliling* (disingkat `Hood` dari *neighbourhood*) yang
 terdiri atas sebuah daftar elemen bagian kiri (`lefts`), elemen yang dilihat
@@ -5742,10 +4955,6 @@ terdiri atas sebuah daftar elemen bagian kiri (`lefts`), elemen yang dilihat
 ~~~~~~~~
   final case class Hood[A](lefts: IList[A], focus: A, rights: IList[A])
 ~~~~~~~~
-
-The `lefts` and `rights` should each be ordered with the nearest to
-the `focus` at the head, such that we can recover the original `IList`
-via `.toIList`
 
 Struktur `lefts` dan `rights` harus dibuat dengan yang dimulai dari
 `focus` lalu semakin menjauh bila ditambahkan, sehingga kita bisa
@@ -5757,9 +4966,6 @@ mendapatkan kembali `IList` awal dengan metoda `.toIList`.
     implicit class Ops[A](hood: Hood[A]) {
       def toIList: IList[A] = hood.lefts.reverse ::: hood.focus :: hood.rights
 ~~~~~~~~
-
-We can write methods that let us move the focus one to the left
-(`previous`) and one to the right (`next`)
 
 Kita dapat menulis metoda-metoda untuk memindah fokus ke kiri (`previous`)
 ataupun ke kanan (`next`)
@@ -5778,10 +4984,6 @@ ataupun ke kanan (`next`)
           Just(Hood(hood.focus :: hood.lefts, head, tail))
       }
 ~~~~~~~~
-
-By introducing `more` to repeatedly apply an optional function to
-`Hood` we can calculate *all* the `positions` that `Hood` can take in
-the list
 
 Dengan mengaplikasikan `more` atas sebuah fungsi opsional secara berulang
 kepada sebuah `Hood`, kita dapat menghitung *semua* `positions` yang
@@ -5803,8 +5005,6 @@ bisa digunakan pada `Hood` yang bersangkutan
     }
 ~~~~~~~~
 
-We can now implement `Comonad[Hood]`
-
 Sekarang, kita dapat mengimplementasikan `Comonad[Hood]`
 
 {lang="text"}
@@ -5819,9 +5019,6 @@ Sekarang, kita dapat mengimplementasikan `Comonad[Hood]`
     }
   }
 ~~~~~~~~
-
-`cojoin` gives us a `Hood[Hood[IList]]` containing all the possible
-neighbourhoods in our initial `IList`
 
 `cojoin` memberikan kita sebuah `Hood[Hood[IList]]` yang berisi semua
 `Hood` ynag mungkin pada `IList` awal kita
@@ -5842,10 +5039,7 @@ neighbourhoods in our initial `IList`
            Hood([8,7,6,5,4,3,2,1],9,[])])
 ~~~~~~~~
 
-Indeed, `cojoin` is just `positions`! We can `override` it with a more
-direct (and performant) implementation
-
-Dan faktanya, `cojoin` sebenarnya adalah `positions`! Tentu, kita dapat
+Dan memang, `cojoin` sebenarnya adalah `positions`! Tentu, kita dapat
 meng-`override`-nya dengan implementasi yang lebih lugas dan performan.
 
 {lang="text"}
@@ -5853,27 +5047,18 @@ meng-`override`-nya dengan implementasi yang lebih lugas dan performan.
   override def cojoin[A](fa: Hood[A]): Hood[Hood[A]] = fa.positions
 ~~~~~~~~
 
-`Comonad` generalises the concept of `Hood` to arbitrary data
-structures. `Hood` is an example of a *zipper* (unrelated to `Zip`).
-Scalaz comes with a `Zipper` data type for streams (i.e. infinite 1D
-data structures), which we will discuss in the next chapter.
-
 `Comonad` menggeneralisasi konsep `Hood` untuk semua struktur data.
 `Hood` merupakan sebuah contoh dari *zipper* (tidak ada hubungannya
 dengan `Zip`). Scalaz sendiri juga mempunyai sebuah tipe data `Zipper`
 yang berhubungan dengan aliran (mis, struktur 1 dimensi tak hingga),
 yang akan kita bahan pada bab selanjutnya.
 
-One application of a zipper is for *cellular automata*, which compute
-the value of each cell in the next generation by performing a
-computation based on the neighbourhood of that cell.
-
 Salah satu penggunaan dari sebuah zipper adalah *automata seluler*
 yang menghitung nilai tiap sel generasi selanjutnya dengan melakukan
 penghitungan terhadap sel-sel di sekeliling sel tadi.
 
 
-### Cozip
+### *Cozip*
 
 {lang="text"}
 ~~~~~~~~
@@ -5888,30 +5073,17 @@ penghitungan terhadap sel-sel di sekeliling sel tadi.
   }
 ~~~~~~~~
 
-Although named `cozip`, it is perhaps more appropriate to talk about
-its symmetry with `unzip`. Whereas `unzip` splits `F[_]` of tuples
-(products) into tuples of `F[_]`, `cozip` splits `F[_]` of
-disjunctions (coproducts) into disjunctions of `F[_]`.
-
 Walaupun dinamai sebagai `cozip`, kelas tipe ini mungkin lebih cocok
 bila dibicarakan sebagai simetri dari `unzip`. Bilamana `unzip` memisah
 `F[_]` dari tuple (produk) menjadi tuple `F[_]`, `cozip` memisah `F[_]`
 dari disjungsi (ko-produk) menjadi disjungsi `F[_]`.
 
-## Bi-things
-
-Sometimes we may find ourselves with a thing that has two type holes
-and we want to `map` over both sides. For example we might be tracking
-failures in the left of an `Either` and we want to do something with the
-failure messages.
+## Bi-
 
 Seringkali kita menemui keadaan dimana kita mempunyai sebuah benda yang
 mempunyai dua tipe, dan kita ingin memetakan keduanya ke kategori lain.
 Sebagai contoh, mungkin kita ingin melacak galat pada bagian kiri sebuah
 `Either` dan ingin melakukan sesuatu pada pesan galat tersebut. 
-
-The `Functor` / `Foldable` / `Traverse` typeclasses have bizarro
-relatives that allow us to map both ways.
 
 Kelas tipe `Functor` / `Foldable` / `Traverse` mempunyai sepupu yang
 janggal yang memperkenankan kita untuk memetakan dari satu kategori
@@ -5948,17 +5120,9 @@ ke kategori lainnya secarabolak balik.
   }
 ~~~~~~~~
 
-A> `<-:` and `:->` are the happy operators!
-A>
 A> `<-:` dan `:->` merupakan operator om senang!
 
-Although the type signatures are verbose, these are nothing more than
-the core methods of `Functor`, `Foldable` and `Bitraverse` taking two
-functions instead of one, often requiring both functions to return the
-same type so that their results can be combined with a `Monoid` or
-`Semigroup`.
-
-Walaupun signature tipe (lol, cek ini) dari metoda-metoda di atas bisa
+Walaupun penanda tipe dari metoda-metoda di atas bisa
 dikatakan sangat lantung, mereka tidak lain dan tidak bukan hanyalah
 metoda inti dari `Functor`, `Foldable`, dan `Bitraverse` yang menerima
 dua fungsi, bukan satu. Selain itu, metoda-metoda tadi juga memaksa
@@ -5992,10 +5156,6 @@ keluaran mereka dapat digabungkan menggunakan `Monoid` ataupun `Semigroup`.
   res: Future[Either[Int, Int]] = Future(<not completed>)
 ~~~~~~~~
 
-In addition, we can revisit `MonadPlus` (recall it is `Monad` with the
-ability to `filterWith` and `unite`) and see that it can `separate`
-`Bifoldable` contents of a `Monad`
-
 Sebagai tamabahan, kita dapat meninjau kembali `MonadPlus` (yang merupakan
 `Monad` dengan tambahan `filterWith` dan `unite`) dan mempertimbangkan
 apakah kelas tipe ini bisa memisah konten `Bifoldable` dari sebuah `Monad`
@@ -6008,9 +5168,6 @@ apakah kelas tipe ini bisa memisah konten `Bifoldable` dari sebuah `Monad`
     ...
   }
 ~~~~~~~~
-
-This is very useful if we have a collection of bi-things and we want
-to reorganise them into a collection of `A` and a collection of `B`
 
 Hal ini sangat berguna bila kita mempunyai sebuah koleksi dari bi-things
 dan kita ingin me-reorganisasi menjadi sebuah koleksi atas `A` dan
@@ -6026,23 +5183,13 @@ koleksi atas `B`
 ~~~~~~~~
 
 
-## Summary
-
-That was a lot of material! We have just explored a standard library
-of polymorphic functionality. But to put it into perspective: there
-are more traits in the Scala stdlib Collections API than typeclasses
-in Scalaz.
+## Kesimpulan
 
 Sesungguhnya, materi pada bab ini cukup banyak dan kita sudah mengeksplorasi
 pustaka standar untuk fungsionalitas polimorfis. Namun, bila kita harus
 membandingkan satu dengan lainnya, pustaka standar Koleksi milik Scala
 memiliki *trait* yang jauh lebih banyak bila dibandingkan dengan kelas
 tipe yang dimiliki oleh Scalaz.
-
-It is normal for an FP application to only touch a small percentage of the
-typeclass hierarchy, with most functionality coming from domain-specific
-algebras and typeclasses. Even if the domain-specific typeclasses are just
-specialised clones of something in Scalaz, it is OK to refactor it later.
 
 Adalah hal yang jamak ditemui bila sebuah aplikasi pemrograman fungsional
 hanya menyentuh sebagian kecil dari hierarki kelas tipe. Hal itu juga
@@ -6051,16 +5198,10 @@ spesifik domain dan kelas tipe. Bahkan bila kelas tipe yang spesifik
 pada domain hanya merupakan salinan khusus dari kelas tipe Scalaz,
 kita bisa melakukan refaktor di lain waktu.
 
-To help, we have included a cheat-sheet of the typeclasses and their
-primary methods in the Appendix, inspired by Adam Rosien's [Scalaz
-Cheatsheet](http://arosien.github.io/scalaz-cheatsheets/typeclasses.pdf).
-
 Sebagai tambahan, kita juga sudah mengikutsertakan contekan untuk kelas
 tipe dan metoda utamanya pada Lampiran. Contekan ini mendapatkan inspirasi
 dari [Contekan Scalaz](http://arosien.github.io/scalaz-cheatsheets/typeclasses.pdf)
 yang ditulis oleh Adam Rosien.
-
-To help further, Valentin Kasas explains how to [combine `N` things](https://twitter.com/ValentinKasas/status/879414703340081156):
 
 Lebih lanjut, Valentin Kasas menjelaskan mengenai [Penggabungan `N` thing](https://twitter.com/ValentinKasas/status/879414703340081156):
 
