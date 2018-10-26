@@ -1256,37 +1256,20 @@ dengan versi yang berurutan.
     dan memberikan cakupan tes yang lebih tinggi.
 
 
-# Data and Functionality
-
-From OOP we are used to thinking about data and functionality
-together: class hierarchies carry methods, and traits can demand that
-data fields exist. Runtime polymorphism of an object is in terms of
-"is a" relationships, requiring classes to inherit from common
-interfaces. This can get messy as a codebase grows. Simple data types
-become obscured by hundreds of lines of methods, trait mixins suffer
-from initialisation order errors, and testing / mocking of highly
-coupled components becomes a chore.
+# Data dan Fungsionalitas
 
 Pada OOP, kita biasa berpikir mengenai data dan fungsionalitas
 dalam satu bentuk, kelas. Hierarki kelas berisi metoda-metoda dan
-trait (lol, ciri) yang memaksa bidang bidang data ada pada kelas
-yang memakainya.
-Polimorfisme saat waktu-jalan dari sebuah objek dilihat dengan kacamata
+trait yang memaksa bidang bidang data ada pada kelas yang memakainya.
+Polimorfisme dari sebuah objek saat waktu-jalan dilihat dengan kacamata
 hubungan "merupakan", yang mengkehendaki kelas kelas untuk mewariskan
 dari antarmuka-antarmuka umum.
-Hal semacam ini bisa jadi sangat keruh bila basis kode menjadi besar.
+Hal semacam ini bisa dapat memperkeruh bila basis kode menjadi besar.
 Tipe data tipe data sederhana bisa jadi kabur batasannya karena ratusan
-baris metoda, trait (lol, ciri) menjadi kacau karena urutan inisiasi yang salah,
-dan testing maupun peniruan (lol, mocking) komponen yang melekat kuat menjadi kelagepan (lol, chore).
+baris metoda, trait menjadi kacau karena urutan inisiasi yang salah,
+dan testing maupun peniruan komponen yang melekat kuat menjadi kelagepan.
 
-FP takes a different approach, defining data and functionality
-separately. In this chapter, we will cover the basics of data types
-and the advantages of constraining ourselves to a subset of the Scala
-language. We will also discover *typeclasses* as a way to achieve
-compiletime polymorphism: thinking about functionality of a data
-structure in terms of "has a" rather than "is a" relationships.
-
-FP mengambil pendekatan yang berbeda dengan mendefinisikan data dan
+PF mengambil pendekatan yang berbeda dengan mendefinisikan data dan
 fungsionalitas secara terpisah.
 Pada bab ini, kita akan membahas tipe data tipe data dasar dan keuntungan
 dari pembatasan diri kita kepada subset Scala.
@@ -1297,45 +1280,24 @@ struktur data dengan kacamata hubungan "memiliki" bukan hubungan "merupakan".
 
 ## Data
 
-The fundamental building blocks of data types are
-
--   `final case class` also known as *products*
--   `sealed abstract class` also known as *coproducts*
--   `case object` and `Int`, `Double`, `String` (etc) *values*
-
 Blok bangunan mendasar dari tipe data adalah
 
 -   `final case class` yang juga dikenal sebagai *produk*
 -   `sealed abstract class` yang juga dikenal sebagai *ko-produk*
 -   `case object` dan `Int`, `Double`, `String` (dll) sebagai *nilai*
 
-with no methods or fields other than the constructor parameters. We prefer
-`abstract class` to `trait` in order to get better binary compatibility and to
-discourage trait mixing.
-
 tanpa metoda ataupun bidang selain parameter konstruktor.
 Kita lebih memilih `abstract class` dibandingkan `trait` dengan alasan
 agar mendapatkan kompatibilitas biner dan juga me-makruh-kan pencampuran "mixin" (lol, mixin)
 
-The collective name for *products*, *coproducts* and *values* is
-*Algebraic Data Type* (ADT).
-
-Ketiga tipe data diatas, secara paket, disebut juga dengan *Tipe Data Aljabar*.
-
-We compose data types from the `AND` and `XOR` (exclusive `OR`)
-Boolean algebra: a product contains every type that it is composed of,
-but a coproduct can be only one. For example
+Ketiga tipe data diatas, secara paket, disebut juga dengan *Tipe Data Aljabar* (TDA).
 
 Sebagai contoh, kita menyusun tipe data dari aljabar Boolean `AND` dan `XOR`:
-sebuah produk berisi setiap tipe yang merupakan penyusunan (lol, HELP).
-
--   product: `ABC = a AND b AND c`
--   coproduct: `XYZ = x XOR y XOR z`
+sebuah produk berisi semua tipe yang terdiri darinya, namun sebuah ko-produk
+hanya dapat menjadi satu-satunya. Sebagai contoh
 
 -   produk: `ABC = a AND b AND c`
 -   ko-produk: `XYZ = x XOR y XOR z`
-
-written in Scala
 
 yang bila ditulis menggunakan Scala
 
@@ -1357,18 +1319,13 @@ yang bila ditulis menggunakan Scala
 ~~~~~~~~
 
 
-### Generalised ADTs
-
-When we introduce a type parameter into an ADT, we call it a
-*Generalised Algebraic Data Type* (GADT).
+### TDA Tergeneralisasi
 
 Ketika kita mengenalkan sebuah parameter tipe ke sebuah ADT, kita
-menyebutnya dengan *Tipe Data Aljabar Umum* (Generalised Algebraic Data Type).
-
-`scalaz.IList`, a safe alternative to the stdlib `List`, is a GADT:
+menyebutnya dengan *Tipe Data Aljabar Tergenerealisasi* (Generalised Algebraic Data Type).
 
 `scalaz.IList`, yang merupakan alternatif yang lebih aman dari pustaka
-standar `List`, merupakan GADT:
+standar `List`, adalah sebuah TDAT:
 
 {lang="text"}
 ~~~~~~~~
@@ -1377,45 +1334,30 @@ standar `List`, merupakan GADT:
   final case class ICons[A](head: A, tail: IList[A]) extends IList[A]
 ~~~~~~~~
 
-If an ADT refers to itself, we call it a *recursive type*. `IList` is
-recursive because `ICons` contains a reference to `IList`.
-
-Bila sebuah GADT mengacu pada dirinya sendiri, kita menyebutnya sebagai
+Bila sebuah TDA mengacu pada dirinya sendiri, kita menyebutnya sebagai
 sebuah *tipe rekursif*. `IList` sendiri merupakan contoh tipe rekursif
 karena `ICons` berisi referensi ke sebuah `IList`.
 
 
-### Functions on ADTs
+### Fungsi pada TDA
 
 ADTs can contain *pure functions*
 
-ADT bisa berisi fungsi murni (lol, murni)
+TDA bisa berisi fungsi murni
 
 {lang="text"}
 ~~~~~~~~
   final case class UserConfiguration(accepts: Int => Boolean)
 ~~~~~~~~
 
-But ADTs that contain functions come with some caveats as they don't
-translate perfectly onto the JVM. For example, legacy `Serializable`,
-`hashCode`, `equals` and `toString` do not behave as one might
-reasonably expect.
-
-Namun ADT yang berisi fungsi mempunyai beberapa kekurangan karena
+Namun TDA yang berisi fungsi mempunyai beberapa kekurangan karena
 ADT tersebut tidak bisa diterjemahkan dengan sempurna ke JVM.
 Sebagai contoh, warisan `Serializable`, `hashCode`, `equals`, dan `toString`
 tidak berperilaku sebagaimana yang diharapkan.
 
-Unfortunately, `Serializable` is used by popular frameworks, despite
-far superior alternatives. A common pitfall is forgetting that
-`Serializable` may attempt to serialise the entire closure of a
-function, which can crash production servers. A similar caveat applies
-to legacy Java classes such as `Throwable`, which can carry references
-to arbitrary objects.
-
 Dan yang menjadi sebuah kekecewaan adalah, `Serializable` sangat jamak
 digunakan oleh *framework* populer walaupun alternatif yang lebih
-bagus banyak (HIT, lol).
+bagus banyak.
 Salah satu jebakan yang umum memakan korban adalah seorang penulis
 lupa bahwa `Serializable` bisa jadi berusaha untuk menyerikan fungsi
 *closure* secara keseluruhan dan bisa berakibat server rhemuk! (lol, rhemuk)
@@ -1423,23 +1365,13 @@ Kekurangan lain yang mirip juga sama terjadi pada kelas Java peninggalan
 jaman dulu seperti `Throwable`, yang bisa saja berisi rujukan pada objek
 arbiter.
 
-We will explore alternatives to the legacy methods when we discuss the
-Scalaz library in the next chapter, at the cost of losing
-interoperability with some legacy Java and Scala code.
-
 Kita akan mengeksplorasi alternatif alternatif untuk metoda peninggalan
 sejarah saat kita berbincang mengenai pustaka Scalaz pada bab berikutnya.
 Tentu dengan mengorbankan interoperabilitas dengan kode kode Scala dan
 Java peninggalan sejarah.
 
 
-### Exhaustivity
-
-It is important that we use `sealed abstract class`, not just
-`abstract class`, when defining a data type. Sealing a `class` means
-that all subtypes must be defined in the same file, allowing the
-compiler to know about them in pattern match exhaustivity checks and
-in macros that eliminate boilerplate. e.g.
+### Kelengkapan
 
 Adalah hal yang penting untuk kita menggunakan `sealed abstract class`,
 dan tidak hanya `abstract class`, saat kita mendefinisikan sebuah tipe
@@ -1448,8 +1380,7 @@ Dengan menyegel (`seal`) sebuah `class`, kita juga memastikan bahwa
 semua sub-tipe-nya harus didefinisikan di berkas yang sama.
 Hal ini memberikan kesempatan agar kompilator bisa mengetahui hubungan
 mereka, sehingga kompilator bisa memeriksa keluwesan "pattern match"
-dan juga pada makro yang menghilangkan "boilerplate" (lol, boilerplate).
-Sebagai contoh,
+dan juga pada makro yang menghilangkan plat cetak.  Sebagai contoh,
 
 {lang="text"}
 ~~~~~~~~
@@ -1466,19 +1397,12 @@ Sebagai contoh,
                                ^
 ~~~~~~~~
 
-This shows the developer what they have broken when they add a new
-product to the codebase. We're using `-Xfatal-warnings`, otherwise
-this is just a warning.
-
 Cuplikan diatas menunjukkan kepada pengembang apa yang telah mereka
-rhemukkan (lol) ketika menambah sebuah produk baru ke basis kode.
+rusak ketika menambah sebuah produk baru ke basis kode.
 Hal ini terjadi karena kita menggunakan ekstensi `-Xfatal-warnings`
 sehingga semua peringatan dari kompilator menjadi galat.
 
-However, the compiler will not perform exhaustivity checking if the
-`class` is not sealed or if there are guards, e.g.
-
-Namun, kompilator juga tidak akan memeriksa keluwesan bila kelas tidak
+Namun, kompilator juga tidak akan memeriksa kelengkapan bila kelas tidak
 tersegel ataupun ada pengaman lain. Misal
 
 {lang="text"}
@@ -1492,37 +1416,23 @@ tersegel ataupun ada pengaman lain. Misal
     at .thing(<console>:15)
 ~~~~~~~~
 
-To remain safe, don't use guards on `sealed` types.
-
 Agar tetap aman, jangan gunakan pengaman ketika menggunakan tipe tersegel.
-
-The [`-Xstrict-patmat-analysis`](https://github.com/scala/scala/pull/5617) flag has been proposed as a language
-improvement to perform additional pattern matcher checks.
 
 Panji [`-Xstrict-patmat-analysis`](https://github.com/scala/scala/pull/5617)
 sudah diajukan sebagai peningkatan bahasa untuk menampah pemeriksaan
 "pattern match" tambahan (lol, pattern match.)
 
 
-### Alternative Products and Coproducts
-
-Another form of product is a tuple, which is like an unlabelled `final
-case class`.
+### Produk dan Koproduk Alternatif
 
 Bentuk lain dari produk adalah tuple yang merupakan sebuah `final case class`
 tanpa label.
-
-`(A.type, B, C)` is equivalent to `ABC` in the above example but it is best to
-use `final case class` when part of an ADT because the lack of names is awkward
-to deal with, and `case class` has much better performance for primitive values.
 
 `(A.type, B, C)` ekuivalen denga `ABC` pada contoh di atas.
 Namun, sangat disarankan untuk menggunakan `final case class` ketika
 digunakan pada sebuah ADT. Selain karena agak canggung bila tanpa nama,
 `case class` juga mempunyai performa yang jauh lebih baik bila dibandingkan
 dengan nilai-nilai primitif.
-
-Another form of coproduct is when we nest `Either` types. e.g.
 
 Contoh lain dari ko-produk adalah saat kita melapisi tipe `Either`.
 
@@ -1537,9 +1447,9 @@ allowing infix notation with association from the right:
 
 yang ekuivalen dengan kelas abstrak tersegel `XYZ`.
 Untuk sintaks yang lebih rapi yang digunakan untuk mendefinisikan
-tipe `Either` berlapis, bisa digunakan tipe alias yang akhiran
-titik dua (lol, HELP)
-
+tipe `Either` berlapis, pengguna dapat menggunakan alias tipe yang diakhiri
+dengan titik dua. Hal ini memperkenankan penggunaan notasi infiks dengan
+asosiasi sebelah kanan:
 
 {lang="text"}
 ~~~~~~~~
@@ -1547,9 +1457,6 @@ titik dua (lol, HELP)
   
   X.type |: Y.type |: Z
 ~~~~~~~~
-
-This is useful to create anonymous coproducts when we cannot put all
-the implementations into the same source file.
 
 Cara ini berguna untuk membuat ko-produk anonim saat kita tidak
 dapat meletakkan semua implementasi dalam sebuah berkas kode yang
@@ -1560,12 +1467,9 @@ sama.
   type Accepted = String |: Long |: Boolean
 ~~~~~~~~
 
-Yet another alternative coproduct is to create a custom `sealed abstract class`
-with `final case class` definitions that simply wrap the desired type:
-
 Alternatif lain dari ko-produk adalah dengan membuat `sealed abstract class`
 khusus dengan definisi `final case class` yang hanya membungkus tipe
-yang diinginkan. (lol, susah)
+yang diinginkan.
 
 {lang="text"}
 ~~~~~~~~
@@ -1575,22 +1479,14 @@ yang diinginkan. (lol, susah)
   final case class AcceptedBoolean(value: Boolean) extends Accepted
 ~~~~~~~~
 
-Pattern matching on these forms of coproduct can be tedious, which is why [Union
-Types](https://contributors.scala-lang.org/t/733) are being explored in the Dotty next-generation Scala compiler. Macros
-such as [totalitarian](https://github.com/propensive/totalitarian) and [iotaz](https://github.com/frees-io/iota) exist as alternative ways of encoding anonymous
-coproducts.
-
-"Pattern match" pada bentuk bentuk ko-produk ini bisa jadi sangat boyak.
+Pencocokan pola pada bentuk bentuk ko-produk ini bisa jadi sangat boyak.
 Hal ini juga yang melatar belakangi eksplorasi [Tipe Gabungan](https://contributors.scala-lang.org/t/733)
 pada kompilator baru Scala, Dotty.
 Makro seperti [totalitarian](https://github.com/propensive/totalitarian) dan [iotaz](https://github.com/frees-io/iota)
 hadir sebagai alternatif untuk menyandikan ko-produk anonim.
 
 
-### Convey Information
-
-Besides being a container for necessary business information, data
-types can be used to encode constraints. For example,
+### Penyampaian Informasi
 
 Selain digunakan sebagai kontainer untuk informasi bisnis, tipe data
 juga bisa digunakan untuk menyandikan batasan. Sebagai contoh,
@@ -1600,19 +1496,13 @@ juga bisa digunakan untuk menyandikan batasan. Sebagai contoh,
   final case class NonEmptyList[A](head: A, tail: IList[A])
 ~~~~~~~~
 
-can never be empty. This makes `scalaz.NonEmptyList` a useful data type despite
-containing the same information as `IList`.
-
-tidak bisa kisang. Hal inilah yang menjadikan `scalaz.NonEmptyList`
+tidak bisa kosong. Hal inilah yang menjadikan `scalaz.NonEmptyList`
 sebuah tipe data yang penting walaupun mempunyai informasi yang sama
 dengan `IList`.
 
-Product types often contain types that are far more general than is allowed. In
-traditional OOP this would be handled with input validation through assertions:
-
 Tipe produk sering kali berisi tipe yang jauh lebih umum daripada yang diharapkan.
 Pada OOP tradisional, hal ini diatasi dengan menggunakan validasi input
-dan asersi. (lol, asersi)
+dan penegasan.
 
 {lang="text"}
 ~~~~~~~~
@@ -1620,10 +1510,6 @@ dan asersi. (lol, asersi)
     require(name.nonEmpty && age > 0) // breaks Totality, don't do this!
   }
 ~~~~~~~~
-
-Instead, we can use the `Either` data type to provide `Right[Person]` for valid
-instances and protect invalid instances from propagating. Note that the
-constructor is `private`:
 
 Sebagai gantinya, kita dapat menggunakan tipe data `Either` untuk menyediakan
 `Right[Person]` untuk instans valid. Tidak hanya itu, penggunaan `Either` juga
@@ -1651,11 +1537,7 @@ dibuat sebagai final.
 ~~~~~~~~
 
 
-#### Refined Data Types
-
-A clean way to restrict the values of a general type is with the `refined`
-library, providing a suite of restrictions to the contents of data. To install
-refined, add the following to `build.sbt`
+#### Tipe Data Terrefinasi
 
 Selain dengan menggunakan `Either` sebagaimana yang telah dicontohkan pada
 bagian sebelumnya, ada juga cara yang lebih mudah dan rapi yaitu dengan
@@ -1670,8 +1552,6 @@ Untuk memasang pustaka tersebut, silakan tambahkan baris berikut pada
   libraryDependencies += "eu.timepit" %% "refined-scalaz" % "0.9.2"
 ~~~~~~~~
 
-and the following imports
-
 dan baris-baris berikut pada kode sumber.
 
 {lang="text"}
@@ -1680,17 +1560,9 @@ dan baris-baris berikut pada kode sumber.
   import refined.api.Refined
 ~~~~~~~~
 
-`Refined` allows us to define `Person` using adhoc refined types to capture
-requirements exactly, written `A Refined B`.
-
 `Refined` memberikan batasan batasan yang jauh lebih jelas dengan menuliskan
 `A Refined B`.
 
-A> All types with two parameters can be written *infix* in Scala. For example,
-A> `Either[String, Int]` is the same as `String Either Int`. It is conventional for
-A> `Refined` to be written infix since `A Refined B` can be read as "an `A` that
-A> meets the requirements defined in `B`".
-A>
 A> Pada Scala, semua tipe dengan dua parameter dapat ditulis sebagai sisipan.
 A> Sebagai contoh, `Either[String, Int]` sama dan sebangun dengan `String Either Int`.
 A> Menggunakan fakta ini, `Refined` secara konvensi akan digunakan sebagai operator
@@ -1708,9 +1580,6 @@ A> kriteria yang didefinisikan oleh `B`."
   )
 ~~~~~~~~
 
-The underlying value can be obtained with `.value`. We can construct a
-value at runtime using `.refineV`, returning an `Either`
-
 Nilai pokok bisa didapatkan dengan memanggil metoda `.value`. Sedangkan
 untuk membuat nilai `refined` pada saat waktu jalan, kita bisa menggunakan
 `.refineV` yang mengembalikan `Either`.
@@ -1725,17 +1594,12 @@ untuk membuat nilai `refined` pada saat waktu jalan, kita bisa menggunakan
   Right(Sam)
 ~~~~~~~~
 
-If we add the following import
-
 Bila kita menambah impor berikut,
 
 {lang="text"}
 ~~~~~~~~
   import refined.auto._
 ~~~~~~~~
-
-we can construct valid values at compiletime and get an error if the provided
-value does not meet the requirements
 
 kita dapat menyusun nilai nilai valid saat waktu kompile dan akan mendapatkan
 pesan galat ketika nilai yang disediakan tidak memenuhi kriteria yang diminta.
@@ -1749,9 +1613,6 @@ pesan galat ketika nilai yang disediakan tidak memenuhi kriteria yang diminta.
   <console>:21: error: Predicate isEmpty() did not fail.
 ~~~~~~~~
 
-More complex requirements can be captured, for example we can use the built-in
-rule `MaxSize` with the following imports
-
 Untuk kriteria yang lebih kompleks, kita dapat menggunakan aturan `MaxSize` pada
 contoh berikut.
 
@@ -1761,9 +1622,6 @@ contoh berikut.
   import refined.boolean.And
   import refined.collection.MaxSize
 ~~~~~~~~
-
-capturing the requirement that the `String` must be both non-empty and have a
-maximum size of 10 characters:
 
 Untuk memenuhi persyaratan bahwa `String` harus tidak kosong dan mempunyai
 panjang maksimal 10 karakter, kita bisa menulis sebagai berikut:
@@ -1778,9 +1636,6 @@ panjang maksimal 10 karakter, kita bisa menulis sebagai berikut:
   )
 ~~~~~~~~
 
-A> The `W` notation is short for "witness". This syntax will be much simpler in
-A> Scala 2.13, which has support for *literal types*:
-A>
 A> Notasi `W` merupakan kependekan dari *witness*. Sintaksis ini akan jauh lebih
 A> sederhana pada Scala 2.13 yang mendukung *tipe literal*.
 A>
@@ -1788,11 +1643,6 @@ A> {lang="text"}
 A> ~~~~~~~~
 A>   type Name = NonEmpty And MaxSize[10]
 A> ~~~~~~~~
-
-It is easy to define custom requirements that are not covered by the refined
-library. For example in `drone-dynamic-agents` we will need a way of ensuring
-that a `String` contains `application/x-www-form-urlencoded` content. We can
-create a `Refined` rule using the Java regular expression library:
 
 Bila kita menemui persyaratan-persyaratan yang tidak didukung oleh pustaka
 `refined`, kita dapat dengan mudah menyusunnya sendiri.
@@ -1817,14 +1667,7 @@ Untuk menyusunnya, kita bisa menggunakan pustaka standar *regex* Java.
 ~~~~~~~~
 
 
-### Simple to Share
-
-By not providing any functionality, ADTs can have a minimal set of
-dependencies. This makes them easy to publish and share with other
-developers. By using a simple data modelling language, it makes it
-possible to interact with cross-discipline teams, such as DBAs, UI
-developers and business analysts, using the actual code instead of a
-hand written document as the source of truth.
+### Sederhana untuk Dibagi
 
 Dengan tidak berisi fungsionalitas apapun, sangat mungkin sebuah ADT
 memiliki ketergantungan yang kecil. Hal ini-lah yang memudahkan kita
@@ -1833,146 +1676,84 @@ Dengan menggunakan bahasa pemodelan data sederhana, interaksi antar
 tim inter-disipliner akan lebih mudah dan ketergantungan atas dokumen
 tertulis berkurang.
 
-Furthermore, tooling can be more easily written to produce or consume
-schemas from other programming languages and wire protocols.
-
-Terlebih lagi, peralatan yang digunakan bisa dibuat dengan mudah untuk
-(lol, males banget. saya kaku.)
+Terlebih lagi, peralatan yang digunakan bisa dibuat dengan mudah agar
+dapat menghasilkan atau menggunakan skema dari bahasa pemrograman lain
+dan protokol komunikasi.
 
 
-### Counting Complexity
-
-The complexity of a data type is the count of values that can exist. A good data
-type has the least amount of complexity it needs to hold the information it
-conveys, and no more.
+### Menghitung Kompleksitas
 
 Kompleksitas dari sebuah tipe data diambil dari jumlah nilai yang bisa
 ada pada tipe data tersebut. Sebuah tipe data yang bagus mempunyai tingkat
 kompleksitas yang rendah bila dibandingkan dengan informasi yang disampaikan.
 
-Values have a built-in complexity:
-
 Nilai-nilai berikut punya kompleksitas yang tetap.
-
--   `Unit` has one value (why it is called "unit")
--   `Boolean` has two values
--   `Int` has 4,294,967,295 values
--   `String` has effectively infinite values
 
 -   `Unit` punya satu nilai.
 -   `Boolean` punya dua nilai.
 -   `Int` punya 4,294,967,295 nilai.
 -   `String` bisa dibilang punya nilai tak hingga.
 
-To find the complexity of a product, we multiply the complexity of
-each part.
-
 Untuk mencari kompleksitas dari sebuah produk, kita tinggal mengalikan
 kompleksitas dari tiap bagian.
-
--   `(Boolean, Boolean)` has 4 values (`2*2`)
--   `(Boolean, Boolean, Boolean)` has 8 values (`2*2*2`)
 
 -   `(Boolean, Boolean)` punya 4 nilai (`2*2`)
 -   `(Boolean, Boolean, Boolean)` punya 8 nilai (`2*2*2`)
 
-To find the complexity of a coproduct, we add the complexity of each
-part.
-
 Sedangkan untuk mencari kompleksitas dari sebuah ko-produk, kita tinggal
 menambah kompleksitas dari tiap bagian.
 
--   `(Boolean |: Boolean)` has 4 values (`2+2`)
--   `(Boolean |: Boolean |: Boolean)` has 6 values (`2+2+2`)
-
 -   `(Boolean |: Boolean)` punya 4 nilai (`2+2`)
 -   `(Boolean |: Boolean |: Boolean)` punya 6 nilai (`2+2+2`)
-
-To find the complexity of a GADT, multiply each part by the complexity
-of the type parameter:
 
 Sedangkan untuk mencari kompleksitas dari sebuah GADT, kalikan tiap bagian
 dengan kompleksitas dari setiap parameter.
 
 -   `Option[Boolean]` punya 3 nilai, `Some[Boolean]` dan `None` (`2+1`)
 
-In FP, functions are *total* and must return an value for every
-input, no `Exception`. Minimising the complexity of inputs and outputs
-is the best way to achieve totality. As a rule of thumb, it is a sign
-of a badly designed function when the complexity of a function's
-return value is larger than the product of its inputs: it is a source
-of entropy.
-
 Pada pemrograman fungsional, selain fungsi harus *total*, juga harus mempunyai
-nilai kembalian untuk semua input, tak terkecuali (lol, pun hilang).
+nilai kembalian untuk semua input, tak pengecualian..
 Praktik utama yang digunakan untuk mencapai *totalitas* adalah dengan
 mengurangi jumlah input dan output. Sebagai patokan, tanda tanda fungsi
 yang tidak didesain dengan seksama adalah ketika kompleksitas dari output
 sebuah fungsi lebih besar daripada jumlah perkalian inputnya.
 
 
-The complexity of a total function is the number of possible functions that can
-satisfy the type signature: the output to the power of the input.
-
 Kompleksitas dari sebuah fungsi total adalah jumlah fungsi yang bisa memenuhi
 *signature* dari fungsi tersebut yang dihitung dengan menggunakan output pangkat
 input.
-
--   `Unit => Boolean` has complexity 2
--   `Boolean => Boolean` has complexity 4
--   `Option[Boolean] => Option[Boolean]` has complexity 27
--   `Boolean => Int` is a mere quintillion going on a sextillion.
--   `Int => Boolean` is so big that if all implementations were assigned a unique
-    number, each would require 4 gigabytes to represent.
 
 -   `Unit => Boolean` punya kompleksitas 2.
 -   `Boolean => Boolean` punya kompleksitas 4.
 -   `Option[Boolean] => Option[Boolean]` punya kompleksitas 27.
 -   `Boolean => Int` dari quintillion jadi sextillion.
--   `Int => Boolean` gede banget (lol, that's what she said!)
-
-In reality, `Int => Boolean` will be something simple like `isOdd`, `isEven` or
-a sparse `BitSet`. This function, when used in an ADT, could be better replaced
-with a coproduct labelling the limited set of functions that are relevant.
+-   `Int => Boolean` sedemikian besar bila semua implementasi ditetapkan pada
+    sebuah angka unik, tiap implementasi membutuhkan ruang 4 gigabita agar dapat
+    direpresentasikan.
 
 Kenyataannya, `Int => Boolean` bisa jadi hanya sebuah fungsi sederhana seperti
 `isOdd`, `isEven`, atau `BitSet`. Fungsi ini, ketika digunakan pada sebuah ADT,
 bisa diganti dengan menggunakan ko-produk untuk menandai fungsi yang relevan.
 
-When our complexity is "infinity in, infinity out" we should introduce
-restrictive data types and validation closer to the point of input with
-`Refined` from the previous section.
-
 Ketika kompleksitas fungsi kita adalah "semua boleh masuk dan semua bisa keluar",
 kita harus memberikan tipe data yang terbatas dan proses validasi. etc (lol, help)
 
-The ability to count the complexity of a type signature has one other practical
-application: we can find simpler type signatures with High School algebra! To go
-from a type signature to its algebra of complexity, simply replace
-
-Keuntungan lain yang bisa didapat saat kita bisa menghitung kompleksitas *signature* (lol)
-tipe adalah kita bisa mencari *signature* (lol) tipe yang lebih sederhana dengan
-aljabar tingkat SMP (pangkat sudah diajari saat SMP, kan?).
-Untuk menghitung kompleksitasnya, tinggal mengganti
+Keuntungan lain yang bisa didapat saat kita bisa menghitung kompleksitas penanda
+tipe adalah kita bisa mencari penanda tipe yang lebih sederhana dengan
+aljabar tingkat SMP.  Untuk menghitung kompleksitasnya, tinggal mengganti
 
 -   `Either[A, B]` dengan `a + b`
 -   `(A, B)` dengan `a * b`
 -   `A => B` dengan `b ^ a`
 
-do some rearranging, and convert back. For example, say we've designed a
-framework based on callbacks and we've managed to work ourselves into the
-situation where we have created this type signature:
-
 dilanjutkan dengan mengurutkan, lalu tinggal konversi balik. Sebagai contoh,
 misalkan kita mendesain sebuah kerangka kerja berdasarkan *callbacks* dan
-pada akhirnya kita membuat *signature* tipe sebagai berikut:
+pada akhirnya kita membuat penanda tipe sebagai berikut:
 
 {lang="text"}
 ~~~~~~~~
   (A => C) => ((B => C) => C)
 ~~~~~~~~
-
-We can convert and rearrange
 
 Yang bisa kita konversi dan atur ulang sebagai
 
@@ -1983,8 +1764,6 @@ Yang bisa kita konversi dan atur ulang sebagai
   = c ^ (c ^ (a + b))
 ~~~~~~~~
 
-then convert back to types and get
-
 dan pada akhirnya, kita bisa konversi ulang ke tipe dan mendapat:
 
 {lang="text"}
@@ -1992,13 +1771,8 @@ dan pada akhirnya, kita bisa konversi ulang ke tipe dan mendapat:
   (Either[A, B] => C) => C
 ~~~~~~~~
 
-which is much simpler: we only need to ask the users of our framework to provide
-a `Either[A, B] => C`.
-
 yang jauh lebih sederhana. Kita cuma perlu untuk menyuruh pengguna untuk
 menyediakan `Either[A, B] => C`.
-
-The same line of reasoning can be used to prove that
 
 Dengan penalaran yang sama, kita bisa membuktikan bahwa
 
@@ -2007,8 +1781,6 @@ Dengan penalaran yang sama, kita bisa membuktikan bahwa
   A => B => C
 ~~~~~~~~
 
-is equivalent to
-
 ekuivalen dengan
 
 {lang="text"}
@@ -2016,17 +1788,10 @@ ekuivalen dengan
   (A, B) => C
 ~~~~~~~~
 
-also known as *Currying*.
-
 yang dikenal dengan *Currying* (lol, bikin kare. tapi tidak sopan, nama orang.)
 
 
-### Prefer Coproduct over Product
-
-An archetypal modelling problem that comes up a lot is when there are
-mutually exclusive configuration parameters `a`, `b` and `c`. The
-product `(a: Boolean, b: Boolean, c: Boolean)` has complexity 8
-whereas the coproduct
+### Pilih Koproduk, bukan Produk
 
 Sebuah masalah pemodelan dasar yang sering kali muncul adalah ketika
 ada beberapa parameter konfigurasi yang saling ekslusif yang sebut saja
@@ -2044,20 +1809,10 @@ sedangkan ko-produk
   }
 ~~~~~~~~
 
-has a complexity of 3. It is better to model these configuration
-parameters as a coproduct rather than allowing 5 invalid states to
-exist.
-
 punya kompleksitas 3. Sebagaimana yang telah ditunjukkan di atas,
 adalah lebih disukai untuk memodelkan parameter konfigurasi ini
 sebagai ko-produk bila dibandingkan dengan memberikan kemungkinan
 5 kondisi invalid terjadi.
-
-The complexity of a data type also has implications on testing. It is
-practically impossible to test every possible input to a function, but it is
-easy to test a sample of values with the [Scalacheck](https://www.scalacheck.org/) property testing framework.
-If a random sample of a data type has a low probability of being valid, it is a
-sign that the data is modelled incorrectly.
 
 Kompleksitas dari sebuah tipe data juga mempunyai implikasi pada testing.
 Di lapangan, adalah hal yang mustahil untuk memeriksa semua input yang
@@ -2069,39 +1824,24 @@ hal tersebut merupakan pertanda bahwa pemodelan data dilakukan secara
 kurang tepat.
 
 
-### Optimisations
-
-A big advantage of using a simplified subset of the Scala language to
-represent data types is that tooling can optimise the JVM bytecode
-representation.
+### Pengoptimalan
 
 Keuntungan yang sangat terasa saat menggunakan subset sederhana
 Scala untuk merepresentasikan tipe data adalah *tooling* dapat
 melakukan optimisasi atas representasi *bytecode* JVM.
-
-For example, we could pack `Boolean` and `Option` fields into an `Array[Byte]`,
-cache values, memoise `hashCode`, optimise `equals`, use `@switch` statements
-when pattern matching, and much more.
 
 Sebagai contoh, kita dapat mengemas bidang `Boolean` dan `Option` ke dalam
 sebuah `Array[Byte]`, menyimpan nilai di tembolok, memoisasi `hashCode`,
 optimisasi `equals`, menggunakan statemen `@switch` pada saat pattern match,
 dan banyak lagi.
 
-These optimisations are not applicable to OOP `class` hierarchies that
-may be managing state, throwing exceptions, or providing adhoc method
-implementations.
-
-Optimisasi semacam ini tidak bisa diterapkan pada hierarki `class` di
+Pengoptimalan semacam ini tidak bisa diterapkan pada hierarki `class` di
 OOP yang juga mengatur "state", melempar eksepsi, ataupun menyediakan
 implementasi metoda adhoc.
 
-## Functionality
+## Fungsionalitas
 
-Pure functions are typically defined as methods on an `object`.
-
-Fungsi murni (lol) biasanya didefinisikan sebagai metoda pada
-sebuah objek.
+Fungsi murni biasanya didefinisikan sebagai metoda pada sebuah objek.
 
 {lang="text"}
 ~~~~~~~~
@@ -2113,25 +1853,14 @@ sebuah objek.
   math.sin(1.0)
 ~~~~~~~~
 
-However, it can be clunky to use `object` methods since it reads
-inside-out, not left to right. In addition, a function on an `object`
-steals the namespace. If we were to define `sin(t: T)` somewhere else
-we get *ambiguous reference* errors. This is the same problem as
-Java's static methods vs class methods.
-
 Sebagaimana yang kita lihat pada cuplikan di atas, penggunaan metoda
 pada object bisa jadi terlihat kikuk. Selain karena terbaca dari dalam
 ke luar (bukan kiri ke kanan), juga karena objek tersebut menggunakan
-"namespace" (ruang nama? lol).
+"namespace".
 Bila kita mendefinisikan `sin(t: T)` di tempat lain, kita akan mendapat
 galat *referensi ambigu*. Bila pembaca pernah mengalami masalah saat
 menggunakan metoda statik dan metoda kelas pada Java, hal yang sama
 juga terjadi bila menggunakan metoda objek pada Scala.
-
-W> The sort of developer who puts methods on a `trait`, requiring users to mix it
-W> with the *cake pattern*, is going straight to hell. It leaks internal
-W> implementation detail to public APIs, bloats bytecode, makes binary
-W> compatibility basically impossible, and confuses IDE autocompleters.
 
 W> Sesungguhnya, pengembang yang meletakkan metoda pada sebuah `trait`
 W> dan menyebabkan pengguna menggunakan *cake pattern* akan menerima
@@ -2140,12 +1869,8 @@ W> kebocoran detail implementasi ke API publik, bytecode gemuk, kompatibilitas
 W> binari menjadi tidak mungkin dilakukan, dan membingungkan pengkomplet
 W> automatis dari IDE.
 
-With the `implicit class` language feature (also known as *extension
-methodology* or *syntax*), and a little boilerplate, we can get the
-familiar style:
-
-Dengan menggunakan fitur `implicit class` dan sedikit tambahan (lol, boilerplate), kita
-dapat menggunakan gaya penulisan yang familiar:
+Dengan menggunakan fitur `implicit class` dan sedikit plat cetak, kita dapat
+menggunakan gaya penulisan yang familiar:
 
 {lang="text"}
 ~~~~~~~~
@@ -2157,12 +1882,8 @@ dapat menggunakan gaya penulisan yang familiar:
   res: Double = 0.8414709848078965
 ~~~~~~~~
 
-Often it is best to just skip the `object` definition and go straight
-for an `implicit class`, keeping boilerplate to a minimum:
-
 Sering kali, lebih disukai bila kita melewatkan pendefinisian `object`
-dan langsung mendefinisikan `implicit class` untuk mengurangi
-tambahan (lol, boilerplate).
+dan langsung mendefinisikan `implicit class` untuk mengurangi plat cetak:
 
 {lang="text"}
 ~~~~~~~~
@@ -2171,8 +1892,6 @@ tambahan (lol, boilerplate).
   }
 ~~~~~~~~
 
-A> `implicit class` is syntax sugar for an implicit conversion:
-A> 
 A> `implicit class` merupakan pemanis sintaksis untuk konversi implisit:
 A>
 A> {lang="text"}
@@ -2183,16 +1902,9 @@ A>     def sin: Double = java.lang.Math.sin(x)
 A>   }
 A> ~~~~~~~~
 A> 
-A> Which unfortunately has a runtime cost: each time the extension method
-A> is called, an intermediate `DoubleOps` will be constructed and then
-A> thrown away. This can contribute to GC pressure in hotspots.
-A>
 A> Walaupun mempunyai kekurangan yaitu konstruksi `DoubleOps` yang langsung
 A> dibuang bila selesai dipanggil untuk tiap kali pemanggulan.
 A> Hal ini bisa memberikan beban tambahan untuk GC.
-A>
-A> There is a slightly more verbose form of `implicit class` that avoids
-A> the allocation and is therefore preferred:
 A>
 A> Untuk metode yang lebih disukai, walaupun sedikit lebih lantung, tanpa
 A> alokasi memori adalah sebagai berikut.
@@ -2205,46 +1917,22 @@ A>   }
 A> ~~~~~~~~
 
 
-### Polymorphic Functions
-
-The more common kind of function is a polymorphic function, which
-lives in a *typeclass*. A typeclass is a trait that:
-
--   holds no state
--   has a type parameter
--   has at least one abstract method (*primitive combinators*)
--   may contain *generalised* methods (*derived combinators*)
--   may extend other typeclasses
+### Fungsi Polimorfis
 
 Jenis fungsi yang lebih umum adalah fungsi polimorfis yang biasa
-ada pada sebuah *kelas tipe* (lol). Sebuah tipe kelas merupakan ciri
+ada pada sebuah *kelas tipe*. Sebuah tipe kelas merupakan ciri
 yang:
 
--   tidak berisi kondisi. (lol, state apa ya?)
+-   tidak berisi keadaan.
 -   mempunyai parameter tipe.
 -   mempunyai, setidaknya, satu metoda abstrak (*kombinator primitif*).
 -   mungkin berisi metoda yang terumumkan (*kombinator turunan*).
 -   mungkin berupa perpanjangan dari *kelas tipe* lain.
 
-There can only be one implementation of a typeclass for any given type
-parameter, a property known as *typeclass coherence*. Typeclasses look
-superficially similar to algebraic interfaces from the previous chapter, but
-algebras do not have to be coherent.
-
 Untuk semua tipe parameter, hanya boleh ada satu implementasi kelas tipe.
 Properti ini dikenal sebagai *koherensi kelas tipe*. Kelas tipe secara
 sekilas, terlihat seperti antarmuka aljabaris di bab sebelumnya. Namun,
 aljabar tidak harus koheren.
-
-A> Typeclass coherence is primarily about consistency, and the consistency gives us
-A> the confidence to use `implicit` parameters. It would be difficult to reason
-A> about code that performs differently depending on the implicit imports that are
-A> in scope. Typeclass coherence effectively says that imports should not impact
-A> the behaviour of the code.
-A> 
-A> Additionally, typeclass coherence allows us to globally cache implicits at
-A> runtime and save memory allocations, gaining performance improvements from
-A> reduced pressure on the garbage collector.
 
 A> Koherensi kelas tipe pada utamanya adalah mengenai konsistensi. Dan, konsistensi-lah
 A> yang memberikan kita kepercayaan diri untuk menggunakan parameter `implicit`.
@@ -2257,9 +1945,6 @@ A> Sebagai tambahan, koherensi kelas tipe memberikan kita jalan untuk menyimpan
 A> implisit ke tembolok secara global pada saat waktu jalan. Selain itu, alokasi
 A> memori yang lebih rendah dan peningkatan performa yang disebabkan oleh GC
 A> yang santai juga merupakan bonus menarik karena penggunaan koherensi kelas tipe.
-
-Typeclasses are used in the Scala stdlib. We will explore a simplified
-version of `scala.math.Numeric` to demonstrate the principle:
 
 Pustaka standar Scala juga berisi kelas tipe. Kita akan mengeksplorasi
 `scala.math.Numeric` yang disederhanakan untuk menunjukkan prinsip prinsip
@@ -2284,16 +1969,6 @@ dari kelas tipe:
   }
 ~~~~~~~~
 
-We can see all the key features of a typeclass in action:
-
--   there is no state
--   `Ordering` and `Numeric` have type parameter `T`
--   `Ordering` has abstract `compare` and `Numeric` has abstract `plus`,
-    `times`, `negate` and `zero`
--   `Ordering` defines generalised `lt` and `gt` based on `compare`,
-    `Numeric` defines `abs` in terms of `lt`, `negate` and `zero`.
--   `Numeric` extends `Ordering`
-
 Kita dapat melihat semua fitur utama dari sebuah kelas tipe pada
 cuplikan kode di atas:
 
@@ -2306,9 +1981,6 @@ cuplikan kode di atas:
     menggunakan `lt`, `negate`, dan `zero`.
 -   `Numeric` merupakan perpanjangan dari `Ordering`.
 
-We can now write functions for types that "have a" `Numeric`
-typeclass:
-
 Sekarang kita dapat membuat fungsi untuk tipe yang memiliki kelas tipe `Numeric`:
 
 {lang="text"}
@@ -2319,28 +1991,14 @@ Sekarang kita dapat membuat fungsi untuk tipe yang memiliki kelas tipe `Numeric`
   }
 ~~~~~~~~
 
-We are no longer dependent on the OOP hierarchy of our input types,
-i.e. we don't demand that our input "is a" `Numeric`, which is vitally
-important if we want to support a third party class that we cannot
-redefine.
-
 Kita tidak lagi bergantung kepada hierarki OOP untuk tipe input kita.
 Dengan kata lain, kita tidak meminta input kita "merupakan sebuah"
 `Numeric`. Hal ini sangat penting bila kita ingin mendukung kelas dari
 pihak ketiga yang tidak mungkin kita definisikan ulang.
 
-Another advantage of typeclasses is that the association of
-functionality to data is at compiletime, as opposed to OOP runtime
-dynamic dispatch.
-
 Keuntungan lain dari kelas tipe adalah pengasosiasian fungsionalitas
 ke data dilakukan saat kompilasi. Hal yang berbeda terjadi pada OOP
-dimana dilakukan "dynamic dispatch" pada wakut jalan. (lol, apa ini?)
-
-For example, whereas the `List` class can only have one implementation
-of a method, a typeclass method allows us to have a different
-implementation depending on the `List` contents and therefore offload
-work to compiletime instead of leaving it to runtime.
+dimana dilakukan "dynamic dispatch" pada wakut jalan.
 
 Sebagai contoh, dimana kelas `List` hanya bisa mempunya satu implementasi
 sebuah metoda, sebuah metoda kelas tipe bisa memberikan kita beberapa
@@ -2348,31 +2006,20 @@ implementasi yang begantung pada konten `List`.
 Sehingga, terjadi pemindahan beban kerja dari waktu jalan ke waktu kompilasi.
 
 
-### Syntax
-
-The syntax for writing `signOfTheTimes` is clunky, there are some
-things we can do to clean it up.
+### Sintaks
 
 Ada beberapa hal yang bisa dirapikan pada sintaks `signOfTheTimes`
 yang terlihat kikuk.
 
-Downstream users will prefer to see our method use *context bounds*,
-since the signature reads cleanly as "takes a `T` that has a
-`Numeric`"
-
-Pengguna akan lebih senang bila mereka dapat melihat metoda kita
-menggunakan *konteks terikat* karena signature (lol) dapat terbaca
+Pengguna hilir akan lebih senang bila mereka dapat melihat metoda kita
+menggunakan *konteks terikat* karena penanda dapat terbaca
 dengan jelas bahwa metoda tersebut menerima parameter `T` yang,
 misal, merupakan `Numeric`
-
 
 {lang="text"}
 ~~~~~~~~
   def signOfTheTimes[T: Numeric](t: T): T = ...
 ~~~~~~~~
-
-but now we have to use `implicitly[Numeric[T]]` everywhere. By
-defining boilerplate on the companion of the typeclass
 
 walaupun hal itu berarti kita harus selalu menggunakan `implicitly[Numeric[T]]`.
 Dengan mendefinisikan boilerplate (lol) pada kelas tipe,
@@ -2383,8 +2030,6 @@ Dengan mendefinisikan boilerplate (lol) pada kelas tipe,
     def apply[T](implicit numeric: Numeric[T]): Numeric[T] = numeric
   }
 ~~~~~~~~
-
-we can obtain the implicit with less noise
 
 kita bisa mengurangi derau untuk `implicit`.
 
@@ -2397,9 +2042,10 @@ kita bisa mengurangi derau untuk `implicit`.
   }
 ~~~~~~~~
 
-But it is still worse for us as the implementors. We have the
-syntactic problem of inside-out static methods vs class methods. We
-deal with this by introducing `ops` on the typeclass companion:
+Namun hal semacam ini tetap saja buruk bagi kita sebagai pengimplementasi.
+Kita mempunyai masalah sintaksis dari metoda statik dalam-ke-luar atau
+metoda kelas. Kita menangani hal ini dengan memperkenalkan `ops` pada
+objek pendamping kelas tipe:
 
 {lang="text"}
 ~~~~~~~~
@@ -2421,10 +2067,6 @@ deal with this by introducing `ops` on the typeclass companion:
   }
 ~~~~~~~~
 
-Note that `-x` is expanded into `x.unary_-` by the compiler's syntax
-sugar, which is why we define `unary_-` as an extension method. We can
-now write the much cleaner:
-
 Harap diperhatikan bahwa `-x` akan dijabarkan menjadi `x.unary_-` oleh
 pemanis sintaksis kompilator. Oleh karena itu, kita mendefinisikan `unary_-`
 sebagai sebuah metode perpanjangan. Sekarang, kita dapat menulis `signOfTheTimes`
@@ -2435,12 +2077,6 @@ dengan lebih rapi:
   import Numeric.ops._
   def signOfTheTimes[T: Numeric](t: T): T = -(t.abs) * t
 ~~~~~~~~
-
-The good news is that we never need to write this boilerplate because
-[Simulacrum](https://github.com/mpilquist/simulacrum) provides a `@typeclass`
-macro annotation that automatically generates the `apply` and `ops`. It even
-allows us to define alternative (usually symbolic) names for common methods. In
-full:
 
 Langkah langkah diatas mungkin tidak perlu dilakukan bila menggunakan [Simulacrum](https://github.com/mpilquist/simulacrum)
 yang menyediakan anotasi makro `@typeclass` yang secara otomatis menghasilkan
@@ -2470,22 +2106,15 @@ Untuk lebih lengkapnya, bisa dilihat potongan kode berikut:
   def signOfTheTimes[T: Numeric](t: T): T = -(t.abs) * t
 ~~~~~~~~
 
-When there is a custom symbolic `@op`, it can be pronounced like its method
-name. e.g. `<` is pronounced "less than", not "left angle bracket".
-
 Saat ada simbol buatan `@op`, simbol ini diucapkan seperti nama metoda-nya.
 Misalkan simbol `<` disebut sebagai "kurang dari", bukan "kurung " (lol, apa ya?)
 
-### Instances
-
-*Instances* of `Numeric` (which are also instances of `Ordering`) are
-defined as an `implicit val` that extends the typeclass, and can
-provide optimised implementations for the generalised methods:
+### Instans
 
 *Instans* dari `Numeric` (yang juga merupakan instans dari `Ordering`)
 didefinisikan sebagai sebuah `implicit val` (nilai implicit) yang merupakan
 perpanjangan dari kelas tipe dan dapat menyediakan implementasi teroptimisasi
-dari metoda tergeneralisasi: (lol, dipendekin dah. tidak natural bila dibaca.)
+dari metoda tergeneralisasi:
 
 {lang="text"}
 ~~~~~~~~
@@ -2503,22 +2132,12 @@ dari metoda tergeneralisasi: (lol, dipendekin dah. tidak natural bila dibaca.)
   }
 ~~~~~~~~
 
-Although we are using `+`, `*`, `unary_-`, `<` and `>` here, which are
-the ops (and could be an infinite loop!), these methods exist already
-on `Double`. Class methods are always used in preference to extension
-methods. Indeed, the Scala compiler performs special handling of
-primitives and converts these method calls into raw `dadd`, `dmul`,
-`dcmpl` and `dcmpg` bytecode instructions, respectively.
-
 Walaupun kita menggunakan operator `+`, `*`, `unary_-`, `<`, dan `>`,
 metoda-metoda tersebut sebenarnya sudah ada pada `Double`. Metoda kelas
 biasanya lebih disukai daripada metoda perpanjangan. Dan faktanya,
 kompilator Scala melakukan penanganan khusus untuk primitif dan mengubah
 metoda ini menjadi instruksi bytecode asli seperti `dadd`, `dmul`, `dcmpl`,
 dan `dcmpg`.
-
-We can also implement `Numeric` for Java's `BigDecimal` class (avoid
-`scala.BigDecimal`, [it is fundamentally broken](https://github.com/scala/bug/issues/9670))
 
 Kita juga bisa mengimplementasikan `Numeric` untuk kelas `BigDecimal` milik
 Java (bukan `scala.BigDecimal` yang [rhemuk](https://github.com/scala/bug/issues/9670))
@@ -2536,17 +2155,12 @@ Java (bukan `scala.BigDecimal` yang [rhemuk](https://github.com/scala/bug/issues
   }
 ~~~~~~~~
 
-We could create our own data structure for complex numbers:
-
 Kita bisa membuat struktur data kita sendiri untuk bilangan kompleks:
 
 {lang="text"}
 ~~~~~~~~
   final case class Complex[T](r: T, i: T)
 ~~~~~~~~
-
-And derive a `Numeric[Complex[T]]` if `Numeric[T]` exists. Since these
-instances depend on the type parameter, it is a `def`, not a `val`.
 
 Dan menurunkan `Numeric[Complex[T]]` bila `Numeric[T]` sudah ada.
 Karena instans ini bergantung pada parameter tipe, penurunan ini menggunakan
@@ -2570,18 +2184,9 @@ Karena instans ini bergantung pada parameter tipe, penurunan ini menggunakan
     }
 ~~~~~~~~
 
-The observant reader may notice that `abs` is not at all what a
-mathematician would expect. The correct return value for `abs` should
-be `T`, not `Complex[T]`.
-
 Pembaca yang jeli mungkin memperhatikan bahwa `abs` tidak sesuai
 dengan apa yang matematikawan harapkan. Nilai kembalian untuk `abs`
 seharusnya berupa `T`, bukan `Complex[T]`.
-
-`scala.math.Numeric` tries to do too much and does not generalise
-beyond real numbers. This is a good lesson that smaller, well defined,
-typeclasses are often better than a monolithic collection of overly
-specific features.
 
 `scala.math.Numeric` mencoba untuk melakukan terlalu banyak hal dan
 tidak tergeneralisasi diluar bilangan nyata. Hal ini bisa jadi pelajaran
@@ -2589,30 +2194,17 @@ yang bagus bahwa kelas tipe yang kecil dan terdefinisi dengan baik sering
 kali lebih baik daripada koleksi monolitik yang terdiri dari fitur
 fitur yang terlalu spesifik.
 
-### Implicit Resolution
-
-We've discussed implicits a lot: this section is to clarify what
-implicits are and how they work.
+### Resolusi Implisit
 
 Kita sudah mendiskusikan mengenai implisit secara panjang lebar.
 Bagian ini akan berbicara mengenai apakah implisit itu dan bagaimana
 cara mereka bekerja.
-
-*Implicit parameters* are when a method requests that a unique
-instance of a particular type is in the *implicit scope* of the
-caller, with special syntax for typeclass instances. Implicit
-parameters are a clean way to thread configuration through an
-application.
 
 *Parameter implisit* adalah saat sebuah metoda meminta instan khusus
 dari sebuah tipe tertentu yang ada pada *cakupan implisit* dari pemanggil
 dengan sintaks khusus untuk instans kelas tipe. Parameter implisit
 merupakan cara yang lebih rapi dalam menggalur konfigurasi pada sebuah
 aplikasi.
-
-In this example, `foo` requires that typeclass instances of `Numeric` and
-`Typeable` are available for `A`, as well as an implicit `Handler` object that
-takes two type parameters
 
 Pada contoh ini, `foo` meminta instans dari `Numeric` dan `Typeable` yang
 tersedia untuk `A` dan juga sebuah objek `Handler` implisit yang meminta
@@ -2623,13 +2215,6 @@ dua parameter.
   def foo[A: Numeric: Typeable](implicit A: Handler[String, A]) = ...
 ~~~~~~~~
 
-*Implicit conversion* is when an `implicit def` exists. One such use
-of implicit conversions is to enable extension methodology. When the
-compiler is resolving a call to a method, it first checks if the
-method exists on the type, then its ancestors (Java-like rules). If it
-fails to find a match, it will search the *implicit scope* for
-conversions to other types, then search for methods on those types.
-
 *Konversi implisit* adalah ketika sebuah `implicit def` ada. Salah
 satu penggunaan konversi implisit adalah untuk pembuatan perpanjangan
 metodologi. Ketika kompilator menyelesaikan pemanggilan sebuah metoda,
@@ -2639,36 +2224,16 @@ Bila gagal menemukan yang cocok, kompilator akan mencari *cakupan implisit*
 untuk konversi ke tipe lain. Baru dilanjutkan dengan pencarian
 untuk tipe-tipe tersebut.
 
-Another use for implicit conversions is *typeclass derivation*. In the
-previous section we wrote an `implicit def` that derived a
-`Numeric[Complex[T]]` if a `Numeric[T]` is in the implicit scope. It
-is possible to chain together many `implicit def` (including
-recursively) which is the basis of *typeful programming*, allowing for
-computations to be performed at compiletime rather than runtime.
-
-Penggunaan lain untuk konversi implisit adalah dengan *penurunan kelas tipe*
-atau *derivasi kelas tipe* (lol, pilih mana?). Pada bagian sebelumnya,
-kita menulis sebuah `implicit def` yang diturunkan dari `Numeric[Complex[T]]`
+Penggunaan lain untuk konversi implisit adalah dengan *derivasi kelas tipe*.
+Pada bagian sebelumnya, kita menulis sebuah `implicit def` yang diturunkan dari `Numeric[Complex[T]]`
 bila sebuah `Numeric[T]` ada pada cakupan implisit. Adalah sebuah hal
 yang mungkin untuk merangkai banyak `implicit def` (juga secara rekursif).
-Hal ini juga merupakan basis dari *pemrograman typeful* (lol, help) yang
+Hal ini juga merupakan basis dari *pemrograman dengan tipe* yang
 memindahkan komputasi untuk dilakukan pada saat kompilasi daripada
 saat waktu jalan.
 
-The glue that combines implicit parameters (receivers) with implicit
-conversion (providers) is implicit resolution.
-
 Perekat yang menggabungkan parameter implisit dengan konversi implisit
 adalah resolusi implisit.
-
-First, the normal variable scope is searched for implicits, in order:
-
--   local scope, including scoped imports (e.g. the block or method)
--   outer scope, including scoped imports (e.g. members in the class)
--   ancestors (e.g. members in the super class)
--   the current package object
--   ancestor package objects (when using nested packages)
--   the file's imports
 
 Pertama, cakupan variabel normal dicari dengan urutan:
 
@@ -2679,91 +2244,47 @@ Pertama, cakupan variabel normal dicari dengan urutan:
 -   objek dari kelas orang tua.
 -   impor pada berkas.
 
-If that fails to find a match, the special scope is searched, which
-looks for implicit instances inside a type's companion, its package
-object, outer objects (if nested), and then repeated for ancestors.
-This is performed, in order, for the:
-
 Bila semua gagal mencari yang cocok, maka pencarian pada cakupan khusus
 akan dilakukan. Pencarian ini dikhususkan untuk instans implisit yang ada
 pada objek pasangan, objek paket, objek luar (bila berlapis), dan diulang
 untuk ancestor (lol). Pencarian ini dilakukan dengan urutan sebagai berikut:
 
-
--   given parameter type
--   expected parameter type
--   type parameter (if there is one)
-
 -   tipe parameter yang ada.
 -   tipe parameter yang diminta.
 -   parameter tipe (bila ada).
 
-If two matching implicits are found in the same phase of implicit
-resolution, an *ambiguous implicit* error is raised.
-
 Bila ada dua implisit yang sesuai diketemukan pada resolusi implisit
 yang sama, galat *implisit ambigu* akan dilempar.
-
-Implicits are often defined on a `trait`, which is then extended by an
-object. This is to try and control the priority of an implicit
-relative to another more specific one, to avoid ambiguous implicits.
 
 Implisit seringkali didefinisikan pada sebuah `trait`, yang biasanya
 akan diperpanjang oleh sebuah objek. Hal ini dilakukan untuk mengotrol
 prioritas dari sebuah implisit, relatif terhadap implisit lain yang lebih
 spesifik, untuk mencegah implisit yang ambigu.
 
-The Scala Language Specification is rather vague for corner cases, and
-the compiler implementation is the *de facto* standard. There are some
-rules of thumb that we will use throughout this book, e.g. prefer
-`implicit val` over `implicit object` despite the temptation of less
-typing. It is a [quirk of implicit resolution](https://github.com/scala/bug/issues/10411) that `implicit object` on
-companion objects are not treated the same as `implicit val`.
-
 Spesifikasi Bahasa Scala cenderung kabur untuk kasus kasus yang kurang umum
 dan implementasi kompilator-lah yang menjadi standar de-fakto. Ada beberapa
 patokan yang akan kita gunakan sepanjang buku ini. Misalkan, kita akan
 memilih `implicit val` dibandingkan `implicit object` meskipun akan ada
-godaan untuk menulis lebih pendek. Ada sebuah [quirk (lol) atas resolusi implisit](https://github.com/scala/bug/issues/10411)
+godaan untuk menulis lebih pendek. ini adalah [perilaku unik atas resolusi implisit](https://github.com/scala/bug/issues/10411)
 yang memperlakukan `imlicit object` tidak sama saat memperlakukan `implicit val`.
-
-Implicit resolution falls short when there is a hierarchy of typeclasses, like
-`Ordering` and `Numeric`. If we write a function that takes an implicit
-`Ordering`, and we call it for a primitive type which has an instance of
-`Numeric` defined on the `Numeric` companion, the compiler will fail to find it.
 
 Resolusi implisit gagal saat ada hierarki kelas tipe seperti `Ordering` dan `Numeric`.
 Bila kita menulis fungsi yang mengambil sebuah `Ordering` implicit, dan kita memanggilnya
 untuk sebuah tipe primitif yang punya instans `Numeric` yang terdefinisi pada pasangan `Numeric`,
 kompilator akan gagal mencarinya.
 
-Implicit resolution is particularly hit-or-miss [if type aliases are used](https://github.com/scala/bug/issues/10582) where
-the *shape* of the implicit parameters are changed. For example an implicit
-parameter using an alias such as `type Values[A] = List[Option[A]]` will
-probably fail to find implicits defined as raw `List[Option[A]]` because the
-shape is changed from a *thing of things* of `A` to a *thing* of `A`.
-
 Resolusi implisit seringkali untung-untungan [bila kelas tipe digunakan](https://github.com/scala/bug/issues/10582)
 saat *bentuk* dari parameter imlisit berubah. Sebagai contoh, sebuah parameter
 implisit menggunakan sebuah alias seperti `type Values[A] = List[Option[A]]` mungkin
 akan gagal untuk mencari implisit yang definisikan sebagai `List[Option[A]]`.
 Hal ini disebabkan karena bentuknya berubah dari *thing of things* dari `A`
-menjadi *thing* dari `A`. (lol, thing.)
+menjadi *thing* dari `A`.
 
 
-## Modelling OAuth2
-
-We will finish this chapter with a practical example of data modelling
-and typeclass derivation, combined with algebra / module design from
-the previous chapter.
+## Memodelkan OAuth2
 
 Kita akan menutup bab ini dengan contoh praktikal dari pemodelan data dan
 derivasi kelas tipe dan aljabar / desain modul dari bab sebelumnya.
-
-In our `drone-dynamic-agents` application, we must communicate with Drone and
-Google Cloud using JSON over REST. Both services use [OAuth2](https://tools.ietf.org/html/rfc6749) for authentication.
-There are many ways to interpret OAuth2, but we will focus on the version that
-works for Google Cloud (the Drone version is even simpler).
 
 Pada aplikasi `drone-dynamic-agents` kita, untuk berkomunikasi dengan Drone
 dan Google Cloud, kita harus menggunakan JSON dengan REST. Kedua layanan tersebut
@@ -2772,10 +2293,7 @@ Ada banyak dalam interpretasi OAuth2, namun kita akan fokus pada versi yang
 cocok untuk Google Cloud. Bahkan, versi untuk Drone jauh lebih sederhana.
 
 
-### Description
-
-Every Google Cloud application needs to have an *OAuth 2.0 Client Key*
-set up at
+### Deskripsi
 
 Setiap aplikasi Google Cloud mengharuskan kita untuk mengatur *OAuth 2.0 Client Key*
 pada
@@ -2785,13 +2303,7 @@ pada
   https://console.developers.google.com/apis/credentials?project={PROJECT_ID}
 ~~~~~~~~
 
-Obtaining a *Client ID* and a *Client secret*.
-
-Mendapatkan *Client ID* dan *Client secret*. (lol, ini apaan, ya?)
-
-The application can then obtain a one time *code* by making the user
-perform an *Authorization Request* in their browser (yes, really, **in
-their browser**). We need to make this page open in the browser:
+Mendapatkan *Client ID* dan *Client secret*.
 
 Lalu, aplikasi bisa mendapatkan satu *kode* setelah pengguna melakukan
 *Permintaan Otorisasi* pada peramban mereka. Kita harus membuka laman
@@ -2808,15 +2320,9 @@ berikut pada peramban:
     client_id={CLIENT_ID}
 ~~~~~~~~
 
-The *code* is delivered to the `{CALLBACK_URI}` in a `GET` request. To
-capture it in our application, we need to have a web server listening
-on `localhost`.
-
 *Kode* yang dikirimkan ke `{CALLBACK_URI}` dalam sebuah permintaan `GET`.
 Untuk menangkap informasi ini di aplikasi kita, kita harus mempunya sebuah
 pelayan web yang mendengar ke `localhost`.
-
-Once we have the *code*, we can perform an *Access Token Request*:
 
 Setelah kita punya *kode* tersebut, kita dapat melakukan *Access Token Request*:
 
@@ -2836,8 +2342,6 @@ Setelah kita punya *kode* tersebut, kita dapat melakukan *Access Token Request*:
     grant_type=authorization_code
 ~~~~~~~~
 
-which gives a JSON response payload
-
 yang akan memberikan jawaban berupa JSON.
 
 {lang="text"}
@@ -2850,10 +2354,7 @@ yang akan memberikan jawaban berupa JSON.
   }
 ~~~~~~~~
 
-*Bearer tokens* typically expire after an hour, and can be refreshed
-by sending an HTTP request with any valid *refresh token*:
-
-*Bearer token* biasanya kadaluarsa setelah satu jam dan dapat disegarkan (lol)
+*Bearer token* biasanya kadaluarsa setelah satu jam dan dapat disegarkan
 dengan mengirimkan sebuah permintaan HTTP dengan *refresh token* yang valid.
 
 {lang="text"}
@@ -2869,8 +2370,6 @@ dengan mengirimkan sebuah permintaan HTTP dengan *refresh token* yang valid.
     client_id={CLIENT_ID}
 ~~~~~~~~
 
-responding with
-
 yang akan direspon dengan
 
 {lang="text"}
@@ -2882,8 +2381,6 @@ yang akan direspon dengan
   }
 ~~~~~~~~
 
-All userland requests to the server should include the header
-
 Semua permintaan dari pengguna ke server harus mengikutsertakan tajuk
 
 {lang="text"}
@@ -2891,36 +2388,19 @@ Semua permintaan dari pengguna ke server harus mengikutsertakan tajuk
   Authorization: Bearer BEARER_TOKEN
 ~~~~~~~~
 
-after substituting the actual `BEARER_TOKEN`.
-
-setelah mengganti dengan `BEARER_TOKEN` yang asli.
-
-Google expires all but the most recent 50 *bearer tokens*, so the
-expiry times are just guidance. The *refresh tokens* persist between
-sessions and can be expired manually by the user. We can therefore
-have a one-time setup application to obtain the refresh token and then
-include the refresh token as configuration for the user's install of
-the headless server.
+setelah mengganti dengan `BEARER_TOKEN` yang sebenarnya.
 
 Google hanya akan menerima 50 *bearer token* terakhir. Jadi, waktu kadaluarsa
 hanya merupakan panduan saja. *Refresh token* bertahan antar sesi dan dapat
 dibuat kadaluarsa secara manual oleh pengguna. Sehingga, kita memiliki
 aplikasi yang harus diatur sekali untuk mendapatkan "refresh token" (lol)
-dan mengikutsertakan "refresh token" (lol) sebagai konfigurasi untuk pemasangan
-server "headless". (lol)
+dan mengikutsertakan "refresh token" sebagai konfigurasi untuk pemasangan
+server "headless".
 
-Drone doesn't implement the `/auth` endpoint, or the refresh, and simply
-provides a `BEARER_TOKEN` through their user interface.
-
-Drone tidak perlu mengimplementasikan "endpoint" (lol) `/auth` atau refresh
+Drone tidak perlu mengimplementasikan "endpoint" `/auth` atau refresh
 karena sebuah `BEARER_TOKEN` sudah cukup untuk antarmuka.
 
 ### Data
-
-The first step is to model the data needed for OAuth2. We create an ADT with
-fields having exactly the same name as required by the OAuth2 server. We will
-use `String` and `Long` for brevity, but we could use refined types if they leak
-into our business models.
 
 Langkah pertama adalah memodelkan data yang dibutuhkan untuk OAuth2. Kita membuat
 sebuah ADT dengan bidang yang sama persis dengan yang dibutuhkan oleh server OAuth2.
@@ -2968,51 +2448,27 @@ kita juga bisa menggunakan tipe "refined" bila bidang yang menggunakan `String` 
   )
 ~~~~~~~~
 
-W> Avoid using `java.net.URL` at all costs: it uses DNS to resolve the
-W> hostname part when performing `toString`, `equals` or `hashCode`.
-W>
 W> Hindari penggunaan `java.net.URL` karena kelas ini menggunakan DNS
 W> untuk mengecek bagian hostname saat melakukan `toString`, `equals`, atau `hashCode`.
 W> 
-W> Apart from being insane, and **very very** slow, these methods can throw
-W> I/O exceptions (are not *pure*), and can change depending on the
-W> network configuration (are not *deterministic*).
-W>
 W> Selain tidak umum, dan **sangat pelan**, metoda metoda tersebut dapat melempar
 W> eksepsi I/O, dan dapat berubah bergantung dengan konfigurasi jaringan.
-W> Dengan kata lain, tidak pure (lol) dan tidak deterministik.
+W> Dengan kata lain, tidak murni dan tidak deterministik.
 W> 
-W> The refined type `String Refined Url` allows us to perform equality checks based
-W> on the `String` and we can safely construct a `URL` only if it is needed by a
-W> legacy API.
-W>
-W> Tipe refined (lol) `String Refined Url` menyediakan jalan untuk melakukan
+W> Tipe terrefinasi (lol) `String Refined Url` menyediakan jalan untuk melakukan
 W> pemeriksaan kesamaan berdasarkan `String` dan kita dapat membuat sebuah `URL`
 W> dengan aman jika ada kebutuhan dari API lama.
 W> 
-W> That said, in high performance code we would prefer to skip `java.net.URL`
-W> entirely and use a third party URL parser such as [jurl](https://github.com/anthonynsimon/jurl), because even the safe
-W> parts of `java.net.*` are extremely slow at scale.
-W>
 W> Dengan kata lain, pada kode dengan performa tinggi, kita lebih memilih untuk
 W> meninggalkan `java.net.URL` dan menggunakan parser URL dari pihak ketiga seperti [jurl](https://github.com/anthonynsimon/jurl).
 W> Selain karena banyak yang tidak "aman", juga karena lelet.
 
 
-### Functionality
-
-We need to marshal the data classes we defined in the previous section into
-JSON, URLs and POST-encoded forms. Since this requires polymorphism, we will
-need typeclasses.
+### Fungsionalitas
 
 Kita juga harus menyusun kelas data yang telah kita definisikan pada bagian
 sebelumnya ke JSON, URL, dan borang yang dikodekan dalam POST. Kebutuhan seperti
 ini sangat bisa dipenuhi dengan menggunakan kelas tipe.
-
-[`jsonformat`](https://github.com/scalaz/scalaz-deriving/tree/master/examples/jsonformat/src) is a simple JSON library that we will study in more detail in a
-later chapter, as it has been written with principled FP and ease of readability
-as its primary design objectives. It consists of a JSON AST and encoder /
-decoder typeclasses:
 
 [`jsonformat`](https://github.com/scalaz/scalaz-deriving/tree/master/examples/jsonformat/src)
 adalah pustaka JSON sederhana yang akan kita pelajari lebih seksama di bab yang akan datang.
@@ -3042,24 +2498,13 @@ kelas tipe penyandi dan pembaca sandi:
   }
 ~~~~~~~~
 
-A> `\/` is Scalaz's `Either` and has a `.flatMap`. We can use it in `for`
-A> comprehensions, whereas stdlib `Either` does not support `.flatMap` prior to
-A> Scala 2.12. It is spoken as *disjunction*, or *angry rabbit*.
-A>
 A> `\/` merupakan implementasi `Either` dari Scalaz. Operator ini punya `.flatMap`
-A> sehingga bisa digunakan pada for comprehension (lol, help). Hal yang berbeda
+A> sehingga bisa digunakan pada komprehensi `for`. Hal yang berbeda
 A> dengan pustaka standar Scala yang tidak mempunyai `.flatMap` sebelum Scala 2.12.
 A> Untuk namanya, biasa disebut dengan (lol, apa ini?)
 A> 
-A> `scala.Either` was [contributed to
-A> the Scala standard library](https://issues.scala-lang.org/browse/SI-250) by the creator of Scalaz, Tony Morris, in 2007.
-A> `\/` was created when unsafe methods were added to `Either`.
-A>
 A> `scala.Either` [dimasukkan pada pustaka standar Scala](https://issues.scala-lang.org/browse/SI-250) oleh penulis Scalaz, Tony Morris pada 2007.
 A> `\/` dibuat ketika metoda yang tidak aman ditambahkan ke `Either`.
-
-We need instances of `JsDecoder[AccessResponse]` and `JsDecoder[RefreshResponse]`.
-We can do this by making use of a helper function:
 
 Kita butuh instans `JsDecoder[AccessResponse]` dan `JsDecoder[RefreshResponse]`
 dan kita dapat membuatnya dengan menggunakan fungsi bantuan:
@@ -3070,9 +2515,6 @@ dan kita dapat membuatnya dengan menggunakan fungsi bantuan:
     def getAs[A: JsDecoder](key: String): String \/ A = ...
   }
 ~~~~~~~~
-
-We put the instances on the companions of our data types, so that they are
-always in the implicit scope:
 
 Kita meletakkan instans tersebut pada pasangan dari tipe data kita. Sehingga,
 mereka akan selalu ada pada cakupan implisit:
@@ -3101,8 +2543,6 @@ mereka akan selalu ada pada cakupan implisit:
   }
 ~~~~~~~~
 
-We can then parse a string into an `AccessResponse` or a `RefreshResponse`
-
 Lalu, kita dapat menguraikan sebuah string ke `AccessResponse` atau `RefreshResponse`
 
 {lang="text"}
@@ -3121,9 +2561,6 @@ Lalu, kita dapat menguraikan sebuah string ke `AccessResponse` atau `RefreshResp
   AccessResponse(BEARER_TOKEN,Bearer,3600,REFRESH_TOKEN)
 ~~~~~~~~
 
-We need to write our own typeclasses for URL and POST encoding. The
-following is a reasonable design:
-
 Kita dapat menulis tipe kelas kita sendiri untuk URL dan pengkodean POST.
 Berikut adalah desain yang masuk akal:
 
@@ -3140,8 +2577,6 @@ Berikut adalah desain yang masuk akal:
     def toUrlEncoded(a: A): String Refined UrlEncoded
   }
 ~~~~~~~~
-
-We need to provide typeclass instances for basic types:
 
 Kita harus menyediakan instans kelas tipe untuk tipe dasar:
 
@@ -3169,24 +2604,14 @@ Kita harus menyediakan instans kelas tipe untuk tipe dasar:
   }
 ~~~~~~~~
 
-We use `Refined.unsafeApply` when we can logically deduce that the contents of
-the string are already url encoded, bypassing any further checks.
-
 Disini, kita menggunakan `Refined.unsafeApply` ketika kita dapat menebak isi
 dari string sudah berupa url terkode.
-
-`ilist` is an example of simple typeclass derivation, much as we derived
-`Numeric[Complex]` from the underlying numeric representation. The
-`.intercalate` method is like `.mkString` but more general.
 
 `ilist` merupakan sebuah contoh dari penurunan sederhana dari kelas tipe,
 yang kurang lebih satu tingkat dengan penurunan `Numeric[Complex]` dari
 representasi numerik. Metoda `.intercalate` kurang lebih sama dengan `.mkString`
 namun lebih umum.
 
-A> `UrlEncodedWriter` is making use of the *Single Abstract Method* (SAM types)
-A> Scala language feature. The full form of the above is
-A>
 A> `UrlEncodedWriter` menggunakan *Single Abstract Method* (tipe SAM)
 A> yang merupakan fitur dari Scala. Secara lengkapnya bisa dilihat
 A> 
@@ -3198,16 +2623,9 @@ A>       override def toUrlEncoded(s: String): String = ...
 A>     }
 A> ~~~~~~~~
 A> 
-A> When the Scala compiler expects a class (which has a single abstract
-A> method) but receives a lambda, it fills in the boilerplate
-A> automatically.
-A>
 A> Ketika kompilator Scala berharap sebuah kelas (yang memiliki sebuah metoda abstrak)
-A> namun menerima sebuah lambda, kompilator akan mengisi boilerplate (lol) secara otomatis
+A> namun menerima sebuah lambda, kompilator akan mengisi plat cetak secara otomatis
 A> 
-A> Prior to SAM types, a common pattern was to define a method named
-A> `instance` on the typeclass companion
-A>
 A> Sebelum tipe SAM, pola yang jamak dijumpai adalah mendefinisikan metoda
 A> dengan nama `instance` pada kelas tipe pasangan
 A> 
@@ -3218,8 +2636,6 @@ A>     new UrlEncodedWriter[T] {
 A>       override def toUrlEncoded(t: T): String = f(t)
 A>     }
 A> ~~~~~~~~
-A> 
-A> allowing for
 A>
 A> yang memungkinkan
 A> 
@@ -3228,30 +2644,17 @@ A> ~~~~~~~~
 A>   implicit val string: UrlEncodedWriter[String] = instance { s => ... }
 A> ~~~~~~~~
 A> 
-A> This pattern is still used in code that must support older versions of
-A> Scala, or for typeclasses instances that need to provide more than one
-A> method.
-A>
 A> Pola ini masih digunakan pada kode yang harus mendukung penggunaan pada
 A> Scala versi lama, atau untuk instans kelas yang harus menyediakan lebih
 A> dari satu metoda.
 A> 
-A> Note that there are a lot of bugs around SAM types, as they do not interact with
-A> all the language features. Revert to the non-SAM variant if there are any
-A> strange compiler crashes.
-A>
 A> Harap dicatat, ada banyak kutu yang berhubungan dengan tipe SAM, karena mereka
 A> tidak berhubungan langsung dengan fitur bahasa. Silakan gunakan varian non-SAM
 A> bila terjadi kerhemukan pada kompilator.
 
-In a dedicated chapter on *Typeclass Derivation* we will calculate instances of
-`UrlQueryWriter` automatically, as well as clean up what
-we have already written, but for now we will write the boilerplate for the types
-we wish to convert:
-
 Pada bab khusus pada *Penurunan Kelas Tipe*, kita akan mengkalkulasi instans dari
 `UrlQueryWriter` secara otomatis. Selain itu, kita akan merapikan apa yang
-telah kita tulis. Untuk saat ini, kita akan menulis boilerplate (lol) untuk
+telah kita tulis. Untuk saat ini, kita akan menulis plat cetak untuk
 tipe yang akan kita konversi:
 
 {lang="text"}
@@ -3293,22 +2696,13 @@ tipe yang akan kita konversi:
 ~~~~~~~~
 
 
-### Module
-
-That concludes the data and functionality modelling required to implement
-OAuth2. Recall from the previous chapter that we define components that need to
-interact with the world as algebras, and we define business logic in a module,
-so it can be thoroughly tested.
+### Modul
 
 Bagian sebelumnya melengkapi semua pemodelan data dan fungsionalitas yang dibutuhkan
 untuk mengimplementasikan OAuth2. Sebagaimana yang sudah dibahas pada bab sebelumnya,
 kita mendefinisikan komponen yang akan berinteraksi dengan dunia luar sebagai
 aljabar. Selain itu, kita akan mendefinisikan logika bisnis pada sebuah modul
 sehingga bisa dites dengan seksama.
-
-We define our dependency algebras, and use context bounds to show that our
-responses must have a `JsDecoder` and our `POST` payload must have a
-`UrlEncodedWriter`:
 
 Kita akan mendefinisikan ketergantungan aljabar dan menggunakan batasan konteks
 untuk agar respon kita mempunyai `JsDecoder` dan muatan `POST` kita mempunyai
@@ -3330,23 +2724,11 @@ untuk agar respon kita mempunyai `JsDecoder` dan muatan `POST` kita mempunyai
   }
 ~~~~~~~~
 
-Note that we only define the happy path in the `JsonClient` API. We will get
-around to error handling in a later chapter.
-
 Harap dicatat bahwa kita hanya mendefinisikan alur dengan asumsi terbaik
 pada APA `JsonClient`.
 Untuk kejadian kejadian yang tidak diinginkan dan penangannya, kita akan
 membicarakannya pada bab selanjutnya.
 
-
-Obtaining a `CodeToken` from the Google `OAuth2` server involves
-
-1.  starting an HTTP server on the local machine, and obtaining its port number.
-2.  making the user open a web page in their browser, which allows them to log in
-    with their Google credentials and authorise the application, with a redirect
-    back to the local machine.
-3.  capturing the code, informing the user of next steps, and closing the HTTP
-    server.
 
 Untuk mendapatkan `CodeToken` dari peladen `OAuth2` Google, ada beberapa langkah
 yang harus dilakukan.
@@ -3358,8 +2740,6 @@ yang harus dilakukan.
     sebuah pengalihan balik ke mesin lokal.
 3.  Mengambil kode token, menginformasikan kepada pengguna tentang langkah selanjutnya,
     lalu menutup peladen HTTP.
-
-We can model this with three methods on a `UserInteraction` algebra.
 
 Kita dapat memodelkan langkah berikut dengan tiga metoda pada aljabar di `UserInteraction`.
 
@@ -3374,11 +2754,7 @@ Kita dapat memodelkan langkah berikut dengan tiga metoda pada aljabar di `UserIn
   }
 ~~~~~~~~
 
-It almost sounds easy when put like that.
-
-We also need an algebra to abstract over the local system time
-
-Mungkin saudara/i tidak percaya dengan cuplikan diatas. Akan tetapi,
+Mungkin pembaca budiman tidak percaya dengan cuplikan diatas. Akan tetapi,
 memang kenyataannya semudah itu.
 
 Lalu, kita akan melanjutkan dengan abstraksi atas waktu pada sistem lokal.
@@ -3389,8 +2765,6 @@ Lalu, kita akan melanjutkan dengan abstraksi atas waktu pada sistem lokal.
     def now: F[Epoch]
   }
 ~~~~~~~~
-
-And introduce data types that we will use in the refresh logic
 
 Dan membuat tipe data yang akan kita pakai pada logika untuk memuat ulang
 
@@ -3407,8 +2781,6 @@ Dan membuat tipe data yang akan kita pakai pada logika untuk memuat ulang
   final case class RefreshToken(token: String)
   final case class BearerToken(token: String, expires: Epoch)
 ~~~~~~~~
-
-Now we can write an OAuth2 client module:
 
 Sekarang, kita akan menulis modul klien OAuth2:
 
@@ -3460,22 +2832,9 @@ Sekarang, kita akan menulis modul klien OAuth2:
 ~~~~~~~~
 
 
-## Summary
+## Kesimpulan
 
--   *algebraic data types* (ADTs) are defined as *products* (`final case class`)
-    and *coproducts* (`sealed abstract class`).
--   `Refined` types enforce constraints on values.
--   concrete functions can be defined in an `implicit class` to maintain
-    left-to-right flow.
--   polymorphic functions are defined in *typeclasses*. Functionality is provided
-    via "has a" *context bounds*, rather than "is a" class hierarchies.
--   typeclass *instances* are implementations of a typeclass.
--   `@simulacrum.typeclass` generates `.ops` on the companion, providing
-    convenient syntax for typeclass functions.
--   *typeclass derivation* is compiletime composition of typeclass
-    instances.
-
--   *Tipe data aljabar* didefinisikan sebagai *produk* (`final case class`) dan
+-   *Tipe data aljabar* (TDA) didefinisikan sebagai *produk* (`final case class`) dan
     ko-produk (`sealed abstract class`).
 -   Tipe `Refined` memperketat batasan pada nilai.
 -   Fungsi konkret dapat didefinisikan pada sebuah `implicit class` agar alur
