@@ -443,12 +443,12 @@ dengan penggunaan `$` jamak
 ~~~~~~~~
 
 
-## Typeclasses
+## Kelas Tipe
 
-To define a typeclass we use the `class` keyword, followed by the name of the
-typeclass, its type parameter, then the required members in a `where` clause. If
-there are dependencies between typeclasses, i.e. `Applicative` requires a
-`Functor`, use `=>` notation
+Untuk mendefiniskan kelas tipe, kita menggunakan kata kunci `class` yang diteruskan
+dengan nama kelas, parameter tipenya, dan anggota yang dibutuhkan pada klausa
+`where`. Bila ada ketergantungan antar kelas tipe, misalkan `Applicative`
+membutuhkan `Functor`, gunakan notasi `=>`
 
 {lang="text"}
 ~~~~~~~~
@@ -466,9 +466,9 @@ there are dependencies between typeclasses, i.e. `Applicative` requires a
     infixr 1 =<<
 ~~~~~~~~
 
-We provide an implementation of a typeclass with the `instance` keyword. If we
-wish to repeat the type signature on instance functions, useful for clarity, we
-must enable the `InstanceSigs` language extension.
+Kita menyediakan implementasi dari kelas tipe dengan kata kunci `instance`. Bila
+kita ingin mengulang penanda tipe pada fungsi instans, demi kejelasan, kita
+harus menggunakan ekstensi `InstanceSigs`.
 
 {lang="text"}
 ~~~~~~~~
@@ -496,8 +496,9 @@ must enable the `InstanceSigs` language extension.
     f =<< list = flatMap f list
 ~~~~~~~~
 
-If we want to make use of a typeclass in a function we require it with `=>`. For
-example we can define something similar to Scalaz's `Apply.apply2`
+Bila kita ingin menggunakan kelas tipe pada fungsi, kita menggunakan `=>` pada
+penanda tipenya. Sebagai contoh, kita dapat mendefinisikan fungsi yang mirip
+dengan `Apply.apply2` milik Scalaz sebagai berikut
 
 {lang="text"}
 ~~~~~~~~
@@ -505,8 +506,8 @@ example we can define something similar to Scalaz's `Apply.apply2`
   apply2 f fa fb = f <$> fa <*> fb
 ~~~~~~~~
 
-Since we have introduced `Monad`, it is a good time to introduce `do` notation,
-which was the inspiration for Scala's `for` comprehensions:
+Karena kita telah memperkenalkan `Monad`, saatnya memperkenalkan notasi `do`
+yang merupakan inspirasi untuk komprehensi *for* Scala:
 
 {lang="text"}
 ~~~~~~~~
@@ -517,7 +518,7 @@ which was the inspiration for Scala's `for` comprehensions:
     return (a, b, c)
 ~~~~~~~~
 
-desugars to
+yang dijabarkan menjadi
 
 {lang="text"}
 ~~~~~~~~
@@ -527,7 +528,7 @@ desugars to
         return (a, b, c)
 ~~~~~~~~
 
-where `>>=` is `=<<` with parameters flipped
+dimana `>>=` adalah `=<<` dengan parameter yang dibalik
 
 {lang="text"}
 ~~~~~~~~
@@ -539,10 +540,10 @@ where `>>=` is `=<<` with parameters flipped
   flip :: (a -> b -> c) -> b -> a -> c
 ~~~~~~~~
 
-and `return` is a synonym for `pure`.
+dan `return` sebagai sinonim untuk `pure`.
 
-Unlike Scala, we do not need to bind unit values, or provide a `yield` if we are
-returning `()`. For example
+Tidak seperti Scala, kita tidak perlu mengikat nilai unit, atau menyediakan `yield`
+bilakita mengembalikan `()`. Sebagai contoh
 
 {lang="text"}
 ~~~~~~~~
@@ -552,7 +553,7 @@ returning `()`. For example
   } yield ()
 ~~~~~~~~
 
-translates to
+menjadi
 
 {lang="text"}
 ~~~~~~~~
@@ -560,7 +561,7 @@ translates to
      putStr " world"
 ~~~~~~~~
 
-Non-monadic values can be bound with the `let` keyword:
+Nilai non-monadik dapat ditetapkan dengan kata kunci `let`:
 
 {lang="text"}
 ~~~~~~~~
@@ -574,9 +575,10 @@ Non-monadic values can be bound with the `let` keyword:
                   return full
 ~~~~~~~~
 
-Finally, Haskell has typeclass derivation with the `deriving` keyword, the
-inspiration for `@scalaz.deriving`. Defining the derivation rules is an advanced
-topic, but it is easy to derive a typeclass for an ADT:
+Haskell juga mempunyai derivasi kelas tipe yang menggunakan kata kunci `deriving`
+yang juga merupakan inspirasi untuk `@scalaz.deriving`. Mendefinisikan aturan
+derivasi merupakan topik lanjutan. Namun, untuk menderivasi kelas tipe untuk
+sebuah tipe data aljabaris sangat mudah:
 
 {lang="text"}
 ~~~~~~~~
